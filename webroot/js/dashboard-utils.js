@@ -82,9 +82,10 @@ function infraMonitorClass() {
         var alertDS = globalObj['dataSources']['alertsDS']
         if(popupAlerts.length > 0)
             alertDS['dataSource'].setData(popupAlerts);
+        var alertsDeferredObj;
         if(globalObj.showAlertsPopup){
-            alertsDef = alertDS['deferredObj'];
-            loadAlertsContent(alertsDef);
+            alertsDeferredObj = alertDS['deferredObj'];
+            loadAlertsContent(alertsDeferredObj);
         }
         /*Need to resolve the alertsDef once all the alertsDS depend datasource are loaded
          */
@@ -96,8 +97,8 @@ function infraMonitorClass() {
                      allDSResolved = false
             }
         }
-        if(allDSResolved && alertsDef != null)
-            alertsDef.resolve();
+        if(allDSResolved && alertsDeferredObj != null)
+            alertsDeferredObj.resolve();
         var detailAlerts = [];
         for(var i = 0; i < allAlerts.length; i++ ){
             if(allAlerts[i]['detailAlert'] != false)
