@@ -249,7 +249,8 @@
                  var svg = $(selector).find('svg')[0];
                  chart = setChartOptions(chart,chartOptions);
                  d3.select(svg).datum(d);
-                 chart.update();
+                 if(chart.update != null)
+                     chart.update();
             }
             if(data['widgetBoxId'] != null)
                 endWidgetLoading(data['widgetBoxId']);
