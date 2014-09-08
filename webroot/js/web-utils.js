@@ -2402,3 +2402,15 @@ function showBasicDetails(){
     $('#divBasic').show();
     $('#divAdvanced').parents('.widget-box').find('.widget-header h4 .subtitle').remove();
 }
+/***
+ *  Returns the list of keys from a hashmap whose value matches with the given value
+ ***/
+function getKeysForValue(obj, value) {
+  var all = [];
+  for (var name in obj) {
+    if (!Object.hasOwnProperty(name) && obj[name] === value) {
+      all.push(name);
+    }
+  }
+  return all;
+}
