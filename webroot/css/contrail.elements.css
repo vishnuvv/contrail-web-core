@@ -4021,8 +4021,7 @@ td.td-actions a.td-action {
     cursor:pointer;
 }
 .chart-settings-hide {
-	height: 1px;
-	background-color: #dddddd;
+	background-color: none;
 	margin-left: 70px;
 	margin-right: 20px;
 }
@@ -4030,9 +4029,8 @@ td.td-actions a.td-action {
 	margin-left: 70px;
 	margin-right: 20px;
 	border: 1px solid #e5e5e5;
-	background-color: #e5e5e5;
 	border-radius: 3px;
-	padding:2px;
+	padding:2px 8px 2px 9px;
 }
 
 .chart-settings img,.chart-settings-hide img {

@@ -589,6 +589,7 @@ function initScatterBubbleChart(selector, data, chart, chartOptions) {
             .tooltipXContent(null)
             .tooltipYContent(null)
             .showTooltipLines(false)
+            .showLegend(false)
             .tooltipContent(chartOptions['tooltipFn']);
         chart = setChartOptions(chart,chartOptions);
       //If more than one category is displayed,enable showLegend
@@ -597,6 +598,7 @@ function initScatterBubbleChart(selector, data, chart, chartOptions) {
         }
         $(selector).append('<svg></svg>');
         $(selector).data('chart', chart);
+        $(selector).on('dblclick',chartOptions['elementDblClickFunction']);
         if(!($(selector).is(':visible'))) {
             $(selector).find('svg').bind("refresh", function() {
                 d3.select($(selector)[0]).select('svg').datum(data).call(chart);
