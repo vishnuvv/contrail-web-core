@@ -2388,19 +2388,19 @@ function uniqueArray(arr) {
     return retArr;
 }
 
-function showAdvancedDetails(){
-    $('#divBasic').hide();
-    $('#divStatus').hide();
-    $('#divAdvanced').show();
-    $('#divAdvanced').parents('.widget-box').find('.widget-header h4 .subtitle').remove();
-    $('#divAdvanced').parents('.widget-box').find('.widget-header h4').append('<span class="subtitle">(Advanced)</span>')
+function showAdvancedDetails(name){
+    $('#divBasic' + '_' + name).hide();
+    $('#divStatus' + '_' + name).hide();
+    $('#divAdvanced' + '_' + name).show();
+    $('#divAdvanced' + '_' + name).parents('.widget-box').find('.widget-header h4 .subtitle').remove();
+    $('#divAdvanced' + '_' + name).parents('.widget-box').find('.widget-header h4').append('<span class="subtitle">(Advanced)</span>')
 }
 
-function showBasicDetails(){
-    $('#divAdvanced').hide();
-    $('#divStatus').hide();
-    $('#divBasic').show();
-    $('#divAdvanced').parents('.widget-box').find('.widget-header h4 .subtitle').remove();
+function showBasicDetails(name){
+    $('#divAdvanced' + '_' + name).hide();
+    $('#divStatus' + '_' + name).hide();
+    $('#divBasic' + '_' + name).show();
+    $('#divAdvanced' + '_' + name).parents('.widget-box').find('.widget-header h4 .subtitle').remove();
 }
 /***
  *  Returns the list of keys from a hashmap whose value matches with the given value
@@ -2414,3 +2414,17 @@ function getKeysForValue(obj, value) {
   }
   return all;
 }
+function getIPforHostName(name,dataSourceName) {
+   if(globalObj.dataSources != null && globalObj.dataSources[dataSourceName] != null 
+       &&  globalObj.dataSources[dataSourceName].dataSource != null) {
+       var dataSrc = globalObj.dataSources[dataSourceName].dataSource.getItems();
+       for(var i = 0;i < dataSrc.length;i++) {
+           if(dataSrc[i].name === name) {
+               return dataSrc[i].ip;    
+           }
+       }
+   } else {
+       return null;
+   }
+}
+
