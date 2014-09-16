@@ -202,13 +202,13 @@ function getDefaultGridConfig() {
             		}
                     //extending search to comma separted input values
                     if(args.searchString.indexOf(',') === -1) {
-            		    if(queryString.toLowerCase().indexOf(args.searchString.toLowerCase()) != -1){
+            		    if(queryString.toLowerCase().indexOf(args.searchString.trim().toLowerCase()) != -1){
             		    	returnFlag = true;
             		    }
                     } else {
                         var searchStrArry = args.searchString.split(',');
                         for(var i = 0; i < searchStrArry.length; i++) {
-            		        if(searchStrArry[i] != '' && queryString.toLowerCase().indexOf(searchStrArry[i].toLowerCase()) != -1){
+            		        if(searchStrArry[i] != '' && queryString.toLowerCase().indexOf(searchStrArry[i].trim().toLowerCase()) != -1){
             		        	returnFlag = true;
             		        }
                         }
