@@ -1499,6 +1499,10 @@ color: #b94a48;
 	font-size:11px;
 }
 
+.chart-sub-settings{
+	margin-left:10px;
+}
+
 .chart-settings-close{
 	display: block;
 	width: 12px;
