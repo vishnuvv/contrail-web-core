@@ -1604,3 +1604,13 @@ color: #b94a48;
 .chart-settings .color-selection label {
     display:inline-block;
 }
+
+/*style to fix the detail template height*/
+
+.slick-grid-detail-content-height{
+    height : 300px !important;
+}
+
+.slick-grid-detail-sub-content-height{
+    height : 290px !important;
+}
