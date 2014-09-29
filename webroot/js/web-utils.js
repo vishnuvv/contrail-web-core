@@ -2463,7 +2463,13 @@ function ManageCrossFilters(){
         var cfObj = globalObj['crossFilters'][cfName];
         var dataCF = crossfilter(data);
         cfObj.crossfilter = dataCF;
+        var dimensions = this.getDimensions(cfName);
         globalObj['crossFilters'][cfName] = cfObj;
+        for (var key in dimensions) {
+            if (dimensions.hasOwnProperty(key)) {
+                this.addDimension(cfName,key);
+            }
+        }
         //cfObj.callBacks.fire();
     }
     
@@ -2483,6 +2489,14 @@ function ManageCrossFilters(){
         globalObj['crossFilters'][cfName] = cfObj;
     }
 
+    this.getDimensions = function(cfName){
+        var cfObj = globalObj['crossFilters'][cfName];
+        if(cfObj != null && cfObj.dimensions != null){
+            return cfObj.dimensions;
+        }
+        return null;
+    }
+    
     this.getDimension = function(cfName,dimensionName){
         var cfObj = globalObj['crossFilters'][cfName];
         if(cfObj != null && cfObj.dimensions != null && cfObj.dimensions[dimensionName] != null){
@@ -2493,8 +2507,8 @@ function ManageCrossFilters(){
     
     this.removeDimension = function(cfName,dimensionName){
         var cfObj = globalObj['crossFilters'][cfName];
-        if(cfObj != null && cfObj.dimensions != null && cfObj.dimensions.dimensionName != null){
-            var dimension = cfObj.dimensions.dimensionName;
+        if(cfObj != null && cfObj.dimensions != null && cfObj.dimensions[dimensionName] != null){
+            var dimension = cfObj.dimensions[dimensionName];
             dimension.dispose();
             delete globalObj['crossFilters'][cfName]['dimensions'][dimensionName];
             cfObj.callBacks.fire();
@@ -2514,6 +2528,7 @@ function ManageCrossFilters(){
             }
             var thirdDimension = cf.dimension(function(d) { return d[dimensionName]; });
             var t = thirdDimension.top(Infinity);
+            thirdDimension.remove();
            // cfObj.callBacks.fire();
             return t;
         }
@@ -2521,8 +2536,8 @@ function ManageCrossFilters(){
     
     this.removeFilter = function(cfName,dimensionName){
         var cfObj = globalObj['crossFilters'][cfName];
-        if(cfObj != null && cfObj.dimensions != null && cfObj.dimensions.dimensionName != null){
-            var dimension = cfObj.dimensions.dimensionName;
+        if(cfObj != null && cfObj.dimensions != null && cfObj.dimensions[dimensionName] != null){
+            var dimension = cfObj.dimensions[dimensionName];
             dimension.filterAll();
             //cfObj.callBacks.fire();
         }
@@ -2534,6 +2549,7 @@ function ManageCrossFilters(){
             var cf = cfObj['crossfilter'];
             var thirdDimension = cf.dimension(function(d) { return d['x']; });
             var t = thirdDimension.top(Infinity);
+            thirdDimension.remove();
             //cfObj.callBacks.fire(t);
             return t;
         }
@@ -2544,6 +2560,13 @@ function ManageCrossFilters(){
             return globalObj['crossFilters'][cfName]['callBacks'];
         }
         return null;
+    }
+    
+    this.setCallBacks = function(cfName){
+        if(globalObj['crossFilters'] != null && globalObj['crossFilters'][cfName] != null 
+                && globalObj['crossFilters'][cfName]['callBacks'] == null){
+            globalObj['crossFilters'][cfName]['callBacks'] = $.Callbacks();
+        }
     }
     
     this.getCallBackFns = function(cfName){
@@ -2563,6 +2586,9 @@ function ManageCrossFilters(){
     
     this.addCallBack = function(cfName,callBackName,callBackFn){
         var callBacks = this.getCallBacks(cfName);
+        if(callBacks == null){
+            this.setCallBacks(cfName);
+        }
         var cfObj = this.getCrossFilter
         callBacks.add(callBackFn);
         var cfObj = this.getCrossFilterObj(cfName);
@@ -2595,10 +2621,14 @@ function ManageCrossFilters(){
         delete globalObj['crossFilters'][cfName]['callBackFns'][callBackName];
     }
     
-    this.fireCallBacks = function(cfName){
+    this.fireCallBacks = function(cfName,options){
         var callBacks = this.getCallBacks(cfName);
+        var ret = {};
         if(callBacks != null){
-            callBacks.fire();
+            if(options != null && options.source != null){
+                ret['source'] = options.source;
+            }
+            callBacks.fire(ret);
         }
     }
 }
