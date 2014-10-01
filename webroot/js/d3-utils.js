@@ -624,7 +624,13 @@ function setChartOptions(chart,chartOptions){
     // of the chart object will retain so we are setting to null if any property not exists
     chart.tooltipRenderedFn(ifNull(chartOptions['tooltipRenderedFn'],null));
     chart.forceX(ifNull(chartOptions['forceX'],null));
+    if(chartOptions['forceX'] != null) {
+        chart.xAxis.tickValues(chartOptions.xStops);
+    }    
     chart.forceY(ifNull(chartOptions['forceY'],null));
+    if(chartOptions['forceY'] != null) {
+        chart.yAxis.tickValues(chartOptions.yStops);
+    }     
     chart.seriesMap(ifNull(chartOptions['seriesMap'],null));
     chart.scatter.xPositive(ifNull(chartOptions['xPositive'],null));
     chart.scatter.yPositive(ifNull(chartOptions['yPositive'],null));
