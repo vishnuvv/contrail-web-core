@@ -919,7 +919,9 @@ function MenuHandler() {
         });
     }
     
-    //Filter the menu items based on allowedRolesList for each feature and comparing them with the logged-in user roles
+    //Filter the menu items based 
+    //  * allowedRolesList for each feature and comparing them with the logged-in user roles
+    //  * allowedOrchestrationModels for each feature and comparing it against loggedInOrchestrationMode 
     //type = menushortcut returns only the first level menu (Configure,Monitor)
     this.filterMenuItems = function(items,type){
         if(type == null) {
@@ -2508,4 +2510,21 @@ function getFormattedDate(timeStamp){
         secs="0"+secs;
     fmtDate=date.getFullYear()+"-"+mnth+"-"+dte+"  "+hrs+":"+mns+":"+secs;
     return fmtDate;}
+}
+
+//Returns true if the loggedInOrchestrationMode is vcenter
+function isVCenter() {
+    if(globalObj['webServerInfo']['loggedInOrchestrationMode'] == 'vcenter')
+        return true;
+    else
+        return false; 
+}
+//Returns the corresponding NetMask for a givne prefix length
+function prefixToNetMask(prefixLen) {
+    var prefix = Math.pow(2,prefixLen) - 1;
+    var binaryString = prefix.toString(2);
+    for(var i=binaryString.length;i<32;i++) {
+            binaryString += '0';
+    }
+    return v4.Address.fromHex(parseInt(binaryString,2).toString(16)).address;
 }
