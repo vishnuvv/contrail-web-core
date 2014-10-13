@@ -1736,6 +1736,15 @@ color: #b94a48;
 	padding-right: 3px;
 }
 
+/* Underlay overlay*/
+.topology-visualization .elementHighlighted.PhysicalRouter i {
+    color: #498AB9;
+}
+
+.topology-visualization .elementHighlighted.VritualRouter i {
+    color: #498AB9;
+}
+
 /* Context Menu */
 .context-menu-list {
     background-color: #fff;

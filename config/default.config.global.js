@@ -259,5 +259,11 @@ config.staticAuth[0].username = 'admin';
 config.staticAuth[0].password = 'contrail123';
 config.staticAuth[0].roles = ['superAdmin'];
 
+/*
+ * Knob to show Underlay feature under Monitor->Infra section  
+ */
+config.underlay = {};
+config.underlay.enabled = true;
+
 // Export this as a module.
 module.exports = config;
