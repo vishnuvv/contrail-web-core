@@ -581,7 +581,6 @@ function showUnderlayPaths(data) {
         var params = {
             "minsSince" : 300
         };
-        //params.src_vrouter_ip = data.vrouter;
         params.srcIP = data.sourceip;
         params.destIP = data.destip;
         params.srcVN = data.sourcevn;
@@ -597,9 +596,7 @@ function showUnderlayPaths(data) {
                     type    : "POST",
                     data    : {data: params},
                     callback : function(response) {
-                        underlayRenderer.getModel().setHighlightedNodes(response['nodes']);
-                        underlayRenderer.getModel().setHighlightedLinks(response['links']);
-                        underlayRenderer.getView().highlightPath();
+                        underlayRenderer.getView().highlightPath(response);
                     }
                 };
                 underlayRenderer.getController().getModelData(cfg);
