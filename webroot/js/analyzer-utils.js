@@ -578,9 +578,7 @@ function showUnderlayPaths(data) {
     var currentUrlHashObj = layoutHandler.getURLHashObj(),
         currentPage = currentUrlHashObj.p,
         currentParams = currentUrlHashObj.q;
-        var params = {
-            "minsSince" : 300
-        };
+        var params = {};
         params.srcIP = data.sourceip;
         params.destIP = data.destip;
         params.srcVN = data.sourcevn;
@@ -589,6 +587,12 @@ function showUnderlayPaths(data) {
         params.dport = data.dport;
         params.protocol = data.protocol;
         params.direction = (data.direction_ing === 0) ? "egress" : "ingress";
+        if(data.hasOwnProperty('startTime') && data.hasOwnProperty('endTime')) {
+            params['startTime'] = data['startTime'];
+            params['endTime'] = data['endTime'];
+        } else {
+            params['minsSince'] = 300;
+        }
         switch(currentPage) {
             case 'mon_infra_underlay':
                 var cfg = {
