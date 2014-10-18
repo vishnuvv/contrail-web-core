@@ -254,6 +254,27 @@ function createTimeQueryJsonObjByServerTimeFlag (minsSince, serverTimeFlag)
     return timeObj;
 }
 
+function createTimeQueryJsonObjByAppData (appData)
+{
+    var timeObj = {};
+
+    if (appData['startTime']) {
+        if (true == isNaN(appData['startTime'])) {
+            timeObj['start_time'] = appData['startTime'];
+        } else {
+            timeObj['start_time'] = parseInt(appData['startTime']) * 1000;
+        }
+        if (true == isNaN(appData['endTime'])) {
+            timeObj['end_time'] = appData['endTime'];
+        } else {
+            timeObj['end_time'] = parseInt(appData['endTime']) * 1000;
+        }
+    } else {
+        timeObj = createTimeQueryJsonObj(appData['minsSince']);
+    }
+    return timeObj;
+}
+
 function executeQueryString (queryJSON, callback)
 {
     var resultData, startTime = (new Date()).getTime(), endTime;
@@ -292,7 +313,6 @@ function buildPreUnderlayWhereQuery (data)
 
 function buildUnderlayQuery (uiQData, selectFileds)
 {
-    var minsSince = uiQData['minsSince'];
     var queryJSON = global.QUERY_JSON['OverlayToUnderlayFlowMap'];
     var whereClause = [];
     whereClause[0] = [];
@@ -324,8 +344,7 @@ function buildUnderlayQuery (uiQData, selectFileds)
             }
         }
     }
-    var timeObj =
-        createTimeQueryJsonObjByServerTimeFlag(minsSince, false);
+    var timeObj = createTimeQueryJsonObjByAppData(uiQData);
     queryJSON['start_time'] = timeObj['start_time'];
     queryJSON['end_time'] = timeObj['end_time'];
     queryJSON['where'] = whereClause;
