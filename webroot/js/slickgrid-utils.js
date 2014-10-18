@@ -382,7 +382,7 @@ function getDefaultGridConfig() {
 	                columns = columns.concat(gridColumns);
 	                gridColumns = columns;
 
-	                gridContainer.find('.headerRowCheckbox').live('click', function(){
+	                gridContainer.find('.headerRowCheckbox').live('click', function(e){
 	                    if($(this).attr('checked') == 'checked'){
 	                        gridContainer.find('.rowCheckbox').attr('checked',function(i,val){
 	                        	if($(this).attr('disabled') != 'disabled'){
@@ -390,15 +390,15 @@ function getDefaultGridConfig() {
 	                        	}
 	                        	return false;
 	                        });
-	                        (contrail.checkIfExist(onSomethingChecked) ? onSomethingChecked() : '');
-	                        (contrail.checkIfExist(onEverythingChecked) ? onEverythingChecked() : '');
+	                        (contrail.checkIfExist(onSomethingChecked) ? onSomethingChecked(e) : '');
+	                        (contrail.checkIfExist(onEverythingChecked) ? onEverythingChecked(e) : '');
 	                    } else {
 	                        gridContainer.find('.rowCheckbox').removeAttr('checked');
-	                        (contrail.checkIfExist(onNothingChecked) ? onNothingChecked() : '');
+	                        (contrail.checkIfExist(onNothingChecked) ? onNothingChecked(e) : '');
 	                    }
 	                });
 
-	                gridContainer.find('.rowCheckbox').live('click', function(){
+	                gridContainer.find('.rowCheckbox').live('click', function(e){
 	                    if($(this).attr('checked') != 'checked'){
 	                        gridContainer.find('.headerRowCheckbox').removeAttr('checked');
 	                    }
@@ -411,12 +411,12 @@ function getDefaultGridConfig() {
 
                     	if(headerRowChecked) {
                     		gridContainer.find('.headerRowCheckbox').attr('checked','checked');
-                    		(contrail.checkIfExist(onSomethingChecked) ? onSomethingChecked() : '');
-                    		(contrail.checkIfExist(onEverythingChecked) ? onEverythingChecked() : '');
+                    		(contrail.checkIfExist(onSomethingChecked) ? onSomethingChecked(e) : '');
+                    		(contrail.checkIfExist(onEverythingChecked) ? onEverythingChecked(e) : '');
                     	}else if(rowChecked) {
-                    		(contrail.checkIfExist(onSomethingChecked) ? onSomethingChecked() : '');
+                    		(contrail.checkIfExist(onSomethingChecked) ? onSomethingChecked(e) : '');
                     	}else {
-                    		(contrail.checkIfExist(onNothingChecked) ? onNothingChecked() : '');
+                    		(contrail.checkIfExist(onNothingChecked) ? onNothingChecked(e) : '');
                     	}
 	                });
 	            }
