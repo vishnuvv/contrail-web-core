@@ -2,6 +2,7 @@
  * Copyright (c) 2014 Juniper Networks, Inc. All rights reserved.
  */
 var logutils = require('../utils/log.utils');
+var commonUtils = require('../utils/common.utils');
 
 function formatAndClause (objArr)
 {
@@ -366,4 +367,5 @@ exports.createTimeQueryJsonObjByServerTimeFlag =
     createTimeQueryJsonObjByServerTimeFlag;
 exports.executeQueryString = executeQueryString;
 exports.buildUnderlayQuery = buildUnderlayQuery;
+exports.createTimeQueryJsonObjByAppData = createTimeQueryJsonObjByAppData;
 
