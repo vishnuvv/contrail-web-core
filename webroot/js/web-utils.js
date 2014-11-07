@@ -978,14 +978,26 @@ function MenuHandler() {
         var roleExists = false,orchExists = false,accessFnRetVal = false; 
         var orchModel = globalObj['webServerInfo']['loggedInOrchestrationMode'];
         var loggedInUserRoles = globalObj['webServerInfo']['role'];
-        if(value.access != null && value.access.roles != null) {
-            if(!(value.access.roles.role instanceof Array))
-                value.access.roles.role = [value.access.roles.role];
-            var rolesArr = value.access.roles.role;
-            var allowedRolesList = [];
+        if(value.access != null) {
+            if(value.access.roles != null) {
+                if(!(value.access.roles.role instanceof Array))
+                    value.access.roles.role = [value.access.roles.role];
+                var rolesArr = value.access.roles.role;
+                var allowedRolesList = [];
 
-            //If logged-in user has superAdmin role,then allow all features
-            if($.inArray(roles['ADMIN'],loggedInUserRoles) > -1) 
+                //If logged-in user has superAdmin role,then allow all features
+                if($.inArray(roles['ADMIN'],loggedInUserRoles) > -1) {
+                    roleExists = true;
+                } else {
+                    //If any one of userRole is in allowedRolesList
+                    for(var i=0;i<rolesArr.length;i++) {
+                        if($.inArray(rolesArr[i],loggedInUserRoles) > -1) {
+                            roleExists = true;
+                            break;
+                        }
+                    }
+                }
+            } else
                 roleExists = true;
 
             if(value.access.accessFn != null) {
@@ -1362,12 +1374,13 @@ function MenuHandler() {
     }
 }
 
+
 var menuAccessFns = {
-    checkMonitorInfraAccess : function() {
+     hideInFederatedvCenter : function() {
         //Hide in case of multiple orchestration modes along with vCenter and loggedInOrchestrationMode is vCenter
         if(globalObj['webServerInfo']['loggedInOrchestrationMode'] == 'vcenter' &&
-               globalObj['webServerInfo']['orchestrationModel'].length > 1 &&
-               globalObj['webServerInfo']['orchestrationModel'].indexOf('vcenter') > -1)
+                globalObj['webServerInfo']['orchestrationModel'].length > 1 &&
+                globalObj['webServerInfo']['orchestrationModel'].indexOf('vcenter') > -1)
             return false;
         else
             return true;
