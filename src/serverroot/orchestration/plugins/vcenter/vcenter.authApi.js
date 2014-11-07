@@ -68,14 +68,14 @@ function authenticate (req, res, appData, callback)
                         JSON.stringify(resHeaders));
         if (null != err) {
             var loginErrFile = 'webroot/html/login-error.html';
-        commonUtils.changeFileContentAndSend(res, loginErrFile,
-                                             global.CONTRAIL_LOGIN_ERROR,
+            commonUtils.changeFileContentAndSend(res, loginErrFile,
+                                                 global.CONTRAIL_LOGIN_ERROR,
                                                  err.message,
                                                  //messages.error.invalid_user_pass,
                                              function() {
-        });
-        return;
-    }
+            });
+            return;
+        }
         req.session.isAuthenticated = true;
         req.session.userRole = [global.STR_ROLE_ADMIN];
         console.log("Getting urlPatha s:", urlPath, urlHash);
@@ -83,11 +83,13 @@ function authenticate (req, res, appData, callback)
             resHeaders['set-cookie'][0];
             //res.redirect('/');
             //return;
-        if ('' != urlPath) {
-            res.redirect(urlPath + urlHash);
-        } else {
-            res.redirect('/' + urlHash);
-        }
+        plugins.setAllCookies(req, res, appData, {'username': username}, function() {
+            if ('' != urlPath) {
+                res.redirect(urlPath + urlHash);
+            } else {
+                res.redirect('/' + urlHash);
+            }
+        });
     });
 }
 
@@ -150,6 +152,19 @@ function getVMStatsByProject (projUUID, req, callback)
     callback(null, null);
 }
 
+function getSessionExpiryTime (req, appData, callback)
+{
+    var cfgSessTimeout =
+        ((null != config.session) && (null != config.session.timeout)) ?
+        config.session.timeout : null;
+    var defSessTimeout = global.MAX_AGE_SESSION_ID;
+    if (null == cfgSessTimeout) {
+        return defSessTimeout;
+    }
+    return cfgSessTimeout;
+}
+
+exports.getSessionExpiryTime = getSessionExpiryTime;
 exports.authenticate = authenticate;
 exports.getServiceCatalog = getServiceCatalog;
 exports.getAPIServerAuthParamsByReq = getAPIServerAuthParamsByReq;

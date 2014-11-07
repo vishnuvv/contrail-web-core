@@ -97,7 +97,8 @@ function getDomainList (req, callback)
 }
 
 function getNewTokenObjByToken (authObj, callback) {
-    authMethodApi.getUserAuthDataByAuthObj(authObj,
+    var req = authObj.req 
+    getAuthMethod[req.session.loggedInOrchestrationMode].getUserAuthDataByAuthObj(authObj,
                                        function(err, data) {
         callback(err, data);
     });
@@ -150,7 +151,8 @@ function getCookieObjs (req, appData, callback)
 
 function getSessionExpiryTime (req, appData, callback)
 {
-    return authMethodApi.getSessionExpiryTime(req, appData, callback);
+    console.log("req.session.loggedInOrchestrationMode as:", req.session.loggedInOrchestrationMode);
+    return getAuthMethod[req.session.loggedInOrchestrationMode].getSessionExpiryTime(req, appData, callback);
 }
 
 exports.doAuthenticate = doAuthenticate;

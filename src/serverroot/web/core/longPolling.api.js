@@ -172,6 +172,12 @@ function routeAll (req, res, next)
 {
   /* nodejs sets the timeout 2 minute, override this timeout here */
   req.socket.setTimeout(global.NODEJS_HTTP_REQUEST_TIMEOUT_TIME);
+  if(checkLoginReq(req)) {
+    console.log("Login Req, req.url:", req.url);
+    req.session.loggedInOrchestrationMode = 'openstack';
+    if(req.url.indexOf('/vcenter') == 0)
+        req.session.loggedInOrchestrationMode = 'vcenter';
+  }
   if (null == req.session.sessionExpSyncToIdentityToken) {
       if (null != authApi.getSessionExpiryTime) {
         var sessExp = authApi.getSessionExpiryTime(req);
