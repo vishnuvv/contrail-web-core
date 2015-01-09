@@ -2896,3 +2896,10 @@ function addBufferToRange(obj) {
     }
     return value;
 }
+
+/*
+ * Returns a random value within the range of min and max (parameters)
+ */
+function getRandomValue(min,max){
+    return Math.random() * (max - min) + min;
+}
