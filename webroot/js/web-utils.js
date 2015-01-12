@@ -2678,7 +2678,7 @@ function ManageCrossFilters(){
                     name:'vRoutersCF',
                     crossfilter:null,
                     dimensions:{},
-                    callBacks:$.Callbacks(),
+                    callBacks:$.Callbacks("unique"),
                     callBackFns:{}
                 }
             };
@@ -2791,7 +2791,7 @@ function ManageCrossFilters(){
             return t;
         }
     }
-    
+    /** CallBacks related */
     this.getCallBacks = function(cfName) {
         if(globalObj['crossFilters'] != null && globalObj['crossFilters'][cfName] != null){
             return globalObj['crossFilters'][cfName]['callBacks'];
@@ -2802,7 +2802,7 @@ function ManageCrossFilters(){
     this.setCallBacks = function(cfName){
         if(globalObj['crossFilters'] != null && globalObj['crossFilters'][cfName] != null 
                 && globalObj['crossFilters'][cfName]['callBacks'] == null){
-            globalObj['crossFilters'][cfName]['callBacks'] = $.Callbacks();
+            globalObj['crossFilters'][cfName]['callBacks'] = $.Callbacks("unique");
         }
     }
     
@@ -2826,9 +2826,12 @@ function ManageCrossFilters(){
         if(callBacks == null){
             this.setCallBacks(cfName);
         }
-        var cfObj = this.getCrossFilter
-        callBacks.add(callBackFn);
         var cfObj = this.getCrossFilterObj(cfName);
+        if(cfObj != null && cfObj['callBackFns'] != null){
+            callBacks.remove(cfObj['callBackFns'][callBackName]);
+        }
+        callBacks.add(callBackFn);
+       
         if(cfObj != null && cfObj['callBackFns'] != null){
             cfObj['callBackFns'][callBackName] = callBackFn;
             globalObj['crossFilters'][cfName] = cfObj;
