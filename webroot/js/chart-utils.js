@@ -968,6 +968,7 @@ function fetchNodesBetweenXAndYRange(d,xMinMax,yMinMax,cfName){
     var yDimension = dataCF.dimension(function(d) { return d.y; });
     var thirdDimension = dataCF.dimension(function(d) { return d.x; });
     
+
     var filterByX = xDimension.filter(xMinMax);
     var filterByY = yDimension.filter(yMinMax);
     
@@ -1025,7 +1026,7 @@ function doBucketization(data,chartOptions){
         }
         //set forceX and  forceY to fix the axes boundaries
         chartOptions.forceX = minMaxX;
-        chartOptions.forceY = minMaxY;        
+        chartOptions.forceY = minMaxY; 
         if(parentMinMax == null){
             parentMinMax = [];
         }
