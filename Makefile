@@ -31,6 +31,7 @@ fetch-pkgs-dev:
 	rm -rf node_modules
 	mkdir -p node_modules
 	python ../contrail-webui-third-party/fetch_packages.py -f ../contrail-webui-third-party/packages.xml
+#Download third-party packages required in dev/test environment
 	python ../contrail-webui-third-party/fetch_packages.py -f ../contrail-webui-third-party/packages_dev.xml
 	cp -rf $(THIRD_PARTY)/node_modules/* node_modules/.
 
