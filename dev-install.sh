@@ -6,6 +6,7 @@
 
 THIRD_PARTY='../contrail-webui-third-party'
 
+function copyThirdPartyToWebrootAssets() {
 #Start - copy javascript-ipv6 node module files for IPv4/v6 address manipulations/validations
 rm -rf webroot/assets/ip
 mkdir -p webroot/assets/ip
@@ -242,6 +243,8 @@ cp -af ./$THIRD_PARTY/uuid.js webroot/js/uuid.js
 rm -f webroot/js/common/contrail.unified.1.js
 rm -f webroot/js/common/contrail.unified.2.js
 rm -f webroot/js/common/contrail.unified.3.js
+}
+# copyThirdPartyToWebrootAssets
 
 MAINFILE[1]=webroot/assets/jquery-ui/js/jquery-ui.js
 MAINFILE[2]=webroot/assets/jquery/js/jquery.xml2json.js
