@@ -65,6 +65,8 @@ make-ln:
 	rm -f webroot/html/login-error.html
 	ln -sf ../../webroot/html/login-error.tmpl webroot/html/login-error.html
 	
+generate-files:
+	./generate-files.sh "dev-env" $(REPO)
 dev-env:
 	mkdir -p webroot/html
 	ln -sf ../../webroot/html/dashboard.tmpl webroot/html/dashboard.html
