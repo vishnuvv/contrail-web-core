@@ -401,3 +401,7 @@
 	filter: Alpha(Opacity=30);
 	border-radius: 8px;
 }
+
+li.ui-state-default.ui-state-hidden[role=tab]:not(.ui-tabs-active) {
+    display: none;
+}

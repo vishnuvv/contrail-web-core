@@ -32,15 +32,13 @@ define([
                 cacheConfig = modelConfig['cacheConfig'];
 
             contrailListModel = initContrailListModel(cacheConfig, sortConfig);
-
-            if(modelConfig['remote'] != null) {
+            if(modelConfig['remote'] != null) {  
                 if(contrail.checkIfFunction(modelConfig['remote'].onAllRequestsCompleteCB)) {
                     contrailListModel.onAllRequestsComplete.subscribe(function () {
                         modelConfig['remote'].onAllRequestsCompleteCB(contrailListModel, parentModelList);
                     });
                 }
             }
-
             if (modelConfig.data != null) {
                 contrailListModel.setData(modelConfig.data);
                 bindDataHandler2Model(contrailListModel);

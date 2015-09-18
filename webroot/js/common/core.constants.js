@@ -167,6 +167,8 @@ define([
 
         this.FLOW_SERIES_TABLE = "FlowSeriesTable";
         this.FLOW_CLASS = "FlowClass";
+        
+        this.TMPL_LOADING_TEXT = 'loading-text-template';
     };
     return CoreConstants;
 });

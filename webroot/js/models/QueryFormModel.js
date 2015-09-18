@@ -186,7 +186,7 @@ define([
             return attrs4Server;
         },
 
-        getQueryRequestPostData: function (serverCurrentTime) {
+        getQueryRequestPostData: function (serverCurrentTime,reqObj) {
             var queryReqObj = {
                     formModelAttrs: this.getAttributes4Server()
                 },
@@ -209,6 +209,7 @@ define([
             queryReqObj.async = 'true';
             queryReqObj.autoSort = 'true';
             queryReqObj.autoLimit = 'true';
+            queryReqObj = $.extend(true, {}, queryReqObj, reqObj);
 
             delete queryReqObj.formModelAttrs.where_or_clauses;
 
@@ -304,9 +305,10 @@ define([
                                 'table_schema': response
                             }
                         });
-                        contrailViewModel.attributes.select_data_object['select_fields'] = selectFields;
-                        setEnable4SelectFields(selectFields, contrailViewModel.attributes.select_data_object['enable_map']);
-
+                        if(contrailViewModel.attributes.select_data_object != null) {
+                            contrailViewModel.attributes.select_data_object['select_fields'] = selectFields;
+                            setEnable4SelectFields(selectFields, contrailViewModel.attributes.select_data_object['enable_map']);
+                        }
                         contrailViewModel.attributes.where_data_object['name_option_list'] = whereFields;
 
                     }
@@ -339,7 +341,8 @@ define([
 
         $.each(tableSchema.columns, function(schemaKey, schemaValue) {
             if (schemaValue.index){
-                if (tableName === 'FlowSeriesTable') {
+                if (tableName === 'FlowSeriesTable' ||
+                        tableName === 'FlowRecordTable') {
                     if (schemaValue.name === 'protocol') {
                         schemaValue.suffixes = ['sport', 'dport'];
                         tableSchemaFormatted.push(schemaValue);
