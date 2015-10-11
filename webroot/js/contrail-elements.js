@@ -72,6 +72,7 @@
                         for (var i = 0; i < tabIndex.length; i++) {
                             $(self).data('contrailTabs').disableTab(tabIndex[i], hide);
                         }
+                        return;
                     }
                     
                     // Get the array of disabled tabs, if any
@@ -102,6 +103,7 @@
                         for (var i = 0; i < tabIndex.length; i++) {
                             $(self).data('contrailTabs').enableTab(tabIndex[i]);
                         }
+                        return;
                     }
                     $(self).find('li:eq(' + tabIndex + ')').removeClass('ui-state-hidden');
                     $(self).tabs("enable", tabIndex);
