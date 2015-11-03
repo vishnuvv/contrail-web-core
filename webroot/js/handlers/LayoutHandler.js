@@ -42,7 +42,7 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
 
         /** Returns the entire hash object */
         this.getURLHashObj = function () {
-            return $.bbq.getState();
+            return cowu.encodeObjRecursive($.bbq.getState());
         };
 
         /** Override the entire hash object with the given one */
@@ -59,6 +59,7 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
         /** Returns the value of 'q' in urlHash which is used to maintain the state within a page */
         this.getURLHashParams = function () {
             var urlHash = $.bbq.getState('q');
+            cowu.encodeObjRecursive(urlHash);
             return ifNull(urlHash, {});
         };
 

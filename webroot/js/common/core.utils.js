@@ -840,6 +840,17 @@ define(['underscore'], function (_) {
             return strArray;
         };
 
+        this.encodeObjRecursive = function(obj) {
+            for (var k in obj) {
+                if (typeof obj[k] == "object" && obj[k] !== null)
+                    self.encodeObjRecursive(obj[k]);
+                else
+                    //Replace all non-alphanumeric characters excluding some special characters
+                    obj[k] = obj[k].replace(/[^a-zA-Z_:]/g,'');
+            }
+            return obj;
+        };
+
         this.bindPopoverInTopology = function (tooltipConfig, graphView) {
             var timer = null;
             $('.popover').remove();
