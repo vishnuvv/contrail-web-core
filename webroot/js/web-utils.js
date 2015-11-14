@@ -1119,6 +1119,7 @@ function renderSparkLines(cellNode,row,dataContext,colDef) {
 }
 
 function sort(object) {
+    var sortedObj = {};
     if (Array.isArray(object)) {
         return object.sort();
     }
@@ -1126,12 +1127,10 @@ function sort(object) {
         return object;
     }
 
-    return Object.keys(object).sort().map(function (key) {
-        return {
-            key:key,
-            value:sort(object[key])
-        };
+    Object.keys(object).sort().map(function (key) {
+        sortedObj[key] = sort(object[key]);
     });
+    return sortedObj;
 }
 
 function isCellSelectable(elem) {
