@@ -1403,9 +1403,14 @@ function validateIPAddress(inputText){
 function bucketizeCFData(dataCF,accessorFn,cfg) {
     var retArr = [],value;
     var dimension = dataCF.dimension(accessorFn);
-    var cfGroup = dimension.group();
     var maxKey = 0;
     var cfg = ifNull(cfg,{});
+    var filterDimension;
+    if(cfg['filterFn'] != null && cfg['accessorFn'] != null) {
+        filterDimension = dataCF.dimension(cfg['accessorFn']);
+        filterDimension.filter(cfg['filterFn']);
+    }
+    var cfGroup = dimension.group();
     var bucketCnt = ifNull(cfg['bucketCnt'],8);
     if(cfGroup.all().length > 0)
         maxKey = cfGroup.all()[cfGroup.all().length-1]['key'];
