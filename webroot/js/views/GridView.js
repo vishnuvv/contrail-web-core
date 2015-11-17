@@ -58,7 +58,7 @@ define([
                 var dataViewData = dataView.getItems();
                 //TODO: We should not need to set data with empty array.
                 dataView.setData([]);
-                initContrailGrid(dataView);
+                initContrailGrid(dataView,gridOptions);
                 initDataView(gridConfig);
                 dataView.setSearchFilter(searchColumns, searchFilter);
                 initClientSidePagination();
@@ -158,7 +158,7 @@ define([
                 }
             };
 
-            function initContrailGrid(dataObject) {
+            function initContrailGrid(dataObject,gridOptions) {
                 var checkboxSelector = new Slick.CheckboxSelectColumn({
                     cssClass: "slick-cell-checkboxsel"
                 });
@@ -175,11 +175,13 @@ define([
                         visibleColumns.push(column);
                     }
                 });
-                grid = new Slick.Grid(gridContainer.find('.grid-body'), dataObject, visibleColumns, gridOptions);
-                grid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: false}));
+                grid = new Slick.Grid(gridContainer.find('.grid-body'), dataObject, gridColumns, gridOptions);
+                if(gridOptions.checkboxSelectable != false) {
+                    grid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: false}));
+                }
                 grid.registerPlugin(checkboxSelector);
                 gridContainer.append('<div class="grid-load-status hide"></div>');
-                initGridEvents();
+                initGridEvents(gridOptions);
                 setDataObject4ContrailGrid();
                 gridContainer.data('contrailGrid').showGridMessage('loading');
             };
@@ -500,7 +502,7 @@ define([
                 }
             };
 
-            function initGridEvents() {
+            function initGridEvents(gridOptions) {
                 eventHandlerMap.grid['onScroll'] = function (e, args) {
                     if (scrolledStatus.scrollLeft != args.scrollLeft || scrolledStatus.scrollTop != args.scrollTop) {
                         gridContainer.data('contrailGrid').adjustAllRowHeight();
@@ -511,31 +513,33 @@ define([
 
                 grid['onScroll'].subscribe(eventHandlerMap.grid['onScroll']);
 
-                eventHandlerMap.grid['onSelectedRowsChanged'] = function (e, args) {
-                    var onNothingChecked = contrail.checkIfFunction(gridOptions.checkboxSelectable.onNothingChecked) ? gridOptions.checkboxSelectable.onNothingChecked : null,
-                        onSomethingChecked = contrail.checkIfFunction(gridOptions.checkboxSelectable.onSomethingChecked) ? gridOptions.checkboxSelectable.onSomethingChecked : null,
-                        onEverythingChecked = contrail.checkIfFunction(gridOptions.checkboxSelectable.onEverythingChecked) ? gridOptions.checkboxSelectable.onEverythingChecked : null;
+                if(gridOptions.checkboxSelectable != false)  {
+                    eventHandlerMap.grid['onSelectedRowsChanged'] = function (e, args) {
+                        var onNothingChecked = contrail.checkIfFunction(gridOptions.checkboxSelectable.onNothingChecked) ? gridOptions.checkboxSelectable.onNothingChecked : null,
+                            onSomethingChecked = contrail.checkIfFunction(gridOptions.checkboxSelectable.onSomethingChecked) ? gridOptions.checkboxSelectable.onSomethingChecked : null,
+                            onEverythingChecked = contrail.checkIfFunction(gridOptions.checkboxSelectable.onEverythingChecked) ? gridOptions.checkboxSelectable.onEverythingChecked : null;
 
-                    var selectedRowLength = args.rows.length;
+                        var selectedRowLength = args.rows.length;
 
-                    if (selectedRowLength == 0) {
-                        (contrail.checkIfExist(onNothingChecked) ? onNothingChecked(e) : '');
-                    }
-                    else {
-                        (contrail.checkIfExist(onSomethingChecked) ? onSomethingChecked(e) : '');
-
-                        if (selectedRowLength == grid.getDataLength()) {
-                            (contrail.checkIfExist(onEverythingChecked) ? onEverythingChecked(e) : '');
+                        if (selectedRowLength == 0) {
+                            (contrail.checkIfExist(onNothingChecked) ? onNothingChecked(e) : '');
                         }
-                    }
-                    gridContainer.data('contrailGrid').refreshView();
-                    if (gridOptions.multiRowSelection != true) {
-                        gridContainer.find('.slick-cell-checkboxsel').find('input.rowCheckbox:visible').attr('checked', false);
-                        $(gridContainer.find('.slick-cell-checkboxsel').find('input.rowCheckbox:visible')[args.rows.pop()]).attr('checked', true);
-                    }
-                };
+                        else {
+                            (contrail.checkIfExist(onSomethingChecked) ? onSomethingChecked(e) : '');
 
-                grid['onSelectedRowsChanged'].subscribe(eventHandlerMap.grid['onSelectedRowsChanged']);
+                            if (selectedRowLength == grid.getDataLength()) {
+                                (contrail.checkIfExist(onEverythingChecked) ? onEverythingChecked(e) : '');
+                            }
+                        }
+                        gridContainer.data('contrailGrid').refreshView();
+                        if (gridOptions.multiRowSelection != true) {
+                            gridContainer.find('.slick-cell-checkboxsel').find('input.rowCheckbox:visible').attr('checked', false);
+                            $(gridContainer.find('.slick-cell-checkboxsel').find('input.rowCheckbox:visible')[args.rows.pop()]).attr('checked', true);
+                        }
+                    };
+
+                    grid['onSelectedRowsChanged'].subscribe(eventHandlerMap.grid['onSelectedRowsChanged']);
+                }
 
                 eventHandlerMap.grid['onHeaderClick'] = function (e, args) {
                     if ($(e.target).is(":checkbox")) {

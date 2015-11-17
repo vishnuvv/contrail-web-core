@@ -29,7 +29,9 @@ define([
 
                 if (pagingInfo.totalPages - pagingInfo.pageNum <= 1 || currentPagingInfo == null || currentPageNum != pagingInfo.pageNum || currentPageSize != pagingInfo.pageSize) {
                     if (gridContainer.data('contrailGrid') != null && !gridContainer.data('contrailGrid')._gridStates.allPagesDataChecked) {
-                        gridContainer.data('contrailGrid')._grid.setSelectedRows([])
+                        var eventHandlerMap = gridContainer.data('contrailGrid')._eventHandlerMap;
+                        if(eventHandlerMap['onSelectedRowsChanged'] != null)
+                            gridContainer.data('contrailGrid')._grid.setSelectedRows([])
                     }
 
                     setTimeout(function () {
