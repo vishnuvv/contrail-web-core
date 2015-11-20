@@ -56,5 +56,8 @@
     "karma-sinon": "1.0.3",
     "karma-requirejs": "0.2.2",
     "grunt-cli": "0.1.13"
+  },
+  "scripts": {
+    "grunt":"grunt"
   }
 }
