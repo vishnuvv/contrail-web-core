@@ -42,9 +42,13 @@ define([
             self.loadedInfoboxes.push(cfg);
             var infoboxTemplate = contrail.getTemplate4Id(cowc.TMPL_INFOBOX);
             self.$el.find('.infobox-container').append(infoboxTemplate(cfg));
-            self.$el.find('.infobox-detail-container').append($('<div>',{
+            var infoboxElem = $('<div>',{
                     class:'infobox-detail-item',
-                }));
+                });
+            self.$el.find('.infobox-detail-container').append(infoboxElem);
+            infoboxElem = self.$el.find('.infobox-detail-container .infobox-detail-item:last');
+            //Enable rearranging infoboxes
+            // self.$el.find('.infobox-container').sortable({axis:'x'});
 
             //Revisit - Highlight first infobox
             // self.$el.find('.infobox').removeClass('infobox-blue infobox-dark active').addClass('infobox-grey');
