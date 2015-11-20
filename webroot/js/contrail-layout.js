@@ -6,6 +6,13 @@
 var lastHash = {};
 $.xhrPool = [];
 
+var svgRenderer = {
+    load: function() {
+        $('#content-container').html('');
+        $('#content-container').load('/fakeData/physicalTopology.svg');
+    }
+}
+
 var previous_scroll = $(window).scrollTop(),
     scrollHeight = $(document).height() - $(window).height();
 
