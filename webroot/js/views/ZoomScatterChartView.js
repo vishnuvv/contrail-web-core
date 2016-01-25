@@ -33,7 +33,12 @@ define([
 
                 if(cfDataSource != null) {
                     cfDataSource.addCallBack('updateChart',function(data) {
+                        viewConfig['cfg'] = {};
+                        viewConfig['cfg']['source'] = data['cfg']['source'];
+                        console.log('scatterChart','calling renderChart with source',viewConfig['cfg']['source']);
+                        $(selector).find('.filter-list-container .filter-criteria').hide();
                         self.renderChart(selector, viewConfig, self.model);
+                        viewConfig['cfg'] = {};
                     });
                 } else {
                     self.model.onAllRequestsComplete.subscribe(function () {
@@ -81,15 +86,23 @@ define([
 
                 chartConfig = getChartConfig(selector, chartOptions);
                 self.chartModel = new ZoomScatterChartModel(dataListModel, chartConfig);
-                self.zm = self.chartModel.zoomBehavior.on("zoom", getChartZoomFn(self, chartConfig));
-                self.zoomBySelection = false;
+                if(chartConfig['doBucketize'] == false) {
+                    self.zm = self.chartModel.zoomBehavior.on("zoom", getChartZoomFn(self, chartConfig));
+                    self.zoomBySelection = false;
+                }
                 renderControlPanel(self, chartConfig, chartOptions, selector);
             } else {
                 $(selector).find('.chart-container').empty();
                 chartConfig = getChartConfig(selector, chartOptions);
+                //For bucketization,we call refresh from plotZoomScatterChartData,as on ZoomIn renderChart will not be called
+                // if(viewConfig['doBucketize'] == false) {
+                console.log('scatterChart','calling refresh on chartModel');
                 self.chartModel.refresh(chartConfig);
-                self.zm = self.chartModel.zoomBehavior.on("zoom", getChartZoomFn(self, chartConfig));
-                self.zoomBySelection = false;
+                // }
+                if(chartConfig['doBucketize'] == false) {
+                    self.zm = self.chartModel.zoomBehavior.on("zoom", getChartZoomFn(self, chartConfig));
+                    self.zoomBySelection = false;
+                }
             }
 
             renderZoomScatterChart(self, chartConfig, chartOptions, selector);
@@ -172,33 +185,72 @@ define([
             margin = chartConfig['margin'],
             width = chartModel.width,
             height = chartModel.height,
+            cfDataSource = chartView.attributes.viewConfig.cfDataSource,
             maxCircleRadius = chartConfig.maxCircleRadius;
 
         $(chartSelector).height(height + margin.top + margin.bottom);
         $(chartControlPanelSelector).find('.control-panel-item').removeClass('active');
 
-        chartSVG = d3.select($(chartSelector)[0]).append("svg")
-            .attr("class", "zoom-scatter-chart")
-            .attr("width", width + margin.left + margin.right + (2*maxCircleRadius))
-            .attr("height", height + margin.top + margin.bottom + (2*maxCircleRadius))
-            .attr("viewbox", '0 0 ' + (width + margin.left + margin.right + (2*maxCircleRadius)) + ' ' + (height + margin.top + margin.bottom + (2*maxCircleRadius)))
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-            .call(chartView.zm)
-            .append("g")
-            .on("mousedown", mouseDownCallback);
+        if(chartOptions['doBucketize'] == false) {
+            chartSVG = d3.select($(chartSelector)[0]).append("svg")
+                .attr("class", "zoom-scatter-chart")
+                .attr("width", width + margin.left + margin.right + (2*maxCircleRadius))
+                .attr("height", height + margin.top + margin.bottom + (2*maxCircleRadius))
+                .attr("viewbox", '0 0 ' + (width + margin.left + margin.right + (2*maxCircleRadius)) + ' ' + (height + margin.top + margin.bottom + (2*maxCircleRadius)))
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                .call(chartView.zm)
+                .append("g")
+                .on("mousedown", mouseDownCallback);
+        } else {
+            chartSVG = d3.select($(chartSelector)[0]).append("svg")
+                .attr("class", "zoom-scatter-chart")
+                .attr("width", width + margin.left + margin.right + (2*maxCircleRadius))
+                .attr("height", height + margin.top + margin.bottom + (2*maxCircleRadius))
+                .attr("viewbox", '0 0 ' + (width + margin.left + margin.right + (2*maxCircleRadius)) + ' ' + (height + margin.top + margin.bottom + (2*maxCircleRadius)))
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                .append("g")
+        }
 
         //Add color filter
         if(chartOptions['doBucketize'] == true) {
-            if($(selector).find('.color-selection').length == 0) {
-                $(selector).prepend($('<div/>', {
-                        class: 'chart-settings',
-                        style: 'height:20px'
-                    }));
-                $(selector).find('.chart-settings').append(contrail.getTemplate4Id('color-selection'));
+            if($(selector).find('.zs-chart-settings').length == 0) {
+                var zsChartSettingsTmpl = contrail.getTemplate4Id('zs-chart-settings');
+                $(selector).prepend(zsChartSettingsTmpl());
             }
-            if($(selector).find('.filter-list').length == 0) {
-                $(selector).find('.chart-settings').append(contrail.getTemplate4Id('filter-list'));
+
+            $(selector).find('.filter-list-container .filter-criteria').hide();
+            //Show filters
+            var d3Format = d3.format('.2f');
+            var showFilterTemplate = contrail.getTemplate4Id('zs-show-filter-range');
+            if(cfDataSource.getFilter('x') != null) {
+                $(selector).find('.filter-list-container .filter-criteria.x').show();
+                var minMaxX = cfDataSource.getFilterValues('x');
+                $(selector).find('.filter-criteria.x').html(showFilterTemplate({
+                        lbl: 'CPU (%)',
+                        minValue: d3Format(minMaxX[0]),
+                        maxValue: d3Format(minMaxX[1])
+                    }));
+                $(selector).find('.filter-criteria.x').find('.icon-remove').on('click',function() {
+                    $(this).parents('.filter-criteria').hide();
+                    cfDataSource.removeFilter('x');
+                    cfDataSource.fireCallBacks({source:'chartFilterRemoved'});
+                });
+            }
+            if(cfDataSource.getFilter('y') != null) {
+                $(selector).find('.filter-list-container .filter-criteria.y').show();
+                var minMaxY = cfDataSource.getFilterValues('y');
+                $(selector).find('.filter-criteria.y').html(showFilterTemplate({
+                        lbl: 'Mem (MB)',
+                        minValue: d3Format(minMaxY[0]),
+                        maxValue: d3Format(minMaxY[1])
+                }));
+                $(selector).find('.filter-criteria.y').find('.icon-remove').on('click',function() {
+                    $(this).parents('.filter-criteria').hide();
+                    cfDataSource.removeFilter('y');
+                    cfDataSource.fireCallBacks({source:'chartFilterRemoved'});
+                });
             }
         }
 
@@ -315,6 +367,7 @@ define([
         };
         if(chartOptions['doBucketize'] == true) {
             addScatterChartDragHandler({
+                viewConfig: chartView.attributes.viewConfig,
                 selector: chartView.$el,
                 chartModel: chartView.chartModel,
                 cfDataSource: chartView.attributes.viewConfig.cfDataSource
@@ -327,6 +380,16 @@ define([
                     chartModel: chartView.chartModel,
                     cfDataSource: chartView.attributes.viewConfig.cfDataSource
                 });
+                $(selector).find('.zs-bucketize').change(
+                        function() {
+                            var viewConfig = chartView.attributes.viewConfig;
+                            if($(this).is(':checked')) {
+                                viewConfig['chartOptions']['doBucketize'] = true; 
+                            } else {
+                                viewConfig['chartOptions']['doBucketize'] = false;
+                            }
+                            chartView.renderChart(selector,viewConfig,self.model);
+                        });
             }
         }
     }
@@ -336,8 +399,10 @@ define([
         // $(selector).find('.color-selection .circle').addClass('filled');
         if(obj['cfDataSource'] != null) {
             var cfDataSource = obj['cfDataSource'];
-            cfDataSource.removeFilter('chartFilter');
-            cfDataSource.fireCallBacks({source:'chart'});
+            // cfDataSource.removeFilter('chartFilter');
+            cfDataSource.removeFilter('x');
+            cfDataSource.removeFilter('y');
+            cfDataSource.fireCallBacks({source:'chartFilterRemoved'});
         }
     }
 
@@ -368,7 +433,7 @@ define([
         /****
         * Selection handler for color filter in chart settings panel
         ****/
-        $(obj['selector']).on('click','.chart-settings .color-selection .circle',function() {
+        $(obj['selector']).on('click','.zs-chart-settings .color-selection .circle',function() {
             var currElem = $(this);
             $(this).toggleClass('filled');
 
@@ -433,7 +498,7 @@ define([
                     $(selector).find('#rect1').remove();
                     //As x-axis is transformated 50px and again 7px with circle radius
                     //y-axis is transformed 20px from svg
-                    var xOffset = 50+7,yOffset = 20;
+                    var xOffset = 50+10,yOffset = 20;
                     var minMaxX = [];
                     var xValue1 = chartModel.xScale.invert(this.__origin__.x - xOffset);
                     var xValue2 = chartModel.xScale.invert(this.__origin__.x + this.__origin__.dx - xOffset);
@@ -449,6 +514,7 @@ define([
                         yRange: minMaxY,
                         d     : d,
                         selector: selector,
+                        viewConfig: obj['viewConfig'],
                         cfDataSource : obj['cfDataSource']
                     });
                     delete this.__origin__;
@@ -466,11 +532,13 @@ define([
     function zoomIn(obj) {
         var minMaxX = obj['xRange'],
             minMaxY = obj['yRange'],
+            viewConfig = obj.viewConfig,
             cfDataSource = obj['cfDataSource'],
             selector = obj['selector'],
             d = obj['d'];
         //adjust min and max values to include missed bubbles
         var combinedValues = [];
+        console.log('scatterChart:bucketize','zoom-in on the region',minMaxX,minMaxY);
 
         if(d instanceof Array) {
             $.each(d,function(idx,item) {
@@ -485,25 +553,59 @@ define([
             minMaxY = d['minMaxY'];
             combinedValues = [d];
         }
+        //Limit the minMax to the extreme nodes to match the nodes on drill-down
+        //This avoids the offset shown on either side of chart no to be accounted
+        var minMaxXs = [],minMaxYs = [];
+        // combinedValues.every(function(currNode) {
+        //     minMaxXs.push(currNode['minMaxX']);
+        //     minMaxYs.push(currNode['minMaxY']);
+        // });
+        // minMaxX = [d3.min(minMaxXs,function(d) {
+        //                 return d[0];
+        //             }),d3.max(minMaxXs,function(d) {
+        //                 return d[1];
+        //             })];
+        // minMaxY = [d3.min(minMaxYs,function(d) {
+        //                 return d[0];
+        //             }),d3.max(minMaxYs,function(d) {;
+        //                 return d[1];
+        //             })];
 
         //If there is no node within dragged selection,ignore
         if(combinedValues.length == 0) {
             return;
         }
-        var selectedNames = [];
+        var selectedNodes = [];
         $.each(combinedValues,function(idx,obj) {
-            if(obj['isBucket']) {
-                $.each(obj['children'],function(idx,children) {
-                    selectedNames.push(children['name']);
+            if(obj['isBucket'] || obj['children']) {
+                $.each(obj['children'],function(idx,currNode) {
+                    selectedNodes.push(currNode);
                 });
             } else {
-                selectedNames.push(obj['name']);
+                selectedNodes.push(obj);
             }
         });
+        minMaxX = d3.extent(selectedNodes,function(d) { return d.x;});
+        minMaxY = d3.extent(selectedNodes,function(d) { return d.y;});
+        console.info('scatterChart:bucketize','Nodes selected',selectedNodes);
+        var selNames = $.map(selectedNodes,function(obj,idx) {
+           return obj['name']; 
+        });
+        console.info('scatterChart:bucketize','Nodes selected',selNames);
 
         //Zoomin on the selected region
         if(obj['cfDataSource'] != null) {
             var cfDataSource = obj['cfDataSource'];
+            if(cfDataSource.getDimension('x') == null) {
+                cfDataSource.addDimension('x',function(d) {
+                    return d['x'];
+                });
+            }
+            if(cfDataSource.getDimension('y') == null) {
+                cfDataSource.addDimension('y',function(d) {
+                    return d['y'];
+                });
+            }
             if(cfDataSource.getDimension('chartFilter') == null) {
                 cfDataSource.addDimension('chartFilter',function(d) {
                     return d['name'];
@@ -511,12 +613,30 @@ define([
             }
             //As we are maintaining single filter based on name for both x/y axis
             //Can't clear one filter alone
-            cfDataSource.applyFilter('chartFilter',function(d) {
-                return $.inArray(d,selectedNames) > -1;
-            });
-            var d3Format = d3.format('.2f');
-            $(selector).find('.filter-criteria.x').html('<span>CPU (%):&nbsp;</span>' + d3Format(minMaxX[0]) + ' - ' + d3Format(minMaxX[1]));
-            $(selector).find('.filter-criteria.y').html('<span>Mem (MB):&nbsp;</span>' + d3Format(minMaxY[0]) + ' - ' + d3Format(minMaxY[1]));
+            // cfDataSource.applyFilter('chartFilter',function(d) {
+            //     return $.inArray(d,selectedNames) > -1;
+            // });
+            //Don't apply filter again if the update triggered from chart filter removal
+            // if(viewConfig['cfg']['source'] == 'chartFilterRemoved') {
+
+            // $(selector).find('.filter-list-container .filter-criteria').hide();
+            var dataMinMaxX = d3.extent(cfDataSource.getFilteredData(),function(d) { return d.x;});
+            var dataMinMaxY = d3.extent(cfDataSource.getFilteredData(),function(d) { return d.y;});
+            //Apply the filter only if there are nodes less than the select min and greater than the selected max
+            if(dataMinMaxX[0] < minMaxX[0] || dataMinMaxX[1] > minMaxX[1]) {
+                console.info('scatterChart','apply x filter on crossfilter',minMaxX);
+                cfDataSource.applyFilter('x',function(d) {
+                    return d >= minMaxX[0] && d <= minMaxX[1];
+                },minMaxX);
+            }
+            if(dataMinMaxY[0] < minMaxY[0] || dataMinMaxY[1] > minMaxY[1]) {
+                console.info('scatterChart','apply y filter on crossfilter',minMaxY);
+                cfDataSource.applyFilter('y',function(d) {
+                    return d >= minMaxY[0] && d <= minMaxY[1];
+                },minMaxY);
+            }
+
+            // $(selector).find('.filter-list-container').show();
             cfDataSource.fireCallBacks({source:'chart'});
         }
     }
@@ -555,12 +675,13 @@ define([
                 totalCnt = cfDataSource.getRecordCnt();
             var infoElem = ifNull($($(headerElem).contents()[1]),$(headerElem));
             var innerText = infoElem.text().split('(')[0].trim();
-            if (cfDataSource.getFilter('chartFilter') == null) {
+            // if (cfDataSource.getFilter('x') == null && cfDataSource.getFilter('y') == null) {
+            if (filteredCnt == totalCnt) {
                 //Hide filter container
-                $(chartView.$el).find('.filter-list-container').hide();
+                // $(chartView.$el).find('.filter-list-container .filter-criteria').hide();
                 innerText += ' (' + totalCnt + ')';
             } else {
-                $(chartView.$el).find('.filter-list-container').show();
+                // $(chartView.$el).find('.filter-list-container .filter-criteria').show();
                 innerText += ' (' + filteredCnt + ' of ' + totalCnt + ')';
             }
             infoElem.text(innerText);
@@ -578,9 +699,9 @@ define([
             timer = null, maxCircleRadius = chartConfig.maxCircleRadius;
 
 
-        if(chartOptions['doBucketize'] == true) {
-            chartModel.refresh(chartConfig);
-        }
+        // if(chartOptions['doBucketize'] == true) {
+        //     chartModel.refresh(chartConfig);
+        // }
 
         //Bind data to chart
         d3.select($(chartView.$el).find('svg')[0]).data([chartModel.data]);
@@ -617,7 +738,7 @@ define([
 
                 clearTimeout(timer);
                 timer = setTimeout(function () {
-                    constructTooltip(selfOffset, tooltipData, tooltipConfigCB, overlapMap, chartData);
+                    constructTooltip(selfOffset, tooltipData, tooltipConfigCB, overlapMap, chartData,chartView);
                 }, contrail.handleIfNull(tooltipConfig.delay, cowc.TOOLTIP_DELAY));
             })
             .on("mouseleave", function (d) {
@@ -628,11 +749,12 @@ define([
                 if(chartOptions['doBucketize'] == true) {
                     zoomIn({
                         d : d,
+                        viewConfig : chartView.attributes.viewConfig,
                         cfDataSource : chartView.attributes.viewConfig.cfDataSource,
                         selector: chartView.$el
                     });
                 } else {
-                clickCB(d);
+                    clickCB(d);
                 }
             });
     }
@@ -998,7 +1120,7 @@ define([
 
     };
 
-    function constructTooltip(selfOffset, tooltipData, tooltipConfigCB, overlapMap, chartData) {
+    function constructTooltip(selfOffset, tooltipData, tooltipConfigCB, overlapMap, chartData,chartView) {
         var tooltipConfig = tooltipConfigCB(tooltipData),
             tooltipElementObj = generateTooltipHTML(tooltipConfig),
             tooltipElementKey = tooltipData['x'] + ',' + tooltipData['y'],
@@ -1068,7 +1190,16 @@ define([
                     actionCallback = tooltipConfig.content.actions[actionKey].callback;
 
                 destroyTooltip(tooltipElementObj, overlappedElementsDropdownElement);
-                actionCallback(tooltipData);
+                if(tooltipData['isBucket'] == true) {
+                    zoomIn({
+                        d : tooltipData,
+                        viewConfig : chartView.attributes.viewConfig,
+                        cfDataSource : chartView.attributes.viewConfig.cfDataSource,
+                        selector: chartView.$el
+                    });
+                } else {
+                    actionCallback(tooltipData);
+                }
             });
 
         $(tooltipElementObj).find('.popover-remove')

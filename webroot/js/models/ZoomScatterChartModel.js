@@ -46,9 +46,12 @@ define([
             var rawData = dataListModel.getFilteredItems();
             self.data = contrail.checkIfFunction(chartConfig['dataParser']) ? chartConfig['dataParser'](rawData) : rawData;
 
-            if(chartConfig['doBucketize'] == true)
+            if(chartConfig['doBucketize'] == true) {
+                console.info('scatterChart:bucketize','re bucketized');
                 self.data = doBucketization(self.data,chartConfig);
-            chartData = $.extend(true,[],self.data);
+            }
+            // chartData = $.extend(true,[],self.data);
+            chartData = JSON.parse(JSON.stringify(self.data));
             self.chartData = chartData;
             self.sizeFieldName = contrail.handleIfNull(chartConfig['sizeFieldName'], 'size');
             self.sizeMinMax = getSizeMinMax(self.data, self.sizeFieldName);
@@ -75,8 +78,37 @@ define([
             self.height = chartConfig['height'] - margin.top - margin.bottom;
 
             if(chartConfig['doBucketize'] == true) {
+                var chartOffset = 20;
                 forceX = getAxisMinMaxForBucketization(chartData, chartConfig.xField, chartConfig.forceX);
                 forceY = getAxisMinMaxForBucketization(chartData, chartConfig.yField, chartConfig.forceY);
+                var xMin,xMax;
+                //Keep 20px chart empty on either side such that nodes are not plotted on edges
+                if(forceX[0] != forceX[1]) {
+                    var xDiff = forceX[1] - forceX[0];
+                    var domainRangePerPixel = xDiff/self.width;
+                    var xDomainOffset = (domainRangePerPixel*chartOffset);
+                    xMin = forceX[0]-xDomainOffset,xMax=forceX[1]+xDomainOffset;
+                } else {
+                    xMin = forceX[0] * .9;
+                    xMax = forceX[0] * 1.1;
+                }
+                if(forceX[0] > 0 && xMin < 0)
+                    xMin = 0;
+                forceX = [xMin,xMax];
+
+                var yMin,yMax;
+                if(forceY[0] != forceY[1]) {
+                    var yDiff = forceY[1] - forceY[0];
+                    var domainRangePerPixel = yDiff/self.height;
+                    var yDomainOffset = (domainRangePerPixel*chartOffset);
+                    yMin= forceY[0]-yDomainOffset,yMax=forceY[1]+yDomainOffset;
+                } else {
+                    yMin = forceY[0] * .9;
+                    yMax = forceY[0] * 1.1;
+                }
+                if(forceY[0] > 0 && yMin < 0)
+                    yMin = 0;
+                forceY = [yMin,yMax];
             } else {
                 forceX = cowu.getForceAxis4Chart(chartData, chartConfig.xField, chartConfig.forceX);
                 forceY = cowu.getForceAxis4Chart(chartData, chartConfig.yField, chartConfig.forceY);
@@ -88,10 +120,14 @@ define([
             self.yMin = forceY[0];
             self.yMax = forceY[1];
 
+            console.log('scatterChart:bucketize','setting xScale to',self.xMin,self.xMax);
+            console.log('scatterChart:bucketize','setting yScale to',self.yMin,self.yMax);
             self.xScale = d3.scale.linear().domain([self.xMin, self.xMax]).range([0, self.width]);
             self.yScale = d3.scale.linear().domain([self.yMin, self.yMax]).range([self.height, 0]);
 
-            self.zoomBehavior = d3.behavior.zoom().x(self.xScale).y(self.yScale).scaleExtent([1, 4]);
+            if(chartConfig['doBucketize'] == false) {
+                self.zoomBehavior = d3.behavior.zoom().x(self.xScale).y(self.yScale).scaleExtent([1, 4]);
+            }
 
             self.maxColorFilterFields = d3.max(chartData, function (d) {
                 return +d[chartConfig.colorFilterFields]
@@ -171,25 +207,12 @@ define([
         return [axisMin, axisMax];
     };
 
+    //Ensure the input data is not modified
     function doBucketization(data,chartOptions){
-        var data = $.extend(true,[],data);
+        // var data = $.extend(true,[],data);
         var retData = [];
         var minMax, minMaxX, minMaxY, parentMinMax, currLevel, maxBucketizeLevel, bucketsPerAxis,
             defaultBucketsPerAxis = 4;
-        // var bucketOptions = chartOptions.bucketOptions;
-        // if(chartOptions.bucketOptions != null) {
-        //     currLevel = bucketOptions.currLevel;
-        //     minMax = bucketOptions.minMax;
-        //     //maxBucketizeLevel = bucketOptions.maxBucketizeLevel;
-        //     parentMinMax = bucketOptions.parentMinMax;
-        //     //bucketsPerAxis = bucketOptions.bucketsPerAxis;
-        // } else {
-        //     currLevel = 0;
-        // }
-
-        // var chartOptions = {};
-        // maxBucketizeLevel = (!getCookie(BUCKETIZE_LEVEL_COOKIE))? defaultMaxBucketizeLevel : parseInt(getCookie(BUCKETIZE_LEVEL_COOKIE));
-        // bucketsPerAxis = (!getCookie(BUCKETS_PER_AXIS_COOKIE))? defaultBucketsPerAxis : parseInt(getCookie(BUCKETS_PER_AXIS_COOKIE));
         bucketsPerAxis = defaultBucketsPerAxis;
 
         if (data != null) {
@@ -198,16 +221,12 @@ define([
                 xDim = cf.dimension(function(d) { return d.x;}),
                 yDim = cf.dimension(function(d) { return d.y;});
 
-
-
             minMaxX = d3.extent(combinedValues,function(obj){
                 return obj['x'];
             });
             minMaxY = d3.extent(combinedValues,function(obj){
                 return obj['y'];
             });
-            // minMaxX = [xDim.top(1),xDim.bottom(1)];
-            // minMaxY = [yDim.top(1),yDim.bottom(1)];
             //set forceX and  forceY to fix the axes boundaries
             chartOptions.forceX = minMaxX;
             chartOptions.forceY = minMaxY;
@@ -229,6 +248,13 @@ define([
                 /* Bucketize based on d3Scale */
                 var xBucketScale = d3.scale.quantize().domain(minMaxX).range(d3.range(1,bucketsPerAxis));
                 var yBucketScale = d3.scale.quantize().domain(minMaxY).range(d3.range(1,bucketsPerAxis));
+                var xPartitions = [],yPartitions = [];
+                $.each(d3.range(1,bucketsPerAxis),function(idx,obj) {
+                   xPartitions.push(xBucketScale.invertExtent(obj)[0]);
+                   yPartitions.push(yBucketScale.invertExtent(obj)[0]);
+                });
+                console.info('scatterChart:bucketize','x partiotions',xPartitions);
+                console.info('scatterChart:bucketize','y partiotions',yPartitions);
                 var buckets = {};
                 //Group nodes into buckets
                 $.each(data,function(idx,obj) {
@@ -252,6 +278,8 @@ define([
                                 var obj = {};
                                 avgX = d3.mean(buckets[x][y],function(d){return d.x});
                                 avgY = d3.mean(buckets[x][y],function(d){return d.y});
+                                avgX = d3.mean(xBucketScale.invertExtent(parseInt(x)),function(d) { return d});
+                                avgY = d3.mean(yBucketScale.invertExtent(parseInt(y)),function(d) { return d});
                                 obj['x'] = avgX;
                                 obj['y'] = avgY;
                                 if(typeof(chartOptions['bubbleSizeFn']) == 'function') {
@@ -270,7 +298,7 @@ define([
                                 buckets[x][y].sort(dashboardUtils.sortNodesByColor);
                                 var nodeCnt = buckets[x][y].length;
                                 obj['color'] = buckets[x][y][nodeCnt-1]['color'];
-                                obj['clickFn'] = 'processBucket';
+                                // obj['clickFn'] = 'processBucket';
                                 //If bucket contains only one node,minX and maxX will be same
                                 obj['minMaxX'] = d3.extent(buckets[x][y],function(obj)  {
                                     return obj['x'];
@@ -278,6 +306,9 @@ define([
                                 obj['minMaxY'] = d3.extent(buckets[x][y],function(obj) {
                                     return obj['y'];
                                 });
+                                // obj['minMaxX'] = xBucketScale.invertExtent(parseInt(x));
+                                // obj['minMaxY'] = yBucketScale.invertExtent(parseInt(y));
+                                console.info('scatterChart:bucketize','Plotting ',x,y,' bucket nodes ',buckets[x][y].length,' at ',avgX,avgY,obj['minMaxX'],obj['minMaxY']);
 
                                 obj['children'] = buckets[x][y];
                                 retData.push(obj);
