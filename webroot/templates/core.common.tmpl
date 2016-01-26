@@ -497,7 +497,7 @@
         </div>
         <div class="span4">
             <div id="alerts-box" class="widget-box transparent">
-                <div class="widget-header"></div>
+                <div class="widget-header"><i class="icon-spinner icon-spin blue bigger-125"></i>Alarms</div>
                 <div class="widget-body">
                     <div id="alerts-box-content" class="widget-main padding-4">
                     </div>
@@ -513,7 +513,7 @@
     <div id="dashboard-stats" class="row-fluid">
         <div class="span4">
             <div id="logs-box" class="widget-box transparent">
-                <div class="widget-header"></div>
+                <div class="widget-header"><h4 class="smaller"><i class="icon-spinner icon-spin blue bigger-125"></i>Logs</h4></div>
                 <div class="widget-body">
                     <div class="widget-main padding-4">
                     </div>
@@ -532,7 +532,7 @@
         </div>
         <div class="span4">
             <div id="alerts-box" class="widget-box transparent">
-                <div class="widget-header"></div>
+                <div class="widget-header"><h4 class="smaller"><i class="icon-spinner icon-spin blue bigger-125"></i>Alarms</h4></div>
                 <div class="widget-body">
                     <div id="alerts-box-content" class="widget-main padding-4">
                     </div>
@@ -544,49 +544,6 @@
 
 <script type="text/x-handlebars-template" id="mon-infra-node-details-chart">
     <div id='infoboxes-container' style="height:380px">
-    </div>
-</script>
-
-<script type="text/x-handlebars-template" id="infra-dashboard">
-    <div class="row-fluid">
-        <div class="row-fluid">
-            <div id='topStats' class="span12 infobox-container"></div>
-        </div>
-        <hr class="hr-8"/>
-        <div id="dashboard-charts" class="row-fluid">
-        </div>
-
-        <hr />
-
-        <div id="dashboard-stats" class="row-fluid">
-            <div class="span4">
-                <div id="logs-box" class="widget-box transparent">
-                    <div class="widget-header"></div>
-                    <div class="widget-body">
-                        <div class="widget-main padding-4">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="span4">
-                <div id="sysinfo-box" class="widget-box transparent">
-                    <div class="widget-header"></div>
-                    <div class="widget-body">
-                        <div id="system-info-stat" class="widget-main">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="span4">
-                <div id="alerts-box" class="widget-box transparent">
-                    <div class="widget-header"></div>
-                    <div class="widget-body">
-                        <div id="alerts-box-content" class="widget-main padding-4">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </script>
 
@@ -739,7 +696,7 @@
     </div>
 </script>
 <script type="text/x-handlebars-template" id="filter-list">
-    <div class="filter-list-container" style="position:relative;width:400px;left:45px;display:none">
+    <div class="filter-list-container" style="position:relative;width:400px;left:45px;">
         <ul class="filter-list">
             <li class="filter-criteria x"></li>
             <li class="filter-criteria y"></li>

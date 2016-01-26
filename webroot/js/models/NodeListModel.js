@@ -17,6 +17,18 @@ define([
 
             self.nodeListModels = [];
             var timer;
+            //Check if any nodeListModel primary request is in progress
+            self.isPrimaryRequestInProgress = function() {
+                var isInProgress = false;
+                for(var i=0,len=self.nodeListModels.length;i<len;i++) {
+                    if(self.nodeListModels[i].isPrimaryRequestInProgress()) {
+                        isInProgress = true;
+                        break;
+                    }
+                }
+                return isInProgress;
+            }
+
             self.addListModel = function(listModel) {
                 self.nodeListModels.push(listModel);
                 listModel.onDataUpdate.subscribe(function() {

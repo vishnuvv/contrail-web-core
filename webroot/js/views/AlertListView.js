@@ -17,9 +17,7 @@ define([
 
             self.$el.find('.widget-body .widget-main').
                 html(alertListTmpl(alertList.slice(0,5)));
-            self.$el.find('.widget-header').initWidgetHeader({
-                title: 'Alarms'
-            });
+            self.$el.find('.widget-header i').hide();
 
             self.$el.find('#moreAlertsLink').click(function() {
                 cowu.loadAlertsPopup({
@@ -29,9 +27,13 @@ define([
         },
         render: function() {
             var self = this;
-            self.renderAlerts();
-            self.model.onDataUpdate.subscribe(function() {
+            if(self.model.isPrimaryRequestInProgress == false)
                 self.renderAlerts();
+            self.model.onDataUpdate.subscribe(function() {
+                //Render Alerts container if not empty or all nodeListModels requests are complete
+                if(self.model.getItems().length > 0 || self.isPrimaryRequestInProgress == false) {
+                    self.renderAlerts();
+                }
             });
         }
     });

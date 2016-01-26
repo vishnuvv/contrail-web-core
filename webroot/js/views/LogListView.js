@@ -13,18 +13,17 @@ define([
             var self = this;
             var logList = self.model.getItems();
             var logListTmpl = contrail.getTemplate4Id('logList-template');
+            self.$el.find('.widget-header i').hide(); 
             //Display only recent 3 log messages
             self.$el.find('.widget-body .widget-main').
                 html(logListTmpl(logList.reverse().slice(0,3)));
         },
         render: function() {
             var self = this;
-            self.renderLogs();
+            if(self.model.isPrimaryRequestInProgress() == false || self.model.loadedFromCache)
+                self.renderLogs();
             self.model.onDataUpdate.subscribe(function() {
                 self.renderLogs();
-            });
-            self.$el.find('.widget-header').initWidgetHeader({
-                title: 'Logs'
             });
         }
     });
