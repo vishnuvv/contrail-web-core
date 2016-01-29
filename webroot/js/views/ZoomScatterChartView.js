@@ -491,11 +491,13 @@ define([
                 this.__origin__.y = p[1];
                 this.__origin__.dx  = 0,this.__origin__.dy = 0;
                 d3.select($(selector)[0]).select('svg').append('rect').attr('id','rect1');
+                console.log('scatterChart:drag','Drag position started at(',p[0],p[1],')');
             })
             .on("drag", function(d, i){
                 cancelDragEvent = false;
                 this.__origin__.dx += d3.event.dx;
                 this.__origin__.dy += d3.event.dy;
+                console.log('scatterChart:drag','Moved by',this.__origin__.dx,this.__origin__.dy); 
                 var xMirror = 1,yMirror =1,
                     offsetX = this.__origin__.x,offsetY = this.__origin__.y;
                 //Working only when we negate both scale & x/y coordinates
@@ -507,7 +509,8 @@ define([
                     yMirror = -1;
                     offsetY = -offsetY;
                 }
-
+                console.log('scatterChart:drag','Updating rectangle start:',this.__origin__.x,this.__origin__.y,'(width,height)',
+                     Math.abs(d3.event.x - this.__origin__.x),Math.abs(d3.event.y - this.__origin__.y));
                 d3.select($(selector).find('svg rect#rect1')[0])
                 .attr('x',offsetX)
                 .attr('y',offsetY)

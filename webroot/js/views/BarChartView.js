@@ -210,10 +210,12 @@ define([
         brush.on("brush.chart", function () {
             var g = d3.select(this.parentNode),
                 extent = brush.extent();
+            console.info("before round",extent);
             if (round) g.select(".brush")
                 .call(brush.extent(extent = extent.map(round)))
                 .selectAll(".resize")
                 .style("display", null);
+            console.info("after round",extent);
             g.select("#clip-" + id + " rect")
                 .attr("x", x(extent[0]))
                 .attr("width", x(extent[1]) - x(extent[0]));
@@ -231,6 +233,7 @@ define([
             if(onBrushEnd != null) {
                 var extent = brush.extent();
                 onBrushEnd(extent);
+                console.info("brush end",extent);
             }
         });
 

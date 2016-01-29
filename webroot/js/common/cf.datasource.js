@@ -43,6 +43,7 @@ define([], function() {
 
         this.addDimension =  function(dimensionName,dimFn) {
             var dimension;
+            console.assert(cf != null,"Couldn't create dimension as crossfilter is not yet initialized");
             //Add dimension only if it doesn't exist
             if(cf != null) {
                 if(self.getDimension(dimensionName) == null) {
@@ -125,6 +126,8 @@ define([], function() {
 
         this.fireCallBacks = function(options) {
             var ret = {};
+            console.groupCollapsed("fireCallBacks",options.source);
+            console.trace();
             if(callBacks != null) {
                 var data = this.getFilteredData();
                 ret['data'] = data;
@@ -134,6 +137,7 @@ define([], function() {
                 }
                 callBacks.fire(ret);
             }
+            console.groupEnd();
         }
     }
     return CFDataSource;
