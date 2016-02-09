@@ -746,7 +746,7 @@ define([
             })
             .on("click", function (d) {
                 clearTimeout(timer);
-                if(chartOptions['doBucketize'] == true) {
+                if(chartOptions['doBucketize'] == true && getValueByJsonPath(d,'children',[]).length > 1) {
                     zoomIn({
                         d : d,
                         viewConfig : chartView.attributes.viewConfig,
@@ -754,6 +754,9 @@ define([
                         selector: chartView.$el
                     });
                 } else {
+                    if(getValueByJsonPath(d,'children',[]).length == 1) {
+                        d = d['children'][0];
+                    } 
                     clickCB(d);
                 }
             });
@@ -1190,7 +1193,8 @@ define([
                     actionCallback = tooltipConfig.content.actions[actionKey].callback;
 
                 destroyTooltip(tooltipElementObj, overlappedElementsDropdownElement);
-                if(tooltipData['isBucket'] == true) {
+                //Drill-down only if it's a bucket comprising of multiple nodes
+                if(tooltipData['isBucket'] == true && getValueByJsonPath(tooltipData,'children',[]).length > 1) {
                     zoomIn({
                         d : tooltipData,
                         viewConfig : chartView.attributes.viewConfig,
