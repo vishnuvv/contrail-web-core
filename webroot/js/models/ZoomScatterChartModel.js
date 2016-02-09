@@ -212,7 +212,7 @@ define([
         // var data = $.extend(true,[],data);
         var retData = [];
         var minMax, minMaxX, minMaxY, parentMinMax, currLevel, maxBucketizeLevel, bucketsPerAxis,
-            defaultBucketsPerAxis = 4;
+            defaultBucketsPerAxis = 6;
         bucketsPerAxis = defaultBucketsPerAxis;
 
         if (data != null) {
@@ -278,8 +278,8 @@ define([
                                 var obj = {};
                                 avgX = d3.mean(buckets[x][y],function(d){return d.x});
                                 avgY = d3.mean(buckets[x][y],function(d){return d.y});
-                                avgX = d3.mean(xBucketScale.invertExtent(parseInt(x)),function(d) { return d});
-                                avgY = d3.mean(yBucketScale.invertExtent(parseInt(y)),function(d) { return d});
+                                // avgX = d3.mean(xBucketScale.invertExtent(parseInt(x)),function(d) { return d});
+                                // avgY = d3.mean(yBucketScale.invertExtent(parseInt(y)),function(d) { return d});
                                 obj['x'] = avgX;
                                 obj['y'] = avgY;
                                 if(typeof(chartOptions['bubbleSizeFn']) == 'function') {
