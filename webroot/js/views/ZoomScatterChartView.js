@@ -227,6 +227,7 @@ define([
             var d3Format = d3.format('.2f');
             var showFilterTemplate = contrail.getTemplate4Id('zs-show-filter-range');
             if(cfDataSource.getFilter('x') != null) {
+                $(selector).find('.filter-list-container').show();
                 $(selector).find('.filter-list-container .filter-criteria.x').show();
                 var minMaxX = cfDataSource.getFilterValues('x');
                 $(selector).find('.filter-criteria.x').html(showFilterTemplate({
@@ -241,6 +242,7 @@ define([
                 });
             }
             if(cfDataSource.getFilter('y') != null) {
+                $(selector).find('.filter-list-container').show();
                 $(selector).find('.filter-list-container .filter-criteria.y').show();
                 var minMaxY = cfDataSource.getFilterValues('y');
                 $(selector).find('.filter-criteria.y').html(showFilterTemplate({
@@ -411,11 +413,12 @@ define([
     function getColorFilterFn(selector) {
         //Add color filter
         var selectedColorElems = $(selector).find('.circle.filled');
+        selectedColorElems = $(selector).parents('.control-panel-filter-group').find('input:checked').siblings('span');
         var selColors = [];
         $.each(selectedColorElems,function(idx,obj) {
             $.each(ctwc.COLOR_SEVERITY_MAP,function(currColorName,currColorCode) {
-                if($(obj).hasClass(currColorName)) {
-                    if(selColors.indexOf(currColorName) == -1)
+                if($(obj).hasClass(currColorCode)) {
+                    // if(selColors.indexOf(currColorName) == -1)
                         selColors.push(currColorCode);
                 }
             });
@@ -957,7 +960,8 @@ define([
             }
         }
         if(contrail.checkIfKeyExistInObject(true, chartOptions, 'controlPanelConfig.filter.enable') && chartOptions.controlPanelConfig.filter.enable) {
-            controlPanelConfig.custom.filter = getControlPanelFilterConfig(chartOptions.controlPanelConfig.filter, chartControlPanelExpandedSelector, chartView.model)
+            controlPanelConfig.custom.filter = getControlPanelFilterConfig(chartOptions.controlPanelConfig.filter, chartControlPanelExpandedSelector, chartView.model,{
+                cfDataSource:chartView.attributes.viewConfig.cfDataSource})
         }
 
         if(contrail.checkIfKeyExistInObject(true, chartOptions, 'controlPanelConfig.legend.enable') && chartOptions.controlPanelConfig.legend.enable) {
@@ -967,7 +971,9 @@ define([
         return controlPanelConfig;
     };
 
-    var getControlPanelFilterConfig = function(customControlPanelFilterConfig, chartControlPanelExpandedSelector, listModel) {
+    var getControlPanelFilterConfig = function(customControlPanelFilterConfig, chartControlPanelExpandedSelector, listModel,filterCfg) {
+        var filterCfg = ifNull(filterCfg,{});
+        var cfDataSource = filterCfg['cfDataSource'];
         var scatterFilterFn = function(item, args) {
             if (args.itemCheckedLength == 0) {
                 return true;
@@ -1002,24 +1008,37 @@ define([
                                 $($('#control-panel-filter-group-items-' + groupValue.id).find('input')[itemKey])
                                     .off('click')
                                     .on('click', function (event) {
-                                        var itemChecked = $(this).is(':checked'),
-                                            itemCheckedLength = $('#control-panel-filter-group-items-' + groupValue.id).find('input:checked').length,
-                                            scatterFilterArgs = {
-                                                itemChecked: itemChecked,
-                                                itemCheckedLength: itemCheckedLength,
-                                                itemValue: itemValue
-                                            };
+                                        if(cfDataSource == null) {
+                                            var itemChecked = $(this).is(':checked'),
+                                                itemCheckedLength = $('#control-panel-filter-group-items-' + groupValue.id).find('input:checked').length,
+                                                scatterFilterArgs = {
+                                                    itemChecked: itemChecked,
+                                                    itemCheckedLength: itemCheckedLength,
+                                                    itemValue: itemValue
+                                                };
 
 
-                                        if (itemCheckedLength == 0) {
-                                            $('#control-panel-filter-group-items-' + groupValue.id).find('input').prop('checked', true);
-                                        }
+                                            if (itemCheckedLength == 0) {
+                                                $('#control-panel-filter-group-items-' + groupValue.id).find('input').prop('checked', true);
+                                            }
 
-                                        listModel.setFilterArgs(scatterFilterArgs);
-                                        listModel.setFilter(scatterFilterFn);
+                                            listModel.setFilterArgs(scatterFilterArgs);
+                                            listModel.setFilter(scatterFilterFn);
 
-                                        if (contrail.checkIfKeyExistInObject(true, itemValue, 'events.click')) {
-                                            itemValue.events.click(event)
+                                            if (contrail.checkIfKeyExistInObject(true, itemValue, 'events.click')) {
+                                                itemValue.events.click(event)
+                                            }
+                                        } else {
+                                            var itemCheckedLength = $('#control-panel-filter-group-items-' + groupValue.id).find('input:checked').length;
+                                            console.info('filter');
+                                            if (itemCheckedLength == 0) {
+                                                $('#control-panel-filter-group-items-' + groupValue.id).find('input').prop('checked', true);
+                                            }
+                                            var colorFilterFunc = getColorFilterFn($(this));
+                                            if(cfDataSource != null) {
+                                                cfDataSource.applyFilter('colorFilter',colorFilterFunc);
+                                                cfDataSource.fireCallBacks({source:'chart'});
+                                            }
                                         }
                                     });
                             });
