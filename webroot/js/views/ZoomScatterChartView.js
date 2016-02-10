@@ -189,6 +189,7 @@ define([
             maxCircleRadius = chartConfig.maxCircleRadius;
 
         $(chartSelector).height(height + margin.top + margin.bottom);
+        //What if we want an icon to be active by default
         $(chartControlPanelSelector).find('.control-panel-item').removeClass('active');
 
         if(chartOptions['doBucketize'] == false) {
@@ -380,7 +381,7 @@ define([
                     chartModel: chartView.chartModel,
                     cfDataSource: chartView.attributes.viewConfig.cfDataSource
                 });
-                $(selector).find('.zs-bucketize').change(
+                /*$(selector).find('.zs-bucketize').change(
                         function() {
                             var viewConfig = chartView.attributes.viewConfig;
                             if($(this).is(':checked')) {
@@ -389,7 +390,7 @@ define([
                                 viewConfig['chartOptions']['doBucketize'] = false;
                             }
                             chartView.renderChart(selector,viewConfig,self.model);
-                        });
+                        });*/
             }
         }
     }
@@ -933,6 +934,27 @@ define([
                 }
             };
 
+        if(chartConfig['doBucketize'] == true) {
+            controlPanelConfig.custom.bucketize = {
+                iconClass: 'icon-align-left active',
+                    title: 'Bucketize',
+                events: {
+                    click: function (event, self, controlPanelSelector) {
+                        $(self).toggleClass('active');
+                        $(self).toggleClass('bucketize');
+                        var viewConfig = chartView.attributes.viewConfig;
+                        if($(self).hasClass('bucketize')) {
+                            viewConfig['chartOptions']['doBucketize'] = true; 
+                        } else {
+                            viewConfig['chartOptions']['doBucketize'] = false;
+                        }
+                        $(controlPanelSelector).find('.control-panel-item').removeClass('disabled');
+                        $(self).removeClass('refreshing');
+                        chartView.renderChart(selector,viewConfig,chartView.model);
+                    }
+                }
+            }
+        }
         if(contrail.checkIfKeyExistInObject(true, chartOptions, 'controlPanelConfig.filter.enable') && chartOptions.controlPanelConfig.filter.enable) {
             controlPanelConfig.custom.filter = getControlPanelFilterConfig(chartOptions.controlPanelConfig.filter, chartControlPanelExpandedSelector, chartView.model)
         }
@@ -1271,6 +1293,7 @@ define([
             sizeFieldName: chartOptions['sizeFieldName'],
             noDataMessage: chartOptions['noDataMessage'],
             doBucketize : chartOptions['doBucketize'],
+            bubbleSizeFn: chartOptions['bubbleSizeFn'],
             defaultDataStatusMessage: true,
             statusMessageHandler: cowm.getRequestMessage
         };
