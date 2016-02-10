@@ -120,6 +120,22 @@ define([
             self.yMin = forceY[0];
             self.yMax = forceY[1];
 
+            //Round-off yMin/yMax to nearest 100
+            self.yMin = self.yMin - (self.yMin%100)
+            self.yMax = self.yMax + (100 - self.yMax%100)
+
+            //Round-off xMin/xMax to 2 decimal
+            if(d3.round(self.xMin,2) != d3.round(self.xMax,2)) {
+                self.xMin = d3.round(self.xMin,2);
+                self.xMax = d3.round(self.xMax,2);
+            } else if(d3.round(self.xMin,3) != d3.round(self.xMax,3)) {
+                self.xMin = d3.round(self.xMin,3);
+                self.xMax = d3.round(self.xMax,3);
+            } else if(d3.round(self.xMin,4) != d3.round(self.xMax,4)) {
+                self.xMin = d3.round(self.xMin,4);
+                self.xMax = d3.round(self.xMax,4);
+            }
+
             console.log('scatterChart:bucketize','setting xScale to',self.xMin,self.xMax);
             console.log('scatterChart:bucketize','setting yScale to',self.yMin,self.yMax);
             self.xScale = d3.scale.linear().domain([self.xMin, self.xMax]).range([0, self.width]);
