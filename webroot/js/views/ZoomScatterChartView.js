@@ -86,10 +86,10 @@ define([
 
                 chartConfig = getChartConfig(selector, chartOptions);
                 self.chartModel = new ZoomScatterChartModel(dataListModel, chartConfig);
-                if(chartConfig['doBucketize'] == false) {
+                // if(chartConfig['doBucketize'] == false) {
                     self.zm = self.chartModel.zoomBehavior.on("zoom", getChartZoomFn(self, chartConfig));
                     self.zoomBySelection = false;
-                }
+                // }
                 renderControlPanel(self, chartConfig, chartOptions, selector);
             } else {
                 $(selector).find('.chart-container').empty();
@@ -99,10 +99,10 @@ define([
                 console.log('scatterChart','calling refresh on chartModel');
                 self.chartModel.refresh(chartConfig);
                 // }
-                if(chartConfig['doBucketize'] == false) {
+                // if(chartConfig['doBucketize'] == false) {
                     self.zm = self.chartModel.zoomBehavior.on("zoom", getChartZoomFn(self, chartConfig));
                     self.zoomBySelection = false;
-                }
+                // }
             }
 
             renderZoomScatterChart(self, chartConfig, chartOptions, selector);
@@ -211,6 +211,7 @@ define([
                 .attr("viewbox", '0 0 ' + (width + margin.left + margin.right + (2*maxCircleRadius)) + ' ' + (height + margin.top + margin.bottom + (2*maxCircleRadius)))
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                .call(chartView.zm)
                 .append("g")
         }
 
@@ -788,9 +789,9 @@ define([
     function getChartZoomFn(chartView, chartConfig) {
         return function () {
             //As region selector for drill-down conflicting with zoom
-            if(chartConfig['doBucketize'] == true) {
-                return;
-            }
+            // if(chartConfig['doBucketize'] == true) {
+            //     return;
+            // }
             var chartModel = chartView.chartModel;
 
             //Restrict translation to 0 value
@@ -914,7 +915,7 @@ define([
                     }
                 },
                 custom: {
-                    zoomBySelectedArea: {
+                    /*zoomBySelectedArea: {
                         iconClass: 'icon-crop',
                         title: 'Zoom By Selection',
                         events: {
@@ -930,7 +931,7 @@ define([
                                 }
                             }
                         }
-                    }
+                    }*/
                 }
             };
 
