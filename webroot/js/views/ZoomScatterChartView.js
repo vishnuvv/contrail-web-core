@@ -212,6 +212,10 @@ define([
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
                 .call(chartView.zm)
+                .on('dblclick.zoom',function() {
+                    zoomOut({cfDataSource:cfDataSource});
+                    console.info('dblclick');
+                }).on('mousedown.zoom',null)
                 .append("g")
         }
 
@@ -430,10 +434,10 @@ define([
     }
 
     function addSelectorClickHandlers(obj) {
-        // d3.select($(selector).find('svg')[0]).on('dblclick',
-        // function() {
-        //     chartOptions['elementDblClickFunction']();
-        // });
+        // d3.select($(obj['selector']).find('svg')[0]).on('dblclick',
+        //     function() {
+        //         zoomOut(obj);
+        //     });
 
         /****
         * Selection handler for color filter in chart settings panel
@@ -907,11 +911,15 @@ define([
     };
 
     function getControlPanelConfig(chartView, chartConfig, chartOptions, selector) {
+        var zoomEnabled = true;
+        if(chartConfig['doBucketize'] == true) {
+            zoomEnabled = false;
+        }
         var chartControlPanelExpandedSelector = $(selector).find('.chart-control-panel-expanded-container'),
             controlPanelConfig = {
                 default: {
                     zoom: {
-                        enabled: true,
+                        enabled: zoomEnabled,
                         events: function (controlPanelSelector) {
                             initZoomEvents(controlPanelSelector, chartView, chartConfig)
                         }

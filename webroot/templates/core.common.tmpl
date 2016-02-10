@@ -1935,8 +1935,8 @@ $(this).parent().closest('tr').next().closest('tr').next().slideToggle(20);$(thi
         {{#IfCompare default.zoom.enabled true}}
             <div class="control-panel-item zoom-in" title="Zoom In"><i class="icon-zoom-in"></i></div>
             <div class="control-panel-item zoom-out" title="Zoom Out"><i class="icon-zoom-out"></i></div>
-            <div class="control-panel-item zoom-reset" title="Zoom Reset"><i class="icon-remove-circle"></i></div>
         {{/IfCompare}}
+            <div class="control-panel-item zoom-reset" title="Zoom Reset"><i class="icon-remove-circle"></i></div>
         {{#each custom}}
             <div class="control-panel-item {{@key}}" title="{{title}}"><i class="{{iconClass}}"></i></div>
         {{/each}}

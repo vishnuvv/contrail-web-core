@@ -124,16 +124,27 @@ define([
             self.yMin = self.yMin - (self.yMin%100)
             self.yMax = self.yMax + (100 - self.yMax%100)
 
+            function decimalPlaces(num) {
+            var match = (''+num).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
+            if (!match) { return 0; }
+            return Math.max(
+                0,
+                // Number of digits right of decimal point.
+                (match[1] ? match[1].length : 0)
+                // Adjust for scientific notation.
+                - (match[2] ? +match[2] : 0));
+            }
+
             //Round-off xMin/xMax to 2 decimal
             if(d3.round(self.xMin,2) != d3.round(self.xMax,2)) {
-                self.xMin = d3.round(self.xMin,2);
-                self.xMax = d3.round(self.xMax,2);
+                self.xMin = Math.min(self.xMin,d3.round(self.xMin,2));
+                self.xMax = Math.max(d3.round(self.xMax,2),self.xMax);
             } else if(d3.round(self.xMin,3) != d3.round(self.xMax,3)) {
-                self.xMin = d3.round(self.xMin,3);
-                self.xMax = d3.round(self.xMax,3);
+                self.xMin = Math.min(self.xMin,d3.round(self.xMin,3));
+                self.xMax = Math.max(self.xMax,d3.round(self.xMax,3));
             } else if(d3.round(self.xMin,4) != d3.round(self.xMax,4)) {
-                self.xMin = d3.round(self.xMin,4);
-                self.xMax = d3.round(self.xMax,4);
+                self.xMin = Math.min(d3.round(self.xMin,4),self.xMin);
+                self.xMax = Math.max(d3.round(self.xMax,4),self.xMax);
             }
 
             console.log('scatterChart:bucketize','setting xScale to',self.xMin,self.xMax);
