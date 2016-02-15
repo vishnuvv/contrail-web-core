@@ -35,6 +35,7 @@ define([
                     cfDataSource.addCallBack('updateChart',function(data) {
                         viewConfig['cfg'] = {};
                         viewConfig['cfg']['source'] = data['cfg']['source'];
+                        console.log('scatterChart','calling renderChart with source',viewConfig['cfg']['source']);
                         $(selector).find('.filter-list-container .filter-criteria').hide();
                         self.renderChart(selector, viewConfig, self.model);
                         viewConfig['cfg'] = {};
@@ -92,6 +93,7 @@ define([
             } else {
                 $(selector).find('.chart-container').empty();
                 chartConfig = getChartConfig(selector, chartOptions);
+                console.log('scatterChart','calling refresh on chartModel');
                 self.chartModel.refresh(chartConfig);
                 self.zm = self.chartModel.zoomBehavior.on("zoom", getChartZoomFn(self, chartConfig));
                 if(typeof(self.zoomBySelection) == "undefined")
@@ -209,6 +211,7 @@ define([
                 .call(chartView.zm)
                 .on('dblclick.zoom',function() {
                     zoomOut({cfDataSource:cfDataSource});
+                    console.info('dblclick');
                 })
                 .append("g")
                 .on('mousedown.zoom',mouseDownCallback);
@@ -572,6 +575,7 @@ define([
             d = obj['d'];
         //adjust min and max values to include missed bubbles
         var combinedValues = [];
+        console.log('scatterChart:bucketize','zoom-in on the region',minMaxX,minMaxY);
 
         if(d instanceof Array) {
             $.each(d,function(idx,item) {
@@ -604,9 +608,11 @@ define([
         });
         minMaxX = d3.extent(selectedNodes,function(d) { return d.x;});
         minMaxY = d3.extent(selectedNodes,function(d) { return d.y;});
+        console.info('scatterChart:bucketize','Nodes selected',selectedNodes);
         var selNames = $.map(selectedNodes,function(obj,idx) {
            return obj['name'];
         });
+        console.info('scatterChart:bucketize','Nodes selected',selNames);
 
         //Zoomin on the selected region
         if(obj['cfDataSource'] != null) {
@@ -630,11 +636,13 @@ define([
             var dataMinMaxY = d3.extent(cfDataSource.getFilteredData(),function(d) { return d.y;});
             //Apply the filter only if there are nodes less than the select min and greater than the selected max
             if(dataMinMaxX[0] < minMaxX[0] || dataMinMaxX[1] > minMaxX[1]) {
+                console.info('scatterChart','apply x filter on crossfilter',minMaxX);
                 cfDataSource.applyFilter('x',function(d) {
                     return d >= minMaxX[0] && d <= minMaxX[1];
                 },minMaxX);
             }
             if(dataMinMaxY[0] < minMaxY[0] || dataMinMaxY[1] > minMaxY[1]) {
+                console.info('scatterChart','apply y filter on crossfilter',minMaxY);
                 cfDataSource.applyFilter('y',function(d) {
                     return d >= minMaxY[0] && d <= minMaxY[1];
                 },minMaxY);
@@ -1071,6 +1079,7 @@ define([
                                             }
                                         } else {
                                             var itemCheckedLength = $('#control-panel-filter-group-items-' + groupValue.id).find('input:checked').length;
+                                            console.info('filter');
                                             if (itemCheckedLength == 0) {
                                                 $('#control-panel-filter-group-items-' + groupValue.id).find('input').prop('checked', true);
                                             }

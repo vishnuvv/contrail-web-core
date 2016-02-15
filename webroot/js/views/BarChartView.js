@@ -23,6 +23,7 @@ define([
             var barRange = scaleCfg['barRange'],
                 maxXValue = scaleCfg['maxXValue'];
             // Ensure range is set correctly to number of bars * 10
+            console.log('crossFilter','setting xScale max to',maxXValue);
             this.chart.dimension(dimension)
                 //Find out which bucket it falls in and multiply by barRange
                 .group(dimension.group(function(d) { return Math.floor(d/barRange) * barRange;}))
@@ -178,6 +179,7 @@ define([
                     d;
                 while (++i < n) {
                     d = groups[i];
+                    console.assert($.isNumeric(x(d.key)) || $.isNumeric(y(d.value)),'barPath error');
                     path.push("M", x(d.key), ",", height, "V", y(d.value), "h9V", height);
                 }
                 if(path.length == 0)

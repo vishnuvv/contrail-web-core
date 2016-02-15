@@ -47,6 +47,7 @@ define([
             self.data = contrail.checkIfFunction(chartConfig['dataParser']) ? chartConfig['dataParser'](rawData) : rawData;
 
             if(chartConfig['doBucketize'] == true) {
+                console.info('scatterChart:bucketize','re bucketized');
                 self.data = doBucketization(self.data,chartConfig);
             }
             chartData = JSON.parse(JSON.stringify(self.data));
@@ -145,6 +146,8 @@ define([
                 self.xMax = Math.max(d3.round(self.xMax,4),self.xMax);
             }*/
 
+            console.log('scatterChart:bucketize','setting xScale to',self.xMin,self.xMax);
+            console.log('scatterChart:bucketize','setting yScale to',self.yMin,self.yMax);
             self.xScale = d3.scale.linear().domain([self.xMin, self.xMax]).range([0, self.width]);
             self.yScale = d3.scale.linear().domain([self.yMin, self.yMax]).range([self.height, 0]);
 
@@ -274,6 +277,8 @@ define([
                    xPartitions.push(xBucketScale.invertExtent(obj)[0]);
                    yPartitions.push(yBucketScale.invertExtent(obj)[0]);
                 });
+                console.info('scatterChart:bucketize','x partiotions',xPartitions);
+                console.info('scatterChart:bucketize','y partiotions',yPartitions);
                 var buckets = {};
                 //Group nodes into buckets
                 $.each(data,function(idx,obj) {
@@ -327,6 +332,7 @@ define([
                                 });
                                 // obj['minMaxX'] = xBucketScale.invertExtent(parseInt(x));
                                 // obj['minMaxY'] = yBucketScale.invertExtent(parseInt(y));
+                                console.info('scatterChart:bucketize','Plotting ',x,y,' bucket nodes ',buckets[x][y].length,' at ',avgX,avgY,obj['minMaxX'],obj['minMaxY']);
 
                                 obj['children'] = buckets[x][y];
                                 retData.push(obj);
