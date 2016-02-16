@@ -319,6 +319,7 @@ define([
             var e = this,
                 origin = d3.mouse(e),
                 rect = chartSVG.append("rect").attr("class", "zoom");
+            console.log('scatterChart','orign',origin);
             d3.select("body").classed("noselect", true);
             origin[0] = Math.max(0, Math.min(width, origin[0]));
             origin[1] = Math.max(0, Math.min(height, origin[1]));
@@ -493,6 +494,7 @@ define([
                 this.__origin__.x = p[0];
                 this.__origin__.y = p[1];
                 this.__origin__.dx  = 0,this.__origin__.dy = 0;
+                console.log('scatterChart','__origin__',this.__origin__.x,this.__origin__.y);
                 d3.select($(selector)[0]).select('svg').append('rect').attr('id','rect1');
                 console.log('scatterChart:drag','Drag position started at(',p[0],p[1],')');
             })
