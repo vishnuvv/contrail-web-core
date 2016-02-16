@@ -844,9 +844,11 @@ define([
                                 result = (value1 == value2 ? 0 : (value1 > value2 ? 1 : -1)) * sign;
                             }
                             if (result != 0) {
+                                // console.log('grid:sort',value1,value2,result);
                                 return result;
                             }
                         }
+                        // console.log('grid:sort',value1,value2,result);
                         return 0;
                     });
                 }
