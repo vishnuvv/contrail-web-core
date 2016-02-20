@@ -2,7 +2,7 @@
  * Copyright (c) 2014 Juniper Networks, Inc. All rights reserved.
  */
 
-var contrail = new Contrail();
+contrail = new Contrail();
 
 function Contrail() {
     var templates = {};

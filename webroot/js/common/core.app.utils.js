@@ -3,10 +3,10 @@
  */
 
 
-var globalObj = {'env':""},
-    FEATURE_PCK_WEB_CONTROLLER = "webController",
+var FEATURE_PCK_WEB_CONTROLLER = "webController",
     FEATURE_PCK_WEB_STORAGE = "webStorage",
     FEATURE_PCK_WEB_SERVER_MANAGER = "serverManager";
+// globalObj = {'env':""},
 
 function getCoreAppPaths(coreBaseDir, coreBuildDir) {
     /**
@@ -540,9 +540,9 @@ function initDomEvents() {
         });
 };
 
-if (typeof exports !== 'undefined' && module.exports) {
-    exports = module.exports;
-    exports.getCoreAppPaths = getCoreAppPaths;
-    exports.coreAppMap = coreAppMap;
-    exports.coreAppShim = coreAppShim;
-}
+// if (typeof exports !== 'undefined' && module.exports) {
+//     exports = module.exports;
+//     exports.getCoreAppPaths = getCoreAppPaths;
+//     exports.coreAppMap = coreAppMap;
+//     exports.coreAppShim = coreAppShim;
+// }

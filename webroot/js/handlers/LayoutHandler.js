@@ -114,7 +114,7 @@ function getWebServerInfo(project, callback) {
     }).done(function (webServerInfo) {
         if (webServerInfo['serverUTCTime'] != null) {
             webServerInfo['timeDiffInMillisecs'] = webServerInfo['serverUTCTime'] - new Date().getTime();
-            if (Math.abs(webServerInfo['timeDiffInMillisecs']) > timeStampTolearence) {
+            if (Math.abs(webServerInfo['timeDiffInMillisecs']) > globalObj['timeStampTolerance']) {
                 if (webServerInfo['timeDiffInMillisecs'] > 0) {
                     globalAlerts.push({
                         msg: infraAlertMsgs['TIMESTAMP_MISMATCH_BEHIND'].format(diffDates(new XDate(), new XDate(webServerInfo['serverUTCTime']), 'rounded')),

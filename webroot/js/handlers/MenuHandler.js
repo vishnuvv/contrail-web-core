@@ -34,17 +34,14 @@ define(['underscore'], function (_) {
                 }
             }
             $.get('/' + mFileName+ '?built_at=' + built_at, function (xml) {
-                $.get('/api/admin/webconfig/features/disabled?built_at=' + built_at, function (disabledFeatures) {
-                    $.get('/api/admin/webconfig/featurePkg/webController?built_at=' + built_at, function (featurePkgsInfo) {
-                        menuObj = $.xml2json(xml);
-                        processXMLJSON(menuObj, disabledFeatures);
-                        globalObj['webServerInfo']['disabledFeatures'] = ifNull(disabledFeatures, []);
-                        var menuShortcuts = contrail.getTemplate4Id('menu-shortcuts')(menuHandler.filterMenuItems(menuObj['items']['item'], 'menushortcut', featurePkgsInfo));
-                        $("#sidebar-shortcuts").html(menuShortcuts);
-                        ['items']['item'] = menuHandler.filterMenuItems(menuObj['items']['item']);
-                        initMenuDefObj.resolve();
-                    });
-                })
+                menuObj = $.xml2json(xml);
+                var disabledFeatures = globalObj['webServerInfo']['disabledFeatures'];
+                var featurePkgsInfo = globalObj['webServerInfo']['featurePkgsInfo'];
+                processXMLJSON(menuObj, disabledFeatures);
+                var menuShortcuts = contrail.getTemplate4Id('menu-shortcuts')(menuHandler.filterMenuItems(menuObj['items']['item'], 'menushortcut', featurePkgsInfo));
+                $("#sidebar-shortcuts").html(menuShortcuts);
+                ['items']['item'] = menuHandler.filterMenuItems(menuObj['items']['item']);
+                initMenuDefObj.resolve();
             });
 
             //Add an event listener for clicking on menu items
@@ -142,7 +139,7 @@ define(['underscore'], function (_) {
                     var allowedRolesList = [];
 
                     //If logged-in user has superAdmin role,then allow all features
-                    if ($.inArray(roles['ADMIN'], loggedInUserRoles) > -1) {
+                    if ($.inArray(globalObj['roles']['ADMIN'], loggedInUserRoles) > -1) {
                         roleExists = true;
                     } else {
                         //If any one of userRole is in allowedRolesList
@@ -157,8 +154,8 @@ define(['underscore'], function (_) {
                     roleExists = true;
 
                 if (value.access.accessFn != null) {
-                    if (typeof(menuAccessFns[value.access.accessFn]) == 'function')
-                        accessFnRetVal = menuAccessFns[value.access.accessFn]();
+                    if (typeof(globalObj['menuAccessFns'][value.access.accessFn]) == 'function')
+                        accessFnRetVal = globalObj['menuAccessFns'][value.access.accessFn]();
                 } else
                     accessFnRetVal = true;
 
@@ -297,9 +294,9 @@ define(['underscore'], function (_) {
             var searchStrings = item.searchStrings, hash = item.hash, queryParams = item.queryParams;
             if (hash != null && searchStrings != null) {
                 var searchStrArray = cowu.splitString2Array(searchStrings, ',');
-                siteMap[hash] = {searchStrings: searchStrArray, queryParams: queryParams};
+                globalObj['siteMap'][hash] = {searchStrings: searchStrArray, queryParams: queryParams};
                 for (var j = 0; j < searchStrArray.length; j++) {
-                    siteMapSearchStrings.push(searchStrArray[j]);
+                    globalObj['siteMapSearchStrings'].push(searchStrArray[j]);
                 }
             }
         }

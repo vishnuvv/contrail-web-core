@@ -4,8 +4,8 @@
  */
 
 define([
-    'underscore'
-], function (_) {
+    'underscore','d3'
+], function (_,d3) {
     var CoreViewsDefaultConfig = function () {
         this.gridConfig = {
             header: {
