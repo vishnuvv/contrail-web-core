@@ -2,6 +2,7 @@
  * Copyright (c) 2014 Juniper Networks, Inc. All rights reserved.
  */
 var defaultBaseDir = (document.location.pathname.indexOf('/vcenter') == 0) ? "./../" : "./";
+var built_at = "00000";
 
 if(typeof(globalObj) == "undefined") 
     globalObj = {};
@@ -50,41 +51,47 @@ require.config({
     baseUrl:"/dist",
     urlArgs: 'built_at=' + built_at,
 });
+define('jquery', [], function() {
+    return jQuery;
+});
 
 //Start with base module, and start adding other modules,such that the code can start executing as and when it mets its dpendencies
-require(['jquery-libs','config_global'],function() {
+// require(['jquery-libs','config_global'],function() {
+require(['jquery'],function() {
     loadCommonTemplates();
-    require(['web-utils','contrail-layout','jquery.ba-bbq','thirdparty-libs','contrail-core-views','contrail-libs'],function() {
-    // require(['jquery-libs','thirdparty-libs','contrail-libs'],function() {
-        //Include all non-AMD modules that modify global variables
-        //The first require call loads knockout and exports it to window.ko.Issue the second require call once its exported,such that the new required modules fine ko.
-        require(['knockout','validation','contrail-common','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
-            window.ko = knockout;
-            kbValidation = validation;
-            console.info(globalObj);
-            require(['core-utils','core-constants','core-formatters','core-labels','core-messages',
-                'core-cache','core-views-default-config'],function(
-                CoreUtils,CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig) {
-                require(['chart-libs'],function() {
-                });
-                cowc = new CoreConstants();
-                cowu = new CoreUtils();
-                cowf = new CoreFormatters();
-                cowl = new CoreLabels();
-                cowm = new CoreMessages();
-                covdc = new CoreViewsDefaultConfig();
-                cowch = new Cache();
-                require(['layout-handler','contrail-load','slick.core','slick.dataview','slick.checkboxselectcolumn','slick.grid',
-                    'slick.rowselectionmodel','select2'],function(LayoutHandler) {
-                    initBackboneValidation();
-                    initCustomKOBindings(window.ko);
-                    initDomEvents();
-                    layoutHandler = new LayoutHandler();
-                    layoutHandler.load();
+    require(['chart-libs'],function() {
+    });
+    // require(['config_global','web-utils','contrail-layout'],function() {
+        require(['config_global','web-utils','contrail-layout','jquery-libs','thirdparty-libs','contrail-core-views','contrail-libs'],function() {
+        // require(['jquery-libs','thirdparty-libs','contrail-libs'],function() {
+            //Include all non-AMD modules that modify global variables
+            //The first require call loads knockout and exports it to window.ko.Issue the second require call once its exported,such that the new required modules fine ko.
+            require(['knockout','validation','contrail-common','web-utils','jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
+                window.ko = knockout;
+                kbValidation = validation;
+                console.info(globalObj);
+                require(['core-utils','core-constants','core-formatters','core-labels','core-messages',
+                    'core-cache','core-views-default-config'],function(
+                    CoreUtils,CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig) {
+                    cowc = new CoreConstants();
+                    cowu = new CoreUtils();
+                    cowf = new CoreFormatters();
+                    cowl = new CoreLabels();
+                    cowm = new CoreMessages();
+                    covdc = new CoreViewsDefaultConfig();
+                    cowch = new Cache();
+                    require(['layout-handler','contrail-load','slick.core','slick.dataview','slick.checkboxselectcolumn','slick.grid',
+                        'slick.rowselectionmodel','select2'],function(LayoutHandler) {
+                        initBackboneValidation();
+                        initCustomKOBindings(window.ko);
+                        initDomEvents();
+                        layoutHandler = new LayoutHandler();
+                        layoutHandler.load();
+                    });
                 });
             });
         });
-    });
+    // });
 });
 // require(['jquery'],function($) {
 //     loadCommonTemplates();
