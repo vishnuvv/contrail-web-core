@@ -5,8 +5,7 @@
 define(['underscore'], function (_) {
     var MenuHandler = function () {
         var self = this, menuObj,
-            initMenuDefObj = $.Deferred(),
-            webServerInfoDefObj = $.Deferred();
+            initMenuDefObj = $.Deferred();  //Will be resolved once menu is loaded and filtered
         //onHashChange is triggered once it is resolved
         self.deferredObj = $.Deferred();
 
@@ -33,7 +32,8 @@ define(['underscore'], function (_) {
                     mFileName = 'menu_' + featureMaps.join('_') + '.xml';
                 }
             }
-            $.get('/' + mFileName+ '?built_at=' + built_at, function (xml) {
+            // $.get('/' + mFileName+ '?built_at=' + built_at, function (xml) {
+            globalObj['layoutDefObj'].done(function(xml) {
                 menuObj = $.xml2json(xml);
                 var disabledFeatures = globalObj['webServerInfo']['disabledFeatures'];
                 var featurePkgsInfo = globalObj['webServerInfo']['featurePkgsInfo'];

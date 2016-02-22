@@ -23,14 +23,15 @@ var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defau
     pkgBaseDir = defaultBaseDir;
 require.config({
     paths: {
-        'jquery-libs'           : 'js/jquery-libs',
-        'thirdparty-libs'       : 'js/thirdparty-libs',
-        'contrail-core-views'   : 'js/contrail-core-views',
-        'chart-libs'            : 'js/chart-libs',
-        'contrail-libs'         : 'js/contrail-libs',
-        'web-utils'             : 'js/web-utils',
-        'contrail-layout'       : 'js/contrail-layout',
-        'config_global'         : 'js/config_global',
+        'jquery-libs'           : 'dist/js/jquery-libs',
+        'thirdparty-libs'       : 'dist/js/thirdparty-libs',
+        'contrail-core-views'   : 'dist/js/contrail-core-views',
+        'chart-libs'            : 'dist/js/chart-libs',
+        'contrail-libs'         : 'dist/js/contrail-libs',
+        // 'web-utils'             : 'js/web-utils',
+        // 'contrail-layout'       : 'js/contrail-layout',
+        // 'config_global'         : 'js/config_global',
+        'global-libs'           : 'js/global-libs',
         'contrail-load'         : 'js/contrail-load'
     }, map: {
         '*': {
@@ -48,7 +49,7 @@ require.config({
     }
 });
 require.config({
-    baseUrl:"/dist",
+    baseUrl:"/",
     urlArgs: 'built_at=' + built_at,
 });
 define('jquery', [], function() {
@@ -58,15 +59,82 @@ define('jquery', [], function() {
 //Start with base module, and start adding other modules,such that the code can start executing as and when it mets its dpendencies
 // require(['jquery-libs','config_global'],function() {
 require(['jquery'],function() {
+    globalObj = {};
+    globalObj['layoutDefObj'] = $.Deferred();
     loadCommonTemplates();
+
+    function parseWebServerInfo(webServerInfo) {
+        if (webServerInfo['serverUTCTime'] != null) {
+            webServerInfo['timeDiffInMillisecs'] = webServerInfo['serverUTCTime'] - new Date().getTime();
+            if (Math.abs(webServerInfo['timeDiffInMillisecs']) > globalObj['timeStampTolerance']) {
+                if (webServerInfo['timeDiffInMillisecs'] > 0) {
+                    globalAlerts.push({
+                        msg: infraAlertMsgs['TIMESTAMP_MISMATCH_BEHIND'].format(diffDates(new XDate(), new XDate(webServerInfo['serverUTCTime']), 'rounded')),
+                        sevLevel: sevLevels['INFO']
+                    });
+                } else {
+                    globalAlerts.push({
+                        msg: infraAlertMsgs['TIMESTAMP_MISMATCH_AHEAD'].format(diffDates(new XDate(webServerInfo['serverUTCTime']), new XDate(), 'rounded')),
+                        sevLevel: sevLevels['INFO']
+                    });
+                }
+            }
+            //Menu filename
+            var featurePkgToMenuNameMap = {
+                'webController': 'wc',
+                'webStorage': 'ws',
+                'serverManager': 'sm'
+            },featureMaps = [];
+            if (null != webServerInfo['featurePkg']) {
+                var pkgList = webServerInfo['featurePkg'];
+                for (var key in pkgList) {
+                    if (null != featurePkgToMenuNameMap[key]) {
+                        featureMaps.push(featurePkgToMenuNameMap[key]);
+                    } else {
+                        console.log('featurePkgToMenuNameMap key is null: ' + key);
+                    }
+                }
+                if (featureMaps.length > 0) {
+                    featureMaps.sort();
+                    globalObj['mFileName'] = 'menu_' + featureMaps.join('_') + '.xml';
+                }
+            }
+        }
+        return webServerInfo;
+    }
+
+    function getWebServerInfo(project, callback,fromCache) {
+        var fromCache = (fromCache == null) ? false : fromCache;
+        if(fromCache == false || globalObj['webServerInfo'] == null) {
+            //Compares client UTC time with the server UTC time and display alert if mismatch exceeds the threshold
+            $.ajax({
+                url: '/api/service/networking/web-server-info?project=' + 'admin'
+            }).done(function (webServerInfo) {
+                globalObj['webServerInfo'] = parseWebServerInfo(webServerInfo);
+                $.ajax({
+                    url:'/' + globalObj['mFileName'] + '?built_at=' + built_at
+                }).done(function(xml) {
+                    globalObj['layoutDefObj'].resolve(xml);
+                });
+                if(typeof(callback) == 'function') {
+                    callback(webServerInfo);
+                }
+            });
+        } else {
+            if(typeof(callback) == 'function') {
+                callback(globalObj['webServerInfo']);
+            }
+        }
+    };
+    getWebServerInfo();
     require(['chart-libs'],function() {
     });
     // require(['config_global','web-utils','contrail-layout'],function() {
-        require(['config_global','web-utils','contrail-layout','jquery-libs','thirdparty-libs','contrail-core-views','contrail-libs'],function() {
+        require(['global-libs','jquery-libs','thirdparty-libs','contrail-core-views','contrail-libs'],function() {
         // require(['jquery-libs','thirdparty-libs','contrail-libs'],function() {
             //Include all non-AMD modules that modify global variables
             //The first require call loads knockout and exports it to window.ko.Issue the second require call once its exported,such that the new required modules fine ko.
-            require(['knockout','validation','contrail-common','web-utils','jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
+            require(['knockout','validation','contrail-common','jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
                 window.ko = knockout;
                 kbValidation = validation;
                 console.info(globalObj);

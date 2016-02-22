@@ -107,28 +107,67 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
     return LayoutHandler;
 });
 
-function getWebServerInfo(project, callback) {
-    //Compares client UTC time with the server UTC time and display alert if mismatch exceeds the threshold
-    $.ajax({
-        url: '/api/service/networking/web-server-info?project=' + project
-    }).done(function (webServerInfo) {
-        if (webServerInfo['serverUTCTime'] != null) {
-            webServerInfo['timeDiffInMillisecs'] = webServerInfo['serverUTCTime'] - new Date().getTime();
-            if (Math.abs(webServerInfo['timeDiffInMillisecs']) > globalObj['timeStampTolerance']) {
-                if (webServerInfo['timeDiffInMillisecs'] > 0) {
-                    globalAlerts.push({
-                        msg: infraAlertMsgs['TIMESTAMP_MISMATCH_BEHIND'].format(diffDates(new XDate(), new XDate(webServerInfo['serverUTCTime']), 'rounded')),
-                        sevLevel: sevLevels['INFO']
-                    });
+/*
+function parseWebServerInfo(webServerInfo) {
+    if (webServerInfo['serverUTCTime'] != null) {
+        webServerInfo['timeDiffInMillisecs'] = webServerInfo['serverUTCTime'] - new Date().getTime();
+        if (Math.abs(webServerInfo['timeDiffInMillisecs']) > globalObj['timeStampTolerance']) {
+            if (webServerInfo['timeDiffInMillisecs'] > 0) {
+                globalAlerts.push({
+                    msg: infraAlertMsgs['TIMESTAMP_MISMATCH_BEHIND'].format(diffDates(new XDate(), new XDate(webServerInfo['serverUTCTime']), 'rounded')),
+                    sevLevel: sevLevels['INFO']
+                });
+            } else {
+                globalAlerts.push({
+                    msg: infraAlertMsgs['TIMESTAMP_MISMATCH_AHEAD'].format(diffDates(new XDate(webServerInfo['serverUTCTime']), new XDate(), 'rounded')),
+                    sevLevel: sevLevels['INFO']
+                });
+            }
+        }
+        //Menu filename
+        var featurePkgToMenuNameMap = {
+            'webController': 'wc',
+            'webStorage': 'ws',
+            'serverManager': 'sm'
+        };
+        if (null != webServerInfo['featurePkg']) {
+            var pkgList = webServerInfo['featurePkg'];
+            for (var key in pkgList) {
+                if (null != featurePkgToMenuNameMap[key]) {
+                    featureMaps.push(featurePkgToMenuNameMap[key]);
                 } else {
-                    globalAlerts.push({
-                        msg: infraAlertMsgs['TIMESTAMP_MISMATCH_AHEAD'].format(diffDates(new XDate(webServerInfo['serverUTCTime']), new XDate(), 'rounded')),
-                        sevLevel: sevLevels['INFO']
-                    });
+                    console.log('featurePkgToMenuNameMap key is null: ' + key);
                 }
             }
-            globalObj['webServerInfo'] = webServerInfo;
-            callback(webServerInfo);
+            if (featureMaps.length > 0) {
+                featureMaps.sort();
+                webServerInfo['mFileName'] = 'menu_' + featureMaps.join('_') + '.xml';
+            }
         }
-    });
-};
+    }
+    return webServerInfo;
+}
+
+function getWebServerInfo(project, callback,fromCache) {
+    var fromCache = (fromCache == null) ? false : fromCache;
+    if(fromCache == false || globalObj['webServerInfo'] == null) {
+        //Compares client UTC time with the server UTC time and display alert if mismatch exceeds the threshold
+        $.ajax({
+            url: '/api/service/networking/web-server-info?project=' + project
+        }).done(function (webServerInfo) {
+            globalObj['webServerInfo'] = parseWebServerInfo(webServerInfo);
+            $.ajax({
+                url:'/' + mFileName + '?built_at=' + built_at
+            }).done(function(xml) {
+                layoutDefObj.resolve(xml);
+            });
+            if(typeof(callback) == 'function') {
+                callback(webServerInfo);
+            }
+        });
+    } else {
+        if(typeof(callback) == 'function') {
+            callback(globalObj['webServerInfo']);
+        }
+    }
+};*/
