@@ -23,6 +23,8 @@ var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defau
     pkgBaseDir = defaultBaseDir;
 require.config({
     paths: {
+        'core-srcdir'                 : coreBaseDir,
+        'core-basedir'                : coreWebDir,
         'jquery-libs'           : 'dist/js/jquery-libs',
         'thirdparty-libs'       : 'dist/js/thirdparty-libs',
         'contrail-core-views'   : 'dist/js/contrail-core-views',
@@ -53,6 +55,9 @@ require.config({
     urlArgs: 'built_at=' + built_at,
 });
 define('jquery', [], function() {
+    //To lazy-load contrail-all.css
+    /*var cssLink = $("<link rel='stylesheet' type='text/css' href='/css/contrail-all.css?built_at='>");
+    $('head').append(cssLink);*/
     return jQuery;
 });
 
@@ -131,6 +136,10 @@ require(['jquery'],function() {
     });
     // require(['config_global','web-utils','contrail-layout'],function() {
         require(['global-libs','jquery-libs','thirdparty-libs','contrail-core-views','contrail-libs'],function() {
+            //Get core-app paths and register to require
+            require.config({
+                paths:getCoreAppPaths("","")
+                });
         // require(['jquery-libs','thirdparty-libs','contrail-libs'],function() {
             //Include all non-AMD modules that modify global variables
             //The first require call loads knockout and exports it to window.ko.Issue the second require call once its exported,such that the new required modules fine ko.
@@ -139,8 +148,8 @@ require(['jquery'],function() {
                 kbValidation = validation;
                 console.info(globalObj);
                 require(['core-utils','core-constants','core-formatters','core-labels','core-messages',
-                    'core-cache','core-views-default-config'],function(
-                    CoreUtils,CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig) {
+                    'core-cache','core-views-default-config','chart-utils'],function(
+                    CoreUtils,CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig,ChartUtils) {
                     cowc = new CoreConstants();
                     cowu = new CoreUtils();
                     cowf = new CoreFormatters();
@@ -148,6 +157,7 @@ require(['jquery'],function() {
                     cowm = new CoreMessages();
                     covdc = new CoreViewsDefaultConfig();
                     cowch = new Cache();
+                    chUtils = new ChartUtils();
                     require(['layout-handler','contrail-load','slick.core','slick.dataview','slick.checkboxselectcolumn','slick.grid',
                         'slick.rowselectionmodel','select2'],function(LayoutHandler) {
                         initBackboneValidation();

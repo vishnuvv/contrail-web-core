@@ -28,6 +28,7 @@ define([
     'layout-handler',
     'menu-handler',
     'content-handler',
+    'cf-datasource',
 
     'contrail-view',
     'contrail-model',

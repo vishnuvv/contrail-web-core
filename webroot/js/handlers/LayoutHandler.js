@@ -12,8 +12,10 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
         this.load = function () {
             menuHandler = new MenuHandler();
 
-            getWebServerInfo(contrail.getCookie('project'),
+            globalObj['layoutDefObj'].done(
+            // getWebServerInfo(contrail.getCookie('project'),
                              function(webServerInfo) {
+                var webServerInfo = globalObj['webServerInfo'];
                 menuHandler.loadMenu(webServerInfo);
                 menuHandler.handleSideMenu();
                 /**

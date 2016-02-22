@@ -21,7 +21,7 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir) {
     return {
         'core-srcdir'                 : coreBaseDir,
         'core-basedir'                : coreWebDir,
-        'jquery'                      : coreWebDir + '/assets/jquery/js/jquery-1.8.3.min',
+        /*'jquery'                      : coreWebDir + '/assets/jquery/js/jquery-1.8.3.min',
         'knockout'                    : coreWebDir + '/assets/knockout/knockout-3.0.0',
         'joint'                       : coreWebDir + '/assets/joint/js/joint.clean',
         'geometry'                    : coreWebDir + '/assets/joint/js/geometry',
@@ -56,7 +56,7 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir) {
         'contrail-remote-data-handler': coreWebDir + '/js/handlers/ContrailRemoteDataHandler',
         'layout-handler'              : coreWebDir + '/js/handlers/LayoutHandler',
         'menu-handler'                : coreWebDir + '/js/handlers/MenuHandler',
-        'content-handler'             : coreWebDir + '/js/handlers/ContentHandler',
+        'content-handler'             : coreWebDir + '/js/handlers/ContentHandler',*/
 
         'graph-view'                  : coreWebDir + '/js/views/GraphView',
         'contrail-view'               : coreWebDir + '/js/views/ContrailView',

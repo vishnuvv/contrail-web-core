@@ -10,7 +10,7 @@
     wrapShim:true,
     //Output directory
     dir:"dist",
-    fileExclusionRegExp:/^(dist1|config|monitor|reports|setting)$/,
+    fileExclusionRegExp:/^(dist1|config|monitor|reports|setting|test)$/,
     findNestedDependencies:false,
     removeCombined:true,
     //out:"main.build.js",
@@ -74,7 +74,7 @@
             exclude:['lodash','jquery','backbone','knockback','knockout']
         },{
             name:'js/chart-libs',
-            exclude:['jquery','d3']
+            exclude:['jquery']
         }
     ]
 })

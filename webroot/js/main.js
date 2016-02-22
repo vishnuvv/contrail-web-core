@@ -177,7 +177,8 @@ require.config({
             deps: ['d3']
         },
         'crossfilter' : {
-            deps: ['d3']
+            deps: ['d3'],
+            exports:'crossfilter'
         },
         'jquery.xml2json' : {
             deps: ["jquery"]

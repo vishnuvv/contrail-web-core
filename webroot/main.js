@@ -173,13 +173,15 @@ require.config({
             deps: ["jquery"]
         },
         'd3' : {
-            deps: ["jquery"]
+            deps: ["jquery"],
+            exports: 'd3'
         },
         'nv.d3' : {
             deps: ['d3']
         },
-        'crossfilter' : {
-            deps: ['d3']
+        'jrossfilter' : {
+            deps: ['d3'],
+            exports:'crossfilter'
         },
         'jquery.xml2json' : {
             deps: ["jquery"]
