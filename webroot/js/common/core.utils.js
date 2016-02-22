@@ -8,7 +8,7 @@ define(['underscore'], function (_) {
 
     var CoreUtils = function () {
         var self = this;
-        this.getAlarmsFromAnalytics = true;
+        this.getAlarmsFromAnalytics = false;
         //Setting the sevLevels used to display the node colors
         if(this.getAlarmsFromAnalytics) {
             sevLevels = cowc.SEV_LEVELS;
@@ -813,7 +813,7 @@ define(['underscore'], function (_) {
             }
             cowu.createModal(modalConfig);
 
-            if(cfgObj.model == null) {
+            /*if(cfgObj.model == null) {
                 require(['mon-infra-node-list-model','monitor-infra-parsers',
                     'monitor-infra-constants','monitor-infra-utils'],
                     function(NodeListModel,MonitorInfraParsers,MonitorInfraConstants,
@@ -876,7 +876,7 @@ define(['underscore'], function (_) {
                         alertGridView.render();
                     });
                 }
-            }
+            }*/
         };
 
         this.delete_cookie = function(name) {
@@ -986,6 +986,49 @@ define(['underscore'], function (_) {
                         delete obj[key];
                     } else if(typeof(obj[key]) == "object") {
                         obj[key] = this.filterJsonKeysWithNullValues(obj[key]);
+                    }
+                }
+            }
+            return obj;
+        }
+        this.ifNull = function(value, defValue) {
+            if (value == null)
+                return defValue;
+            else
+                return value;
+        }
+        // this.ipUtils = {
+        //     isValidSubnet: function(value,cfg) {
+        //         var cfg = self.ifNull(cfg,{});
+        //         var minIPsNeeded = ifNull(
+        //
+        //
+        //     }
+        //
+        // }
+        this.filterJsonKeysWithCfgOptions = function(obj,cfg) {
+            var cfg = self.ifNull(cfg,{});
+            var filterEmptyArrays = self.ifNull(cfg['filterEmptyArrays'],true);
+            var filterEmptyObjects = self.ifNull(cfg['filterEmptyObjects'],false);
+            var filterNullValues = self.ifNull(cfg['filterNullValues'],true);
+            if(obj instanceof Array) {
+                for(var i=0,len=obj.length;i<len;i++) {
+                    obj[i] = this.filterJsonKeysWithCfgOptions(obj[i],cfg);
+                }
+            } else if(typeof(obj) == "object") {
+                for(var key in obj) {
+                    if(filterNullValues && (obj[key] == null)) {
+                        delete obj[key];
+                    } else if(obj[key] instanceof Array) {
+                        if(filterEmptyArrays && obj[key].length == 0) {
+                            delete obj[key];
+                        }
+                    } else if(typeof(obj[key]) == "object") {
+                        if(filterEmptyObjects && _.keys(obj[key]).length == 0) {
+                            delete obj[key];
+                        } else {
+                            obj[key] = this.filterJsonKeysWithCfgOptions(obj[key],cfg);
+                        }
                     }
                 }
             }

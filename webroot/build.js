@@ -10,7 +10,7 @@
     wrapShim:true,
     //Output directory
     dir:"dist",
-    fileExclusionRegExp:/dist1/,
+    fileExclusionRegExp:/^(dist1|config|monitor|reports|setting)$/,
     findNestedDependencies:false,
     removeCombined:true,
     //out:"main.build.js",
@@ -27,6 +27,7 @@
             ]
         },{
             name:"js/jquery-libs",
+            exclude:['jquery']
         },{
             name:'js/thirdparty-libs',
             exclude:['jquery','jquery.event.drag']

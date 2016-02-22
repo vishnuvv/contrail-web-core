@@ -337,17 +337,17 @@ require(['core-utils','core-constants','core-formatters','core-labels','core-mes
     cowch = new Cache();
 });
 
-require(['layout-handler','contrail-layout',"jquery","jquery-ui","jquery.xml2json","jquery.ba-bbq","jquery.timer","jquery.ui.touch-punch","jquery.validate","jquery.tristate",
-    "jquery.multiselect","jquery.multiselect.filter","jquery.steps.min","jquery.panzoom","jquery.ui.position","jquery-contextmenu","bootstrap",
-    "crossfilter","jsonpath","handlebars","handlebars-utils","contrail-elements","jquery.event.drag","jquery.json","jquery.droppick",
-    "slick.core","slick.grid","slick.dataview","slick.checkboxselectcolumn","slick.rowselectionmodel","jquery.datetimepicker","select2",
-    "moment","ipv6","protocol","uuid","xdate","contrail-common","slick.enhancementpager","slickgrid-utils",
-    "web-utils","config_global","analyzer-utils","dashboard-utils","d3","nv.d3","knockout","core-constants",'core.app.utils','validation','joint.contrail'
-    ],function(LayoutHandler,contrail) {
-        initBackboneValidation();
-        initCustomKOBindings(window.ko);
-        initDomEvents();
-        layoutHandler = new LayoutHandler();
-        layoutHandler.load();
-
-});
+// require(['layout-handler','contrail-layout',"jquery","jquery-ui","jquery.xml2json","jquery.ba-bbq","jquery.timer","jquery.ui.touch-punch","jquery.validate","jquery.tristate",
+//     "jquery.multiselect","jquery.multiselect.filter","jquery.steps.min","jquery.panzoom","jquery.ui.position","jquery-contextmenu","bootstrap",
+//     "crossfilter","jsonpath","handlebars","handlebars-utils","contrail-elements","jquery.event.drag","jquery.json","jquery.droppick",
+//     "slick.core","slick.grid","slick.dataview","slick.checkboxselectcolumn","slick.rowselectionmodel","jquery.datetimepicker","select2",
+//     "moment","ipv6","protocol","uuid","xdate","contrail-common","slick.enhancementpager","slickgrid-utils",
+//     "web-utils","config_global","analyzer-utils","dashboard-utils","d3","nv.d3","knockout","core-constants",'core.app.utils','validation','joint.contrail'
+//     ],function(LayoutHandler,contrail) {
+//         initBackboneValidation();
+//         initCustomKOBindings(window.ko);
+//         initDomEvents();
+//         layoutHandler = new LayoutHandler();
+//         layoutHandler.load();
+//
+// });
