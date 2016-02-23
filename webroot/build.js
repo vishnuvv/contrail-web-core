@@ -68,13 +68,13 @@
         // ],
         },{
             name:'js/contrail-libs',
-            exclude:['lodash','jquery','d3','handlebars','jquery-ui']
+            exclude:['lodash','jquery','d3','handlebars','jquery-ui','jquery.event.drag','backbone','knockout','knockback',]
         },{
             name:'js/contrail-core-views',
             exclude:['lodash','jquery','backbone','knockback','knockout']
         },{
             name:'js/chart-libs',
-            exclude:['jquery']
+            exclude:['jquery','lodash','backbone']
         }
     ]
 })

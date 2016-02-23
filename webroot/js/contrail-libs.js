@@ -16,13 +16,13 @@ define([
     'uuid',                      
     'contrail-common',           
 
-    'slickgrid-utils',          
+    // 'slickgrid-utils',          
     // 'contrail-load',
     // 'web-utils',                 
     // 'config_global',             
     // 'contrail-layout',
-    'analyzer-utils',            
-    'dashboard-utils',           
+    // 'analyzer-utils',            
+    // 'dashboard-utils',           
 
     'contrail-remote-data-handler',
     'layout-handler',

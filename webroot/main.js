@@ -64,12 +64,12 @@ require.config({
         'xdate'                     : "assets/xdate/js/xdate",
         'contrail-common'           : "js/contrail-common",
         'slick.enhancementpager'    : "assets/slickgrid/js/slick.enhancementpager",
-        'slickgrid-utils'           : "js/slickgrid-utils",
+        // 'slickgrid-utils'           : "js/slickgrid-utils",
         // 'web-utils'                 : "js/web-utils",
         // 'config_global'             : "js/config_global",
         'contrail-load'             : 'js/contrail-load',
-        'analyzer-utils'            : "js/analyzer-utils",
-        'dashboard-utils'           : "js/dashboard-utils",
+        // 'analyzer-utils'            : "js/analyzer-utils",
+        // 'dashboard-utils'           : "js/dashboard-utils",
 
         'd3'                        : 'assets/d3-v3.5.6/js/d3',
         'nv.d3'                     : 'assets/nvd3-v1.8.1/js/nv.d3',
@@ -240,9 +240,9 @@ require.config({
         'slick.dataview': {
             deps: ['jquery']
         },
-        'slickgrid-utils': {
-            deps: ['jquery','slick.grid','slick.dataview']
-        },
+        // 'slickgrid-utils': {
+        //     deps: ['jquery','slick.grid','slick.dataview']
+        // },
         'contrail-elements': {
             deps: ['jquery-ui']
         },

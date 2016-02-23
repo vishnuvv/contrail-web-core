@@ -23,9 +23,10 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
                  * this will preserve the initFeatureModuleMap and prevent require-ing the same feature modules again
                  * when layoutHandler is loaded multiple times.
                  */
-                if (typeof contentHandler === 'undefined') {
-                    contentHandler = new ContentHandler();
-                }
+                //Need to fix the issue,if layoutHandler is loaded multiple times
+                // if (typeof contentHandler === 'undefined') {
+                //     contentHandler = new ContentHandler();
+                // }
 
                 $.when.apply(window, [menuHandler.deferredObj]).done(function () {
                     self.onHashChange({}, $.bbq.getState());

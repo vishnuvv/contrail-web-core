@@ -34,7 +34,9 @@ require.config({
         // 'contrail-layout'       : 'js/contrail-layout',
         // 'config_global'         : 'js/config_global',
         'global-libs'           : 'js/global-libs',
-        'contrail-load'         : 'js/contrail-load'
+        'contrail-load'         : 'js/contrail-load',
+        //File to load on demand
+        'vis'                   : coreWebDir + '/assets/vis-v4.9.0/js/vis.min'
     }, map: {
         '*': {
             // Backbone requires underscore. This forces requireJS to load lodash instead:
@@ -173,8 +175,9 @@ require(['jquery'],function() {
                     covdc = new CoreViewsDefaultConfig();
                     cowch = new Cache();
                     chUtils = new ChartUtils();
-                    require(['layout-handler','contrail-load','slick.core','slick.dataview','slick.checkboxselectcolumn','slick.grid',
-                        'slick.rowselectionmodel','select2'],function(LayoutHandler) {
+                    require(['layout-handler','content-handler','contrail-load','slick.core','slick.dataview','slick.checkboxselectcolumn','slick.grid',
+                        'slick.rowselectionmodel','select2'],function(LayoutHandler,ContentHandler) {
+                        contentHandler = new ContentHandler();
                         initBackboneValidation();
                         initCustomKOBindings(window.ko);
                         initDomEvents();
