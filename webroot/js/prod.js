@@ -64,9 +64,6 @@ require.config({
         'controller-libs': 'controller-dist/js/controller-libs'
     }
 })
-require(['controller-libs'],function() {
-
-});
 /*
  * End - Controller paths
  */
@@ -175,7 +172,7 @@ require(['jquery'],function() {
                     cowm = new CoreMessages();
                     covdc = new CoreViewsDefaultConfig();
                     cowch = new Cache();
-                    // chUtils = new ChartUtils();
+                    chUtils = new ChartUtils();
                     require(['layout-handler','contrail-load','slick.core','slick.dataview','slick.checkboxselectcolumn','slick.grid',
                         'slick.rowselectionmodel','select2'],function(LayoutHandler) {
                         initBackboneValidation();
@@ -183,6 +180,28 @@ require(['jquery'],function() {
                         initDomEvents();
                         layoutHandler = new LayoutHandler();
                         layoutHandler.load();
+                        require(['controller-libs'],function() {
+                            require([
+                                'controller-constants',
+                                'controller-labels',
+                                'controller-utils',
+                                'controller-messages',
+                                'controller-grid-config',
+                                'controller-graph-config',
+                                'controller-parsers',
+                                'controller-view-config',
+                            ], function (Constants, Labels, Utils, Messages, GridConfig, GraphConfig, Parsers, ViewConfig) {
+                                ctwc = new Constants();
+                                ctwl = new Labels();
+                                ctwu = new Utils;
+                                ctwm = new Messages();
+                                ctwgc = new GridConfig();
+                                ctwgrc = new GraphConfig();
+                                ctwp = new Parsers();
+                                ctwvc = new ViewConfig();
+                                contentHandler.featureAppDefObj.resolve();
+                            });
+                        });
                     });
                 });
             });
