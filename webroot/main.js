@@ -323,6 +323,7 @@ require.config({
     baseUrl:"/",
     urlArgs: 'built_at=' + built_at,
 });
+
 require(['jquery'],function($) {
     loadCommonTemplates();
 });

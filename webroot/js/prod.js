@@ -54,6 +54,23 @@ require.config({
     baseUrl:"/",
     urlArgs: 'built_at=' + built_at,
 });
+
+/*
+ * Start - Controller paths
+ */
+require.config({
+    paths: {
+        // 'controller-libs': '../../../contrail-web-controller/dist/controller-libs'
+        'controller-libs': 'controller-dist/js/controller-libs'
+    }
+})
+require(['controller-libs'],function() {
+
+});
+/*
+ * End - Controller paths
+ */
+
 define('jquery', [], function() {
     //To lazy-load contrail-all.css
     /*var cssLink = $("<link rel='stylesheet' type='text/css' href='/css/contrail-all.css?built_at='>");
@@ -149,6 +166,7 @@ require(['jquery'],function() {
                 console.info(globalObj);
                 require(['core-utils','core-constants','core-formatters','core-labels','core-messages',
                     'core-cache','core-views-default-config','chart-utils'],function(
+                    // 'core-cache','core-views-default-config','chart-utils'],function(
                     CoreUtils,CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig,ChartUtils) {
                     cowc = new CoreConstants();
                     cowu = new CoreUtils();
@@ -157,7 +175,7 @@ require(['jquery'],function() {
                     cowm = new CoreMessages();
                     covdc = new CoreViewsDefaultConfig();
                     cowch = new Cache();
-                    chUtils = new ChartUtils();
+                    // chUtils = new ChartUtils();
                     require(['layout-handler','contrail-load','slick.core','slick.dataview','slick.checkboxselectcolumn','slick.grid',
                         'slick.rowselectionmodel','select2'],function(LayoutHandler) {
                         initBackboneValidation();

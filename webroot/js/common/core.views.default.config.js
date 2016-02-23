@@ -4,7 +4,7 @@
  */
 
 define([
-    'underscore','d3'
+    'underscore'
 ], function (_,d3) {
     var CoreViewsDefaultConfig = function () {
         this.gridConfig = {
@@ -115,7 +115,7 @@ define([
                 var formattedValue = formatBytes(y2Value * 1024, true);
                 return formattedValue;
             },
-            y1Formatter: d3.format(".01f"),
+            // y1Formatter: d3.format(".01f"),
             showLegend: true
         };
     };
