@@ -91,6 +91,7 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
         };
 
         this.onHashChange = function(lastHash, currHash, loadingStartedDefObj) {
+            //Waiting for all feature pkgs to load??
             if(contentHandler.isInitFeatureAppComplete) {
                 contentHandler.loadContent(lastHash, currHash, loadingStartedDefObj);
             } else if (contentHandler.isInitFeatureAppInProgress) {
