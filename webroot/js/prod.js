@@ -63,7 +63,8 @@ require.config({
 require.config({
     paths: {
         // 'controller-libs': '../../../contrail-web-controller/dist/controller-libs'
-        'controller-libs': 'controller-dist/js/controller-libs'
+        'controller-libs': 'controller-dist/js/controller-libs',
+        'controller-dashboard-libs': 'controller-dist/js/controller-dashboard-libs'
     }
 })
 /*
@@ -164,7 +165,7 @@ require(['jquery'],function() {
                 kbValidation = validation;
                 console.info(globalObj);
                 require(['core-utils','core-constants','core-formatters','core-labels','core-messages',
-                    'core-cache','core-views-default-config','chart-utils'],function(
+                    'core-cache','core-views-default-config'],function(
                     // 'core-cache','core-views-default-config','chart-utils'],function(
                     CoreUtils,CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig,ChartUtils) {
                     cowc = new CoreConstants();
@@ -174,15 +175,15 @@ require(['jquery'],function() {
                     cowm = new CoreMessages();
                     covdc = new CoreViewsDefaultConfig();
                     cowch = new Cache();
-                    chUtils = new ChartUtils();
-                    require(['layout-handler','content-handler','contrail-load','slick.core','slick.dataview','slick.checkboxselectcolumn','slick.grid',
-                        'slick.rowselectionmodel','select2'],function(LayoutHandler,ContentHandler) {
+                    require(['layout-handler','content-handler','chart-utils','contrail-load','slick.core','slick.dataview','slick.checkboxselectcolumn','slick.grid',
+                        'slick.rowselectionmodel','select2'],function(LayoutHandler,ContentHandler,ChartUtils) {
                         contentHandler = new ContentHandler();
                         initBackboneValidation();
                         initCustomKOBindings(window.ko);
                         initDomEvents();
                         layoutHandler = new LayoutHandler();
                         layoutHandler.load();
+                        chUtils = new ChartUtils();
                         require(['controller-libs'],function() {
                             require([
                                 'controller-constants',
