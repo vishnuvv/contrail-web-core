@@ -22803,7 +22803,7 @@ nv.models.sunburstChart = function() {
 
 nv.version = "1.8.1";
 })();
-
+return root.nv = nv;
   }).apply(root, arguments);
 });
 }(this));

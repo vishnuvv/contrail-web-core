@@ -18,13 +18,14 @@ if (globalObj['env'] == 'prod') {
     defaultBaseDir = defaultBaseDir.slice(0, -1);
     globalObj['buildBaseDir'] = '';
 }
+// defaultBaseDir = ".";
 var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defaultBaseDir,
     smBaseDir = defaultBaseDir, strgBaseDir = defaultBaseDir,
     pkgBaseDir = defaultBaseDir;
 require.config({
     paths: {
         'core-srcdir'                 : coreBaseDir,
-        'core-basedir'                : coreWebDir,
+        'core-basedir'                : coreBaseDir,
         'jquery-libs'           : 'dist/js/jquery-libs',
         'thirdparty-libs'       : 'dist/js/thirdparty-libs',
         'contrail-core-views'   : 'dist/js/contrail-core-views',
@@ -36,7 +37,7 @@ require.config({
         'global-libs'           : 'js/global-libs',
         'contrail-load'         : 'js/contrail-load',
         //File to load on demand
-        'vis'                   : coreWebDir + '/assets/vis-v4.9.0/js/vis.min'
+        // 'vis'                   : coreWebDir + '/assets/vis-v4.9.0/js/vis.min'
     }, map: {
         '*': {
             // Backbone requires underscore. This forces requireJS to load lodash instead:
@@ -44,6 +45,20 @@ require.config({
         }
     },
     shim: {
+        'joint': {
+            deps: ['geometry', 'vectorizer', 'jquery','lodash','backbone'],
+            exports: 'joint',
+            init: function (geometry, vectorizer) {
+                this.g = geometry;
+                this.V = vectorizer;
+            }
+        },
+        'joint.layout.DirectedGraph': {
+            deps: ['joint']
+        },
+        'joint.contrail': {
+            deps: ['joint.layout.DirectedGraph']
+        },
         // 'contrail-libs': {
         //     deps:['jquery-libs','thirdparty-libs']
         // },
@@ -84,6 +99,10 @@ require(['jquery'],function() {
     globalObj = {};
     globalObj['layoutDefObj'] = $.Deferred();
     loadCommonTemplates();
+
+    SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformToElement || function(toElement) {
+        return toElement.getScreenCTM().inverse().multiply(this.getScreenCTM());
+    };
 
     function parseWebServerInfo(webServerInfo) {
         if (webServerInfo['serverUTCTime'] != null) {
@@ -163,7 +182,7 @@ require(['jquery'],function() {
             'core-srcdir'                 : coreBaseDir,
             'core-basedir'                : coreWebDir,
             /*'jquery'                      : coreWebDir + '/assets/jquery/js/jquery-1.8.3.min',
-            'knockout'                    : coreWebDir + '/assets/knockout/knockout-3.0.0',
+            'knockout'                    : coreWebDir + '/assets/knockout/knockout-3.0.0',*/
             'joint'                       : coreWebDir + '/assets/joint/js/joint.clean',
             'geometry'                    : coreWebDir + '/assets/joint/js/geometry',
             'vectorizer'                  : coreWebDir + '/assets/joint/js/vectorizer',
@@ -171,7 +190,8 @@ require(['jquery'],function() {
             'dagre'                       : coreWebDir + '/assets/joint/js/dagre',
             'vis'                         : coreWebDir + '/assets/vis-v4.9.0/js/vis.min',
             'bezier'                      : coreWebDir + '/assets/bezierjs/bezier',
-            'lodash'                      : coreWebDir + '/assets/lodash/lodash.min',
+            'joint.contrail'              : coreWebDir + '/js/joint.contrail',
+            /*'lodash'                      : coreWebDir + '/assets/lodash/lodash.min',
             'backbone'                    : coreWebDir + '/assets/backbone/backbone-min',
             'knockback'                   : coreWebDir + '/assets/backbone/knockback.min',
             'validation'                  : coreWebDir + '/assets/backbone/backbone-validation-amd',
@@ -179,7 +199,6 @@ require(['jquery'],function() {
             'underscore'                  : coreWebDir + '/assets/underscore/underscore-min',
 
             'contrail-layout'             : coreWebDir + '/js/contrail-layout',
-            'joint.contrail'              : coreWebDir + '/js/joint.contrail',
             'core-utils'                  : coreWebDir + '/js/common/core.utils',
 
             'core-constants'              : coreWebDir + '/js/common/core.constants',
@@ -238,11 +257,14 @@ require(['jquery'],function() {
                 // require(['joint'],function(joint) {
                 //     window.joint = joint;
                 // });
+                require(['nv.d3'],function(nvd3) {
+                    window.nv = nvd3;
+                });
             });
         // require(['jquery-libs','thirdparty-libs','contrail-libs'],function() {
             //Include all non-AMD modules that modify global variables
             //The first require call loads knockout and exports it to window.ko.Issue the second require call once its exported,such that the new required modules fine ko.
-            require(['knockout','validation','bootstrap','contrail-common','jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
+            require(['knockout','validation','ipv6','crossfilter','bootstrap','contrail-common','jquery.panzoom','jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
                 window.ko = knockout;
                 kbValidation = validation;
                 console.info(globalObj);

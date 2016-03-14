@@ -3841,6 +3841,35 @@ function generateQueryUUID() {
     s[s.length] = (new Date()).getTime();
     return s.join('');
 };
+/**
+ * This function takes parsed nodeData from the infra parse functions and returns object with all alerts displaying in dashboard tooltip,
+ * and tooltip messages array
+ */
+function getNodeStatusForSummaryPages(data,page) {
+    var result = {},msgs = [],tooltipAlerts = [];
+    for(var i = 0;i < ifNull(data['alerts'],[]).length; i++) {
+        if(data['alerts'][i]['tooltipAlert'] != false) {
+            tooltipAlerts.push(data['alerts'][i]);
+            msgs.push(data['alerts'][i]['msg']);
+        }
+    }
+    //Status is pushed to messages array only if the status is "UP" and tooltip alerts(which are displaying in tooltip) are zero
+    if(ifNull(data['status'],"").indexOf('Up') > -1 && tooltipAlerts.length == 0) {
+        msgs.push(data['status']);
+        tooltipAlerts.push({msg:data['status'],sevLevel:sevLevels['INFO']});
+    } else if(ifNull(data['status'],"").indexOf('Down') > -1) {
+        //Need to discuss and add the down status
+        //msgs.push(data['status']);
+        //tooltipAlerts.push({msg:data['status'],sevLevel:sevLevels['ERROR']})
+    }
+    result['alerts'] = tooltipAlerts;
+    result['nodeSeverity'] = data['alerts'][0] != null ? data['alerts'][0]['sevLevel'] : sevLevels['INFO'];
+    result['messages'] = msgs;
+     var statusTemplate = contrail.getTemplate4Id('statusTemplate');
+    if(page == 'summary')
+        return statusTemplate({sevLevel:result['nodeSeverity'],sevLevels:sevLevels});
+    return result;
+}
 var dashboardUtils = {
     sortNodesByColor: function(a,b) {
         // var colorPriorities = [d3Colors['green'],d3Colors['blue'],d3Colors['orange'],d3Colors['red']];

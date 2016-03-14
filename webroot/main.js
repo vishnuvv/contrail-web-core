@@ -177,9 +177,10 @@ require.config({
             exports: 'd3'
         },
         'nv.d3' : {
-            deps: ['d3']
+            deps: ['d3'],
+            exports: 'nv'
         },
-        'jrossfilter' : {
+        'crossfilter' : {
             deps: ['d3'],
             exports:'crossfilter'
         },
