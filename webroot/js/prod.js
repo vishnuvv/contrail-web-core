@@ -70,6 +70,7 @@ require.config({
 require.config({
     baseUrl:"/",
     urlArgs: 'built_at=' + built_at,
+    waitSeconds: 0
 });
 
 /*
