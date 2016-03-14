@@ -99,7 +99,8 @@ define([], function() {
 
         this.getFilteredData = function() {
             if(cf != null ) {
-                var thirdDimension = cf.dimension(function(d) { return d['x']; });
+                var thirdDimension = cf.dimension(function(d) { return Object.keys(d)[0]; });
+                console.info("getFilteredData");
                 var t = thirdDimension.top(Infinity);
                 thirdDimension.remove();
                 //cfObj.callBacks.fire(t);
