@@ -149,8 +149,6 @@ require(['jquery'],function() {
         }
     };
     getWebServerInfo();
-    require(['chart-libs'],function() {
-    });
     function getCoreAppPaths(coreBaseDir, coreBuildDir) {
         /**
         * coreBaseDir: Apps Root directory.
@@ -232,11 +230,19 @@ require(['jquery'],function() {
             //Get core-app paths and register to require
             require.config({
                 paths:getCoreAppPaths("","")
-                });
+            });
+            require(['backbone'],function(backbone) {
+                window.Backbone = backbone;
+            });
+            require(['chart-libs'],function() {
+                // require(['joint'],function(joint) {
+                //     window.joint = joint;
+                // });
+            });
         // require(['jquery-libs','thirdparty-libs','contrail-libs'],function() {
             //Include all non-AMD modules that modify global variables
             //The first require call loads knockout and exports it to window.ko.Issue the second require call once its exported,such that the new required modules fine ko.
-            require(['knockout','validation','contrail-common','jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
+            require(['knockout','validation','bootstrap','contrail-common','jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
                 window.ko = knockout;
                 kbValidation = validation;
                 console.info(globalObj);

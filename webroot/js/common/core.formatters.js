@@ -15,7 +15,7 @@ define([
 
                 // As we lazyload d3 don't use d3 for simple formatting
                 // return d3.format(options.formatSpecifier)(value)
-                return value;
+                return value.toLocaleString();
             },
             'date': function (value, options) {
                 var defaultOptions = {formatSpecifier: 'llll'},

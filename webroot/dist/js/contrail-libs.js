@@ -1752,7 +1752,7 @@ define('core-formatters',[
 
                 // As we lazyload d3 don't use d3 for simple formatting
                 // return d3.format(options.formatSpecifier)(value)
-                return value;
+                return value.toLocaleString();
             },
             'date': function (value, options) {
                 var defaultOptions = {formatSpecifier: 'llll'},
@@ -3315,6 +3315,9 @@ define('core-views-default-config',[
                 return formattedValue;
             },
             // y1Formatter: d3.format(".01f"),
+            y1Formatter: function(number) {
+                number.toFixed(1);
+            },
             showLegend: true
         };
     };
@@ -8699,9 +8702,10 @@ define('layout-handler',['underscore', 'menu-handler', 'content-handler'], funct
                  * this will preserve the initFeatureModuleMap and prevent require-ing the same feature modules again
                  * when layoutHandler is loaded multiple times.
                  */
-                if (typeof contentHandler === 'undefined') {
-                    contentHandler = new ContentHandler();
-                }
+                //Need to fix the issue,if layoutHandler is loaded multiple times
+                // if (typeof contentHandler === 'undefined') {
+                //     contentHandler = new ContentHandler();
+                // }
 
                 $.when.apply(window, [menuHandler.deferredObj]).done(function () {
                     self.onHashChange({}, $.bbq.getState());

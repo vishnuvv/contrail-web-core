@@ -116,6 +116,9 @@ define([
                 return formattedValue;
             },
             // y1Formatter: d3.format(".01f"),
+            y1Formatter: function(number) {
+                number.toFixed(1);
+            },
             showLegend: true
         };
     };
