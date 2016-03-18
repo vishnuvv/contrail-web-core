@@ -97,6 +97,39 @@ define('jquery', [], function() {
 //Start with base module, and start adding other modules,such that the code can start executing as and when it mets its dpendencies
 // require(['jquery-libs','config_global'],function() {
 require(['jquery'],function() {
+    function loadCommonTemplates() {
+        //Loads external templates from path and injects in to page DOM
+        templateLoader = (function ($, host) {
+            return{
+                loadExtTemplate:function (path, deferredObj, containerName) {
+                    //Load the template only if it doesn't exists in DOM
+                    var tmplLoader = $.ajax({url:path})
+                        .success(function (result) {
+                            //Add templates to DOM
+                            if (containerName != null) {
+                                $('body').append('<div id="' + containerName + '"></div>');
+                                $('#' + containerName).append(result);
+                            } else
+                                $("body").append(result);
+                            if (deferredObj != null)
+                                deferredObj.resolve();
+                        })
+                        .error(function (result) {
+                            if(result['statusText'] != 'abort')
+                                showInfoWindow("Error while loading page.",'Error');
+                        });
+
+                    tmplLoader.complete(function () {
+                        $(host).trigger("TEMPLATE_LOADED", [path]);
+                    });
+                }
+            };
+        })(jQuery, document);
+        // $.ajaxSetup({async:false});
+        //Need to issue the call synchronously as the following scripts refer to the templates in this file
+        templateLoader.loadExtTemplate('/templates/core.common.tmpl');
+        // $.ajaxSetup({async:true});
+    }
     globalObj = {};
     globalObj['layoutDefObj'] = $.Deferred();
     loadCommonTemplates();
