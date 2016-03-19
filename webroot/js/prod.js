@@ -23,10 +23,14 @@ var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defau
     smBaseDir = defaultBaseDir, strgBaseDir = defaultBaseDir,
     pkgBaseDir = defaultBaseDir;
 require.config({
+    bundles: {
+        'chart-libs'        : ['d3','nv.d3']
+    },
     paths: {
         'core-srcdir'                 : coreBaseDir,
         'core-basedir'                : coreBaseDir,
         'jquery-libs'           : 'dist/js/jquery-libs',
+        'jquery'                : 'js/jquery-1.8.3',
         'thirdparty-libs'       : 'dist/js/thirdparty-libs',
         'contrail-core-views'   : 'dist/js/contrail-core-views',
         'chart-libs'            : 'dist/js/chart-libs',
@@ -87,12 +91,12 @@ require.config({
  * End - Controller paths
  */
 
-define('jquery', [], function() {
-    //To lazy-load contrail-all.css
-    /*var cssLink = $("<link rel='stylesheet' type='text/css' href='/css/contrail-all.css?built_at='>");
-    $('head').append(cssLink);*/
-    return jQuery;
-});
+// define('jquery', [], function() {
+//     //To lazy-load contrail-all.css
+//     /*var cssLink = $("<link rel='stylesheet' type='text/css' href='/css/contrail-all.css?built_at='>");
+//     $('head').append(cssLink);*/
+//     return jQuery;
+// });
 
 //Start with base module, and start adding other modules,such that the code can start executing as and when it mets its dpendencies
 // require(['jquery-libs','config_global'],function() {
@@ -179,6 +183,7 @@ require(['jquery'],function() {
     }
 
     function getWebServerInfo(project, callback,fromCache) {
+        console.info('start: getWebServerInfo', performance.now());
         var fromCache = (fromCache == null) ? false : fromCache;
         if(fromCache == false || globalObj['webServerInfo'] == null) {
             //Compares client UTC time with the server UTC time and display alert if mismatch exceeds the threshold
@@ -194,11 +199,13 @@ require(['jquery'],function() {
                 if(typeof(callback) == 'function') {
                     callback(webServerInfo);
                 }
+                console.info('done: getWebServerInfo', performance.now());
             });
         } else {
             if(typeof(callback) == 'function') {
                 callback(globalObj['webServerInfo']);
             }
+            console.info('done: getWebServerInfo', performance.now());
         }
     };
     getWebServerInfo();
@@ -279,26 +286,33 @@ require(['jquery'],function() {
         };
     };
     // require(['config_global','web-utils','contrail-layout'],function() {
+        console.info('start:loading common bundles',performance.now());
+        //Queue the requests
+        // require(['contrail-load'],function() {});
         require(['global-libs','jquery-libs','thirdparty-libs','contrail-core-views','contrail-libs'],function() {
+            console.info('done: loading common bundles',performance.now());
             //Get core-app paths and register to require
             require.config({
                 paths:getCoreAppPaths("","")
             });
-            require(['backbone'],function(backbone) {
-                window.Backbone = backbone;
-            });
-            require(['chart-libs'],function() {
+            // require(['backbone'],function(backbone) {
+            //     window.Backbone = backbone;
+            // });
+            // require(['chart-libs'],function() {
+            //     console.info('loaded chart-libs',performance.now());
                 // require(['joint'],function(joint) {
                 //     window.joint = joint;
                 // });
-                require(['nv.d3'],function(nvd3) {
-                    window.nv = nvd3;
-                });
-            });
+                // require(['nv.d3'],function(nvd3) {
+                //     window.nv = nvd3;
+                // });
+            // });
         // require(['jquery-libs','thirdparty-libs','contrail-libs'],function() {
             //Include all non-AMD modules that modify global variables
             //The first require call loads knockout and exports it to window.ko.Issue the second require call once its exported,such that the new required modules fine ko.
-            require(['knockout','validation','ipv6','crossfilter','bootstrap','contrail-common','jquery.panzoom','jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
+            require(['knockout','validation','ipv6','crossfilter','bootstrap','contrail-common',
+                'jquery.panzoom','jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
+                console.info('required non-AMD modules',performance.now());
                 window.ko = knockout;
                 kbValidation = validation;
                 console.info(globalObj);
@@ -306,6 +320,7 @@ require(['jquery'],function() {
                     'core-cache','core-views-default-config'],function(
                     // 'core-cache','core-views-default-config','chart-utils'],function(
                     CoreUtils,CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig,ChartUtils) {
+                    console.info('required core utilities',performance.now());
                     cowc = new CoreConstants();
                     cowu = new CoreUtils();
                     cowf = new CoreFormatters();
@@ -313,8 +328,10 @@ require(['jquery'],function() {
                     cowm = new CoreMessages();
                     covdc = new CoreViewsDefaultConfig();
                     cowch = new Cache();
-                    require(['layout-handler','content-handler','chart-utils','contrail-load','slick.core','slick.dataview','slick.checkboxselectcolumn','slick.grid',
+                    require(['layout-handler','content-handler','chart-utils','contrail-load','slick.core',
+                        'slick.dataview','slick.checkboxselectcolumn','slick.grid',
                         'slick.rowselectionmodel','select2'],function(LayoutHandler,ContentHandler,ChartUtils) {
+                        console.info('layout render started',performance.now());
                         contentHandler = new ContentHandler();
                         initBackboneValidation();
                         initCustomKOBindings(window.ko);
@@ -333,6 +350,7 @@ require(['jquery'],function() {
                                 'controller-parsers',
                                 'controller-view-config',
                             ], function (Constants, Labels, Utils, Messages, GridConfig, GraphConfig, Parsers, ViewConfig) {
+                                console.info('required controller libs',performance.now()); 
                                 ctwc = new Constants();
                                 ctwl = new Labels();
                                 ctwu = new Utils;
