@@ -26,6 +26,24 @@
                 'js/contrail-layout'
             ]
         },{
+            name:"js/nonamd-libs",      //Libraries which need to be placed in global scope (web-utils,...) and don't depend on jQuery
+            exclude:['jquery','jquery-ui','knockout','bootstrap','jquery.xml2json','jquery.ba-bbq','jquery.json'],
+            override: {
+                wrapShim: false
+            }
+        },{
+            name:"js/layout-libs",      //Libraries that need for layout and don't depend on jQuery
+            exclude:['jquery','jquery-ui','knockout'],
+            override: {
+                wrapShim: false
+            }
+        },{
+            name:"js/jquery-dep-libs",  //Libraries that depend on jQuery and used for layout
+            exclude:['jquery','jquery-ui'],
+            override: {
+                wrapShim: false
+            }
+        },{
             name:"js/jquery-libs",
             exclude:['jquery','jquery-ui']
         },{
@@ -33,7 +51,7 @@
             exclude:['jquery']
         },{
             name:"js/load-libs",
-            exclude:['jquery','jquery.event.drag','d3']
+            exclude:['jquery','jquery.event.drag','d3','backbone','bootstrap','knockout']
         },{
             name:'js/thirdparty-libs',
             exclude:['jquery','jquery.event.drag']

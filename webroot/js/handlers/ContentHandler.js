@@ -302,6 +302,7 @@ define(['underscore'], function (_) {
             });
         };
 
+        //Need a way to track featurePkg is initialized
         this.loadFeatureApps = function (featurePackages) {
             var featureAppDefObjList= [],
                 initAppDefObj, url;

@@ -123,7 +123,9 @@ $(document).ready(function () {
         layoutHandler.onHashChange(lastHash, currHash);
         lastHash = currHash;
     });
-    enableSearchAhead();
+    // require(['contrail-elements'],function() {
+    //     enableSearchAhead();
+    // });
     addBrowserDetection(jQuery);
     generalInit();
 
@@ -197,3 +199,187 @@ function getWebServerInfo(project, callback,fromCache) {
         }
     }
 };
+(function ($) {
+    $.extend($.fn, {
+        initWidgetHeader:function (data) {
+            var widgetHdrTemplate = contrail.getTemplate4Id("widget-header-template");
+            $(this).html(widgetHdrTemplate(data));
+            if(data['widgetBoxId'] != undefined){
+                startWidgetLoading(data['widgetBoxId']);
+            }
+            if (data['link'] != null)
+                $(this).find('span').addClass('href-link');
+            $(this).find('span').on('click', function () {
+                if ((data['link'] != null) && (data['link']['hashParams'] != null))
+                    layoutHandler.setURLHashObj(data['link']['hashParams']);
+            });
+        },
+    });
+})(jQuery);
+
+$.deparamURLArgs = function (query) {
+    var query_string = {};
+    var query = ifNull(query,'');
+    if (query.indexOf('?') > -1) {
+        query = query.substr(query.indexOf('?') + 1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            pair[0] = decodeURIComponent(pair[0]);
+            pair[1] = decodeURIComponent(pair[1]);
+            // If first entry with this name
+            if (typeof query_string[pair[0]] === "undefined") {
+                query_string[pair[0]] = pair[1];
+                // If second entry with this name
+            } else if (typeof query_string[pair[0]] === "string") {
+                var arr = [ query_string[pair[0]], pair[1] ];
+                query_string[pair[0]] = arr;
+                // If third or later entry with this name
+            } else {
+                query_string[pair[0]].push(pair[1]);
+            }
+        }
+    }
+    return query_string;
+};
+
+$.xhrPool = [];
+
+var previous_scroll = $(window).scrollTop(),
+    scrollHeight = $(document).height() - $(window).height();
+
+$.allajax = (function ($) {
+    var xhrPool = [];
+    var ajaxId = 0;
+    $(document).ajaxSend(function (e, jqXHR, options) {
+        if (options.abortOnNavigate != false && options.abortOnNavigate != "false") {
+            xhrPool.push(jqXHR);
+        }
+    });
+    $(document).ajaxComplete(function (e, jqXHR, options) {
+        var index = xhrPool.indexOf(jqXHR);
+        if (index > -1) {
+            xhrPool.splice(index, 1);
+        }
+    });
+    this.abort = function () {
+        var tempXhrPool = [];
+        $.extend(true, tempXhrPool, xhrPool);
+        for (var i = 0; i < tempXhrPool.length; i++) {
+            tempXhrPool[i].abort();
+        }
+    };
+
+    return this;
+})($);
+
+$('.pre-format-JSON2HTML .expander').live('click', function(){
+    var selfParent = $(this).parent(),
+        jsonObj = {};
+    selfParent.children('i').removeClass('icon-plus').removeClass('expander').addClass('icon-minus').addClass('collapser');
+    if(selfParent.children('.node').hasClass('raw')){
+        jsonObj = JSON.parse(selfParent.children('ul.node').text());
+        selfParent.empty().append(formatJsonObject(jsonObj, 2, parseInt(selfParent.children('.node').data('depth')) + 1));
+    }
+    selfParent.children('.node').show();
+    selfParent.children('.collapsed').hide();
+});
+$('.pre-format-JSON2HTML .collapser').live('click', function(){
+    var selfParent = $(this).parent();
+    selfParent.children('i').removeClass('icon-minus').removeClass('collapser').addClass('icon-plus').addClass('expander');
+    selfParent.children('.collapsed').show();
+    selfParent.children('.node').hide();
+});
+
+(function($) {
+	//Plugin to serializeObject similar to serializeArray.
+	$.fn.serializeObject = function() {
+	   var o = {};
+	   var a = this.serializeArray();
+	   $.each(a, function() {
+	       if (o[this.name]) {
+	           if (!o[this.name].push) {
+	               o[this.name] = [o[this.name]];
+	           }
+	           o[this.name].push(this.value || '');
+	       } else {
+	           o[this.name] = this.value || '';
+	       }
+	   });
+	   return o;
+	};
+	
+	/*
+	 * .addClassSVG(className)
+	 * Adds the specified class(es) to each of the set of matched SVG elements.
+	 */
+	$.fn.addClassSVG = function(className){
+		$(this).attr('class', function(index, existingClassNames) {
+		    return existingClassNames + ' ' + className;
+		});
+		return this;
+	};
+	
+	/*
+	 * .removeClassSVG(className)
+	 * Removes the specified class to each of the set of matched SVG elements.
+	 */
+	$.fn.removeClassSVG = function(className){
+		$(this).attr('class', function(index, existingClassNames) {
+    		var re = new RegExp(className, 'g');
+    		return existingClassNames.replace(re, '');
+    	});
+		return this;
+	};
+	
+	/*
+	 * .hasClassSVG(className)
+	 * Determine whether any of the matched SVG elements are assigned the given class.
+	 */
+	$.fn.hasClassSVG = function(className){
+		var existingClassNames = $(this).attr('class').split(' ');
+		return (existingClassNames.indexOf(className) > -1 ? true : false);
+	};
+	
+	/*
+	 * .parentsSVG(className)
+	 * Get the ancestors of each element in the current set of matched elements or SVG elements, optionally filtered by a selector
+	 */
+	$.fn.parentsSVG = function(selector){
+		var parents = $(this).parents(),
+			outputParents = [];
+		$.each(parents, function(keyParents, valueParents){
+			if($(valueParents).is(selector)){
+				outputParents.push(valueParents);
+			}
+		});
+		return outputParents;
+	};
+
+    /*
+     * .heightSVG(className)
+     * Get the current computed height for the first element in the set of matched SVG elements.
+     */
+    $.fn.heightSVG = function(){
+        return ($(this).get(0)) ? $(this).get(0).getBBox().height : null;
+    };
+
+    /*
+     * .widthSVG(className)
+     * Get the current computed width for the first element in the set of matched SVG elements.
+     */
+    $.fn.widthSVG = function(){
+        return ($(this).get(0)) ? $(this).get(0).getBBox().width : null;
+    };
+
+    /*
+     * .redraw()
+     * Redraw or refresh the DOM to reflect the styles configured (Safari hack to render svg elements)
+     * */
+    $.fn.redraw = function() {
+        this.css('display', 'none');
+        var temp = this[0].offsetHeight;
+        this.css('display', '');
+    };
+	
+})(jQuery);

@@ -4,35 +4,6 @@
 
 
 var lastHash = {};
-$.xhrPool = [];
-
-var previous_scroll = $(window).scrollTop(),
-    scrollHeight = $(document).height() - $(window).height();
-
-$.allajax = (function ($) {
-    var xhrPool = [];
-    var ajaxId = 0;
-    $(document).ajaxSend(function (e, jqXHR, options) {
-        if (options.abortOnNavigate != false && options.abortOnNavigate != "false") {
-            xhrPool.push(jqXHR);
-        }
-    });
-    $(document).ajaxComplete(function (e, jqXHR, options) {
-        var index = xhrPool.indexOf(jqXHR);
-        if (index > -1) {
-            xhrPool.splice(index, 1);
-        }
-    });
-    this.abort = function () {
-        var tempXhrPool = [];
-        $.extend(true, tempXhrPool, xhrPool);
-        for (var i = 0; i < tempXhrPool.length; i++) {
-            tempXhrPool[i].abort();
-        }
-    };
-
-    return this;
-})($);
 
 Object.identical = function (a, b, sortArrays) {
     function sort(object) {

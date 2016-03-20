@@ -100,7 +100,7 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
                     contentHandler.loadContent(lastHash, currHash, loadingStartedDefObj);
                 });
             } else {
-                contentHandler.loadFeatureApps(globalObj['webServerInfo']['featurePkg']);
+                // contentHandler.loadFeatureApps(globalObj['webServerInfo']['featurePkg']);
                 contentHandler.featureAppDefObj.done(function () {
                     contentHandler.loadContent(lastHash, currHash, loadingStartedDefObj);
                 });

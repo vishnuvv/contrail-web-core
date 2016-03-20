@@ -6,7 +6,9 @@ define([
     'underscore',
     'contrail-view',
     'contrail-list-model',
-    'core-basedir/js/views/GridFooterView'
+    'core-basedir/js/views/GridFooterView',
+    'slick.checkboxselectcolumn',
+    'slick.grid','slick.rowselectionmodel'
 ], function (_, ContrailView, ContrailListModel, GridFooterView) {
     var GridView = ContrailView.extend({
         render: function () {

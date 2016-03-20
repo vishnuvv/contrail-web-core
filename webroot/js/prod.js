@@ -24,7 +24,8 @@ var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defau
     pkgBaseDir = defaultBaseDir;
 require.config({
     bundles: {
-        'chart-libs'        : ['d3','nv.d3']
+        'chart-libs'        : ['d3','nv.d3'],
+        'thirdparty-libs'   : ['knockback','slick.checkboxselectcolumn','slick.rowselectionmodel','select2','slick.grid','validation']
     },
     paths: {
         'core-srcdir'                 : coreBaseDir,
@@ -41,6 +42,9 @@ require.config({
         // 'contrail-layout'       : 'js/contrail-layout',
         // 'config_global'         : 'js/config_global',
         'global-libs'           : 'js/global-libs',
+        'layout-libs'           : 'dist/js/layout-libs',
+        'jquery-dep-libs'       : 'dist/js/jquery-dep-libs',
+        'nonamd-libs'           : 'dist/js/nonamd-libs',
         'contrail-load'         : 'js/contrail-load',
         //File to load on demand
         // 'vis'                   : coreWebDir + '/assets/vis-v4.9.0/js/vis.min'
@@ -102,7 +106,9 @@ require.config({
 
 //Start with base module, and start adding other modules,such that the code can start executing as and when it mets its dpendencies
 // require(['jquery-libs','config_global'],function() {
-require(['jquery','jquery-load-libs','load-libs','contrail-core-views','contrail-libs'],function() {
+// require(['jquery','jquery-load-libs','load-libs','contrail-core-views','contrail-libs'],function() {
+// });
+require(['jquery','layout-libs','nonamd-libs'],function() {
 });
 // require(['text!templates/core.common.tmpl'],function() {
 // });
@@ -115,21 +121,20 @@ function loadAjaxRequest(ajaxCfg,callback) {
     });
 
 }
-require(['jquery'],function() {
-    function loadCommonTemplates() {
-        //Loads external templates from path and injects in to page DOM
-        templateLoader = (function ($, host) {
-            return{
-                loadExtTemplate:function (path, deferredObj, containerName) {
-                    //Load the template only if it doesn't exists in DOM
+function loadCommonTemplates() {
+    //Loads external templates from path and injects in to page DOM
+    templateLoader = (function ($, host) {
+        return{
+            loadExtTemplate:function (path, deferredObj, containerName) {
+                //Load the template only if it doesn't exists in DOM
                     var tmplLoader = $.ajax({url:path})
                         .success(function (result) {
-                            //Add templates to DOM
+                    //Add templates to DOM
                             if (containerName != null) {
                                 $('body').append('<div id="' + containerName + '"></div>');
                                 $('#' + containerName).append(result);
                             } else
-                                $("body").append(result);
+                        $("body").append(result);
                             if (deferredObj != null)
                                 deferredObj.resolve();
                         })
@@ -141,17 +146,18 @@ require(['jquery'],function() {
                     tmplLoader.complete(function () {
                         $(host).trigger("TEMPLATE_LOADED", [path]);
                     });
-                }
-            };
-        })(jQuery, document);
-        // $.ajaxSetup({async:false});
-        //Need to issue the call synchronously as the following scripts refer to the templates in this file
-        templateLoader.loadExtTemplate('/templates/core.common.tmpl');
-        // $.ajaxSetup({async:true});
-    }
-    globalObj = {};
+            }
+        };
+    })(jQuery, document);
+    // $.ajaxSetup({async:false});
+    //Need to issue the call synchronously as the following scripts refer to the templates in this file
+    templateLoader.loadExtTemplate('/templates/core.common.tmpl');
+    // $.ajaxSetup({async:true});
+}
+require(['jquery'],function() {
+    require(['jquery-dep-libs'],function() {});
     globalObj['layoutDefObj'] = $.Deferred();
-    // loadCommonTemplates();
+    loadCommonTemplates();
 
     SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformToElement || function(toElement) {
         return toElement.getScreenCTM().inverse().multiply(this.getScreenCTM());
@@ -305,7 +311,10 @@ require(['jquery'],function() {
         console.info('start:loading common bundles',performance.now());
         //Queue the requests
         // require(['contrail-load'],function() {});
-        require(['global-libs','jquery-load-libs','load-libs','contrail-core-views','contrail-libs'],function() {
+        // require(['nonamd-libs','jquery-load-libs','load-libs','contrail-core-views','contrail-libs'],function() {
+        //nonamd-libs   #no dependency on jquery
+        //layout-libs   #dependency on jquery
+        require(['jquery-dep-libs','nonamd-libs','layout-libs'],function() {
             console.info('done: loading common bundles',performance.now());
             //Get core-app paths and register to require
             require.config({
@@ -325,39 +334,42 @@ require(['jquery'],function() {
             // });
         // require(['jquery-libs','thirdparty-libs','contrail-libs'],function() {
             //Include all non-AMD modules that modify global variables
-            //The first require call loads knockout and exports it to window.ko.Issue the second require call once its exported,such that the new required modules fine ko.
+            //The first require call loads knockout and exports it to window.ko.Issue the second require call once its exported,such that the new required modules find ko.
             // require(['validation','jquery.panzoom','ipv6'],function() {});
             //'slick.checkboxselectcolumn'
             //'slick.rowselectionmodel','select2','slick.grid'
-            require(['knockout','crossfilter','bootstrap','contrail-common',
-                    ,'jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
-                console.info('required non-AMD modules',performance.now());
-                window.ko = knockout;
-                kbValidation = validation;
+            console.info('start: required non-AMD modules',performance.now());
+            // require(['knockout','validation','crossfilter','bootstrap','contrail-common',
+            //         ,'jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
+                console.info('done: required non-AMD modules',performance.now());
+                // window.ko = knockout;
+                // kbValidation = validation;
                 console.info(globalObj);
-                require(['core-utils','core-constants','core-formatters','core-labels','core-messages',
-                    'core-cache','core-views-default-config'],function(
+                require(['core-utils'/*,'core-constants','core-formatters','core-labels','core-messages',
+                    'core-cache','core-views-default-config'*/],function(
                     // 'core-cache','core-views-default-config','chart-utils'],function(
                     CoreUtils,CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig,ChartUtils) {
                     console.info('required core utilities',performance.now());
-                    cowc = new CoreConstants();
                     cowu = new CoreUtils();
-                    cowf = new CoreFormatters();
-                    cowl = new CoreLabels();
-                    cowm = new CoreMessages();
-                    covdc = new CoreViewsDefaultConfig();
-                    cowch = new Cache();
-                    require(['layout-handler','content-handler','chart-utils','contrail-load','slick.core',
-                        'slick.dataview',
+                    // cowc = new CoreConstants();
+                    // cowf = new CoreFormatters();
+                    // cowl = new CoreLabels();
+                    // cowm = new CoreMessages();
+                    // covdc = new CoreViewsDefaultConfig();
+                    // cowch = new Cache();
+                    // require(['layout-handler','content-handler','chart-utils','contrail-load','slick.core','slick.dataview',
+                    require(['layout-handler','content-handler','contrail-load'
                         ],function(LayoutHandler,ContentHandler,ChartUtils) {
                         console.info('layout render started',performance.now());
                         contentHandler = new ContentHandler();
-                        initBackboneValidation();
-                        initCustomKOBindings(window.ko);
-                        initDomEvents();
+                        // initBackboneValidation();
+                        // initCustomKOBindings(window.ko);
+                        // initDomEvents();
                         layoutHandler = new LayoutHandler();
                         layoutHandler.load();
-                        chUtils = new ChartUtils();
+                        //Load core utils
+
+                        // chUtils = new ChartUtils();
                         require(['controller-libs'],function() {
                             require([
                                 'controller-constants',
@@ -383,7 +395,7 @@ require(['jquery'],function() {
                         });
                     });
                 });
-            });
+            // });
         });
     // });
 });

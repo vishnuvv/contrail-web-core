@@ -1,6 +1,4 @@
-define(['jquery-ui',
-        'jquery.xml2json',
-        'jquery.ba-bbq',
+define([
         'jquery.timer',
         'jquery.ui.touch-punch',
         'jquery.validate',
@@ -9,10 +7,8 @@ define(['jquery-ui',
         'jquery.multiselect.filter',
         'jquery.steps.min',
         'jquery.panzoom',
-        'jquery.ui.position',
         'jquery-contextmenu',
         'jquery.event.drag',
-        'jquery.json',
         'jquery.droppick',
         'jquery.datetimepicker'
 ], function() {});
