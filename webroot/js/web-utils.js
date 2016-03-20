@@ -813,40 +813,6 @@ function get32binary(int) {
         .padleft(32, "1");
 };
 
-/**
- * Delay execution of UI widgets, until the given deferred object is resolved,
- * which gives the data for UI widgets
- */
-function initDeferred(data) {
-    var deferredObj = $.Deferred();
-    //To load asynchronously
-    if (data['deferredObj'] != null) {
-        deferredObj = data['deferredObj'];
-    } else if (data['url'] != null) {
-        $.ajax({
-            url:data['url'],
-        }).done(function (result) {
-                deferredObj.resolve(result);
-            });
-    } else {
-        deferredObj.resolve(data);
-    }
-    deferredObj.done(function (response) {
-        if (data['parseFn'] != null && typeof(data['parseFn']) == 'function') {
-            response = data['parseFn'](response);
-        }
-        $(data['selector'])[data['renderFn']](response);
-    });
-    //Show error message on deferred object reject
-    deferredObj.fail(function(errObj) {
-        if(errObj['errTxt'] != null && errObj['errTxt'] != 'abort') {
-            if(data['renderFn'] == 'initScatterChart') {
-                showMessageInChart({selector:$(data['selector']),msg:'Error in fetching Details',type:'bubblechart'});
-            }
-        }
-    });
-}
-
 //DNS TTL Validations
 function validateTTLRange(v){
     if(v >=0 && v<=2147483647)
@@ -872,6 +838,48 @@ function validateIPAddress(inputText){
         return true;
     else
         return false;
+}
+
+function bucketizeCFData(dataCF,accessorFn,cfg) {
+    var retArr = [],value;
+    var dimension = dataCF.dimension(accessorFn);
+    var cfGroup = dimension.group();
+    var maxKey = 0;
+    var cfg = ifNull(cfg,{});
+    var bucketCnt = ifNull(cfg['bucketCnt'],8);
+    if(cfGroup.all().length > 0)
+        maxKey = cfGroup.all()[cfGroup.all().length-1]['key'];
+    
+    //Max no of occurrences in any bucket
+    var maxValue = 0;
+    $.each(cfGroup.all(),function(idx,obj) {
+        if(obj['value'] > maxValue)
+            maxValue = obj['value'];
+    });
+    var zeroValue = 0.01;
+    var bucketRange = parseInt(maxKey / 8) + 1;
+    //Have buckets 0-8
+    if(maxKey <= 8) {
+        maxKey = 8;
+    } else {
+    	bucketRange = Math.ceil((maxKey+1)/bucketCnt);
+    }
+    for(var i=0;i<=maxKey;i+=bucketRange) {
+        dimension.filterAll();
+        if(bucketRange == 1) {
+            value = dimension.filter(i).top(Infinity).length;
+            if(value == 0)
+                value = zeroValue;
+            retArr.push({name:i,min:i,max:i+bucketRange-1,value:value});
+        } else {
+            value = dimension.filter(function(d) { return ((d >= i) && (d <= (i+bucketRange-1))); }).top(Infinity).length;
+            if(value == 0)
+                value = zeroValue;
+            retArr.push({name:i + '-' + (i+bucketRange-1),min:i,max:i+bucketRange-1,value:value});
+        }
+    }
+    dimension.filterAll();
+    return {data:retArr,zeroValue:zeroValue};
 }
 
 function getMaxNumericValueInArray(inputArray) {
@@ -1397,3 +1405,74 @@ function check4StorageInit(callback) {
         callback();
     }
 };
+
+function generateQueryUUID() {
+    var s = [], itoh = '0123456789ABCDEF';
+    for (var i = 0; i < 36; i++) {
+        s[i] = Math.floor(Math.random() * 0x10);
+    }
+    s[14] = 4;
+    s[19] = (s[19] & 0x3) | 0x8;
+    for (var i = 0; i < 36; i++) {
+        s[i] = itoh[s[i]];
+    }
+    s[8] = s[13] = s[18] = s[23] = s[s.length] = '-';
+    s[s.length] = (new Date()).getTime();
+    return s.join('');
+};
+/**
+ * This function takes parsed nodeData from the infra parse functions and returns object with all alerts displaying in dashboard tooltip,
+ * and tooltip messages array
+ */
+function getNodeStatusForSummaryPages(data,page) {
+    var result = {},msgs = [],tooltipAlerts = [];
+    for(var i = 0;i < ifNull(data['alerts'],[]).length; i++) {
+        if(data['alerts'][i]['tooltipAlert'] != false) {
+            tooltipAlerts.push(data['alerts'][i]);
+            msgs.push(data['alerts'][i]['msg']);
+        }
+    }
+    //Status is pushed to messages array only if the status is "UP" and tooltip alerts(which are displaying in tooltip) are zero
+    if(ifNull(data['status'],"").indexOf('Up') > -1 && tooltipAlerts.length == 0) {
+        msgs.push(data['status']);
+        tooltipAlerts.push({msg:data['status'],sevLevel:sevLevels['INFO']});
+    } else if(ifNull(data['status'],"").indexOf('Down') > -1) {
+        //Need to discuss and add the down status
+        //msgs.push(data['status']);
+        //tooltipAlerts.push({msg:data['status'],sevLevel:sevLevels['ERROR']})
+    }
+    result['alerts'] = tooltipAlerts;
+    result['nodeSeverity'] = data['alerts'][0] != null ? data['alerts'][0]['sevLevel'] : sevLevels['INFO'];
+    result['messages'] = msgs;
+     var statusTemplate = contrail.getTemplate4Id('statusTemplate');
+    if(page == 'summary')
+        return statusTemplate({sevLevel:result['nodeSeverity'],sevLevels:sevLevels});
+    return result;
+}
+var dashboardUtils = {
+    sortNodesByColor: function(a,b) {
+        // var colorPriorities = [d3Colors['green'],d3Colors['blue'],d3Colors['orange'],d3Colors['red']];
+        var colorPriorities = [d3Colors['blue'],d3Colors['green'],d3Colors['orange'],d3Colors['red']];
+        var aColor = $.inArray(a['color'],colorPriorities);
+        var bColor = $.inArray(b['color'],colorPriorities);
+        return aColor-bColor;
+    },
+    getDownNodeCnt : function(data) {
+        var downNodes = $.grep(data,function(obj,idx) {
+                           return obj['color'] == cowc.COLOR_SEVERITY_MAP['red'];
+                        });
+        return downNodes.length;
+    },
+    /**
+     * Sort alerts first by severity and with in same severity,sort by timestamp if available
+     */
+    sortInfraAlerts: function(a,b) {
+        if(a['sevLevel'] != b['sevLevel'])
+            return a['sevLevel'] - b['sevLevel'];
+        if(a['sevLevel'] == b['sevLevel']) {
+            if(a['timeStamp'] != null && b['timeStamp'] != null)
+                return b['timeStamp'] - a['timeStamp'];
+        }
+        return 0;
+    },
+}

@@ -40,7 +40,6 @@ define([
     'core-basedir/js/views/QueryResultLineChartView',
     'core-basedir/js/views/QuerySelectView',
     'core-basedir/js/views/QueryWhereView',
-    'core-basedir/js/views/ScatterChartView',
     'core-basedir/js/views/SectionView',
     'core-basedir/js/views/SparklineView',
     'core-basedir/js/views/TabsView',
