@@ -11138,7 +11138,6 @@ define('menu-handler',['underscore'], function (_) {
                 return true;
             else
                 return false;
-
         }
 
         /*

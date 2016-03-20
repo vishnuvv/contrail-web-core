@@ -10,5 +10,6 @@ define([
         'jquery-contextmenu',
         'jquery.event.drag',
         'jquery.droppick',
-        'jquery.datetimepicker'
+        'jquery.datetimepicker',
+        'jquery-ui'
 ], function() {});

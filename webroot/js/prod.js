@@ -26,7 +26,11 @@ require.config({
     bundles: {
         'chart-libs'        : ['d3','nv.d3'],
         'thirdparty-libs'   : ['knockback','slick.checkboxselectcolumn','slick.rowselectionmodel','select2','slick.grid','validation'],
-        'core-bundle'       : ['controller-view-model']
+        'core-bundle'       : ['controller-view-model'],
+        'contrail-core-views':[
+    'core-basedir/js/views/GridView','core-basedir/js/views/AccordianView','core-basedir/js/views/DetailsView','core-basedir/js/views/DonutChartView','core-basedir/js/views/FormAutoCompleteTextBoxView','core-basedir/js/views/FormButtonView','core-basedir/js/views/FormCheckboxView','core-basedir/js/views/FormCollectionView','core-basedir/js/views/FormComboboxView','core-basedir/js/views/FormCompositeView','core-basedir/js/views/FormDateTimePickerView','core-basedir/js/views/FormDropdownView','core-basedir/js/views/FormEditableGridView','core-basedir/js/views/FormGridView','core-basedir/js/views/FormHierarchicalDropdownView','core-basedir/js/views/FormInputView','core-basedir/js/views/FormMultiselectView','core-basedir/js/views/FormNumericTextboxView','core-basedir/js/views/FormRadioButtonView','core-basedir/js/views/FormTextAreaView','core-basedir/js/views/FormTextView','core-basedir/js/views/GridFooterView','core-basedir/js/views/HeatChartView','core-basedir/js/views/HorizontalBarChartView','core-basedir/js/views/LineBarWithFocusChartView','core-basedir/js/views/LineWithFocusChartView','core-basedir/js/views/LoginWindowView','core-basedir/js/views/MultiBarChartView','core-basedir/js/views/MultiDonutChartView','core-basedir/js/views/NodeConsoleLogsView','core-basedir/js/views/QueryFilterView','core-basedir/js/views/QueryResultGridView','core-basedir/js/views/QueryResultLineChartView','core-basedir/js/views/QuerySelectView','core-basedir/js/views/QueryWhereView','core-basedir/js/views/SparklineView','core-basedir/js/views/TabsView','core-basedir/js/views/WizardView'],
+        'jquery-libs'       : [
+        'jquery.timer','jquery.ui.touch-punch','jquery.validate','jquery.tristate','jquery.multiselect','jquery.multiselect.filter','jquery.steps.min','jquery.panzoom','jquery-contextmenu','jquery.event.drag','jquery.droppick','jquery.datetimepicker']
     },
     paths: {
         'core-srcdir'                 : coreBaseDir,
@@ -373,9 +377,9 @@ require(['jquery'],function() {
                         layoutHandler = new LayoutHandler();
                         layoutHandler.load();
                         //Load core utils
-
                         require(['core-bundle','controller-bundle'],function() {
                         });
+
                         require(['core-bundle'],function() {
                             require(['core-constants','core-formatters','core-labels','core-messages',
                                 'core-cache','core-views-default-config','chart-utils'],function(CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig,ChartUtils) {
@@ -397,7 +401,7 @@ require(['jquery'],function() {
                                 'controller-grid-config',
                                 'controller-graph-config',
                                 'controller-parsers',
-                                // 'controller-view-config',
+                                'controller-view-config',
                             ], function (Constants, Labels, Utils, Messages, GridConfig, GraphConfig, Parsers, ViewConfig) {
                                 console.info('required controller libs',performance.now()); 
                                 ctwc = new Constants();
@@ -407,7 +411,7 @@ require(['jquery'],function() {
                                 ctwgc = new GridConfig();
                                 ctwgrc = new GraphConfig();
                                 ctwp = new Parsers();
-                                // ctwvc = new ViewConfig();
+                                ctwvc = new ViewConfig();
                                 contentHandler.featureAppDefObj.resolve();
                             });
                         });

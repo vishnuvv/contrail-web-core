@@ -39,7 +39,7 @@
             }
         }*/,{
             name:"js/jquery-dep-libs",  //Libraries that depend on jQuery and used for layout
-            exclude:['jquery','jquery-ui'],
+            exclude:['jquery'],
             override: {
                 wrapShim: false
             }
