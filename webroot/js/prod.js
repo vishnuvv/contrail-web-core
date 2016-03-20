@@ -31,6 +31,8 @@ require.config({
         'core-basedir'                : coreBaseDir,
         'jquery-libs'           : 'dist/js/jquery-libs',
         'jquery'                : 'js/jquery-1.8.3',
+        'load-libs'             : 'dist/js/load-libs',
+        'jquery-load-libs'      : 'dist/js/jquery-load-libs',
         'thirdparty-libs'       : 'dist/js/thirdparty-libs',
         'contrail-core-views'   : 'dist/js/contrail-core-views',
         'chart-libs'            : 'dist/js/chart-libs',
@@ -100,6 +102,19 @@ require.config({
 
 //Start with base module, and start adding other modules,such that the code can start executing as and when it mets its dpendencies
 // require(['jquery-libs','config_global'],function() {
+require(['jquery','jquery-load-libs','load-libs','contrail-core-views','contrail-libs'],function() {
+});
+// require(['text!templates/core.common.tmpl'],function() {
+// });
+function loadAjaxRequest(ajaxCfg,callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET',ajaxCfg['url']);
+    xhr.send(null);
+    xhr.onload(function(response) {
+        callback(response);
+    });
+
+}
 require(['jquery'],function() {
     function loadCommonTemplates() {
         //Loads external templates from path and injects in to page DOM
@@ -136,7 +151,7 @@ require(['jquery'],function() {
     }
     globalObj = {};
     globalObj['layoutDefObj'] = $.Deferred();
-    loadCommonTemplates();
+    // loadCommonTemplates();
 
     SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformToElement || function(toElement) {
         return toElement.getScreenCTM().inverse().multiply(this.getScreenCTM());
@@ -191,6 +206,7 @@ require(['jquery'],function() {
                 url: '/api/service/networking/web-server-info?project=' + 'admin'
             }).done(function (webServerInfo) {
                 globalObj['webServerInfo'] = parseWebServerInfo(webServerInfo);
+                console.info('start: fetching menu.xml',performance.now());
                 $.ajax({
                     url:'/' + globalObj['mFileName'] + '?built_at=' + built_at
                 }).done(function(xml) {
@@ -289,7 +305,7 @@ require(['jquery'],function() {
         console.info('start:loading common bundles',performance.now());
         //Queue the requests
         // require(['contrail-load'],function() {});
-        require(['global-libs','jquery-libs','thirdparty-libs','contrail-core-views','contrail-libs'],function() {
+        require(['global-libs','jquery-load-libs','load-libs','contrail-core-views','contrail-libs'],function() {
             console.info('done: loading common bundles',performance.now());
             //Get core-app paths and register to require
             require.config({
@@ -310,8 +326,11 @@ require(['jquery'],function() {
         // require(['jquery-libs','thirdparty-libs','contrail-libs'],function() {
             //Include all non-AMD modules that modify global variables
             //The first require call loads knockout and exports it to window.ko.Issue the second require call once its exported,such that the new required modules fine ko.
-            require(['knockout','validation','ipv6','crossfilter','bootstrap','contrail-common',
-                'jquery.panzoom','jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
+            // require(['validation','jquery.panzoom','ipv6'],function() {});
+            //'slick.checkboxselectcolumn'
+            //'slick.rowselectionmodel','select2','slick.grid'
+            require(['knockout','crossfilter','bootstrap','contrail-common',
+                    ,'jquery.ba-bbq','jquery.xml2json','handlebars-utils','contrail-elements'],function(knockout,validation) {
                 console.info('required non-AMD modules',performance.now());
                 window.ko = knockout;
                 kbValidation = validation;
@@ -329,8 +348,8 @@ require(['jquery'],function() {
                     covdc = new CoreViewsDefaultConfig();
                     cowch = new Cache();
                     require(['layout-handler','content-handler','chart-utils','contrail-load','slick.core',
-                        'slick.dataview','slick.checkboxselectcolumn','slick.grid',
-                        'slick.rowselectionmodel','select2'],function(LayoutHandler,ContentHandler,ChartUtils) {
+                        'slick.dataview',
+                        ],function(LayoutHandler,ContentHandler,ChartUtils) {
                         console.info('layout render started',performance.now());
                         contentHandler = new ContentHandler();
                         initBackboneValidation();

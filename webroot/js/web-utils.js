@@ -874,48 +874,6 @@ function validateIPAddress(inputText){
         return false;
 }
 
-function bucketizeCFData(dataCF,accessorFn,cfg) {
-    var retArr = [],value;
-    var dimension = dataCF.dimension(accessorFn);
-    var cfGroup = dimension.group();
-    var maxKey = 0;
-    var cfg = ifNull(cfg,{});
-    var bucketCnt = ifNull(cfg['bucketCnt'],8);
-    if(cfGroup.all().length > 0)
-        maxKey = cfGroup.all()[cfGroup.all().length-1]['key'];
-    
-    //Max no of occurrences in any bucket
-    var maxValue = 0;
-    $.each(cfGroup.all(),function(idx,obj) {
-        if(obj['value'] > maxValue)
-            maxValue = obj['value'];
-    });
-    var zeroValue = 0.01;
-    var bucketRange = parseInt(maxKey / 8) + 1;
-    //Have buckets 0-8
-    if(maxKey <= 8) {
-        maxKey = 8;
-    } else {
-    	bucketRange = Math.ceil((maxKey+1)/bucketCnt);
-    }
-    for(var i=0;i<=maxKey;i+=bucketRange) {
-        dimension.filterAll();
-        if(bucketRange == 1) {
-            value = dimension.filter(i).top(Infinity).length;
-            if(value == 0)
-                value = zeroValue;
-            retArr.push({name:i,min:i,max:i+bucketRange-1,value:value});
-        } else {
-            value = dimension.filter(function(d) { return ((d >= i) && (d <= (i+bucketRange-1))); }).top(Infinity).length;
-            if(value == 0)
-                value = zeroValue;
-            retArr.push({name:i + '-' + (i+bucketRange-1),min:i,max:i+bucketRange-1,value:value});
-        }
-    }
-    dimension.filterAll();
-    return {data:retArr,zeroValue:zeroValue};
-}
-
 function getMaxNumericValueInArray(inputArray) {
     var maxVal;
     if(inputArray != null && inputArray instanceof Array){
@@ -1230,21 +1188,6 @@ function uniqueArray(arr) {
     return retArr;
 }
 
-function showAdvancedDetails(){
-    $('#divBasic').hide();
-    $('#divStatus').hide();
-    $('#divAdvanced').show();
-    $('#divAdvanced').parents('.widget-box').find('.widget-header h4 .subtitle').remove();
-    $('#divAdvanced').parents('.widget-box').find('.widget-header h4').append('<span class="subtitle">(Advanced)</span>')
-}
-
-function showBasicDetails(){
-    $('#divAdvanced').hide();
-    $('#divStatus').hide();
-    $('#divBasic').show();
-    $('#divAdvanced').parents('.widget-box').find('.widget-header h4 .subtitle').remove();
-}
-
 function getFormattedDate(timeStamp){
     if(!$.isNumeric(timeStamp))
         return '';
@@ -1422,105 +1365,6 @@ function formatVN(vn){
 /**
  * Cross filter management methods ENDS
 */
-/*
- * This function adds/subtract the buffer to the min and max values array provided and if "isPositive"
- * is true it will return only positive values 
- */
-function addBufferToRange(obj) {
-    var value = obj['values'];
-    var buffer = obj['buffer']/100;
-    var minValue = value[0];
-    var formatFn = obj['formatFn'];
-    value[0] = value[0] - value[0] * buffer;
-    value[1] = value[1] + value[1] * buffer;
-    if(obj['isPositive'] && value[0] < 0){
-        value[0] = minValue;
-    }
-    if(formatFn != null) {
-        value[0] = formatFn(value[0]);
-        value[1] = formatFn(value[1]);
-    }
-    return value;
-}
-
-/*
- * Returns a random value within the range of min and max (parameters)
- */
-function getRandomValue(min,max){
-    return Math.random() * (max - min) + min;
-}
-
-//Below functions need to move it to controller.utils.js file soon
-/*
- * Onclick event handler for links within the grid cell
- */
- function onClickGridLink(e,selRowDataItem){
-    var name = $(e.target).attr('name');
-    var reqObj = {};
-    if ($.inArray(name, ['project']) > -1) {
-        layoutHandler.setURLHashParams({fqName:selRowDataItem['name']},{merge:false});
-    } else if($.inArray(name,['network']) > -1) {
-        layoutHandler.setURLHashParams({fqName:selRowDataItem['name']},{merge:false,p:'mon_networking_networks'});
-    } else if($.inArray(name,['instance']) > -1) {
-        layoutHandler.setURLHashParams({vmName:selRowDataItem['vmName'],fqName:selRowDataItem['name'],srcVN:selRowDataItem['vn'][0]},{merge:false,p:'mon_networking_instances'});
-    } else if($.inArray(name,['vRouter']) > -1) {
-        layoutHandler.setURLHashParams({node: selRowDataItem['vRouter'], tab:''}, {p:'mon_infra_vrouter',merge:false});
-    }
-}
-
-function setProjectURLHashParams(hashParams, projectFQN, triggerHashChange) {
-    var hashObj = {
-        type: "project",
-        view: "details",
-        focusedElement: {
-            fqName: projectFQN,
-            type: 'project'
-        }
-    };
-
-    if(contrail.checkIfKeyExistInObject(true, hashParams, 'clickedElement')) {
-        hashObj.clickedElement = hashParams.clickedElement;
-    }
-
-    layoutHandler.setURLHashParams(hashObj, {p: "mon_networking_projects", merge: false, triggerHashChange: triggerHashChange});
-
-};
-
-function setNetworkURLHashParams(hashParams, networkFQN, triggerHashChange) {
-    var hashObj = {
-        type: "network",
-        view: "details",
-        focusedElement: {
-            fqName: networkFQN,
-            type: 'virtual-network'
-        }
-    };
-
-    if(contrail.checkIfKeyExistInObject(true, hashParams, 'clickedElement')) {
-        hashObj.clickedElement = hashParams.clickedElement;
-    }
-
-    layoutHandler.setURLHashParams(hashObj, {p: "mon_networking_networks", merge: false, triggerHashChange: triggerHashChange});
-
-};
-
-function setInstanceURLHashParams(hashParams, networkFQN, instanceUUID, triggerHashChange) {
-    var hashObj = {
-        type: "instance",
-        view: "details",
-        focusedElement: {
-            fqName: networkFQN,
-            type: 'virtual-network',
-            uuid: instanceUUID
-        }
-    };
-
-    if(contrail.checkIfKeyExistInObject(true, hashParams, 'clickedElement')) {
-        hashObj.clickedElement = hashParams.clickedElement;
-    }
-
-    layoutHandler.setURLHashParams(hashObj, {p: "mon_networking_instances", merge: false, triggerHashChange: triggerHashChange});
-};
 
 function checkIfDuplicates(arr){
     
