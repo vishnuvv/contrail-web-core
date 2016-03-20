@@ -25,13 +25,16 @@ var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defau
 require.config({
     bundles: {
         'chart-libs'        : ['d3','nv.d3'],
-        'thirdparty-libs'   : ['knockback','slick.checkboxselectcolumn','slick.rowselectionmodel','select2','slick.grid','validation']
+        'thirdparty-libs'   : ['knockback','slick.checkboxselectcolumn','slick.rowselectionmodel','select2','slick.grid','validation'],
+        'core-bundle'       : ['controller-view-model']
     },
     paths: {
         'core-srcdir'                 : coreBaseDir,
         'core-basedir'                : coreBaseDir,
+        'controller-basedir'                : coreBaseDir,
         'jquery-libs'           : 'dist/js/jquery-libs',
-        'jquery'                : 'js/jquery-1.8.3',
+        // 'jquery'                : 'js/jquery-1.8.3',
+        'jquery'                : 'assets/jquery/js/jquery-1.8.3.min',
         'load-libs'             : 'dist/js/load-libs',
         'jquery-load-libs'      : 'dist/js/jquery-load-libs',
         'thirdparty-libs'       : 'dist/js/thirdparty-libs',
@@ -41,6 +44,7 @@ require.config({
         // 'web-utils'             : 'js/web-utils',
         // 'contrail-layout'       : 'js/contrail-layout',
         // 'config_global'         : 'js/config_global',
+        'core-bundle'           : 'dist/js/core-bundle',
         'global-libs'           : 'js/global-libs',
         'layout-libs'           : 'dist/js/layout-libs',
         'jquery-dep-libs'       : 'dist/js/jquery-dep-libs',
@@ -90,6 +94,7 @@ require.config({
     paths: {
         // 'controller-libs': '../../../contrail-web-controller/dist/controller-libs'
         'controller-libs': 'controller-dist/js/controller-libs',
+        'controller-bundle': 'controller-dist/js/controller-bundle',
         'controller-dashboard-libs': 'controller-dist/js/controller-dashboard-libs'
     }
 })
@@ -108,7 +113,7 @@ require.config({
 // require(['jquery-libs','config_global'],function() {
 // require(['jquery','jquery-load-libs','load-libs','contrail-core-views','contrail-libs'],function() {
 // });
-require(['jquery','layout-libs','nonamd-libs'],function() {
+require(['jquery','nonamd-libs'],function() {
 });
 // require(['text!templates/core.common.tmpl'],function() {
 // });
@@ -314,7 +319,7 @@ require(['jquery'],function() {
         // require(['nonamd-libs','jquery-load-libs','load-libs','contrail-core-views','contrail-libs'],function() {
         //nonamd-libs   #no dependency on jquery
         //layout-libs   #dependency on jquery
-        require(['jquery-dep-libs','nonamd-libs','layout-libs'],function() {
+        require(['jquery-dep-libs','nonamd-libs'],function() {
             console.info('done: loading common bundles',performance.now());
             //Get core-app paths and register to require
             require.config({
@@ -369,8 +374,21 @@ require(['jquery'],function() {
                         layoutHandler.load();
                         //Load core utils
 
-                        // chUtils = new ChartUtils();
-                        require(['controller-libs'],function() {
+                        require(['core-bundle','controller-bundle'],function() {
+                        });
+                        require(['core-bundle'],function() {
+                            require(['core-constants','core-formatters','core-labels','core-messages',
+                                'core-cache','core-views-default-config','chart-utils'],function(CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig,ChartUtils) {
+                                cowc = new CoreConstants();
+                                cowf = new CoreFormatters();
+                                cowl = new CoreLabels();
+                                cowm = new CoreMessages();
+                                covdc = new CoreViewsDefaultConfig();
+                                cowch = new Cache();
+                                chUtils = new ChartUtils();
+                            });
+                        });
+                        require(['controller-bundle','core-bundle'],function() {
                             require([
                                 'controller-constants',
                                 'controller-labels',
@@ -379,7 +397,7 @@ require(['jquery'],function() {
                                 'controller-grid-config',
                                 'controller-graph-config',
                                 'controller-parsers',
-                                'controller-view-config',
+                                // 'controller-view-config',
                             ], function (Constants, Labels, Utils, Messages, GridConfig, GraphConfig, Parsers, ViewConfig) {
                                 console.info('required controller libs',performance.now()); 
                                 ctwc = new Constants();
@@ -389,7 +407,7 @@ require(['jquery'],function() {
                                 ctwgc = new GridConfig();
                                 ctwgrc = new GraphConfig();
                                 ctwp = new Parsers();
-                                ctwvc = new ViewConfig();
+                                // ctwvc = new ViewConfig();
                                 contentHandler.featureAppDefObj.resolve();
                             });
                         });

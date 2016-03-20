@@ -1,11 +1,6 @@
 define([
     'core-basedir/js/views/GridView',
     'core-basedir/js/views/AccordianView',
-    'core-basedir/js/views/BarChartInfoView',
-    'core-basedir/js/views/BreadcrumbDropdownView',
-    'core-basedir/js/views/BreadcrumbTextView',
-    'core-basedir/js/views/ChartView',
-    'core-basedir/js/views/ControlPanelView',
     'core-basedir/js/views/DetailsView',
     'core-basedir/js/views/DonutChartView',
     'core-basedir/js/views/FormAutoCompleteTextBoxView',
@@ -28,7 +23,6 @@ define([
     'core-basedir/js/views/GridFooterView',
     'core-basedir/js/views/HeatChartView',
     'core-basedir/js/views/HorizontalBarChartView',
-    'core-basedir/js/views/InfoboxesView',
     'core-basedir/js/views/LineBarWithFocusChartView',
     'core-basedir/js/views/LineWithFocusChartView',
     'core-basedir/js/views/LoginWindowView',
@@ -40,12 +34,9 @@ define([
     'core-basedir/js/views/QueryResultLineChartView',
     'core-basedir/js/views/QuerySelectView',
     'core-basedir/js/views/QueryWhereView',
-    'core-basedir/js/views/SectionView',
     'core-basedir/js/views/SparklineView',
     'core-basedir/js/views/TabsView',
-    'core-basedir/js/views/WidgetView',
     'core-basedir/js/views/WizardView',
-    'core-basedir/js/views/ZoomScatterChartView'
         ], function() {});
 
 

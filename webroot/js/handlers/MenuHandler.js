@@ -255,7 +255,6 @@ define(['underscore'], function (_) {
                 return true;
             else
                 return false;
-
         }
 
         /*
