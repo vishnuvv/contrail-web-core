@@ -69,18 +69,6 @@ $(document).ready(function () {
         return false;
     });
 
-    //Handle if any ajax response fails because of session expiry and redirect to login page
-    $(document).ajaxComplete(function (event, xhr, settings) {
-        var urlHash = window.location.hash;
-        var redirectHeader = xhr.getResponseHeader('X-Redirect-Url');
-        if (redirectHeader != null) {
-            //Carry the current hash parameters to redirect URL(login page) such that user will be taken to the same page once he logs in
-            if (redirectHeader.indexOf('#') == -1)
-                window.location.href = redirectHeader + urlHash;
-            else
-                window.location.href = redirectHeader;
-        }
-    });
 
     // layoutHandler.load();
 
@@ -89,21 +77,6 @@ $(document).ready(function () {
     //Get the CSRF token from cookie
     // globalObj['_csrf'] = getCookie('_csrf');
     // delete_cookie('_csrf');
-    $.ajaxSetup({
-        cache: false,
-        crossDomain: true,
-        //set the default timeout as 30 seconds
-        timeout: 30000,
-        beforeSend: function (xhr, settings) {
-            if (globalObj['webServerInfo'] != null && globalObj['webServerInfo']['loggedInOrchestrationMode'] != null)
-                xhr.setRequestHeader("x-orchestrationmode", globalObj['webServerInfo']['loggedInOrchestrationMode']);
-            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-            xhr.setRequestHeader("X-CSRF-Token", getCookie('_csrf'));
-        },
-        error: function (xhr, e) {
-            //ajaxDefErrorHandler(xhr);
-        }
-    });
 
     //$(window).resize(onWindowResize);
     lastHash = $.bbq.getState();

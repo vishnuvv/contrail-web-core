@@ -1106,10 +1106,11 @@ function authenticate (req, res, appData, callback)
         }
 
         plugins.setAllCookies(req, res, appData, {'username': username}, function() {
-            if(urlPath != '') 
+            commonUtils.handleJSONResponse(null,res,{status:'success'});
+            /*if(urlPath != '') 
                 res.redirect(urlPath + urlHash);
             else
-                res.redirect('/' + urlHash);
+                res.redirect('/' + urlHash);*/
         });
     });
 

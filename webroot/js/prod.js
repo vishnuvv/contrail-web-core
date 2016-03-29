@@ -24,7 +24,8 @@ var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defau
     pkgBaseDir = defaultBaseDir;
 require.config({
     bundles: {
-        'chart-libs'        : ['d3','nv.d3'],
+        // 'chart-libs'        : ['d3','nv.d3'],
+        'chart-libs'        : [],
         'thirdparty-libs'   : ['knockback','slick.checkboxselectcolumn','slick.rowselectionmodel','select2','slick.grid','validation'],
         'core-bundle'       : ['controller-view-model'],
         'contrail-core-views':[
@@ -119,6 +120,8 @@ require.config({
 // });
 require(['jquery','nonamd-libs'],function() {
 });
+require(['core-bundle','controller-bundle'],function() {
+});
 // require(['text!templates/core.common.tmpl'],function() {
 // });
 function loadAjaxRequest(ajaxCfg,callback) {
@@ -163,7 +166,62 @@ function loadCommonTemplates() {
     templateLoader.loadExtTemplate('/templates/core.common.tmpl');
     // $.ajaxSetup({async:true});
 }
+function getCookie(name) {
+	if(name != null) {
+	    var cookies = document.cookie.split(";");
+	    for (var i = 0; i < cookies.length; i++) {
+	        var x = cookies[i].substr(0, cookies[i].indexOf("="));
+	        var y = cookies[i].substr(cookies[i].indexOf("=") + 1);
+	        x = x.replace(/^s+|s+$/g, "").trim();
+	        if (x == name)
+	            return unescape(y);
+	    }
+	}
+    return false;
+}
 require(['jquery'],function() {
+    $.ajaxSetup({
+        cache: false,
+        crossDomain: true,
+        //set the default timeout as 30 seconds
+        timeout: 30000,
+        beforeSend: function (xhr, settings) {
+            if (globalObj['webServerInfo'] != null && globalObj['webServerInfo']['loggedInOrchestrationMode'] != null)
+                xhr.setRequestHeader("x-orchestrationmode", globalObj['webServerInfo']['loggedInOrchestrationMode']);
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            xhr.setRequestHeader("X-CSRF-Token", getCookie('_csrf'));
+        },
+        error: function (xhr, e) {
+            //ajaxDefErrorHandler(xhr);
+        }
+    });
+    //Handle if any ajax response fails because of session expiry and redirect to login page
+    //If authenticated,show app-container,else show signin-container
+    $(document).ajaxComplete(function (event, xhr, settings) {
+        var urlHash = window.location.hash;
+        var redirectHeader = xhr.getResponseHeader('X-Redirect-Url');
+        if (redirectHeader != null) {
+            //Not authenticated
+            // $('#sigin-container').show();
+            // $('#app-container').hide();
+            $('#signin-container').removeClass('hide');
+            $('#app-container').addClass('hide');
+            /*
+            //Carry the current hash parameters to redirect URL(login page) such that user will be taken to the same page once he logs in
+            if (redirectHeader.indexOf('#') == -1)
+                window.location.href = redirectHeader + urlHash;
+            else
+                window.location.href = redirectHeader;
+            */
+        } else {
+            // $('#signin-container').hide();
+            // $('#app-container').show();
+            $('#signin-container').addClass('hide');
+            $('#app-container').removeClass('hide');
+        }
+    });
+    $('#signin').click(authenticate);
+
     require(['jquery-dep-libs'],function() {});
     globalObj['layoutDefObj'] = $.Deferred();
     loadCommonTemplates();
@@ -212,16 +270,42 @@ require(['jquery'],function() {
         return webServerInfo;
     }
 
+    function authenticate() {
+        //Compares client UTC time with the server UTC time and display alert if mismatch exceeds the threshold
+        $.ajax({
+            url: '/authenticate',
+            type: "POST",
+            data: JSON.stringify({username:$("[name='username']").val(),password:$("[name='password']").val()}),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json"
+        }).done(function (response) {
+            if(response != null && response.status == "success") {
+                $('#app-container').show();
+                $.ajaxSetup({
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRF-Token", getCookie('_csrf'));
+                    }
+                });
+                getWebServerInfo();
+            } else {
+                //Display login-error message
+            }
+        });
+    }
+
     function getWebServerInfo(project, callback,fromCache) {
-        console.info('start: getWebServerInfo', performance.now());
+        if(performance)
+            console.info('start: getWebServerInfo', performance.now());
         var fromCache = (fromCache == null) ? false : fromCache;
         if(fromCache == false || globalObj['webServerInfo'] == null) {
             //Compares client UTC time with the server UTC time and display alert if mismatch exceeds the threshold
             $.ajax({
                 url: '/api/service/networking/web-server-info?project=' + 'admin'
             }).done(function (webServerInfo) {
+                
                 globalObj['webServerInfo'] = parseWebServerInfo(webServerInfo);
-                console.info('start: fetching menu.xml',performance.now());
+                if(performance)
+                    console.info('start: fetching menu.xml',performance.now());
                 $.ajax({
                     url:'/' + globalObj['mFileName'] + '?built_at=' + built_at
                 }).done(function(xml) {
@@ -377,8 +461,6 @@ require(['jquery'],function() {
                         layoutHandler = new LayoutHandler();
                         layoutHandler.load();
                         //Load core utils
-                        require(['core-bundle','controller-bundle'],function() {
-                        });
 
                         require(['core-bundle'],function() {
                             require(['core-constants','core-formatters','core-labels','core-messages',
