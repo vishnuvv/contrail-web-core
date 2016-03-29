@@ -174,6 +174,8 @@ exports.isSessionAuthenticated = function(req) {
    if so, then redirect to the last page, user visited
  */
 checkAndRedirect = function(req, res, sendFile) {
+    res.sendfile(sendFile);
+    return;
     var data = exports.checkURLInAllowedList(req);
     var loginErrFile = 'webroot/html/login-error.html';
     if (null == data) {

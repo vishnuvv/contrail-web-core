@@ -1224,13 +1224,13 @@ function redirectToLogout (req, res, callback)
     //If URL has '/vcenter',then redirect to /vcenter/logout
     //x-orchestrationmode is set only for ajax requests,so if user changes browser URL then we need to check for loggedInOrchestrationMode
     if(req.headers['x-orchestrationmode'] != null && req.headers['x-orchestrationmode'] == 'vcenter') {
-        redURL = '/vcenter/logout';
+        redURL = '/vcenter/';
     } else if(req.headers['x-orchestrationmode'] != null && req.headers['x-orchestrationmode'] == 'none') {
-        redURL = '/logout';
+        redURL = '/';
     } else if(req['originalUrl'].indexOf('/vcenter') > -1) {
-        redURL = '/vcenter/logout';
+        redURL = '/vcenter/';
     } else {
-        redURL = '/logout';
+        redURL = '/';
     }
     redirectToURL(req, res, redURL);
     if (null != callback) {
@@ -1241,13 +1241,13 @@ function redirectToLogout (req, res, callback)
 function redirectToLogin (req, res)
 {
     if(req.headers['x-orchestrationmode'] != null && req.headers['x-orchestrationmode'] == 'vcenter') {
-        redURL = '/vcenter/login';
+        redURL = '/vcenter/';
     } else if(req.headers['x-orchestrationmode'] != null && req.headers['x-orchestrationmode'] == 'none') {
-        redURL = '/login';
+        redURL = '/';
     } else if(req['originalUrl'].indexOf('/vcenter') > -1) {
-        redURL = '/vcenter/login';
+        redURL = '/vcenter/';
     } else {
-        redURL = '/login';
+        redURL = '/';
     }
     redirectToURL(req, res, redURL);
 }
@@ -1274,6 +1274,10 @@ function redirectToURL(req, res, redURL)
            res.send(307, '');
        }
     } else {
+       if(redURL = "/") {
+            res.sendfile('webroot/html/dashboard.html');
+            return;
+       } 
        res.redirect(redURL);
     }
 }
