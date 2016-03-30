@@ -1,9 +1,4 @@
 $(document).ready(function () {
-    if (contrail.getCookie('username') != null) {
-        $('#user_info').text(contrail.getCookie('username'));
-    }
-
-    $('#user-profile').show();
 
     //Listener to expand/collapse widget based on toggleButton in widget header
     $("#content-container").find('div.widget-box div.widget-header div.widget-toolbar a[data-action="collapse"]').live('click', function () {

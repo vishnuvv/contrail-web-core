@@ -225,25 +225,66 @@ require(['jquery'],function() {
             $('#app-container').removeClass('hide');
         }
     });*/
+
+    function postAuthenticate() {
+        $('#signin-container').empty();
+        // $('#signin-container').addClass('hide');
+        $('#app-container').html($('#app-container-tmpl').text());
+        // $('#app-container').removeClass('hide');
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                xhr.setRequestHeader("X-CSRF-Token", getCookie('_csrf'));
+            }
+        });
+        getWebServerInfo();
+
+        if (contrail.getCookie('username') != null) {
+            $('#user_info').text(contrail.getCookie('username'));
+        }
+        $('#user-profile').show();
+        bindListeners();
+    }
+
+    function onAuthenticationReq() {
+        // $('#signin-container').removeClass('hide');
+        // $('#app-container').addClass('hide');
+        $('#signin-container').html($('#signin-container-tmpl').text());
+        $('#app-container').empty();
+        bindListeners();
+    }
+
     $.ajax({
         url: '/isauthenticated',
         type: "GET",
         dataType: "json"
-    }).done(function (response) {
+    }).done(function (response,textStatus,xhr) {
         var redirectHeader = xhr.getResponseHeader('X-Redirect-Url');
         if(response != null && response.status == "success") {
-            $('#signin-container').addClass('hide');
-            $('#app-container').removeClass('hide');
+            postAuthenticate();
         } else {
-            $('#signin-container').removeClass('hide');
-            $('#app-container').addClass('hide');
+            onAuthenticationReq();
         }
     }).fail(function(response) {
         console.info(response);
-        $('#signin-container').removeClass('hide');
-        $('#app-container').addClass('hide');
+        onAuthenticationReq();
     });
-    $('#signin').click(authenticate);
+
+    function logout() {
+        $.ajax({
+            url: '/logout',
+            type: "GET",
+            dataType: "json"
+        }).done(function (response) {
+            //Hide the app-container and show the signin-container
+            $('#signin-container').removeClass('hide');
+            $('#app-container').addClass('hide');
+        });
+    }
+
+    function bindListeners() {
+        $('#signin').click(authenticate);
+        $('#logout').click(logout);
+    }
 
     require(['jquery-dep-libs'],function() {});
     globalObj['layoutDefObj'] = $.Deferred();
@@ -302,14 +343,7 @@ require(['jquery'],function() {
             dataType: "json"
         }).done(function (response) {
             if(response != null && response.status == "success") {
-                $('#signin-container').hide();
-                $('#app-container').show();
-                $.ajaxSetup({
-                    beforeSend: function (xhr, settings) {
-                        xhr.setRequestHeader("X-CSRF-Token", getCookie('_csrf'));
-                    }
-                });
-                getWebServerInfo();
+                postAuthenticate();
             } else {
                 //Display login-error message
             }
