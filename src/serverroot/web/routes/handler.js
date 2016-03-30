@@ -37,6 +37,16 @@ exports.admin = function (req, res) {
     checkAndRedirect(req, res, 'html/admin.html');
 };
 
+exports.isAuthenticated = function(req,res) {
+    var retData = {}
+    if(req.session.isAuthenticated == true) {
+        retData = {status:"success"};
+    } else {
+        retData = {status:"failure"};
+    }
+    commonUtils.handleJSONResponse(null,res,retData);
+}
+
 function login (req, res)
 {
     res.sendfile('webroot/html/login.html');
@@ -353,4 +363,3 @@ exports.vcenter_login = vcenter_login;
 exports.vcenter_logout = vcenter_logout;
 exports.doAuthenticate = doAuthenticate;
 exports.doVcenterAuthenticate = doVcenterAuthenticate;
-

@@ -180,6 +180,7 @@ function getCookie(name) {
     return false;
 }
 require(['jquery'],function() {
+    loadCommonTemplates();
     $.ajaxSetup({
         cache: false,
         crossDomain: true,
@@ -195,36 +196,57 @@ require(['jquery'],function() {
             //ajaxDefErrorHandler(xhr);
         }
     });
+    /*
+    var sessionAuthenticatedCheckDone = false;
     //Handle if any ajax response fails because of session expiry and redirect to login page
     //If authenticated,show app-container,else show signin-container
     $(document).ajaxComplete(function (event, xhr, settings) {
         var urlHash = window.location.hash;
         var redirectHeader = xhr.getResponseHeader('X-Redirect-Url');
+        if(sessionAuthenticatedDone == true) {
+            return;
+        }
+        sessionAuthenticatedCheckDone = true;
         if (redirectHeader != null) {
             //Not authenticated
             // $('#sigin-container').show();
             // $('#app-container').hide();
             $('#signin-container').removeClass('hide');
             $('#app-container').addClass('hide');
-            /*
             //Carry the current hash parameters to redirect URL(login page) such that user will be taken to the same page once he logs in
             if (redirectHeader.indexOf('#') == -1)
                 window.location.href = redirectHeader + urlHash;
             else
                 window.location.href = redirectHeader;
-            */
         } else {
             // $('#signin-container').hide();
             // $('#app-container').show();
             $('#signin-container').addClass('hide');
             $('#app-container').removeClass('hide');
         }
+    });*/
+    $.ajax({
+        url: '/isauthenticated',
+        type: "GET",
+        dataType: "json"
+    }).done(function (response) {
+        var redirectHeader = xhr.getResponseHeader('X-Redirect-Url');
+        if(response != null && response.status == "success") {
+            $('#signin-container').addClass('hide');
+            $('#app-container').removeClass('hide');
+        } else {
+            $('#signin-container').removeClass('hide');
+            $('#app-container').addClass('hide');
+        }
+    }).fail(function(response) {
+        console.info(response);
+        $('#signin-container').removeClass('hide');
+        $('#app-container').addClass('hide');
     });
     $('#signin').click(authenticate);
 
     require(['jquery-dep-libs'],function() {});
     globalObj['layoutDefObj'] = $.Deferred();
-    loadCommonTemplates();
 
     SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformToElement || function(toElement) {
         return toElement.getScreenCTM().inverse().multiply(this.getScreenCTM());
@@ -280,6 +302,7 @@ require(['jquery'],function() {
             dataType: "json"
         }).done(function (response) {
             if(response != null && response.status == "success") {
+                $('#signin-container').hide();
                 $('#app-container').show();
                 $.ajaxSetup({
                     beforeSend: function (xhr, settings) {
@@ -323,7 +346,7 @@ require(['jquery'],function() {
             console.info('done: getWebServerInfo', performance.now());
         }
     };
-    getWebServerInfo();
+    // getWebServerInfo();
     function getCoreAppPaths(coreBaseDir, coreBuildDir) {
         /**
         * coreBaseDir: Apps Root directory.
