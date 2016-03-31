@@ -174,7 +174,13 @@ function initializeAppConfig (appObj)
         ((null != config.session) && (null != config.session.timeout)) ?
         config.session.timeout : global.MAX_AGE_SESSION_ID;
 
-    app.use(express.compress());
+    var compressOptions = {
+        filter: function(req, res) {
+            return /json|text|xml|javascript|tmpl/.test(res.getHeader('Content-Type'))
+        }
+    };
+    app.use(express.compress(compressOptions));
+    express.static.mime.define({'text/tmpl': ['tmpl']});
     registerStaticFiles(app);
     app.use(helmet.hsts({
         maxAge: maxAgeTime,
