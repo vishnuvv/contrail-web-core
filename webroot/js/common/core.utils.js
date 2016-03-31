@@ -459,6 +459,16 @@ define(['underscore'], function (_) {
                 onAllRenderCompleteCB = renderConfig['onAllRenderCompleteCB'];
                 lazyRenderingComplete  = renderConfig['lazyRenderingComplete'];
 
+                //If a require alias exists for the given path, use that
+                var checkRequirePath = viewPath.replace(/^core-basedir\//,'').replace(/^controller-basedir\//,'');
+                var pathMapping = _.invert(require.s.contexts._.config);
+                pathMapping = {
+                    '/js/views/AlertListView'   : 'mon-infra-alert-list-view',
+                    '/js/views/LogListView'     : 'mon-infra-log-list-view',      
+                    '/js/views/SystemInfoView'  : 'mon-infra-sysinfo-view',       
+                }
+                viewPath = ifNull(_.invert(require.s.contexts._.config)[checkRequirePath],viewPath);
+
                 require([viewPath], function(ElementView) {
                     elementView = new ElementView({el: parentElement, model: model, attributes: viewAttributes, rootView: rootView, onAllViewsRenderCompleteCB: onAllViewsRenderCompleteCB, onAllRenderCompleteCB: onAllRenderCompleteCB});
                     elementView.viewName = viewName;

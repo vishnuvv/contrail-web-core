@@ -45,7 +45,7 @@
             }
         },{
             name:"js/core-bundle",
-            exclude:['jquery','jquery-ui','underscore','d3']
+            exclude:['jquery','jquery-ui','underscore']
         },{
             name:"js/jquery-libs",
             exclude:['jquery','jquery-ui']

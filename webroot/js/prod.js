@@ -25,7 +25,7 @@ var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defau
 require.config({
     bundles: {
         // 'chart-libs'        : ['d3','nv.d3'],
-        'chart-libs'        : [],
+        // 'chart-libs'        : [],
         'thirdparty-libs'   : ['knockback','slick.checkboxselectcolumn','slick.rowselectionmodel','select2','slick.grid','validation'],
         'core-bundle'       : ['controller-view-model'],
         'contrail-core-views':[
@@ -120,7 +120,7 @@ require.config({
 // });
 require(['jquery','nonamd-libs'],function() {
 });
-require(['core-bundle','controller-bundle'],function() {
+require(['core-bundle','controller-bundle','controller-dashboard-libs'],function() {
 });
 // require(['text!templates/core.common.tmpl'],function() {
 // });
@@ -443,17 +443,17 @@ require(['jquery'],function() {
             'contrail-view-model'         : coreWebDir + '/js/models/ContrailViewModel',
             'contrail-model'              : coreWebDir + '/js/models/ContrailModel',
             'contrail-list-model'         : coreWebDir + '/js/models/ContrailListModel',
-            'mon-infra-node-list-model'   : coreWebDir + '/js/models/NodeListModel',
-            'mon-infra-log-list-model'    : coreWebDir + '/js/models/LogListModel',
+            // 'mon-infra-node-list-model'   : coreWebDir + '/js/models/NodeListModel',
+            // 'mon-infra-log-list-model'    : coreWebDir + '/js/models/LogListModel',
 
             // TODO: We need to discuss a criteria on which we should add definations to this file.
             'infoboxes'                   : coreWebDir + '/js/views/InfoboxesView',
             'barchart-cf'                 : coreWebDir + '/js/views/BarChartView',
-            'mon-infra-alert-list-view'   : coreWebDir + '/js/views/AlertListView',
+            // 'mon-infra-alert-list-view'   : coreWebDir + '/js/views/AlertListView',
             'mon-infra-alert-grid-view'   : coreWebDir + '/js/views/AlertGridView',
-            'mon-infra-log-list-view'     : coreWebDir + '/js/views/LogListView',
-            'mon-infra-sysinfo-view'      : coreWebDir + '/js/views/SystemInfoView',
-            'mon-infra-dashboard-view'    : coreWebDir + '/js/views/MonitorInfraDashboardView',
+            // 'mon-infra-log-list-view'     : coreWebDir + '/js/views/LogListView',
+            // 'mon-infra-sysinfo-view'      : coreWebDir + '/js/views/SystemInfoView',
+            // 'mon-infra-dashboard-view'    : coreWebDir + '/js/views/MonitorInfraDashboardView',
             'loginwindow-model'           : coreWebDir + '/js/models/LoginWindowModel'
         };
     };
