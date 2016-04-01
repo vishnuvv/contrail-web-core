@@ -15,8 +15,8 @@ define(['underscore'], function (_) {
             'serverManager': 'sm'
         };
 
-        this.loadMenu = function (webServerInfo) {
-            var mFileName = 'menu.xml';
+        this.loadMenu = function (xml) {
+            /*var mFileName = 'menu.xml';
             var featureMaps = [];
             if (null != webServerInfo['featurePkg']) {
                 var pkgList = webServerInfo['featurePkg'];
@@ -33,16 +33,16 @@ define(['underscore'], function (_) {
                 }
             }
             // $.get('/' + mFileName+ '?built_at=' + built_at, function (xml) {
-            globalObj['layoutDefObj'].done(function(xml) {
+            globalObj['layoutDefObj'].done(function(xml) {*/
                 menuObj = $.xml2json(xml);
                 var disabledFeatures = globalObj['webServerInfo']['disabledFeatures'];
                 var featurePkgsInfo = globalObj['webServerInfo']['featurePkgsInfo'];
                 processXMLJSON(menuObj, disabledFeatures);
                 var menuShortcuts = contrail.getTemplate4Id('menu-shortcuts')(menuHandler.filterMenuItems(menuObj['items']['item'], 'menushortcut', featurePkgsInfo));
                 $("#sidebar-shortcuts").html(menuShortcuts);
-                ['items']['item'] = menuHandler.filterMenuItems(menuObj['items']['item']);
+                // ['items']['item'] = menuHandler.filterMenuItems(menuObj['items']['item']);
                 initMenuDefObj.resolve();
-            });
+            //});
 
             //Add an event listener for clicking on menu items
             $('#menu').on('click', 'ul > li > a', function (e) {

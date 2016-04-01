@@ -37,14 +37,57 @@ exports.admin = function (req, res) {
     checkAndRedirect(req, res, 'html/admin.html');
 };
 
+exports.getMenuXML = function(req,res) {
+//construct the name of menu xml file to be returned based on enabled packages
+    var featurePkgToMenuNameMap = {
+        'webController': 'wc',
+        'webStorage': 'ws',
+        'serverManager': 'sm'
+    },featureMaps = [];
+    var webServerInfo = {featurePkg:{}};
+
+    var pkgList = process.mainModule.exports['pkgList'];
+    var pkgLen = pkgList.length;
+    var activePkgs = [];
+    for (var i = 1; i < pkgLen; i++) {
+        activePkgs.push(pkgList[i]['pkgName']);
+    }
+    /* It may happen that user has written same config multiple times in config
+     * file
+     */
+    activePkgs = _.uniq(activePkgs);
+    var pkgCnt = activePkgs.length;
+    for (var i = 0; i < pkgCnt; i++) {
+        webServerInfo['featurePkg'][activePkgs[i]] = true;
+    }
+
+    if (null != webServerInfo['featurePkg']) {
+        var pkgList = webServerInfo['featurePkg'];
+        for (var key in pkgList) {
+            if (null != featurePkgToMenuNameMap[key]) {
+                featureMaps.push(featurePkgToMenuNameMap[key]);
+            } else {
+                console.log('featurePkgToMenuNameMap key is null: ' + key);
+            }
+        }
+        if (featureMaps.length > 0) {
+            featureMaps.sort();
+            var mFileName = 'menu_' + featureMaps.join('_') + '.xml';
+            res.sendfile('webroot/' + mFileName);
+        }
+    }
+}
+
 exports.isAuthenticated = function(req,res) {
     var retData = {}
     if(req.session.isAuthenticated == true) {
-        retData = {status:"success"};
+        // retData = {status:"success"};
+        commonUtils.getWebServerInfo(req,res)
+        return;
     } else {
         retData = {status:"failure"};
+        commonUtils.handleJSONResponse(null,res,retData);
     }
-    commonUtils.handleJSONResponse(null,res,retData);
 }
 
 function login (req, res)

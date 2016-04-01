@@ -10898,8 +10898,8 @@ define('menu-handler',['underscore'], function (_) {
             'serverManager': 'sm'
         };
 
-        this.loadMenu = function (webServerInfo) {
-            var mFileName = 'menu.xml';
+        this.loadMenu = function (xml) {
+            /*var mFileName = 'menu.xml';
             var featureMaps = [];
             if (null != webServerInfo['featurePkg']) {
                 var pkgList = webServerInfo['featurePkg'];
@@ -10916,7 +10916,7 @@ define('menu-handler',['underscore'], function (_) {
                 }
             }
             // $.get('/' + mFileName+ '?built_at=' + built_at, function (xml) {
-            globalObj['layoutDefObj'].done(function(xml) {
+            globalObj['layoutDefObj'].done(function(xml) {*/
                 menuObj = $.xml2json(xml);
                 var disabledFeatures = globalObj['webServerInfo']['disabledFeatures'];
                 var featurePkgsInfo = globalObj['webServerInfo']['featurePkgsInfo'];
@@ -10925,7 +10925,7 @@ define('menu-handler',['underscore'], function (_) {
                 $("#sidebar-shortcuts").html(menuShortcuts);
                 ['items']['item'] = menuHandler.filterMenuItems(menuObj['items']['item']);
                 initMenuDefObj.resolve();
-            });
+            //});
 
             //Add an event listener for clicking on menu items
             $('#menu').on('click', 'ul > li > a', function (e) {
@@ -11717,9 +11717,9 @@ define('layout-handler',['underscore', 'menu-handler', 'content-handler'], funct
 
             globalObj['layoutDefObj'].done(
             // getWebServerInfo(contrail.getCookie('project'),
-                             function(webServerInfo) {
-                var webServerInfo = globalObj['webServerInfo'];
-                menuHandler.loadMenu(webServerInfo);
+                             function(menuXML) {
+                // var webServerInfo = globalObj['webServerInfo'];
+                menuHandler.loadMenu(menuXML);
                 menuHandler.handleSideMenu();
                 /**
                  * If there is existing instance of contentHandler, use it. Else create new instance.

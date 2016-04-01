@@ -1376,11 +1376,13 @@ function getWebServerInfo (req, res, appData)
         logutils.logger.error("We did not get Orchestration Model");
         assert(0);
     }
-    serverObj ['serverUTCTime'] = commonUtils.getCurrentUTCTime();
+    // var serverObj = {};
+    serverObj['serverUTCTime'] = commonUtils.getCurrentUTCTime();
     serverObj['hostName'] = os.hostname();
     serverObj['role'] = req.session.userRole;
     serverObj['featurePkg'] = {};
     serverObj['uiConfig'] = ui;
+    serverObj['isAuthenticated'] = req.session.isAuthenticated;
     serverObj['discoveryEnabled'] = getValueByJsonPath(config,
                                                        'discoveryService;enable',
                                                        true);
@@ -1425,12 +1427,12 @@ function getWebServerInfo (req, res, appData)
     }
     var userObj = {'tokenid': tokenId, 'tenant': project, 'req': req};
     var authApi = require('../common/auth.api');
-    authApi.getUIUserRoleByTenant(userObj, function(err, roles) {
-        if ((null == err) && (null != roles)) {
-            serverObj['role'] = roles;
-        }
+    // authApi.getUIUserRoleByTenant(userObj, function(err, roles) {
+    //     if ((null == err) && (null != roles)) {
+    //         serverObj['role'] = roles;
+    //     }
         commonUtils.handleJSONResponse(null, res, serverObj);
-    });
+    // });
 }
 
 function getUserRoleListPerTenant (req, res, callback)

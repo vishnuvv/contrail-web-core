@@ -166,18 +166,20 @@ function loadCommonTemplates() {
     templateLoader.loadExtTemplate('/templates/core.common.tmpl');
     // $.ajaxSetup({async:true});
 }
-function getCookie(name) {
-	if(name != null) {
-	    var cookies = document.cookie.split(";");
-	    for (var i = 0; i < cookies.length; i++) {
-	        var x = cookies[i].substr(0, cookies[i].indexOf("="));
-	        var y = cookies[i].substr(cookies[i].indexOf("=") + 1);
-	        x = x.replace(/^s+|s+$/g, "").trim();
-	        if (x == name)
-	            return unescape(y);
-	    }
-	}
-    return false;
+var loadUtils = {
+    getCookie: function(name) {
+        if(name != null) {
+            var cookies = document.cookie.split(";");
+            for (var i = 0; i < cookies.length; i++) {
+                var x = cookies[i].substr(0, cookies[i].indexOf("="));
+                var y = cookies[i].substr(cookies[i].indexOf("=") + 1);
+                x = x.replace(/^s+|s+$/g, "").trim();
+                if (x == name)
+                    return unescape(y);
+            }
+        }
+        return false;
+    }
 }
 require(['jquery'],function() {
     loadCommonTemplates();
@@ -190,7 +192,7 @@ require(['jquery'],function() {
             if (globalObj['webServerInfo'] != null && globalObj['webServerInfo']['loggedInOrchestrationMode'] != null)
                 xhr.setRequestHeader("x-orchestrationmode", globalObj['webServerInfo']['loggedInOrchestrationMode']);
             xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-            xhr.setRequestHeader("X-CSRF-Token", getCookie('_csrf'));
+            xhr.setRequestHeader("X-CSRF-Token", loadUtils.getCookie('_csrf'));
         },
         error: function (xhr, e) {
             //ajaxDefErrorHandler(xhr);
@@ -226,23 +228,28 @@ require(['jquery'],function() {
         }
     });*/
 
-    function postAuthenticate() {
+    var menuXMLLoadDefObj = $.Deferred();
+    function postAuthenticate(response) {
         $('#signin-container').empty();
         // $('#signin-container').addClass('hide');
         $('#app-container').html($('#app-container-tmpl').text());
         // $('#app-container').removeClass('hide');
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
-                xhr.setRequestHeader("X-CSRF-Token", getCookie('_csrf'));
+                xhr.setRequestHeader("X-CSRF-Token", loadUtils.getCookie('_csrf'));
             }
         });
-        getWebServerInfo();
+        globalObj['webServerInfo'] = parseWebServerInfo(response);
 
-        if (contrail.getCookie('username') != null) {
-            $('#user_info').text(contrail.getCookie('username'));
+        if (loadUtils.getCookie('username') != null) {
+            $('#user_info').text(loadUtils.getCookie('username'));
         }
         $('#user-profile').show();
         bindListeners();
+        //Start rendering the layout
+        menuXMLLoadDefObj.done(function(menuXML) {
+            globalObj['layoutDefObj'].resolve(menuXML);
+        });
     }
 
     function onAuthenticationReq() {
@@ -259,11 +266,29 @@ require(['jquery'],function() {
         dataType: "json"
     }).done(function (response,textStatus,xhr) {
         var redirectHeader = xhr.getResponseHeader('X-Redirect-Url');
-        if(response != null && response.status == "success") {
-            postAuthenticate();
+        if(response != null && response.isAuthenticated == true) {
+            postAuthenticate(response);
         } else {
             onAuthenticationReq();
         }
+    }).fail(function(response) {
+        console.info(response);
+        onAuthenticationReq();
+    });
+
+    $.ajax({
+        url: '/menu',
+        type: "GET",
+        dataType: "xml"
+    }).done(function (response,textStatus,xhr) {
+        menuXML = response;
+        menuXMLLoadDefObj.resolve(menuXML);
+        // var redirectHeader = xhr.getResponseHeader('X-Redirect-Url');
+        // if(response != null && response.isAuthenticated == "true") {
+        //     postAuthenticate(response);
+        // } else {
+        //     onAuthenticationReq();
+        // }
     }).fail(function(response) {
         console.info(response);
         onAuthenticationReq();
@@ -275,9 +300,10 @@ require(['jquery'],function() {
             type: "GET",
             dataType: "json"
         }).done(function (response) {
-            //Hide the app-container and show the signin-container
+            onAuthenticationReq();
+            /*//Hide the app-container and show the signin-container
             $('#signin-container').removeClass('hide');
-            $('#app-container').addClass('hide');
+            $('#app-container').addClass('hide');*/
         });
     }
 
@@ -342,8 +368,8 @@ require(['jquery'],function() {
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }).done(function (response) {
-            if(response != null && response.status == "success") {
-                postAuthenticate();
+            if(response != null && response.isAuthenticated == true) {
+                postAuthenticate(response);
             } else {
                 //Display login-error message
             }
@@ -516,7 +542,7 @@ require(['jquery'],function() {
                         // initCustomKOBindings(window.ko);
                         // initDomEvents();
                         layoutHandler = new LayoutHandler();
-                        layoutHandler.load();
+                        // layoutHandler.load();
                         //Load core utils
 
                         require(['core-bundle'],function() {

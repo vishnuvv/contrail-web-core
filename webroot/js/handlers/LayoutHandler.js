@@ -14,9 +14,9 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
 
             globalObj['layoutDefObj'].done(
             // getWebServerInfo(contrail.getCookie('project'),
-                             function(webServerInfo) {
+                             function(menuObj) {
                 var webServerInfo = globalObj['webServerInfo'];
-                menuHandler.loadMenu(webServerInfo);
+                menuHandler.loadMenu(menuObj);
                 menuHandler.handleSideMenu();
                 /**
                  * If there is existing instance of contentHandler, use it. Else create new instance.

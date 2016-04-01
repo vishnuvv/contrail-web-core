@@ -157,7 +157,7 @@ function registerRestrictedURL ()
  */
 function checkLoginReq (req)
 {
-  return ((req.url == '/login') || (req.url == '/authenticate') || (req.url == '/vcenter/authenticate') ||
+  return ((req.url.match(/^\/isauthenticated/) != null) || (req.url.match(/^\/menu/) != null) || (req.url == '/login') || (req.url == '/authenticate') || (req.url == '/vcenter/authenticate') ||
           (req.url == '/logout') || (req.url == '/vcenter/login') ||
           (req.url == '/vcenter/logout'));
 }
