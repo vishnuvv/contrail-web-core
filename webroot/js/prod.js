@@ -228,7 +228,7 @@ require(['jquery'],function() {
         }
     });*/
 
-    var menuXMLLoadDefObj = $.Deferred();
+    var menuXMLLoadDefObj = $.Deferred(),layoutHandlerLoadDefObj = $.Deferred();
     function postAuthenticate(response) {
         $('#signin-container').empty();
         // $('#signin-container').addClass('hide');
@@ -246,10 +246,19 @@ require(['jquery'],function() {
         }
         $('#user-profile').show();
         bindListeners();
-        //Start rendering the layout
-        menuXMLLoadDefObj.done(function(menuXML) {
-            globalObj['layoutDefObj'].resolve(menuXML);
+        // if(typeof(layoutHandler) != "undefined") {
+        //     layoutHandler.load(menuXML);
+        // } else {
+        $.when.apply(window,[menuXMLLoadDefObj,layoutHandlerLoadDefObj]).done(function(menuXML) {
+            layoutHandler.load(menuXML);
         });
+        // }
+
+        //Start rendering the layout
+        // menuXMLLoadDefObj.done(function(menuXML) {
+            // globalObj['layoutDefObj'].resolve(menuXML);
+            // layoutHandler.load(menuXML);
+        // });
     }
 
     function onAuthenticationReq() {
@@ -268,6 +277,7 @@ require(['jquery'],function() {
         var redirectHeader = xhr.getResponseHeader('X-Redirect-Url');
         if(response != null && response.isAuthenticated == true) {
             postAuthenticate(response);
+            // layoutHandler.load(menuXML);
         } else {
             onAuthenticationReq();
         }
@@ -542,7 +552,10 @@ require(['jquery'],function() {
                         // initCustomKOBindings(window.ko);
                         // initDomEvents();
                         layoutHandler = new LayoutHandler();
-                        // layoutHandler.load();
+                        layoutHandlerLoadDefObj.resolve();
+                        // menuXMLLoadDefObj.done(function(menuXML) {
+                        //     layoutHandler.load(menuXML);
+                        // });
                         //Load core utils
 
                         require(['core-bundle'],function() {

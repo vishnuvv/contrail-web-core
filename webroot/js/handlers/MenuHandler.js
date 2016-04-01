@@ -41,7 +41,7 @@ define(['underscore'], function (_) {
                 var menuShortcuts = contrail.getTemplate4Id('menu-shortcuts')(menuHandler.filterMenuItems(menuObj['items']['item'], 'menushortcut', featurePkgsInfo));
                 $("#sidebar-shortcuts").html(menuShortcuts);
                 // ['items']['item'] = menuHandler.filterMenuItems(menuObj['items']['item']);
-                initMenuDefObj.resolve();
+                // initMenuDefObj.resolve();
             //});
 
             //Add an event listener for clicking on menu items
@@ -53,7 +53,7 @@ define(['underscore'], function (_) {
                 }
             });
 
-            $.when.apply(window, [initMenuDefObj]).done(function () {
+            // $.when.apply(window, [initMenuDefObj]).done(function () {
                 //Intialize the alarm flag
                 var disabledFeatures = ifNull(globalObj['webServerInfo']['disabledFeatures']['disabled'],[]);
                 $.each(disabledFeatures, function (i,d) {
@@ -61,8 +61,8 @@ define(['underscore'], function (_) {
                        cowu.getAlarmsFromAnalytics = false;
                    }
                 });
-                self.deferredObj.resolve();
-            });
+            //     self.deferredObj.resolve();
+            // });
         }
 
         //Filter the menu items based

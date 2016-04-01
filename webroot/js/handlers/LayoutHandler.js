@@ -9,12 +9,12 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
         //Don't escape ":[]" characters while pushing state via bbq
         $.param.fragment.noEscape(":[]");
 
-        this.load = function () {
+        this.load = function (menuObj) {
             menuHandler = new MenuHandler();
 
-            globalObj['layoutDefObj'].done(
+            // globalObj['layoutDefObj'].done(
             // getWebServerInfo(contrail.getCookie('project'),
-                             function(menuObj) {
+                             // function(menuObj) {
                 var webServerInfo = globalObj['webServerInfo'];
                 menuHandler.loadMenu(menuObj);
                 menuHandler.handleSideMenu();
@@ -28,10 +28,10 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
                 //     contentHandler = new ContentHandler();
                 // }
 
-                $.when.apply(window, [menuHandler.deferredObj]).done(function () {
+                // $.when.apply(window, [menuHandler.deferredObj]).done(function () {
                     self.onHashChange({}, $.bbq.getState());
-                });
-            });
+                // });
+            // });
         };
 
         /** Get view height excluding header & footer **/

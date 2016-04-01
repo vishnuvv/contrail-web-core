@@ -10923,8 +10923,8 @@ define('menu-handler',['underscore'], function (_) {
                 processXMLJSON(menuObj, disabledFeatures);
                 var menuShortcuts = contrail.getTemplate4Id('menu-shortcuts')(menuHandler.filterMenuItems(menuObj['items']['item'], 'menushortcut', featurePkgsInfo));
                 $("#sidebar-shortcuts").html(menuShortcuts);
-                ['items']['item'] = menuHandler.filterMenuItems(menuObj['items']['item']);
-                initMenuDefObj.resolve();
+                // ['items']['item'] = menuHandler.filterMenuItems(menuObj['items']['item']);
+                // initMenuDefObj.resolve();
             //});
 
             //Add an event listener for clicking on menu items
@@ -10936,7 +10936,7 @@ define('menu-handler',['underscore'], function (_) {
                 }
             });
 
-            $.when.apply(window, [initMenuDefObj]).done(function () {
+            // $.when.apply(window, [initMenuDefObj]).done(function () {
                 //Intialize the alarm flag
                 var disabledFeatures = ifNull(globalObj['webServerInfo']['disabledFeatures']['disabled'],[]);
                 $.each(disabledFeatures, function (i,d) {
@@ -10944,8 +10944,8 @@ define('menu-handler',['underscore'], function (_) {
                        cowu.getAlarmsFromAnalytics = false;
                    }
                 });
-                self.deferredObj.resolve();
-            });
+            //     self.deferredObj.resolve();
+            // });
         }
 
         //Filter the menu items based
@@ -11712,14 +11712,14 @@ define('layout-handler',['underscore', 'menu-handler', 'content-handler'], funct
         //Don't escape ":[]" characters while pushing state via bbq
         $.param.fragment.noEscape(":[]");
 
-        this.load = function () {
+        this.load = function (menuObj) {
             menuHandler = new MenuHandler();
 
-            globalObj['layoutDefObj'].done(
+            // globalObj['layoutDefObj'].done(
             // getWebServerInfo(contrail.getCookie('project'),
-                             function(menuXML) {
-                // var webServerInfo = globalObj['webServerInfo'];
-                menuHandler.loadMenu(menuXML);
+                             // function(menuObj) {
+                var webServerInfo = globalObj['webServerInfo'];
+                menuHandler.loadMenu(menuObj);
                 menuHandler.handleSideMenu();
                 /**
                  * If there is existing instance of contentHandler, use it. Else create new instance.
@@ -11731,10 +11731,10 @@ define('layout-handler',['underscore', 'menu-handler', 'content-handler'], funct
                 //     contentHandler = new ContentHandler();
                 // }
 
-                $.when.apply(window, [menuHandler.deferredObj]).done(function () {
+                // $.when.apply(window, [menuHandler.deferredObj]).done(function () {
                     self.onHashChange({}, $.bbq.getState());
-                });
-            });
+                // });
+            // });
         };
 
         /** Get view height excluding header & footer **/

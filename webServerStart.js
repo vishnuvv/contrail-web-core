@@ -287,8 +287,12 @@ function registerReqToApp ()
     var csrfOptions = {eventEmitter: csrfInvalidEvent};
     var csrf = express.csrf(csrfOptions);
     //Populate the CSRF token in req.session on login request
-    myApp.get('/', csrf);
-    myApp.get('/vcenter/', csrf);
+    // myApp.get('/', csrf);
+    // myApp.get('/authenticate', csrf);
+    // myApp.get('/isauthenticated', csrf);
+    // myApp.get('/vcenter/', csrf);
+    // if(req.session._csrf == null)
+    //     req.session._csrf = utils.uid(24);
     //Enable CSRF token check for all URLs starting with "/api"
     myApp.post('/api/*', csrf);
 
