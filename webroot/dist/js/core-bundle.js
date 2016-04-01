@@ -17607,7 +17607,8 @@ define('mon-infra-dashboard-view',[
             var self = this;
             self.isRendered = true;
             var dashboardTmpl = contrail.getTemplate4Id(cowc.TMPL_INFRA_DASHBOARD);
-            self.$el.html(dashboardTmpl);
+            // self.$el.html(dashboardTmpl);
+            $(contentContainer).html(dashboardTmpl);
             this.infoBoxView = new InfoboxesView({
                 el: $(contentContainer).
                     find('#dashboard-infoboxes')

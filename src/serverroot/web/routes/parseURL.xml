@@ -45,6 +45,12 @@
         <callback>handler.login</callback>
     </item>
     <item>
+        <url>/menu</url>
+        <method>get</method>
+        <feature>monitoring</feature>
+        <callback>handler.getMenuXML</callback>
+    </item>
+    <item>
         <url>/vcenter/login</url>
         <method>get</method>
         <feature>monitoring</feature>
