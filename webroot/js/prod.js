@@ -19,7 +19,7 @@ if (globalObj['env'] == 'prod') {
     globalObj['buildBaseDir'] = '';
 }
 // defaultBaseDir = ".";
-var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defaultBaseDir,
+var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defaultBaseDir,ctWebDir = defaultBaseDir,
     smBaseDir = defaultBaseDir, strgBaseDir = defaultBaseDir,
     pkgBaseDir = defaultBaseDir;
 require.config({
@@ -31,8 +31,10 @@ require.config({
         'core-bundle'       : ['controller-view-model','crossfilter','lodash'],
         'contrail-core-views':[
     'core-basedir/js/views/GridView','core-basedir/js/views/AccordianView','core-basedir/js/views/DetailsView','core-basedir/js/views/DonutChartView','core-basedir/js/views/FormAutoCompleteTextBoxView','core-basedir/js/views/FormButtonView','core-basedir/js/views/FormCheckboxView','core-basedir/js/views/FormCollectionView','core-basedir/js/views/FormComboboxView','core-basedir/js/views/FormCompositeView','core-basedir/js/views/FormDateTimePickerView','core-basedir/js/views/FormDropdownView','core-basedir/js/views/FormEditableGridView','core-basedir/js/views/FormGridView','core-basedir/js/views/FormHierarchicalDropdownView','core-basedir/js/views/FormInputView','core-basedir/js/views/FormMultiselectView','core-basedir/js/views/FormNumericTextboxView','core-basedir/js/views/FormRadioButtonView','core-basedir/js/views/FormTextAreaView','core-basedir/js/views/FormTextView','core-basedir/js/views/GridFooterView','core-basedir/js/views/HeatChartView','core-basedir/js/views/HorizontalBarChartView','core-basedir/js/views/LineBarWithFocusChartView','core-basedir/js/views/LineWithFocusChartView','core-basedir/js/views/LoginWindowView','core-basedir/js/views/MultiBarChartView','core-basedir/js/views/MultiDonutChartView','core-basedir/js/views/NodeConsoleLogsView','core-basedir/js/views/QueryFilterView','core-basedir/js/views/QueryResultGridView','core-basedir/js/views/QueryResultLineChartView','core-basedir/js/views/QuerySelectView','core-basedir/js/views/QueryWhereView','core-basedir/js/views/SparklineView','core-basedir/js/views/TabsView','core-basedir/js/views/WizardView'],
-        'jquery-libs'       : ['jquery-ui',
-        'jquery.timer','jquery.ui.touch-punch','jquery.validate','jquery.tristate','jquery.multiselect','jquery.multiselect.filter','jquery.steps.min','jquery.panzoom','jquery-contextmenu','jquery.event.drag','jquery.droppick','jquery.datetimepicker']
+        'jquery-dep-libs'      : ['jquery-ui',
+         'jquery.timer','jquery.ui.touch-punch','jquery.validate','jquery.tristate','jquery.multiselect','jquery.multiselect.filter','jquery.steps.min','jquery.panzoom','jquery-contextmenu','jquery.event.drag','jquery.droppick','jquery.datetimepicker']
+        // 'jquery-libs'       : ['jquery-ui',
+        // 'jquery.timer','jquery.ui.touch-punch','jquery.validate','jquery.tristate','jquery.multiselect','jquery.multiselect.filter','jquery.steps.min','jquery.panzoom','jquery-contextmenu','jquery.event.drag','jquery.droppick','jquery.datetimepicker']
     },
     paths: {
         'core-srcdir'                 : coreBaseDir,
@@ -89,9 +91,9 @@ require.config({
         // 'contrail-libs': {
         //     deps:['jquery-libs','thirdparty-libs']
         // },
-        'thirdparty-libs': {
-            deps:['jquery-libs']
-        }
+        // 'thirdparty-libs': {
+        //     deps:['jquery-libs']
+        // }
     }
 });
 require.config({
@@ -108,7 +110,10 @@ require.config({
         // 'controller-libs': '../../../contrail-web-controller/dist/controller-libs'
         'controller-libs': 'controller-dist/js/controller-libs',
         'controller-bundle': 'controller-dist/js/controller-bundle',
-        'controller-dashboard-libs': 'controller-dist/js/controller-dashboard-libs'
+        'controller-dashboard-libs': 'controller-dist/js/controller-dashboard-libs',
+        'searchflow-model': 'controller-dist/monitor/infrastructure/underlay/ui/js/models/SearchFlowFormModel',
+        'traceflow-model': 'controller-dist/monitor/infrastructure/underlay/ui/js/models/TraceFlowTabModel',
+        'underlay-graph-model' : 'controller-dist/monitor/infrastructure/underlay/ui/js/models/UnderlayGraphModel'
     }
 })
 /*
