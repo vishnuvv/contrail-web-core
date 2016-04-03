@@ -18,7 +18,7 @@ if (globalObj['env'] == 'prod') {
     defaultBaseDir = defaultBaseDir.slice(0, -1);
     globalObj['buildBaseDir'] = '';
 }
-// defaultBaseDir = ".";
+defaultBaseDir = ".";
 var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defaultBaseDir,ctWebDir = defaultBaseDir,
     smBaseDir = defaultBaseDir, strgBaseDir = defaultBaseDir,
     pkgBaseDir = defaultBaseDir;
@@ -404,7 +404,8 @@ require(['jquery'],function() {
         console.info('done: loading common bundles',performance.now());
         //Get core-app paths and register to require
         require.config({
-            paths:getCoreAppPaths("","")
+            // paths:getCoreAppPaths("","./built" //Can be used for prod vs dev
+            paths:getCoreAppPaths(".","")
         });
         //Require all non-AMD modules that expose global variables if you use wrapShim option
         //Better to bundle all non-AMD modules together such that you can disable warpShim for that bundle..As seen requiring modules also taking decent time

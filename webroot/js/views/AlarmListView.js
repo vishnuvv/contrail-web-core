@@ -6,8 +6,10 @@ define([
     'underscore',
     'contrail-view',
     'contrail-list-model',
-    'cf-datasource'
-], function (_, ContrailView, ContrailListModel, CFDataSource) {
+    'cf-datasource',
+    'core-basedir/js/common/core.alarms.parsers',
+    'core-basedir/js/common/core.alarms.utils',
+], function (_, ContrailView, ContrailListModel, CFDataSource,coreAlarmParsers,coreAlarmUtils) {
     var AlarmListView = ContrailView.extend({
         el: $(contentContainer),
 

@@ -168,6 +168,6 @@ define(
                 }
 
             }
-            return CoreAlarmUtils;
+            return new CoreAlarmUtils();
        }
 );

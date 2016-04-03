@@ -46,10 +46,10 @@
         },{
             name:"js/core-bundle",
             exclude:['jquery','jquery-ui']//,'underscore','validation','knockout','knockback']
-        },{
+        }/*,{
             name:"js/jquery-libs",
             exclude:['jquery','jquery-ui']
-        }/*,{
+        },{
             name:"js/jquery-load-libs",
             exclude:['jquery']
         },{
