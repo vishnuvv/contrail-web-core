@@ -2020,5 +2020,5 @@ define([
         }
     }.init();
 
-    return QEGridConfig;
+    return new QEGridConfig();
 });

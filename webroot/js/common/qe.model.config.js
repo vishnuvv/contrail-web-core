@@ -178,5 +178,5 @@ define([
         return selectDataObject;
     }
 
-    return QEDefaultConfig;
+    return new QEDefaultConfig();
 });

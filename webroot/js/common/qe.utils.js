@@ -816,5 +816,5 @@ define([
         return operatorCode;
     };
 
-    return QEUtils;
+    return new QEUtils();
 });
