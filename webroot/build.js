@@ -7,7 +7,7 @@
     optimizeCss:'none',
     optimize:'none',
     baseUrl:".",
-    wrapShim:true,
+    // wrapShim:true,
     //Output directory
     dir:"dist",
     fileExclusionRegExp:/^(dist1|config|monitor|reports|setting|test)$/,
@@ -27,7 +27,7 @@
             ]
         },{
             name:"js/nonamd-libs",      //Libraries which need to be placed in global scope (web-utils,...) and don't depend on jQuery
-            exclude:['jquery','jquery-ui','knockout','bootstrap','jquery.xml2json','jquery.ba-bbq','jquery.json','d3'],
+            exclude:['jquery','jquery-ui','knockout','bootstrap','jquery.xml2json','jquery.ba-bbq','jquery.json','d3','backbone','validation'],
             override: {
                 wrapShim: false
             }
@@ -45,7 +45,7 @@
             }
         },{
             name:"js/core-bundle",
-            exclude:['jquery','jquery-ui','underscore']
+            exclude:['jquery','jquery-ui']//,'underscore','validation','knockout','knockback']
         },{
             name:"js/jquery-libs",
             exclude:['jquery','jquery-ui']
@@ -57,7 +57,11 @@
             exclude:['jquery','jquery.event.drag','d3','backbone','bootstrap','knockout']
         }*/,{
             name:'js/thirdparty-libs',
-            exclude:['jquery','jquery.event.drag']
+            exclude:['jquery','jquery.event.drag','knockout','backbone','knockback','validation'],
+            override: {
+                //As slickGrid depends on jquery.event.drag which is included in jquery-libs
+                wrapShim: true 
+            }
         //     create:true,
         }/*,{
             name:'js/contrail-libs',
@@ -66,7 +70,7 @@
             name:'js/contrail-core-views',
             exclude:['lodash','jquery','backbone','knockback','knockout','contrail-remote-data-handler','contrail-view',
                 'contrail-list-model','contrail-model','contrail-view-model','d3','nv.d3','slick.checkboxselectcolumn','jquery.event.drag',
-                'slick.grid','slick.rowselectionmodel']
+                'slick.grid','slick.rowselectionmodel','select2','jquery-ui','jquery.multiselect','jquery.multiselect.filter']
         },{
             name:'js/chart-libs',
             exclude:['jquery','lodash','backbone']

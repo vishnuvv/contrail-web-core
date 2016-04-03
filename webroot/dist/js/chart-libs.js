@@ -9502,9 +9502,6 @@
   if (typeof define === "function" && define.amd) define('d3',d3); else if (typeof module === "object" && module.exports) module.exports = d3;
   this.d3 = d3;
 }();
-(function(root) {
-define("nv.d3", ["d3"], function() {
-  return (function() {
 /* nvd3 version 1.8.1 (https://github.com/novus/nvd3) 2015-06-15 */
 (function(){
 
@@ -22803,10 +22800,12 @@ nv.models.sunburstChart = function() {
 
 nv.version = "1.8.1";
 })();
-return root.nv = nv;
-  }).apply(root, arguments);
-});
-}(this));
+define("nv.d3", ["d3"], (function (global) {
+    return function () {
+        var ret, fn;
+        return ret || global.nv;
+    };
+}(this)));
 
 define('js/chart-libs',[
         'd3',

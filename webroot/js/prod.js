@@ -26,8 +26,9 @@ require.config({
     bundles: {
         // 'chart-libs'        : ['d3','nv.d3'],
         // 'chart-libs'        : [],
-        'thirdparty-libs'   : ['knockback','slick.checkboxselectcolumn','slick.rowselectionmodel','select2','slick.grid','validation'],
-        'core-bundle'       : ['controller-view-model','crossfilter'],
+        // 'thirdparty-libs'   : ['knockback','slick.checkboxselectcolumn','slick.rowselectionmodel','select2','slick.grid','validation'],
+        'thirdparty-libs'   : ['slick.checkboxselectcolumn','slick.rowselectionmodel','select2','slick.grid'],
+        'core-bundle'       : ['controller-view-model','crossfilter','lodash'],
         'contrail-core-views':[
     'core-basedir/js/views/GridView','core-basedir/js/views/AccordianView','core-basedir/js/views/DetailsView','core-basedir/js/views/DonutChartView','core-basedir/js/views/FormAutoCompleteTextBoxView','core-basedir/js/views/FormButtonView','core-basedir/js/views/FormCheckboxView','core-basedir/js/views/FormCollectionView','core-basedir/js/views/FormComboboxView','core-basedir/js/views/FormCompositeView','core-basedir/js/views/FormDateTimePickerView','core-basedir/js/views/FormDropdownView','core-basedir/js/views/FormEditableGridView','core-basedir/js/views/FormGridView','core-basedir/js/views/FormHierarchicalDropdownView','core-basedir/js/views/FormInputView','core-basedir/js/views/FormMultiselectView','core-basedir/js/views/FormNumericTextboxView','core-basedir/js/views/FormRadioButtonView','core-basedir/js/views/FormTextAreaView','core-basedir/js/views/FormTextView','core-basedir/js/views/GridFooterView','core-basedir/js/views/HeatChartView','core-basedir/js/views/HorizontalBarChartView','core-basedir/js/views/LineBarWithFocusChartView','core-basedir/js/views/LineWithFocusChartView','core-basedir/js/views/LoginWindowView','core-basedir/js/views/MultiBarChartView','core-basedir/js/views/MultiDonutChartView','core-basedir/js/views/NodeConsoleLogsView','core-basedir/js/views/QueryFilterView','core-basedir/js/views/QueryResultGridView','core-basedir/js/views/QueryResultLineChartView','core-basedir/js/views/QuerySelectView','core-basedir/js/views/QueryWhereView','core-basedir/js/views/SparklineView','core-basedir/js/views/TabsView','core-basedir/js/views/WizardView'],
         'jquery-libs'       : ['jquery-ui',
@@ -37,7 +38,9 @@ require.config({
         'core-srcdir'                 : coreBaseDir,
         'core-basedir'                : coreBaseDir,
         'controller-basedir'                : coreBaseDir,
-        'jquery-libs'           : 'dist/js/jquery-libs',
+        'jquery-libs'               : 'dist/js/jquery-libs',
+        // 'lodash'                      : coreWebDir + '/assets/lodash/lodash.min',
+        // 'underscore'                  : coreWebDir + '/assets/underscore/underscore',
         // 'jquery'                : 'js/jquery-1.8.3',
         'jquery'                : 'assets/jquery/js/jquery-1.8.3.min',
         'load-libs'             : 'dist/js/load-libs',
@@ -59,8 +62,8 @@ require.config({
         // 'vis'                   : coreWebDir + '/assets/vis-v4.9.0/js/vis.min'
     }, map: {
         '*': {
-            // Backbone requires underscore. This forces requireJS to load lodash instead:
-            'underscore': 'lodash'
+            // Backbone requires underscore. This forces requireJS to load lodash instead: Backbone is not compatible with this lodash version
+            // 'underscore': 'lodash'
         }
     },
     shim: {
@@ -75,15 +78,20 @@ require.config({
         'joint.layout.DirectedGraph': {
             deps: ['joint']
         },
+        'underscore' : {
+            init: function() {
+                _.noConflict();
+            }
+        },
         'joint.contrail': {
             deps: ['joint.layout.DirectedGraph']
         },
         // 'contrail-libs': {
         //     deps:['jquery-libs','thirdparty-libs']
         // },
-        // 'thirdparty-libs': {
-        //     deps:['jquery-libs']
-        // }
+        'thirdparty-libs': {
+            deps:['jquery-libs']
+        }
     }
 });
 require.config({
@@ -315,8 +323,9 @@ require(['jquery'],function() {
         return {
             'core-srcdir'                 : coreBaseDir,
             'core-basedir'                : coreWebDir,
-            /*'jquery'                      : coreWebDir + '/assets/jquery/js/jquery-1.8.3.min',
-            'knockout'                    : coreWebDir + '/assets/knockout/knockout-3.0.0',*/
+            // 'knockout'                    : coreWebDir + '/assets/knockout/knockout-3.0.0',
+            // 'knockout'                    : coreWebDir + '/assets/knockout/knockout-3.0.0.debug',
+            /*'jquery'                      : coreWebDir + '/assets/jquery/js/jquery-1.8.3.min',*/
             'joint'                       : coreWebDir + '/assets/joint/js/joint.clean',
             'geometry'                    : coreWebDir + '/assets/joint/js/geometry',
             'vectorizer'                  : coreWebDir + '/assets/joint/js/vectorizer',
@@ -325,12 +334,14 @@ require(['jquery'],function() {
             'vis'                         : coreWebDir + '/assets/vis-v4.9.0/js/vis.min',
             'bezier'                      : coreWebDir + '/assets/bezierjs/bezier',
             'joint.contrail'              : coreWebDir + '/js/joint.contrail',
-            /*'lodash'                      : coreWebDir + '/assets/lodash/lodash.min',
-            'backbone'                    : coreWebDir + '/assets/backbone/backbone-min',
-            'knockback'                   : coreWebDir + '/assets/backbone/knockback.min',
-            'validation'                  : coreWebDir + '/assets/backbone/backbone-validation-amd',
-            'text'                        : coreWebDir + '/assets/requirejs/text',
-            'underscore'                  : coreWebDir + '/assets/underscore/underscore-min',
+            // 'backbone'                    : coreWebDir + '/assets/backbone/backbone-min',
+            // 'backbone'                    : coreWebDir + '/assets/backbone/backbone',
+            // 'validation'                  : coreWebDir + '/assets/backbone/backbone-validation-amd',
+            // 'knockback'                   : coreWebDir + '/assets/backbone/knockback.min',
+            // 'knockback'                   : coreWebDir + '/assets/backbone/knockback',
+            // 'lodash'                      : coreWebDir + '/assets/lodash/lodash.min',
+            // 'underscore'                  : coreWebDir + '/assets/underscore/underscore-min',
+            /*'text'                        : coreWebDir + '/assets/requirejs/text',
 
             'contrail-layout'             : coreWebDir + '/js/contrail-layout',
             'core-utils'                  : coreWebDir + '/js/common/core.utils',
@@ -381,8 +392,9 @@ require(['jquery'],function() {
     //nonamd-libs   #no dependency on jquery
     //layout-libs   #dependency on jquery
     require(['jquery-dep-libs','nonamd-libs'],function() {
-        require(['validation'],function(validation) {
+        require(['validation','knockout','backbone'],function(validation,ko) {
             window.kbValidation = validation;
+            window.ko = ko;
         });
         console.info('done: loading common bundles',performance.now());
         //Get core-app paths and register to require
@@ -396,7 +408,11 @@ require(['jquery'],function() {
             CoreUtils,CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig,ChartUtils) {
             console.info('required core utilities',performance.now());
             cowu = new CoreUtils();
-            require(['layout-handler','content-handler','contrail-load'],function(LayoutHandler,ContentHandler,ChartUtils) {
+            require(['underscore'],function(_) {
+                _.noConflict();
+            });
+            require(['layout-handler','content-handler','contrail-load','lodash'],function(LayoutHandler,ContentHandler,ChartUtils,_) {
+                window._ = _;
                 console.info('layout render started',performance.now());
                 contentHandler = new ContentHandler();
                 initBackboneValidation();

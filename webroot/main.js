@@ -144,7 +144,7 @@ require.config({
     }, map: {
         '*': {
             // Backbone requires underscore. This forces requireJS to load lodash instead:
-            'underscore': 'lodash'
+            // 'underscore': 'lodash'
         }
     },
     shim: {
@@ -273,7 +273,7 @@ require.config({
         },
 
         'backbone': {
-            deps: ['lodash'],
+            deps: ['underscore'],
             exports: 'Backbone'
         },
         'lodash': {

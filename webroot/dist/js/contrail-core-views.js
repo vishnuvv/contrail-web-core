@@ -194,7 +194,10 @@ define('core-basedir/js/views/GridView',[
     'contrail-list-model',
     'core-basedir/js/views/GridFooterView',
     'slick.checkboxselectcolumn',
-    'slick.grid','slick.rowselectionmodel'
+    'slick.grid','slick.rowselectionmodel',
+    'jquery-ui',
+    'jquery.multiselect',
+    'jquery.multiselect.filter'
 ], function (_, ContrailView, ContrailListModel, GridFooterView) {
     var GridView = ContrailView.extend({
         render: function () {
@@ -2729,7 +2732,8 @@ define('core-basedir/js/views/FormDateTimePickerView',[
 
 define('core-basedir/js/views/FormDropdownView',[
     'underscore',
-    'contrail-view'
+    'contrail-view',
+    'select2'
 ], function (_, ContrailView) {
     var FormDropdownView = ContrailView.extend({
         render: function () {
@@ -2780,6 +2784,7 @@ define('core-basedir/js/views/FormDropdownView',[
 
     return FormDropdownView;
 });
+
 /*
  * Copyright (c) 2014 Juniper Networks, Inc. All rights reserved.
  */
@@ -3240,7 +3245,8 @@ define('core-basedir/js/views/FormInputView',[
 
 define('core-basedir/js/views/FormMultiselectView',[
     'underscore',
-    'contrail-view'
+    'contrail-view',
+    'select2'
 ], function (_, ContrailView) {
     var FormMultiselectView = ContrailView.extend({
         render: function () {
@@ -3289,6 +3295,7 @@ define('core-basedir/js/views/FormMultiselectView',[
 
     return FormMultiselectView;
 });
+
 /*
  * Copyright (c) 2014 Juniper Networks, Inc. All rights reserved.
  */
@@ -4495,7 +4502,8 @@ define('core-basedir/js/views/LineBarWithFocusChartView',[
     'underscore',
     'contrail-view',
     'core-basedir/js/models/LineBarWithFocusChartModel',
-    'contrail-list-model'
+    'contrail-list-model',
+    'nv.d3'
 ], function (_, ContrailView, LineBarWithFocusChartModel, ContrailListModel) {
     var LineBarWithFocusChartView = ContrailView.extend({
         render: function () {
@@ -4700,6 +4708,7 @@ define('core-basedir/js/views/LineBarWithFocusChartView',[
 
     return LineBarWithFocusChartView;
 });
+
 /*
  ##Juniper License
 

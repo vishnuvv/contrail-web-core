@@ -133,323 +133,36 @@ var coreAppShim =  {
 
 
 function initBackboneValidation() {
-    _.extend(kbValidation.callbacks, {
-        valid: function (view, attr, selector) {
-            /*
-             var $el = $(view.modalElementId).find('[name=' + attr + ']'),
-             $group = $el.closest('.form-element');
+    require(['validation'],function(kbValidation) {
+        _.extend(kbValidation.callbacks, {
+            valid: function (view, attr, selector) {
+                /*
+                var $el = $(view.modalElementId).find('[name=' + attr + ']'),
+                $group = $el.closest('.form-element');
 
-             $group.removeClass('has-error');
-             $group.find('.help-block').html('').addClass('hidden');
-             */
-        },
-        invalid: function (view, attr, error, selector, validation) {
-            var model = view.model;
-            model.validateAttr(attr, validation);
-            /*
-             var $el = $(view.modalElementId).find('[name=' + attr + ']'),
-             $group = $el.closest('.form-element');
-             $group.addClass('has-error');
-             $group.find('.help-block').html(error).removeClass('hidden');
-             */
-        }
+                $group.removeClass('has-error');
+                $group.find('.help-block').html('').addClass('hidden');
+                */
+            },
+            invalid: function (view, attr, error, selector, validation) {
+                var model = view.model;
+                model.validateAttr(attr, validation);
+                /*
+                var $el = $(view.modalElementId).find('[name=' + attr + ']'),
+                $group = $el.closest('.form-element');
+                $group.addClass('has-error');
+                $group.find('.help-block').html(error).removeClass('hidden');
+                */
+            }
+        });
     });
 };
 
 function initCustomKOBindings(Knockout) {
-    Knockout.bindingHandlers.contrailDropdown = {
-        init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var elementConfig = {}, dropdown;
-
-            if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
-                var elementConfigMap = bindingContext.$root.elementConfigMap(),
-                    elementName = $(element).attr("name");
-
-                elementConfig = elementConfigMap[elementName];
-            }
-
-            dropdown = $(element).contrailDropdown(elementConfig).data('contrailDropdown');
-            Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                dropdown.destroy();
-            });
-        },
-        update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var elementConfig = {},
-                dropdown = $(element).data('contrailDropdown');
-
-            if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
-                var elementConfigMap = bindingContext.$root.elementConfigMap(),
-                    elementName = $(element).attr("name");
-
-                elementConfig = elementConfigMap[elementName];
-            }
-
-            if (!contrail.checkIfExist(elementConfig.data) && !contrail.checkIfExist(elementConfig.dataSource) && allBindingsAccessor.get('optionList')) {
-                var valueBindingAccessor = allBindingsAccessor.get('value'),
-                    value = Knockout.utils.unwrapObservable(valueBindingAccessor),
-                    optionListBindingAccessor = allBindingsAccessor.get('optionList'),
-                    optionList = Knockout.utils.unwrapObservable(optionListBindingAccessor);
-
-                value = contrail.checkIfFunction(value) ? value() : value;
-
-                if (contrail.checkIfFunction(optionList) && $.isArray(optionList(viewModel))) {
-                    dropdown.setData(optionList(viewModel), value, true);
-                } else if ($.isArray(optionList)) {
-                    dropdown.setData(optionList, value, true);
-                }
-            }
-
-            if (allBindingsAccessor.get('value')) {
-                var valueBindingAccessor = allBindingsAccessor.get('value'),
-                    value = Knockout.utils.unwrapObservable(valueBindingAccessor);
-
-                value = contrail.checkIfFunction(value) ? value() : value;
-                //required for hierarchical dropdown
-                if(elementConfig.queryMap) {
-                    var data = dropdown.getAllData();
-                    if(!contrail.isItemExists(value, data)) {
-                        contrail.appendNewItemMainDataSource(value, data);
-                    }
-                }
-                if (contrail.checkIfExist(value) && value !== '') {
-                    dropdown.value(value, true);
-                }
-            }
-        }
-    };
-
-    Knockout.bindingHandlers.contrailMultiselect = {
-        init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var elementConfig = {}, multiselect;
-
-            if (contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)) {
-                var elementConfigMap = bindingContext.$root.elementConfigMap(),
-                    elementName = $(element).attr("name");
-
-                elementConfig = elementConfigMap[elementName];
-            }
-
-            multiselect = $(element).contrailMultiselect(elementConfig).data('contrailMultiselect');
-
-            Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                multiselect.destroy();
-            });
-        },
-        update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var elementConfig = {}, multiselect = $(element).data('contrailMultiselect');
-
-            if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
-                var elementConfigMap = bindingContext.$root.elementConfigMap(),
-                    elementName = $(element).attr("name");
-
-                elementConfig = elementConfigMap[elementName];
-            }
-
-            if (!contrail.checkIfExist(elementConfig.data) && !contrail.checkIfExist(elementConfig.dataSource) && allBindingsAccessor.get('optionList')) {
-                var valueBindingAccessor = allBindingsAccessor.get('value'),
-                    value = Knockout.utils.unwrapObservable(valueBindingAccessor),
-                    optionListBindingAccessor = allBindingsAccessor.get('optionList'),
-                    optionList = Knockout.utils.unwrapObservable(optionListBindingAccessor);
-
-                if (contrail.checkIfFunction(optionList)) {
-                    optionList = optionList(viewModel);
-                }
-
-                var formattedOptionList = formatData(optionList, elementConfig),
-                    currentOptionList = multiselect.getAllData();
-
-               if (JSON.stringify(formattedOptionList) !== JSON.stringify(currentOptionList)) {
-                    value = contrail.checkIfFunction(value) ? value() : value;
-                    if (value !== '') {
-                        value = $.isArray(value) ? value : [value];
-                    } else if (value === '') {
-                        value = [];
-                    }
-
-                   multiselect.setData(optionList, value, true);
-                }
-            }
-
-            if (allBindingsAccessor.get('value')) {
-                var valueBindingAccessor = allBindingsAccessor.get('value'),
-                    value = Knockout.utils.unwrapObservable(valueBindingAccessor);
-
-                value = contrail.checkIfFunction(value) ? value() : value;
-
-                if (contrail.checkIfExist(value)) {
-                    if (value !== '') {
-                        value = $.isArray(value) ? value : [value];
-                        multiselect.value(value, true);
-                    } else if (value === '') {
-                        multiselect.value([], true);
-                    }
-                }
-            }
-        }
-    };
-
-    Knockout.bindingHandlers.contrailCombobox = {
-        init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var elementConfig = {}, combobox;
-
-            if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
-                var elementConfigMap = bindingContext.$root.elementConfigMap(),
-                    elementName = $(element).attr("name");
-
-                elementConfig = elementConfigMap[elementName];
-            }
-
-            combobox = $(element).contrailCombobox(elementConfig).data('contrailCombobox');
-
-            Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                combobox.destroy();
-            });
-        },
-        update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var elementConfig = {}, combobox = $(element).data('contrailCombobox');
-
-            if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
-                var elementConfigMap = bindingContext.$root.elementConfigMap(),
-                    elementName = $(element).attr("name");
-
-                elementConfig = elementConfigMap[elementName];
-            }
-
-            if (!contrail.checkIfExist(elementConfig.data) && !contrail.checkIfExist(elementConfig.dataSource) && allBindingsAccessor.get('optionList')) {
-                var optionListBindingAccessor = allBindingsAccessor.get('optionList'),
-                    optionList = Knockout.utils.unwrapObservable(optionListBindingAccessor);
-                if (contrail.checkIfFunction(optionList) && $.isArray(optionList(viewModel))) {
-                    combobox.setData(optionList(viewModel));
-                } else if ($.isArray(optionList)) {
-                    combobox.setData(optionList);
-                }
-            }
-
-            if (allBindingsAccessor.get('value')) {
-                var valueBindingAccessor = allBindingsAccessor.get('value'),
-                    value = Knockout.utils.unwrapObservable(valueBindingAccessor);
-
-                value = contrail.checkIfFunction(value) ? value() : value;
-
-                if (contrail.checkIfExist(value) && value !== '') {
-                    combobox.value(value);
-                }
-            }
-
-            if (allBindingsAccessor.get('disable')) {
-                var valueBindingAccessor = allBindingsAccessor.get('disable'),
-                    disable = Knockout.utils.unwrapObservable(valueBindingAccessor);
-
-                disable = contrail.checkIfFunction(disable) ? disable() : disable;
-
-                if (contrail.checkIfExist(disable) && disable !== '') {
-                    combobox.enable(!disable)
-                }
-
-            }
-        }
-    };
-
-    Knockout.bindingHandlers.select2 = {
-        init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                $(element).select2('destroy');
-            });
-
-            var valueObj = Knockout.toJS(valueAccessor()) || {},
-                allBindings = allBindingsAccessor(),
-                lookupKey = allBindings.lookupKey;
-
-            $(element).select2(valueObj);
-
-            if (allBindings.value) {
-                var value = Knockout.utils.unwrapObservable(allBindings.value);
-                if (typeof value === 'function') {
-                    $(element).select2('val', value());
-                } else if (value && value != '') {
-                    $(element).select2('val', value);
-                }
-            }
-        },
-        update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            $(element).trigger('change');
-        }
-    };
-
-    Knockout.bindingHandlers.contrailDateTimePicker = {
-        init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var valueObj = Knockout.toJS(valueAccessor()) || {},
-                allBindings = allBindingsAccessor(),
-                elementConfig = {};
-
-            if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
-                var elementConfigMap = bindingContext.$root.elementConfigMap(),
-                    elementName = $(element).attr("name");
-
-                elementConfig = elementConfigMap[elementName];
-            }
-
-            var dateTimePicker = $(element).contrailDateTimePicker(elementConfig).data('contrailDateTimePicker');
-
-            Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                dateTimePicker.destroy();
-            });
-        },
-        update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var dateTimePicker = $(element).data('contrailDateTimePicker');
-
-            if (allBindingsAccessor.get('value')) {
-                var valueBindingAccessor = allBindingsAccessor.get('value'),
-                    value = Knockout.utils.unwrapObservable(valueBindingAccessor);
-
-                value = contrail.checkIfFunction(value) ? value() : value;
-                dateTimePicker.value(value);
-            }
-            else {
-                dateTimePicker.value('');
-            }
-        }
-    };
-
-    Knockout.bindingHandlers.contrailNumericTextbox = {
-        init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var elementConfig = {}, numericTextbox;
-
-            if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
-                var elementConfigMap = bindingContext.$root.elementConfigMap(),
-                    elementName = $(element).attr("name");
-
-                elementConfig = elementConfigMap[elementName];
-            }
-
-            numericTextbox = $(element).contrailNumericTextbox(elementConfig).data('contrailNumericTextbox');
-
-            Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                numericTextbox.destroy();
-            });
-        },
-        update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var numericTextbox = $(element).data('contrailNumericTextbox');
-
-            if (allBindingsAccessor.get('value')) {
-                var valueBindingAccessor = allBindingsAccessor.get('value'),
-                    value = Knockout.utils.unwrapObservable(valueBindingAccessor);
-
-                if (contrail.checkIfFunction(value)) {
-                    numericTextbox.value(value());
-                } else {
-                    numericTextbox.value(value);
-                }
-            }
-            else {
-                numericTextbox.value('');
-            }
-        }
-    };
-
-    Knockout.bindingHandlers.contrailAutoComplete = {
+    require(['knockout'],function(Knockout) {
+        Knockout.bindingHandlers.contrailDropdown = {
             init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-                var elementConfig = {}, autocompleteTextBox;
+                var elementConfig = {}, dropdown;
 
                 if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
                     var elementConfigMap = bindingContext.$root.elementConfigMap(),
@@ -458,52 +171,343 @@ function initCustomKOBindings(Knockout) {
                     elementConfig = elementConfigMap[elementName];
                 }
 
-                autocompleteTextBox = $(element).contrailAutoComplete(elementConfig).data('contrailAutoComplete');
-
+                dropdown = $(element).contrailDropdown(elementConfig).data('contrailDropdown');
                 Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                    autocompleteTextBox.destroy();
+                    dropdown.destroy();
                 });
             },
             update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-                var autocompleteTextBox = $(element).data('contrailAutoComplete');
+                var elementConfig = {},
+                    dropdown = $(element).data('contrailDropdown');
+
+                if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
+                    var elementConfigMap = bindingContext.$root.elementConfigMap(),
+                        elementName = $(element).attr("name");
+
+                    elementConfig = elementConfigMap[elementName];
+                }
+
+                if (!contrail.checkIfExist(elementConfig.data) && !contrail.checkIfExist(elementConfig.dataSource) && allBindingsAccessor.get('optionList')) {
+                    var valueBindingAccessor = allBindingsAccessor.get('value'),
+                        value = Knockout.utils.unwrapObservable(valueBindingAccessor),
+                        optionListBindingAccessor = allBindingsAccessor.get('optionList'),
+                        optionList = Knockout.utils.unwrapObservable(optionListBindingAccessor);
+
+                    value = contrail.checkIfFunction(value) ? value() : value;
+
+                    if (contrail.checkIfFunction(optionList) && $.isArray(optionList(viewModel))) {
+                        dropdown.setData(optionList(viewModel), value, true);
+                    } else if ($.isArray(optionList)) {
+                        dropdown.setData(optionList, value, true);
+                    }
+                }
+
+                if (allBindingsAccessor.get('value')) {
+                    var valueBindingAccessor = allBindingsAccessor.get('value'),
+                        value = Knockout.utils.unwrapObservable(valueBindingAccessor);
+
+                    value = contrail.checkIfFunction(value) ? value() : value;
+                    //required for hierarchical dropdown
+                    if(elementConfig.queryMap) {
+                        var data = dropdown.getAllData();
+                        if(!contrail.isItemExists(value, data)) {
+                            contrail.appendNewItemMainDataSource(value, data);
+                        }
+                    }
+                    if (contrail.checkIfExist(value) && value !== '') {
+                        dropdown.value(value, true);
+                    }
+                }
+            }
+        };
+
+        Knockout.bindingHandlers.contrailMultiselect = {
+            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                var elementConfig = {}, multiselect;
+
+                if (contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)) {
+                    var elementConfigMap = bindingContext.$root.elementConfigMap(),
+                        elementName = $(element).attr("name");
+
+                    elementConfig = elementConfigMap[elementName];
+                }
+
+                multiselect = $(element).contrailMultiselect(elementConfig).data('contrailMultiselect');
+
+                Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                    multiselect.destroy();
+                });
+            },
+            update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                var elementConfig = {}, multiselect = $(element).data('contrailMultiselect');
+
+                if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
+                    var elementConfigMap = bindingContext.$root.elementConfigMap(),
+                        elementName = $(element).attr("name");
+
+                    elementConfig = elementConfigMap[elementName];
+                }
+
+                if (!contrail.checkIfExist(elementConfig.data) && !contrail.checkIfExist(elementConfig.dataSource) && allBindingsAccessor.get('optionList')) {
+                    var valueBindingAccessor = allBindingsAccessor.get('value'),
+                        value = Knockout.utils.unwrapObservable(valueBindingAccessor),
+                        optionListBindingAccessor = allBindingsAccessor.get('optionList'),
+                        optionList = Knockout.utils.unwrapObservable(optionListBindingAccessor);
+
+                    if (contrail.checkIfFunction(optionList)) {
+                        optionList = optionList(viewModel);
+                    }
+
+                    var formattedOptionList = formatData(optionList, elementConfig),
+                        currentOptionList = multiselect.getAllData();
+
+                if (JSON.stringify(formattedOptionList) !== JSON.stringify(currentOptionList)) {
+                        value = contrail.checkIfFunction(value) ? value() : value;
+                        if (value !== '') {
+                            value = $.isArray(value) ? value : [value];
+                        } else if (value === '') {
+                            value = [];
+                        }
+
+                    multiselect.setData(optionList, value, true);
+                    }
+                }
+
+                if (allBindingsAccessor.get('value')) {
+                    var valueBindingAccessor = allBindingsAccessor.get('value'),
+                        value = Knockout.utils.unwrapObservable(valueBindingAccessor);
+
+                    value = contrail.checkIfFunction(value) ? value() : value;
+
+                    if (contrail.checkIfExist(value)) {
+                        if (value !== '') {
+                            value = $.isArray(value) ? value : [value];
+                            multiselect.value(value, true);
+                        } else if (value === '') {
+                            multiselect.value([], true);
+                        }
+                    }
+                }
+            }
+        };
+
+        Knockout.bindingHandlers.contrailCombobox = {
+            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                var elementConfig = {}, combobox;
+
+                if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
+                    var elementConfigMap = bindingContext.$root.elementConfigMap(),
+                        elementName = $(element).attr("name");
+
+                    elementConfig = elementConfigMap[elementName];
+                }
+
+                combobox = $(element).contrailCombobox(elementConfig).data('contrailCombobox');
+
+                Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                    combobox.destroy();
+                });
+            },
+            update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                var elementConfig = {}, combobox = $(element).data('contrailCombobox');
+
+                if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
+                    var elementConfigMap = bindingContext.$root.elementConfigMap(),
+                        elementName = $(element).attr("name");
+
+                    elementConfig = elementConfigMap[elementName];
+                }
+
+                if (!contrail.checkIfExist(elementConfig.data) && !contrail.checkIfExist(elementConfig.dataSource) && allBindingsAccessor.get('optionList')) {
+                    var optionListBindingAccessor = allBindingsAccessor.get('optionList'),
+                        optionList = Knockout.utils.unwrapObservable(optionListBindingAccessor);
+                    if (contrail.checkIfFunction(optionList) && $.isArray(optionList(viewModel))) {
+                        combobox.setData(optionList(viewModel));
+                    } else if ($.isArray(optionList)) {
+                        combobox.setData(optionList);
+                    }
+                }
+
+                if (allBindingsAccessor.get('value')) {
+                    var valueBindingAccessor = allBindingsAccessor.get('value'),
+                        value = Knockout.utils.unwrapObservable(valueBindingAccessor);
+
+                    value = contrail.checkIfFunction(value) ? value() : value;
+
+                    if (contrail.checkIfExist(value) && value !== '') {
+                        combobox.value(value);
+                    }
+                }
+
+                if (allBindingsAccessor.get('disable')) {
+                    var valueBindingAccessor = allBindingsAccessor.get('disable'),
+                        disable = Knockout.utils.unwrapObservable(valueBindingAccessor);
+
+                    disable = contrail.checkIfFunction(disable) ? disable() : disable;
+
+                    if (contrail.checkIfExist(disable) && disable !== '') {
+                        combobox.enable(!disable)
+                    }
+
+                }
+            }
+        };
+
+        Knockout.bindingHandlers.select2 = {
+            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                    $(element).select2('destroy');
+                });
+
+                var valueObj = Knockout.toJS(valueAccessor()) || {},
+                    allBindings = allBindingsAccessor(),
+                    lookupKey = allBindings.lookupKey;
+
+                $(element).select2(valueObj);
+
+                if (allBindings.value) {
+                    var value = Knockout.utils.unwrapObservable(allBindings.value);
+                    if (typeof value === 'function') {
+                        $(element).select2('val', value());
+                    } else if (value && value != '') {
+                        $(element).select2('val', value);
+                    }
+                }
+            },
+            update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+                $(element).trigger('change');
+            }
+        };
+
+        Knockout.bindingHandlers.contrailDateTimePicker = {
+            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                var valueObj = Knockout.toJS(valueAccessor()) || {},
+                    allBindings = allBindingsAccessor(),
+                    elementConfig = {};
+
+                if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
+                    var elementConfigMap = bindingContext.$root.elementConfigMap(),
+                        elementName = $(element).attr("name");
+
+                    elementConfig = elementConfigMap[elementName];
+                }
+
+                var dateTimePicker = $(element).contrailDateTimePicker(elementConfig).data('contrailDateTimePicker');
+
+                Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                    dateTimePicker.destroy();
+                });
+            },
+            update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                var dateTimePicker = $(element).data('contrailDateTimePicker');
+
+                if (allBindingsAccessor.get('value')) {
+                    var valueBindingAccessor = allBindingsAccessor.get('value'),
+                        value = Knockout.utils.unwrapObservable(valueBindingAccessor);
+
+                    value = contrail.checkIfFunction(value) ? value() : value;
+                    dateTimePicker.value(value);
+                }
+                else {
+                    dateTimePicker.value('');
+                }
+            }
+        };
+
+        Knockout.bindingHandlers.contrailNumericTextbox = {
+            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                var elementConfig = {}, numericTextbox;
+
+                if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
+                    var elementConfigMap = bindingContext.$root.elementConfigMap(),
+                        elementName = $(element).attr("name");
+
+                    elementConfig = elementConfigMap[elementName];
+                }
+
+                numericTextbox = $(element).contrailNumericTextbox(elementConfig).data('contrailNumericTextbox');
+
+                Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                    numericTextbox.destroy();
+                });
+            },
+            update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                var numericTextbox = $(element).data('contrailNumericTextbox');
 
                 if (allBindingsAccessor.get('value')) {
                     var valueBindingAccessor = allBindingsAccessor.get('value'),
                         value = Knockout.utils.unwrapObservable(valueBindingAccessor);
 
                     if (contrail.checkIfFunction(value)) {
-                        autocompleteTextBox.value(value());
+                        numericTextbox.value(value());
                     } else {
-                        autocompleteTextBox.value(value);
+                        numericTextbox.value(value);
                     }
                 }
                 else {
-                    autocompleteTextBox.value('');
+                    numericTextbox.value('');
                 }
             }
         };
 
-    var updateSelect2 = function (element) {
-        var el = $(element);
-        if (el.data('select2')) {
-            el.trigger('change');
+        Knockout.bindingHandlers.contrailAutoComplete = {
+                init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                    var elementConfig = {}, autocompleteTextBox;
+
+                    if(contrail.checkIfExist(bindingContext) && contrail.checkIfExist(bindingContext.$root)){
+                        var elementConfigMap = bindingContext.$root.elementConfigMap(),
+                            elementName = $(element).attr("name");
+
+                        elementConfig = elementConfigMap[elementName];
+                    }
+
+                    autocompleteTextBox = $(element).contrailAutoComplete(elementConfig).data('contrailAutoComplete');
+
+                    Knockout.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                        autocompleteTextBox.destroy();
+                    });
+                },
+                update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                    var autocompleteTextBox = $(element).data('contrailAutoComplete');
+
+                    if (allBindingsAccessor.get('value')) {
+                        var valueBindingAccessor = allBindingsAccessor.get('value'),
+                            value = Knockout.utils.unwrapObservable(valueBindingAccessor);
+
+                        if (contrail.checkIfFunction(value)) {
+                            autocompleteTextBox.value(value());
+                        } else {
+                            autocompleteTextBox.value(value);
+                        }
+                    }
+                    else {
+                        autocompleteTextBox.value('');
+                    }
+                }
+            };
+
+        var updateSelect2 = function (element) {
+            var el = $(element);
+            if (el.data('select2')) {
+                el.trigger('change');
+            }
         }
-    }
-    var updateSelect2Options = Knockout.bindingHandlers['options']['update'];
+        var updateSelect2Options = Knockout.bindingHandlers['options']['update'];
 
-    Knockout.bindingHandlers['options']['update'] = function (element) {
-        var r = updateSelect2Options.apply(null, arguments);
-        updateSelect2(element);
-        return r;
-    };
+        Knockout.bindingHandlers['options']['update'] = function (element) {
+            var r = updateSelect2Options.apply(null, arguments);
+            updateSelect2(element);
+            return r;
+        };
 
-    var updateSelect2SelectedOptions = Knockout.bindingHandlers['selectedOptions']['update'];
+        var updateSelect2SelectedOptions = Knockout.bindingHandlers['selectedOptions']['update'];
 
-    Knockout.bindingHandlers['selectedOptions']['update'] = function (element) {
-        var r = updateSelect2SelectedOptions.apply(null, arguments);
-        updateSelect2(element);
-        return r;
-    };
+        Knockout.bindingHandlers['selectedOptions']['update'] = function (element) {
+            var r = updateSelect2SelectedOptions.apply(null, arguments);
+            updateSelect2(element);
+            return r;
+        };
+    });
 };
 
 function initDomEvents() {

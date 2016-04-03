@@ -425,25 +425,25 @@ define(['underscore'], function (_) {
             }
         }
     };
+    function toggleSubMenu(subMenu, linkId) {
+        //if we are opening this submenu, close all other submenus except the ".active" one
+        if (!$(subMenu).is(':visible')) {//ie, we are about to open it and make it visible
+            $('.open > .submenu').each(function () {
+                if (this != subMenu) {
+                    $(this).slideUp(200).parent().removeClass('open').removeClass('active');
+                }
+            });
+            $(subMenu).slideToggle(200).parent().toggleClass('open').toggleClass('active');
+        }
+        if (linkId != null) {
+            $('.submenu > li').each(function () {
+                $(this).removeClass('active');
+            });
+            $(linkId).addClass('active');
+        }
+    };
 
     return MenuHandler;
 });
 
-function toggleSubMenu(subMenu, linkId) {
-    //if we are opening this submenu, close all other submenus except the ".active" one
-    if (!$(subMenu).is(':visible')) {//ie, we are about to open it and make it visible
-        $('.open > .submenu').each(function () {
-            if (this != subMenu) {
-                $(this).slideUp(200).parent().removeClass('open').removeClass('active');
-            }
-        });
-        $(subMenu).slideToggle(200).parent().toggleClass('open').toggleClass('active');
-    }
-    if (linkId != null) {
-        $('.submenu > li').each(function () {
-            $(this).removeClass('active');
-        });
-        $(linkId).addClass('active');
-    }
-};
 

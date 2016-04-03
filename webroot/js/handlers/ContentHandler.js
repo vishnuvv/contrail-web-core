@@ -347,24 +347,24 @@ define(['underscore'], function (_) {
             });
         };
     }
+    function loadExtTemplate(path, deferredObj, containerName) {
+        path = 'text!' + path;
+
+        require([path], function(result) {
+            //Add templates to DOM
+            if (containerName != null) {
+                $('body').append('<div id="' + containerName + '"></div>');
+                $('#' + containerName).append(result);
+            } else {
+                $("body").append(result);
+            }
+
+            if (deferredObj != null) {
+                deferredObj.resolve();
+            }
+        });
+    };
 
     return ContentHandler;
 });
 
-function loadExtTemplate(path, deferredObj, containerName) {
-    path = 'text!' + path;
-
-    require([path], function(result) {
-        //Add templates to DOM
-        if (containerName != null) {
-            $('body').append('<div id="' + containerName + '"></div>');
-            $('#' + containerName).append(result);
-        } else {
-            $("body").append(result);
-        }
-
-        if (deferredObj != null) {
-            deferredObj.resolve();
-        }
-    });
-};
