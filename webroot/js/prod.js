@@ -403,10 +403,10 @@ require(['jquery'],function() {
     //nonamd-libs   #no dependency on jquery
     //layout-libs   #dependency on jquery
     require(['core-bundle','jquery-dep-libs','nonamd-libs'],function() {
-        // require(['validation','knockout','backbone'],function(validation,ko) {
-        //     window.kbValidation = validation;
-        //     window.ko = ko;
-        // });
+        require(['validation','knockout','backbone'],function(validation,ko) {
+            window.kbValidation = validation;
+            // window.ko = ko;
+        });
         console.info('done: loading common bundles',performance.now());
         //Get core-app paths and register to require
         require.config({

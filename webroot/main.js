@@ -296,7 +296,8 @@ require.config({
             exports:'ko'
         },
         'validation': {
-            deps: ['backbone']
+            deps: ['backbone'],
+            exports:'kbValidation'
         },
         'bezier': {
             deps: ['jquery']
@@ -331,9 +332,9 @@ require(['jquery'],function($) {
 require(['knockout'],function(ko) {
     window.ko = ko;
 });
-require(['validation'],function(validation) {
-    kbValidation = validation;
-});
+// require(['validation'],function(validation) {
+//     kbValidation = validation;
+// });
 require(['core-utils','core-constants','core-formatters','core-labels','core-messages',
     'core-cache','core-views-default-config'],function(
     CoreUtils,CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig) {
