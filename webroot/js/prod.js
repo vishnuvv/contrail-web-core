@@ -24,8 +24,8 @@ var coreBaseDir = defaultBaseDir, coreWebDir = defaultBaseDir, ctBaseDir = defau
     pkgBaseDir = defaultBaseDir;
 require.config({
     bundles: {
+        'chart-libs'        : ['nv.d3'],
         // 'chart-libs'        : ['d3','nv.d3'],
-        // 'chart-libs'        : [],
         // 'thirdparty-libs'   : ['knockback','slick.checkboxselectcolumn','slick.rowselectionmodel','select2','slick.grid','validation'],
         'thirdparty-libs'   : ['slick.checkboxselectcolumn','slick.rowselectionmodel','select2','slick.grid'],
         'core-bundle'       : ['controller-view-model','crossfilter','lodash'],
@@ -204,7 +204,12 @@ require(['jquery'],function() {
     var menuXMLLoadDefObj = $.Deferred(),layoutHandlerLoadDefObj = $.Deferred();
     function postAuthenticate(response) {
         $('#signin-container').empty();
-        $('#app-container').html($('#app-container-tmpl').text());
+        //If #content-container already exists,just show it
+        if($('#content-container').length == 0) {
+            $('#app-container').html($('#app-container-tmpl').text());
+            $('#app-container').removeClass('hide');
+        } else 
+            $('#app-container').removeClass('hide');
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
                 xhr.setRequestHeader("X-CSRF-Token", loadUtils.getCookie('_csrf'));
@@ -224,7 +229,8 @@ require(['jquery'],function() {
 
     function onAuthenticationReq() {
         $('#signin-container').html($('#signin-container-tmpl').text());
-        $('#app-container').empty();
+        // $('#app-container').empty();
+        $('#app-container').addClass('hide');
         bindListeners();
     }
 
@@ -396,11 +402,11 @@ require(['jquery'],function() {
     };
     //nonamd-libs   #no dependency on jquery
     //layout-libs   #dependency on jquery
-    require(['jquery-dep-libs','nonamd-libs'],function() {
-        require(['validation','knockout','backbone'],function(validation,ko) {
-            window.kbValidation = validation;
-            window.ko = ko;
-        });
+    require(['core-bundle','jquery-dep-libs','nonamd-libs'],function() {
+        // require(['validation','knockout','backbone'],function(validation,ko) {
+        //     window.kbValidation = validation;
+        //     window.ko = ko;
+        // });
         console.info('done: loading common bundles',performance.now());
         //Get core-app paths and register to require
         require.config({

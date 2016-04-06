@@ -3647,3 +3647,10 @@ input.ace-input[type=checkbox] + .ace-lbl::before, input.ace-input[type=radio] +
 #interfaces-collection tr:first-child td{
         padding-top:17px;}
 
+#vrouter-dashboard-sparkline .infobox-container {
+    margin-top:30px
+}
+#vrouter-dashboard-chart {
+    height:318px
+}
+

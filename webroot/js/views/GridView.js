@@ -43,6 +43,7 @@ define([
 
             gridConfig = $.extend(true, {}, covdc.gridConfig, viewConfig.elementConfig);
             gridContainer = $(this.$el);
+            // gridContainer = $(contentContainer);
             customGridConfig = $.extend(true, {}, gridConfig);
 
             if (contrail.checkIfExist(gridContainer.data('contrailGrid'))) {
