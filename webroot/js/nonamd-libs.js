@@ -7,6 +7,7 @@ define([
         'uuid',
         'protocol',
         'xdate',
+        'ipv6',
         //Third-party
         'handlebars',
         'jsonpath',
