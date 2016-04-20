@@ -176,7 +176,7 @@ if(orchPrefix == "/")
 
 (function() {
     var menuXMLLoadDefObj,layoutHandlerLoadDefObj;
-    var loadUtils = {
+    loadUtils = {
         getCookie: function(name) {
             if(name != null) {
                 var cookies = document.cookie.split(";");
@@ -201,6 +201,9 @@ if(orchPrefix == "/")
                     $('#app-container').removeClass('hide');
                 $.ajaxSetup({
                     beforeSend: function (xhr, settings) {
+                        if (globalObj['webServerInfo'] != null && globalObj['webServerInfo']['loggedInOrchestrationMode'] != null)
+                            xhr.setRequestHeader("x-orchestrationmode", globalObj['webServerInfo']['loggedInOrchestrationMode']);
+                        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
                         xhr.setRequestHeader("X-CSRF-Token", loadUtils.getCookie('_csrf'));
                     }
                 });
