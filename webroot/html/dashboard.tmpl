@@ -58,6 +58,29 @@
     <!--<script src="/fakeData/debugUtils.js"></script>-->
     <!--<script src="/js/common/core.app.utils.js"></script>-->
     <!--<script data-main="js/main" src="/assets/requirejs/require.js"></script>-->
+    <script type="text/javascript">
+    var Ajax = {
+        xhr : null,
+        request : function (url,method, data,success,failure){
+            if (!this.xhr){
+                this.xhr = window.ActiveX ? new ActiveXObject("Microsoft.XMLHTTP"): new XMLHttpRequest();
+            }
+            var self = this.xhr;
+
+            self.onreadystatechange = function () {
+                if (self.readyState === 4 && self.status === 200){
+                    // the request is complete, parse data and call callback
+                    var response = JSON.parse(self.responseText);
+                    success(response);
+                }else if (self.readyState === 4) { // something went wrong but complete
+                    failure();
+                }
+            };
+            this.xhr.open(method,url,true);
+            this.xhr.send();
+        },
+    };
+    </script>
 
 </head>
 
