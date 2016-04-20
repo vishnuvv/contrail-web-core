@@ -1085,10 +1085,11 @@ function authenticate (req, res, appData, callback)
                 logutils.logger.error("Very much unexpected, we came here!!!");
                 errStr = "Unexpected event happened";
             }
-            commonUtils.changeFileContentAndSend(res, loginErrFile,
-                                                 global.CONTRAIL_LOGIN_ERROR,
-                                                 errStr, function() {
-            });
+            commonUtils.handleJSONResponse(null,res,{status:'failure',msg:errStr});
+            // commonUtils.changeFileContentAndSend(res, loginErrFile,
+            //                                      global.CONTRAIL_LOGIN_ERROR,
+            //                                      errStr, function() {
+            // });
             return;
         }
         var multiTenancyEnabled = commonUtils.isMultiTenancyEnabled();
@@ -1098,10 +1099,11 @@ function authenticate (req, res, appData, callback)
                so redirect to login page
              */
             errStr = "User with admin only role is allowed";
-            commonUtils.changeFileContentAndSend(res, loginErrFile,
-                                                 global.CONTRAIL_LOGIN_ERROR,
-                                                 errStr, function() {
-            });
+            commonUtils.handleJSONResponse(null,res,{status:'failure',msg:errStr});
+            // commonUtils.changeFileContentAndSend(res, loginErrFile,
+            //                                      global.CONTRAIL_LOGIN_ERROR,
+            //                                      errStr, function() {
+            // });
             return;
         }
 

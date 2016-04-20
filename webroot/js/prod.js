@@ -263,25 +263,31 @@ if(orchPrefix == "/")
             // $('#logout').click(logout);
         },
         authenticate: function() {
-            //Compares client UTC time with the server UTC time and display alert if mismatch exceeds the threshold
-            $.ajax({
-                url: orchPrefix + '/authenticate',
-                type: "POST",
-                data: JSON.stringify({
-                    username: $("[name='username']").val(),
-                    password: $("[name='password']").val()
-                }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json"
-            }).done(function (response) {
-                if(response != null && response.isAuthenticated == true) {
-                    loadUtils.postAuthenticate(response);
-                } else {
-                    //Display login-error message
-                }
+            require(['jquery'],function() {
+                //Compares client UTC time with the server UTC time and display alert if mismatch exceeds the threshold
+                $.ajax({
+                    url: orchPrefix + '/authenticate',
+                    type: "POST",
+                    data: JSON.stringify({
+                        username: $("[name='username']").val(),
+                        password: $("[name='password']").val()
+                    }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json"
+                }).done(function (response) {
+                    if(response != null && response.isAuthenticated == true) {
+                        loadUtils.postAuthenticate(response);
+                    } else {
+                        //Display login-error message
+                        $('#login-error strong').text(response['msg']);
+                        $('#login-error').removeClass('hide');
+                    }
+                });
             });
         },
         logout: function() {
+            //Clear All Pending Ajax calls
+            $.allajax.abort();
             $.ajax({
                 url: '/logout',
                 type: "GET",

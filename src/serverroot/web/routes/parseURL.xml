@@ -63,6 +63,12 @@
         <callback>handler.isAuthenticated</callback>
     </item>
     <item>
+        <url>/vcenter/isauthenticated</url>
+        <method>get</method>
+        <feature>monitoring</feature>
+        <callback>handler.isAuthenticated</callback>
+    </item>
+    <item>
         <url>/authenticate</url>
         <method>post</method>
         <feature>monitoring</feature>

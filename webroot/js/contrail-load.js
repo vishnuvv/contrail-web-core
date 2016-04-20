@@ -230,6 +230,20 @@ $.allajax = (function ($) {
             xhrPool.splice(index, 1);
         }
     });
+    //Handle if any ajax response fails because of session expiry and redirect to login page
+    $(document).ajaxComplete(function (event, xhr, settings) {
+        var urlHash = window.location.hash;
+        var redirectHeader = xhr.getResponseHeader('X-Redirect-Url');
+        if (redirectHeader != null) {
+            //Show login-form
+            loadUtils.onAuthenticationReq();
+            /*//Carry the current hash parameters to redirect URL(login page) such that user will be taken to the same page once he logs in
+            if (redirectHeader.indexOf('#') == -1)
+                window.location.href = redirectHeader + urlHash;
+            else
+                window.location.href = redirectHeader;*/
+        }
+    });
     this.abort = function () {
         var tempXhrPool = [];
         $.extend(true, tempXhrPool, xhrPool);
