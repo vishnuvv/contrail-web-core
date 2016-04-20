@@ -227,6 +227,11 @@ require(['jquery'],function() {
         });
     }
 
+    var orchPrefix = window.location.pathname;
+    //Even with URL as <https://localhost:8143>,pahtname is returning as "/"
+    if(orchPrefix == "/")
+        orchPrefix = "";
+
     function onAuthenticationReq() {
         $('#signin-container').html($('#signin-container-tmpl').text());
         // $('#app-container').empty();
@@ -235,7 +240,7 @@ require(['jquery'],function() {
     }
 
     $.ajax({
-        url: '/isauthenticated',
+        url: orchPrefix + '/isauthenticated',
         type: "GET",
         dataType: "json"
     }).done(function (response,textStatus,xhr) {
@@ -307,9 +312,12 @@ require(['jquery'],function() {
     function authenticate() {
         //Compares client UTC time with the server UTC time and display alert if mismatch exceeds the threshold
         $.ajax({
-            url: '/authenticate',
+            url: orchPrefix + '/authenticate',
             type: "POST",
-            data: JSON.stringify({username:$("[name='username']").val(),password:$("[name='password']").val()}),
+            data: JSON.stringify({
+                username: $("[name='username']").val(),
+                password: $("[name='password']").val()
+            }),
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }).done(function (response) {
@@ -407,7 +415,7 @@ require(['jquery'],function() {
             window.kbValidation = validation;
             // window.ko = ko;
         });
-        console.info('done: loading common bundles',performance.now());
+        // console.info('done: loading common bundles',performance.now());
         //Get core-app paths and register to require
         require.config({
             // paths:getCoreAppPaths("","./built" //Can be used for prod vs dev
@@ -418,14 +426,14 @@ require(['jquery'],function() {
         console.info(globalObj);
         require(['core-utils'],function(
             CoreUtils,CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig,ChartUtils) {
-            console.info('required core utilities',performance.now());
+            // console.info('required core utilities',performance.now());
             cowu = new CoreUtils();
             require(['underscore'],function(_) {
                 _.noConflict();
             });
             require(['layout-handler','content-handler','contrail-load','lodash'],function(LayoutHandler,ContentHandler,ChartUtils,_) {
                 window._ = _;
-                console.info('layout render started',performance.now());
+                // console.info('layout render started',performance.now());
                 contentHandler = new ContentHandler();
                 initBackboneValidation();
                 initCustomKOBindings(window.ko);
@@ -456,7 +464,7 @@ require(['jquery'],function() {
                         'controller-parsers',
                         'controller-view-config',
                     ], function (Constants, Labels, Utils, Messages, GridConfig, GraphConfig, Parsers, ViewConfig) {
-                        console.info('required controller libs',performance.now()); 
+                        // console.info('required controller libs',performance.now()); 
                         ctwc = new Constants();
                         ctwl = new Labels();
                         ctwu = new Utils;
