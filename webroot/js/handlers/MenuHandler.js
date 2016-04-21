@@ -35,7 +35,7 @@ define(['underscore'], function (_) {
             // $.get('/' + mFileName+ '?built_at=' + built_at, function (xml) {
             globalObj['layoutDefObj'].done(function(xml) {*/
                 menuObj = $.xml2json(xml);
-                var disabledFeatures = globalObj['webServerInfo']['disabledFeatures'];
+                var disabledFeatures = {disabled:globalObj['webServerInfo']['disabledFeatures']};
                 var featurePkgsInfo = globalObj['webServerInfo']['featurePkgsInfo'];
                 processXMLJSON(menuObj, disabledFeatures);
                 var menuShortcuts = contrail.getTemplate4Id('menu-shortcuts')(menuHandler.filterMenuItems(menuObj['items']['item'], 'menushortcut', featurePkgsInfo));

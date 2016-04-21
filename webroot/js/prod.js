@@ -257,6 +257,14 @@ if(orchPrefix == "/")
         bindSignInListeners: function() {
             document.getElementById('signin').onclick = loadUtils.authenticate;
             // $('#signin').click(authenticate);
+            require(['jquery'],function() {
+                $('body').on('keypress', '.login-container', function(args) {
+                    if (args.keyCode == 13) {
+                        $('#signin').click();
+                        return false;
+                    }
+                });
+            });
         },
         bindAppListeners: function() {
             document.getElementById('logout').onclick = loadUtils.logout;
