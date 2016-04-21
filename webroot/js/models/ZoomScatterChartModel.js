@@ -148,7 +148,7 @@ define([
             self.xScale = d3.scale.linear().domain([self.xMin, self.xMax]).range([0, self.width]);
             self.yScale = d3.scale.linear().domain([self.yMin, self.yMax]).range([self.height, 0]);
 
-            self.zoomBehavior = d3.behavior.zoom().x(self.xScale).y(self.yScale).scaleExtent([1, 4]);
+            self.zoomBehavior = d3.behavior.zoom().x(self.xScale).y(self.yScale).scaleExtent([1, 1]);
 
             self.maxColorFilterFields = d3.max(chartData, function (d) {
                 return +d[chartConfig.colorFilterFields]

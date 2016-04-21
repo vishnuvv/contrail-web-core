@@ -92,6 +92,7 @@ require.config({
         'joint.contrail'              : 'js/joint.contrail',
         'core-utils'                  : 'js/common/core.utils',
 
+        'core-alarm-utils'           :  'js/common/core.alarms.utils',
         'core-constants'              : 'js/common/core.constants',
         'core-formatters'             : 'js/common/core.formatters',
         'core-labels'                 : 'js/common/core.labels',

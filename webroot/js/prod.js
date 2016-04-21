@@ -482,14 +482,16 @@ if(orchPrefix == "/")
                     layoutHandlerLoadDefObj.resolve();
                     //Load core utils
                     require(['core-bundle'],function() {
-                        require(['core-constants','core-formatters','core-labels','core-messages',
-                            'core-cache','core-views-default-config','chart-utils'],function(CoreConstants,CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig,ChartUtils) {
+                        require(['core-alarm-utils','core-constants','core-formatters','core-labels','core-messages',
+                            'core-cache','core-views-default-config','chart-utils'],function(CoreAlarmUtils,CoreConstants,
+                                CoreFormatters,CoreLabels,CoreMessages,Cache,CoreViewsDefaultConfig,ChartUtils) {
                             cowc = new CoreConstants();
                             cowf = new CoreFormatters();
                             cowl = new CoreLabels();
                             cowm = new CoreMessages();
                             covdc = new CoreViewsDefaultConfig();
                             cowch = new Cache();
+                            coreAlarmUtils = CoreAlarmUtils;
                             chUtils = new ChartUtils();
                         });
                     });

@@ -8,10 +8,16 @@ define(['underscore'], function (_) {
 
     var CoreUtils = function () {
         var self = this;
-        this.getAlarmsFromAnalytics = false;
+        this.getAlarmsFromAnalytics = true;
         //Setting the sevLevels used to display the node colors
         if(this.getAlarmsFromAnalytics) {
-            sevLevels = cowc.SEV_LEVELS;
+            // sevLevels = cowc.SEV_LEVELS;
+            sevLevels = {
+                ERROR   : 3, //Red
+                WARNING : 4, //Orange
+//                NOTICE  : 2, //Blue
+//                INFO    : 3, //Green
+            };
         }
         this.renderGrid = function (elementId, gridConfig) {
             $(elementId).contrailGrid($.extend(true, {
