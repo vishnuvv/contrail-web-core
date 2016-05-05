@@ -19085,6 +19085,7 @@ define('core-utils',['underscore'], function (_) {
         this.getAlarmsFromAnalytics = true;
         //Setting the sevLevels used to display the node colors
         if(this.getAlarmsFromAnalytics) {
+            // sevLevels = cowc.SEV_LEVELS;
             sevLevels = {
                 ERROR   : 3, //Red
                 WARNING : 4, //Orange

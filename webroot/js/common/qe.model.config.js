@@ -3,8 +3,9 @@
  */
 
 define([
-    'underscore'
-], function (_) {
+    'underscore',
+    'js/common/qe.utils'
+], function (_,qewu) {
     var QEDefaultConfig = function () {
 
         this.getQueryModelConfig = function (customModelConfig) {
