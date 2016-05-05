@@ -14743,7 +14743,7 @@ define('cf-datasource',['crossfilter'], function(crossfilter) {
 
     var CFDataSource = function() {
         var self = this;
-        var cf = null,recordCnt = 0,
+        var cf = crossfilter([]),recordCnt = 0,
             dimensions={},
             filters={},
             filterValues = {};
@@ -18120,7 +18120,7 @@ define('menu-handler',['underscore'], function (_) {
             //});
 
             //Add an event listener for clicking on menu items
-            $('#menu').on('click', 'ul > li > a', function (e) {
+            $('#menu').off('click').on('click', 'ul > li > a', function (e) {
                 var href = $(this).attr('href');
                 loadFeature($.deparam.fragment(href));
                 if (!e.ctrlKey) {

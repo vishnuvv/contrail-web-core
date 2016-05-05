@@ -45,7 +45,7 @@ define(['underscore'], function (_) {
             //});
 
             //Add an event listener for clicking on menu items
-            $('#menu').on('click', 'ul > li > a', function (e) {
+            $('#menu').off('click').on('click', 'ul > li > a', function (e) {
                 var href = $(this).attr('href');
                 loadFeature($.deparam.fragment(href));
                 if (!e.ctrlKey) {
