@@ -7,6 +7,7 @@ define(['underscore'], function (_) {
         var self = this;
         self.featureAppDefObj = $.Deferred();
         self.initFeatureAppDefObjMap = {};
+        //When we have multiple feature apps (contrail-web-controller,contrail-web-storage)??
         self.isInitFeatureAppComplete = false;
         self.isInitFeatureAppInProgress = false;
         self.initFeatureModuleMap = {};
@@ -23,6 +24,7 @@ define(['underscore'], function (_) {
                     //Cleanup the container
                     $(contentContainer).html('');
 
+                    //Info: If the page doesn't load in 2 secs,showing loading content message ??
                     setTimeout(function () {
                         if ($(contentContainer).html() == '') {
                             $(contentContainer).html('<p id="content-container-loading"><i class="icon-spinner icon-spin"></i> &nbsp;Loading content ..</p>');
@@ -68,7 +70,7 @@ define(['underscore'], function (_) {
                 return;
             }
 
-            hideHardRefresh();
+            // hideHardRefresh();
 
             if ($('.modal-backdrop').is(':visible')) {
                 $('.modal-backdrop').remove();
@@ -89,9 +91,9 @@ define(['underscore'], function (_) {
                             currPageHash = 'mon_networking_dashboard';
                     } else if(webServerInfo['featurePkg']['serverManager'] && !webServerInfo['featurePkg']['webController']) {
                         currPageHash = "setting_sm_clusters";
-                    } else if($.inArray(roles['ADMIN'], webServerInfo['role']) > -1) {
+                    } else if($.inArray(globalObj['roles']['ADMIN'], webServerInfo['role']) > -1) {
                         currPageHash = "mon_infra_dashboard";
-                    } else if ($.inArray(roles['TENANT'], webServerInfo['role']) > -1) {
+                    } else if ($.inArray(globalObj['roles']['TENANT'], webServerInfo['role']) > -1) {
                         currPageHash = "mon_networking_dashboard";
                     }
                 }
@@ -301,6 +303,7 @@ define(['underscore'], function (_) {
             });
         };
 
+        //Need a way to track featurePkg is initialized
         this.loadFeatureApps = function (featurePackages) {
             var featureAppDefObjList= [],
                 initAppDefObj, url;
@@ -344,24 +347,24 @@ define(['underscore'], function (_) {
             });
         };
     }
+    function loadExtTemplate(path, deferredObj, containerName) {
+        path = 'text!' + path;
+
+        require([path], function(result) {
+            //Add templates to DOM
+            if (containerName != null) {
+                $('body').append('<div id="' + containerName + '"></div>');
+                $('#' + containerName).append(result);
+            } else {
+                $("body").append(result);
+            }
+
+            if (deferredObj != null) {
+                deferredObj.resolve();
+            }
+        });
+    };
 
     return ContentHandler;
 });
 
-function loadExtTemplate(path, deferredObj, containerName) {
-    path = 'text!' + path;
-
-    require([path], function(result) {
-        //Add templates to DOM
-        if (containerName != null) {
-            $('body').append('<div id="' + containerName + '"></div>');
-            $('#' + containerName).append(result);
-        } else {
-            $("body").append(result);
-        }
-
-        if (deferredObj != null) {
-            deferredObj.resolve();
-        }
-    });
-};

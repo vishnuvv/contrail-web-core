@@ -164,7 +164,13 @@ function initializeAppConfig (appObj)
         ((null != config.session) && (null != config.session.timeout)) ?
         config.session.timeout : global.MAX_AGE_SESSION_ID;
 
-    app.use(express.compress());
+    var compressOptions = {
+        filter: function(req, res) {
+            return /json|text|xml|javascript|tmpl/.test(res.getHeader('Content-Type'))
+        }
+    };
+    app.use(express.compress(compressOptions));
+    express.static.mime.define({'text/tmpl': ['tmpl']});
     registerStaticFiles(app);
     app.use(helmet.hsts({
         maxAge: maxAgeTime,
@@ -270,8 +276,12 @@ function registerReqToApp ()
     var csrfOptions = {eventEmitter: csrfInvalidEvent};
     var csrf = express.csrf(csrfOptions);
     //Populate the CSRF token in req.session on login request
-    myApp.get('/login', csrf);
-    myApp.get('/vcenter/login', csrf);
+    // myApp.get('/', csrf);
+    // myApp.get('/authenticate', csrf);
+    // myApp.get('/isauthenticated', csrf);
+    // myApp.get('/vcenter/', csrf);
+    // if(req.session._csrf == null)
+    //     req.session._csrf = utils.uid(24);
     //Enable CSRF token check for all URLs starting with "/api"
     myApp.post('/api/*', csrf);
 

@@ -1073,6 +1073,8 @@ function getUserRoleByAllTenants (username, password, tenantlist, callback)
         }
     }
     if (!tenantObjArr.length) {
+        //ToDo: Need to check issue if we don't call callback here
+        callback(null);
         return userRoles;
     }
 
@@ -1167,7 +1169,6 @@ function authenticate (req, res, appData, callback)
     if (post.urlPath != null) {
         urlPath = post.urlPath;
     }
-    var loginErrFile = 'webroot/html/login-error.html';
     var identityApiVerList = config.identityManager.apiVersion;
     var verCnt = identityApiVerList.length;
 
@@ -1178,10 +1179,7 @@ function authenticate (req, res, appData, callback)
                 logutils.logger.error("Very much unexpected, we came here!!!");
                 errStr = "Unexpected event happened";
             }
-            commonUtils.changeFileContentAndSend(res, loginErrFile,
-                                                 global.CONTRAIL_LOGIN_ERROR,
-                                                 errStr, function() {
-            });
+            callback(errStr);
             return;
         }
         var multiTenancyEnabled = commonUtils.isMultiTenancyEnabled();
@@ -1191,18 +1189,12 @@ function authenticate (req, res, appData, callback)
                so redirect to login page
              */
             errStr = "User with admin only role is allowed";
-            commonUtils.changeFileContentAndSend(res, loginErrFile,
-                                                 global.CONTRAIL_LOGIN_ERROR,
-                                                 errStr, function() {
-            });
+            callback(errStr);
             return;
         }
 
         plugins.setAllCookies(req, res, appData, {'username': username}, function() {
-            if(urlPath != '') 
-                res.redirect(urlPath + urlHash);
-            else
-                res.redirect('/' + urlHash);
+            callback(null, null);
         });
     });
 
@@ -1336,6 +1328,7 @@ function getUserRoleByProjectList (projects, userObj, callback)
 
 function doV3Auth (req, callback)
 {
+    var start = Date.now();
     var tokenObj = {};
     var self = this,
         post = req.body,
@@ -1347,7 +1340,6 @@ function doV3Auth (req, callback)
     var passwdCipher = null
     var userEncrypted = null;
     var passwdEncrypted = null;
-    var loginErrFile = 'webroot/html/login-error.html';
     var isUnscoped = true;
 
     req.session.authApiVersion = 'v3';
@@ -1442,6 +1434,8 @@ function doV3Auth (req, callback)
                     req.session.userRole = roleStr;
                     req.session.domain = domain;
                     req.session.last_token_used = req.session.def_token_used;
+                    var duration = Date.now() - start;
+                    console.log('doV3Auth',duration);
                     callback(null);
                 });
             });
@@ -1496,6 +1490,7 @@ function doV2Auth (req, callback)
         /* Now check the tenants attached to this user */
         req.session.last_token_used = data.access.token;
         getTenantListByToken(req, data.access.token, function(err, data) {
+            var start = Date.now();
             if ((null == data) || (null == data.tenants) ||
                 (!data.tenants.length)) {
                 req.session.isAuthenticated = false;
@@ -1568,6 +1563,8 @@ function doV2Auth (req, callback)
                                                 data.access);
                         updateLastTokenUsed(req, data.access.token);
                         logutils.logger.info("Login Successful with tenants.");
+                        var duration = Date.now() - start;
+                        console.log('doV2Auth',duration);
                         callback(null);
                     });
                 }

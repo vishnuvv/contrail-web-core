@@ -9,32 +9,33 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
         //Don't escape ":[]" characters while pushing state via bbq
         $.param.fragment.noEscape(":[]");
 
-        this.load = function () {
+        this.load = function (menuObj) {
+            var webServerInfo = globalObj['webServerInfo'];
             menuHandler = new MenuHandler();
             //reset the cache
-            cowch.reset();
-            getWebServerInfo(contrail.getCookie('project'),
-                             function(webServerInfo) {
-                //Get drop down value separator from configuration
-                cowc.DROPDOWN_VALUE_SEPARATOR = getValueByJsonPath(globalObj,
-                    "webServerInfo;uiConfig;dropdown_value_separator",
-                    cowc.DROPDOWN_VALUE_SEPARATOR);
+            if(typeof(cowch) != "undefined")
+                cowch.reset();
+            //Get drop down value separator from configuration
+            // cowc.DROPDOWN_VALUE_SEPARATOR = getValueByJsonPath(globalObj,
+            //     "webServerInfo;uiConfig;dropdown_value_separator",
+            //     cowc.DROPDOWN_VALUE_SEPARATOR);
 
-                menuHandler.loadMenu(webServerInfo);
-                menuHandler.handleSideMenu();
+            menuHandler.loadMenu(menuObj);
+            menuHandler.handleSideMenu();
                 /**
                  * If there is existing instance of contentHandler, use it. Else create new instance.
                  * this will preserve the initFeatureModuleMap and prevent require-ing the same feature modules again
                  * when layoutHandler is loaded multiple times.
                  */
-                if (typeof contentHandler === 'undefined') {
-                    contentHandler = new ContentHandler();
-                }
+                //Need to fix the issue,if layoutHandler is loaded multiple times
+                // if (typeof contentHandler === 'undefined') {
+                //     contentHandler = new ContentHandler();
+                // }
 
-                $.when.apply(window, [menuHandler.deferredObj]).done(function () {
-                    self.onHashChange({}, $.bbq.getState());
-                });
-            });
+                // $.when.apply(window, [menuHandler.deferredObj]).done(function () {
+            self.onHashChange({}, $.bbq.getState());
+                // });
+            // });
         };
 
         /** Get view height excluding header & footer **/
@@ -95,15 +96,16 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
         };
 
         this.onHashChange = function(lastHash, currHash, loadingStartedDefObj) {
-            if(contentHandler.isInitFeatureAppComplete) {
+            //Waiting for all feature pkgs to load??
+            if(globalObj['isInitFeatureAppComplete']) {
                 contentHandler.loadContent(lastHash, currHash, loadingStartedDefObj);
-            } else if (contentHandler.isInitFeatureAppInProgress) {
-                contentHandler.featureAppDefObj.done(function () {
+            } else if (globalObj['isInitFeatureAppInProgress']) {
+                globalObj['featureAppDefObj'].done(function () {
                     contentHandler.loadContent(lastHash, currHash, loadingStartedDefObj);
                 });
             } else {
-                contentHandler.loadFeatureApps(globalObj['webServerInfo']['featurePkg']);
-                contentHandler.featureAppDefObj.done(function () {
+                // contentHandler.loadFeatureApps(globalObj['webServerInfo']['featurePkg']);
+                globalObj['featureAppDefObj'].done(function () {
                     contentHandler.loadContent(lastHash, currHash, loadingStartedDefObj);
                 });
             }
