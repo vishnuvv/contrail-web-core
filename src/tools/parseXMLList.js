@@ -142,7 +142,7 @@ function processXMLFiles (fileObj, callback)
     str += "pkgList['" + arrStr[1] + "'] = [];\n";
     writeToPkgFile(pkgDir, true, str, function() {
         dir.readFiles(pkgDir, {
-            match: match, excludeDir: /^(.git|node_modules)$/},
+            match: match, excludeDir: /^(.git|node_modules|dist|controller-dist)$/},
             function(err, content, filename, next) {
             if (err) {
                 callback(err);

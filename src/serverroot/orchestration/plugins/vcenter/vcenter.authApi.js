@@ -84,11 +84,7 @@ function authenticate (req, res, appData, callback)
             //res.redirect('/');
             //return;
         plugins.setAllCookies(req, res, appData, {'username': username}, function() {
-            if ('' != urlPath) {
-                res.redirect(urlPath + urlHash);
-            } else {
-                res.redirect('/' + urlHash);
-            }
+            commonUtils.getWebServerInfo(req,res)
         });
     });
 }
