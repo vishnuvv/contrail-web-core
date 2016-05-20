@@ -1073,6 +1073,8 @@ function getUserRoleByAllTenants (username, password, tenantlist, callback)
         }
     }
     if (!tenantObjArr.length) {
+        //ToDo: Need to check issue if we don't call callback here
+        callback(null);
         return userRoles;
     }
 
@@ -1178,9 +1180,9 @@ function authenticate (req, res, appData, callback)
                 logutils.logger.error("Very much unexpected, we came here!!!");
                 errStr = "Unexpected event happened";
             }
-            commonUtils.changeFileContentAndSend(res, loginErrFile,
-                                                 global.CONTRAIL_LOGIN_ERROR,
-                                                 errStr, function() {
+            commonUtils.handleJSONResponse(null, res, {
+                status: 'failure',
+                msg: errStr
             });
             return;
         }
@@ -1191,18 +1193,16 @@ function authenticate (req, res, appData, callback)
                so redirect to login page
              */
             errStr = "User with admin only role is allowed";
-            commonUtils.changeFileContentAndSend(res, loginErrFile,
-                                                 global.CONTRAIL_LOGIN_ERROR,
-                                                 errStr, function() {
+            commonUtils.handleJSONResponse(null, res, {
+                status: 'failure',
+                msg: errStr
             });
             return;
         }
 
         plugins.setAllCookies(req, res, appData, {'username': username}, function() {
-            if(urlPath != '') 
-                res.redirect(urlPath + urlHash);
-            else
-                res.redirect('/' + urlHash);
+            // commonUtils.handleJSONResponse(null,res,{status:'success'});
+            commonUtils.getWebServerInfo(req,res)
         });
     });
 
@@ -1336,6 +1336,7 @@ function getUserRoleByProjectList (projects, userObj, callback)
 
 function doV3Auth (req, callback)
 {
+    var start = Date.now();
     var tokenObj = {};
     var self = this,
         post = req.body,
@@ -1442,6 +1443,8 @@ function doV3Auth (req, callback)
                     req.session.userRole = roleStr;
                     req.session.domain = domain;
                     req.session.last_token_used = req.session.def_token_used;
+                    var duration = Date.now() - start;
+                    console.log('doV3Auth',duration);
                     callback(null);
                 });
             });
@@ -1496,6 +1499,7 @@ function doV2Auth (req, callback)
         /* Now check the tenants attached to this user */
         req.session.last_token_used = data.access.token;
         getTenantListByToken(req, data.access.token, function(err, data) {
+            var start = Date.now();
             if ((null == data) || (null == data.tenants) ||
                 (!data.tenants.length)) {
                 req.session.isAuthenticated = false;
@@ -1547,20 +1551,53 @@ function doV2Auth (req, callback)
                                           JSON.stringify(data.access));
                     req.session.def_token_used = data.access.token;
                     var uiRoles = null;
+                    /* We got already the last one from tenantList, so remove
+                     * this from tenantList now
+                     */
+                    var userRolesToDefProject =
+                        commonUtils.getValueByJsonPath(data,
+                                                       'access;user;roles', []);
+                    var uiRolesToDefProject =
+                        getUIRolesByExtRoles(userRolesToDefProject);
+                    console.log("Getting uiRolesToDefProject as:",
+                                uiRolesToDefProject);
+                    tenantList.splice(projCount - 1, 1);
+                    console.log("Getting tebnantList as:", tenantList);
                     getUserRoleByAllTenants(username, password,
                                             tenantList, 
                                             function(uiRoles, tokenObjs) {
-                        if ((null == uiRoles) || (!uiRoles.length)) {
+                        if ((tenantList.length > 0) && ((null == uiRoles) || (!uiRoles.length))) {
                             req.session.isAuthenticated = false;
                             callback(messages.error.unauthenticate_to_project);
                             return;
                         }
-                        /* Save the user-id/password in Redis in encrypted format.
-                         */
+                        if (null == tokenObjs) {
+                            tokenObjs = {};
+                        }
+                        console.log("Getting uiRoles as:", uiRoles, tokenObjs);
+                        var tmpUIRoleObjs = {};
+                        var uiRolesCnt = 0;
+                        if (null != uiRoles) {
+                                        uiRolesCnt = uiRoles.length;
+                        } else {
+                            uiRoles = [];
+                        }
+                        for (var i = 0; i < uiRolesCnt; i++) {
+                            tmpUIRoleObjs[uiRoles[i]] = uiRoles[i];
+                        }
+                        var uiRolesToDefProjectCnt = uiRolesToDefProject.length;
+                        for (var i = 0; i < uiRolesToDefProjectCnt; i++) {
+                            if (null == tmpUIRoleObjs[uiRolesToDefProject[i]]) {
+                                uiRoles.push(uiRolesToDefProject[i]);
+                            }
+                        }
                         req.session.isAuthenticated = true;
                         req.session.userRole = uiRoles;
                         req.session.authApiVersion = 'v2.0';
                         req.session.tokenObjs = tokenObjs;
+                        if (null != data.access) {
+                            req.session.tokenObjs[defProject] = data.access;
+                        }
                         req.session.userRoles =
                             userRoleListByTokenObjs(tokenObjs);
                         //setSessionTimeoutByReq(req);
@@ -1568,6 +1605,8 @@ function doV2Auth (req, callback)
                                                 data.access);
                         updateLastTokenUsed(req, data.access.token);
                         logutils.logger.info("Login Successful with tenants.");
+                        var duration = Date.now() - start;
+                        console.log('doV2Auth',duration);
                         callback(null);
                     });
                 }

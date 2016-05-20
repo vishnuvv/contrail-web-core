@@ -11,7 +11,13 @@ define(['underscore'], function (_) {
         this.getAlarmsFromAnalytics = true;
         //Setting the sevLevels used to display the node colors
         if(this.getAlarmsFromAnalytics) {
-            sevLevels = cowc.SEV_LEVELS;
+            // sevLevels = cowc.SEV_LEVELS;
+            sevLevels = {
+                ERROR   : 3, //Red
+                WARNING : 4, //Orange
+//                NOTICE  : 2, //Blue
+//                INFO    : 3, //Green
+            };
         }
         this.renderGrid = function (elementId, gridConfig) {
             $(elementId).contrailGrid($.extend(true, {
@@ -458,6 +464,16 @@ define(['underscore'], function (_) {
                 onAllViewsRenderCompleteCB = renderConfig['onAllViewsRenderCompleteCB'];
                 onAllRenderCompleteCB = renderConfig['onAllRenderCompleteCB'];
                 lazyRenderingComplete  = renderConfig['lazyRenderingComplete'];
+
+                //If a require alias exists for the given path, use that
+                var checkRequirePath = viewPath.replace(/^core-basedir\//,'').replace(/^controller-basedir\//,'');
+                var pathMapping = _.invert(require.s.contexts._.config);
+                pathMapping = {
+                    '/js/views/AlertListView'   : 'mon-infra-alert-list-view',
+                    '/js/views/LogListView'     : 'mon-infra-log-list-view',      
+                    '/js/views/SystemInfoView'  : 'mon-infra-sysinfo-view',       
+                }
+                viewPath = ifNull(_.invert(require.s.contexts._.config)[checkRequirePath],viewPath);
 
                 require([viewPath], function(ElementView) {
                     elementView = new ElementView({el: parentElement, model: model, attributes: viewAttributes, rootView: rootView, onAllViewsRenderCompleteCB: onAllViewsRenderCompleteCB, onAllRenderCompleteCB: onAllRenderCompleteCB});
@@ -1111,6 +1127,61 @@ define(['underscore'], function (_) {
                 },
               });
         };
+        this.ifNull = function(value, defValue) {
+            if (value == null)
+                return defValue;
+            else
+                return value;
+        };
+        this.formatTimeRange = function(timeRange) {
+            var formattedTime = 'custom', timeInSecs;
+            if(timeRange != null && timeRange != -1) {
+                timeInSecs = parseInt(timeRange);
+                if(timeInSecs <= 3600) {
+                    formattedTime = 'Last ' + timeInSecs/60 + ' mins';
+                } else if ( timeInSecs <= 43200) {
+                    formattedTime = 'Last ' + timeInSecs/3600 + ' hrs';
+                }
+            }
+            return formattedTime;
+        };
+        // this.ipUtils = {
+        //     isValidSubnet: function(value,cfg) {
+        //         var cfg = self.ifNull(cfg,{});
+        //         var minIPsNeeded = ifNull(
+        //
+        //
+        //     }
+        //
+        // }
+        this.filterJsonKeysWithCfgOptions = function(obj,cfg) {
+            var cfg = self.ifNull(cfg,{});
+            var filterEmptyArrays = self.ifNull(cfg['filterEmptyArrays'],true);
+            var filterEmptyObjects = self.ifNull(cfg['filterEmptyObjects'],false);
+            var filterNullValues = self.ifNull(cfg['filterNullValues'],true);
+            if(obj instanceof Array) {
+                for(var i=0,len=obj.length;i<len;i++) {
+                    obj[i] = this.filterJsonKeysWithCfgOptions(obj[i],cfg);
+                }
+            } else if(typeof(obj) == "object") {
+                for(var key in obj) {
+                    if(filterNullValues && (obj[key] == null)) {
+                        delete obj[key];
+                    } else if(obj[key] instanceof Array) {
+                        if(filterEmptyArrays && obj[key].length == 0) {
+                            delete obj[key];
+                        }
+                    } else if(typeof(obj[key]) == "object") {
+                        if(filterEmptyObjects && _.keys(obj[key]).length == 0) {
+                            delete obj[key];
+                        } else {
+                            obj[key] = this.filterJsonKeysWithCfgOptions(obj[key],cfg);
+                        }
+                    }
+                }
+            }
+            return obj;
+        }
     };
 
     function filterXML(xmlString, is4SystemLogs) {
