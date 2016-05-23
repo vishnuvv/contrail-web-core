@@ -1551,53 +1551,20 @@ function doV2Auth (req, callback)
                                           JSON.stringify(data.access));
                     req.session.def_token_used = data.access.token;
                     var uiRoles = null;
-                    /* We got already the last one from tenantList, so remove
-                     * this from tenantList now
-                     */
-                    var userRolesToDefProject =
-                        commonUtils.getValueByJsonPath(data,
-                                                       'access;user;roles', []);
-                    var uiRolesToDefProject =
-                        getUIRolesByExtRoles(userRolesToDefProject);
-                    console.log("Getting uiRolesToDefProject as:",
-                                uiRolesToDefProject);
-                    tenantList.splice(projCount - 1, 1);
-                    console.log("Getting tebnantList as:", tenantList);
                     getUserRoleByAllTenants(username, password,
                                             tenantList, 
                                             function(uiRoles, tokenObjs) {
-                        if ((tenantList.length > 0) && ((null == uiRoles) || (!uiRoles.length))) {
+                        if ((null == uiRoles) || (!uiRoles.length)) {
                             req.session.isAuthenticated = false;
                             callback(messages.error.unauthenticate_to_project);
                             return;
                         }
-                        if (null == tokenObjs) {
-                            tokenObjs = {};
-                        }
-                        console.log("Getting uiRoles as:", uiRoles, tokenObjs);
-                        var tmpUIRoleObjs = {};
-                        var uiRolesCnt = 0;
-                        if (null != uiRoles) {
-                                        uiRolesCnt = uiRoles.length;
-                        } else {
-                            uiRoles = [];
-                        }
-                        for (var i = 0; i < uiRolesCnt; i++) {
-                            tmpUIRoleObjs[uiRoles[i]] = uiRoles[i];
-                        }
-                        var uiRolesToDefProjectCnt = uiRolesToDefProject.length;
-                        for (var i = 0; i < uiRolesToDefProjectCnt; i++) {
-                            if (null == tmpUIRoleObjs[uiRolesToDefProject[i]]) {
-                                uiRoles.push(uiRolesToDefProject[i]);
-                            }
-                        }
+                        /* Save the user-id/password in Redis in encrypted format.
+                         */
                         req.session.isAuthenticated = true;
                         req.session.userRole = uiRoles;
                         req.session.authApiVersion = 'v2.0';
                         req.session.tokenObjs = tokenObjs;
-                        if (null != data.access) {
-                            req.session.tokenObjs[defProject] = data.access;
-                        }
                         req.session.userRoles =
                             userRoleListByTokenObjs(tokenObjs);
                         //setSessionTimeoutByReq(req);
