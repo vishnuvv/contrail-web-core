@@ -242,7 +242,7 @@ define([
             x.domain(dateExtent);
             if (barWidth == null && bucketSize != null) {
                 bucketSize = bucketSize * 60 * 1000;
-                barWidth = d3.scale.ordinal().domain(d3.range(dateExtent[0].getTime(), dateExtent[1].getTime(), bucketSize)).rangeRoundBands(x.range(),0.08).rangeBand();
+                barWidth = d3.scale.ordinal().domain(d3.range(dateExtent[0].getTime(), (dateExtent[1].getTime() + bucketSize), bucketSize)).rangeRoundBands(x.range(),0.08).rangeBand();
             }
             y.domain(yExtent);
             xOverview.domain(x.domain());
