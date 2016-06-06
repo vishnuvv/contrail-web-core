@@ -384,6 +384,7 @@ var coreBundles = {
                 'select2',
                 'slick.grid'],
         'core-bundle'       : [
+                'core-constants',
                 'controller-view-model',
                 'crossfilter',
                 'backbone',
@@ -432,6 +433,10 @@ var coreBundles = {
             'core-basedir/js/views/SparklineView',
             'core-basedir/js/views/TabsView',
             'core-basedir/js/views/WizardView'],
+        'nonamd-libs'      : [
+            'contrail-common',
+            'web-utils'
+        ],
         'jquery-dep-libs'      : [
                 'jquery-ui',
                 'jquery.timer',
