@@ -84,7 +84,7 @@ define([
             , yScale
             , x2
             , y2
-            , showLegend = true
+            , showLegend = (chartOptions.showLegend)? chartOptions.showLegend : true
             , brushExtent = null
             , focusShowAxisY = false
             , noData = null
@@ -196,7 +196,7 @@ define([
                 contextEnter.append('g').attr('class', 'nv-x nv-brush');
 
                 // Legend
-                /*if (requestState === cowc.DATA_REQUEST_STATE_SUCCESS_NOT_EMPTY && showLegend) {
+                if (requestState === cowc.DATA_REQUEST_STATE_SUCCESS_NOT_EMPTY && showLegend) {
                     legend.width(availableWidth);
 
                     g.select('.nv-legendWrap')
@@ -210,7 +210,7 @@ define([
 
                     g.select('.nv-legendWrap')
                         .attr('transform', 'translate(0,' + (-margin.top) + ')')
-                }*/
+                }
 
                 wrap.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
