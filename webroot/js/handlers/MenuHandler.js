@@ -161,6 +161,7 @@ define(['underscore'], function (_) {
             var currentBCTemplate = contrail.getTemplate4Id('current-breadcrumb');
             var currPageHashArray, subMenuId, reloadMenu, linkId;
             var hostname = window.location.hostname;
+            //If "All Regions" is selected 
             if (menuButton == null) {
                 currPageHashArray = currPageHash.split('_');
                 //Looks scalable only till 2nd level menu
