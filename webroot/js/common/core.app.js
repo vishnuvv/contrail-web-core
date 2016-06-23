@@ -80,7 +80,7 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
         'cluster-schema'              : coreWebDir + '/schemas/cluster.schema',
         'json-model'                  : coreWebDir + "/js/models/JsonModel",
         'json-edit-view'              : coreWebDir + '/js/views/JsonEditView'
-
+        'iframe-view'                 : coreWebDir + '/js/views/IframeView'
     };
 
     //Separate out aliases that need to be there for both prod & dev environments
@@ -102,11 +102,11 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
             'contrail-view-model'         : coreWebDir + '/js/models/ContrailViewModel',
             'contrail-list-model'         : coreWebDir + '/js/models/ContrailListModel',
             'lodash'                      : coreWebDir + '/assets/lodash/lodash.min',
-            'crossfilter'               : coreWebDir + '/assets/crossfilter/js/crossfilter',
+            'crossfilter'                 : coreWebDir + '/assets/crossfilter/js/crossfilter',
             'backbone'                    : coreWebDir + '/assets/backbone/backbone-min',
             'text'                        : coreWebDir + '/assets/requirejs/text',
             'knockout'                    : coreWebDir + '/assets/knockout/knockout-3.0.0',
-            'moment'                    : coreWebDir + "/assets/moment/moment",
+            'moment'                      : coreWebDir + "/assets/moment/moment",
             'layout-handler'              : coreWebDir + '/js/handlers/LayoutHandler',
             'menu-handler'                : coreWebDir + '/js/handlers/MenuHandler',
             'content-handler'             : coreWebDir + '/js/handlers/ContentHandler',
@@ -891,6 +891,15 @@ function initCustomKOBindings(Knockout) {
     });
 };
 
+function loadGohanUI() {
+    require(['iframe-view'],function(IframeView) {
+        var iframeView = new IframeView({
+            el:$("#main-container")
+        });
+        iframeView.render();
+    });
+};
+
 function changeRegion (e)
 {
     var oldRegion = contrail.getCookie('region');
@@ -898,6 +907,12 @@ function changeRegion (e)
     if ((null != region) && (oldRegion != region) &&
         ('null' != region) && ('undefined' != region)) {
         contrail.setCookie('region', region);
+        if(region == "All Regions") {
+            //To indicate that gohanUI is being embedded in contrailUI
+            sessionStorage.setItem('gohan_contrail',true);
+            loadGohanUI();
+            return;
+        }
         /* And issue logout request */
         loadUtils.logout()
     }
@@ -1072,6 +1087,7 @@ if (typeof document !== 'undefined' && document) {
                     //If #content-container already exists,just show it
                     if($('#content-container').length == 0) {
                         $('#app-container').html($('#app-container-tmpl').text());
+                        $('#main-container').html($('#main-container-tmpl').text());
                         $('#app-container').removeClass('hide');
                     } else 
                         $('#app-container').removeClass('hide');
@@ -1244,6 +1260,8 @@ if (typeof document !== 'undefined' && document) {
                 });
             },
             logout: function() {
+                //Clear iframes
+                $('.iframe-view').remove();
                 //Clear All Pending Ajax calls
                 $.allajax.abort();
                 $.ajax({
