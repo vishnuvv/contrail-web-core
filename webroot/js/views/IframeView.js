@@ -16,7 +16,8 @@ define([
             var iFrameTmpl = contrail.getTemplate4Id("iframe-template");
             $('#main-container').html('');
             $('body').append(iFrameTmpl({
-                url: "./gohan.html"
+                url: "./gohan.html",
+                id: "gohan"
             }));
         }
     });
