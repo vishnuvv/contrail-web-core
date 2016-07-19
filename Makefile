@@ -45,6 +45,7 @@ package:
 	cp -a webroot/html/login-error.tmpl webroot/html/login-error.html
 	./generate-files.sh 'prod-env' $(REPO)
 	./dev-install.sh
+	./gohan-install.sh
 	# build the minified, unified files.
 	./build-files.sh "prod-env" $(REPO)
 	./prod-dev.sh webroot/html/dashboard.html prod_env dev_env true
