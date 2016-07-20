@@ -1096,4 +1096,28 @@ p.error, p.error-text {
     font-weight:600;
     padding-right:3px;
  }
+#analytics-nodes-chart{
+    margin-top:15px !important;
+}
+.marginLeft{
+    //width:50% important;
+    margin-left:30px !important;
+}
+.marginLeftSeparator{
+    margin-left:110px !important;
+}
 
+#config-nodes-linebarchart, #config-nodes-stackedchart{
+    padding-top:20px;
+}
+#analytics-chart-sandesh-stackedbarchart-id .chart-container g.main text.axis-label {
+    text-anchor:middle;
+    font-weight:600;
+    font-size:11px !important;
+}
+
+#analytics-chart-queries-stackedbarchart-id .chart-container g.main text.axis-label, #analytics-chart-database-read-stackedbarchart-id .chart-container g.main text.axis-label,  #analytics-chart-database-write-stackedbarchart-id .chart-container g.main text.axis-label{
+    text-anchor:middle;
+    font-weight:600;
+    font-size:11px !important;
+}
