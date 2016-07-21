@@ -4,9 +4,9 @@
             <div id="sidebar-shortcuts-large">
                 {{#each this}}
                     {{#IfCompare this.cssClass 'disabledBtn' operator='!='}}
-                        <button id="btn-{{this.id}}" class="btn btn-small {{this.cssClass}}" style="width:42px" title="{{this.label}}" onclick="menuHandler.toggleMenuButton('{{this.id}}');">
+                        <button id="btn-{{this.id}}" class="btn btn-small {{this.cssClass}}" title="{{this.label}}" onclick="menuHandler.toggleMenuButton('{{this.id}}');">
                     {{else}}
-                        <button id="btn-{{this.id}}" class="btn btn-small {{this.cssClass}}" style="width:42px" title="{{this.label}}" onclick="menuHandler.toggleMenuButton('{{this.id}}');" disabled>
+                        <button id="btn-{{this.id}}" class="btn btn-small {{this.cssClass}}" title="{{this.label}}" onclick="menuHandler.toggleMenuButton('{{this.id}}');" disabled>
                     {{/IfCompare}}
                             <i class="{{this.iconClass}} icon-large"></i>
                     </button>
