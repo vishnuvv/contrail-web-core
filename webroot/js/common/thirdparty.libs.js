@@ -7,8 +7,8 @@ define([
         'slick.groupmetadata',
         'slick.rowselectionmodel',
         'slick.enhancementpager',
-        'knockback',
-        'validation',
+        // 'knockback',
+        // 'validation',
         ],function() {});
 
 

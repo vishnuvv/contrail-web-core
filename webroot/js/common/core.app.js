@@ -79,7 +79,7 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
         'server-schema'               : coreWebDir + '/schemas/server.schema',
         'cluster-schema'              : coreWebDir + '/schemas/cluster.schema',
         'json-model'                  : coreWebDir + "/js/models/JsonModel",
-        'json-edit-view'              : coreWebDir + '/js/views/JsonEditView'
+        'json-edit-view'              : coreWebDir + '/js/views/JsonEditView',
         'iframe-view'                 : coreWebDir + '/js/views/IframeView'
     };
 
@@ -189,7 +189,7 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
             'controller-basedir'          : coreBaseDir,
             'backbone'                    : coreWebDir + '/assets/backbone/backbone-min',
             'knockout'                    : coreWebDir + '/assets/knockout/knockout-3.0.0',
-            'knockback'                   : coreWebDir + '/assets/backbone/knockback.min',
+            'knockback'                 : coreWebDir + '/assets/backbone/knockback.min',
             'validation'                  : coreWebDir + '/assets/backbone/backbone-validation-amd'
         }
         //Merge common (for both prod & dev) alias 
@@ -427,6 +427,8 @@ var coreBundles = {
             'jquery.datetimepicker'
         ],
         'core-bundle'       : [
+            // 'knockback',
+            // 'validation',
             'underscore',
             'core-utils',
             'core-constants',
@@ -445,7 +447,9 @@ var coreBundles = {
             'contrail-list-model',
             'lodash',
             'crossfilter',
+            // 'backbone',
             'text',
+            // 'knockout',
             'moment',
             'layout-handler',
             'menu-handler',
@@ -1017,6 +1021,7 @@ if (typeof document !== 'undefined' && document) {
                 if(globalObj['loadedScripts'].indexOf(smUrl) == -1) {
                     //Post-Authentication
                     webServerInfoDefObj.done(function() {
+                        console.info('serverManager: resolved webServerInfoDefObj');
                         //Need to remove "slickgrid-utils" once all grids are moved to GridView
                         require(['core-bundle','jquery-dep-libs','nonamd-libs'],function() {
                             require(['slickgrid-utils'],function() {
