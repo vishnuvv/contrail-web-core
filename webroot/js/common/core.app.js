@@ -1233,6 +1233,8 @@ if (typeof document !== 'undefined' && document) {
                 // $('#logout').click(logout);
             },
             authenticate: function() {
+                //Disable sign-in button
+                $('#signin').prop('disabled',true);
                 require(['jquery'],function() {
                     //Compares client UTC time with the server UTC time and display alert if mismatch exceeds the threshold
                     var postData = {
@@ -1260,6 +1262,8 @@ if (typeof document !== 'undefined' && document) {
                             //Display login-error message
                             $('#login-error strong').text(response['msg']);
                             $('#login-error').removeClass('hide');
+                            //Re-enable signin button
+                            $('#signin').prop('disabled',false);
                         }
                     });
                 });
