@@ -892,6 +892,8 @@ function initCustomKOBindings(Knockout) {
 };
 
 function loadGohanUI() {
+    sessionStorage.setItem('gohan_contrail',true);
+    sessionStorage.setItem('tenant',JSON.stringify(loadUtils.getCookie('project')));
     require(['iframe-view'],function(IframeView) {
         var iframeView = new IframeView({
             el:$("#main-container"),
@@ -1123,7 +1125,19 @@ if (typeof document !== 'undefined' && document) {
                                                             width: '100px',
                                                             change: changeRegion});
                             $('#regionDD').data("contrailDropdown").setData(ddRegionList);
-                            $("#regionDD").data("contrailDropdown").value(contrail.getCookie('region'));
+                            // if(loadUtils.getCookie('region') != "All Regions")
+                            $("#regionDD").data("contrailDropdown").value(loadUtils.getCookie('region'));
+                            //Fetch tokens for gohanUI
+                            /*$.ajax({
+                                type: "POST",
+                                url: '/gohan_contrail_auth/tokens'
+                            }).done(function(response,textStatus,xhr) {
+                                sessionStorage.setItem('scopedToken',JSON.stringify(response));
+                            });*/
+                            //Trigger change handler while setting default value
+                            if(loadUtils.getCookie('region') == "All Regions") {
+                                loadGohanUI();
+                            }
                         }
                     });
                     webServerInfoDefObj.resolve();
@@ -1133,11 +1147,13 @@ if (typeof document !== 'undefined' && document) {
                     }
                     $('#user-profile').show();
                     loadUtils.bindAppListeners();
+
                     $.when.apply(window,[menuXMLLoadDefObj,layoutHandlerLoadDefObj]).done(function(menuXML) {
                         if(globalObj['featureAppDefObj'] == null)
                             globalObj['featureAppDefObj'] = $.Deferred();
                         require(['core-bundle'],function() {
-                            layoutHandler.load(menuXML);
+                            if(loadUtils.getCookie('region') != "All Regions")
+                                layoutHandler.load(menuXML);
                         });
                     });
                 });
@@ -1159,7 +1175,7 @@ if (typeof document !== 'undefined' && document) {
                         $("#region_id").select2({placeholder: "Select the Region",
                                                 data: regionList,
                                                 width: "283px"})
-                        var cookieRegion = contrail.getCookie('region');
+                        var cookieRegion = loadUtils.getCookie('region');
                         if (regionList.length > 0) {
                             if (null == cookieRegion) {
                                 cookieRegion = regionList[0]['key'];
