@@ -712,6 +712,40 @@ define([
             return template;
         };
 
+        /**
+        * Get the value of a property inside a json object with a given path
+        */
+        self.getValueByJsonPath = function(obj,pathStr,defValue,doClone) {
+            try {
+                var currObj = obj;
+                var pathArr = pathStr.split(';');
+                var doClone = ifNull(doClone,true);
+                var arrLength = pathArr.length;
+                for(var i=0;i<arrLength;i++) {
+                    if(currObj[pathArr[i]] != null) {
+                        currObj = currObj[pathArr[i]];
+                    } else
+                        return defValue;
+                }
+                if(currObj instanceof Array) {
+                    if(doClone == false) {
+                        return currObj;
+                    } else {
+                        return $.extend(true,[],currObj);
+                    }
+                } else if(typeof(currObj) == "object") {
+                    if(doClone == false) { 
+                        return currObj;
+                    } else {
+                        return $.extend(true,{},currObj);
+                    }
+                } else
+                    return currObj;
+            } catch(e) {
+                return defValue;
+            }
+}
+
         this.getValueByConfig = function(configValue, app, objectAccessor) {
             var templateGenerator = configValue.templateGenerator;
             if (templateGenerator === 'TextGenerator' || templateGenerator === 'LinkGenerator' || templateGenerator === 'json') {
