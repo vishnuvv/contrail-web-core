@@ -5,9 +5,10 @@ define([
     'gridstack'
 ], function (_, Backbone,ContrailView,gridstack) {
     var GridStackView = ContrailView.extend({
-        initialize: function() {
+        initialize: function(options) {
             var self = this;
             self.widgets = [];
+            self.widgetCfgList = cowu.getValueByJsonPath(options,'attributes;viewConfig;widgetCfgList',{});
             self.COLUMN_CNT = 2;
 
             self.$el.addClass('grid-stack grid-stack-2');
@@ -25,7 +26,14 @@ define([
             }).data('gridstack');
         },
         render: function() {
-
+            var self = this;
+            for(var i=0;i < self.widgetCfgList.length;i++) {
+                var currWidgetCfg = self.widgetCfgList[i];
+                self.add({
+                    modelCfg: currWidgetCfg['modelCfg'],
+                    viewCfg: currWidgetCfg['viewCfg']
+                });
+            }
         },
         add: function(cfg) {
             var self = this;
@@ -33,8 +41,10 @@ define([
             var widgetCnt = self.widgets.length;
             self.gridStack.addWidget(currElem,widgetCnt/self.COLUMN_CNT,(widgetCnt%self.COLUMN_CNT));
             self.widgets.push(currElem);
-            // if(cowu.getValueByJsonPath(cfg['model']['_type']) != 'contrailListModel')
-            self.renderView4Config($(currElem).find('.item-content'), cfg['modelCfg'],cfg['viewCfg']);
+            var modelCfg = cfg['modelCfg'];
+            if(cowu.getValueByJsonPath(cfg,'modelCfg;_type') != 'contrailListModel')
+                modelCfg = new ContrailListModel(modelCfg);
+            self.renderView4Config($(currElem).find('.item-content'), modelCfg, cfg['viewCfg']);
         }
     });
     return GridStackView;

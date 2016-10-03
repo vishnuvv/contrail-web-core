@@ -614,6 +614,13 @@ define([
                 modelMap = renderConfig['modelMap'];
                 rootView = renderConfig['rootView'];
                 viewPath = viewPathPrefix + viewName;
+
+                var pathMapping = _.invert(require.s.contexts._.config.paths);
+                pathMapping = {
+                    'core-basedir/js/views/GridStackView' : 'gs-view'
+                }
+                viewPath = ifNull(pathMapping[viewPath],viewPath);
+
                 onAllViewsRenderCompleteCB = renderConfig['onAllViewsRenderCompleteCB'];
                 onAllRenderCompleteCB = renderConfig['onAllRenderCompleteCB'];
                 lazyRenderingComplete  = renderConfig['lazyRenderingComplete'];
