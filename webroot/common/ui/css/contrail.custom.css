@@ -1103,3 +1103,21 @@ button#close-error-popup{
 .grid-stack-item header {
     background-color:lightblue;
 }
+.custom-carousel-control-left{
+ left: 0;
+ right: auto;
+}
+.custom-carousel-control-right{
+ right: 0;
+ left: auto;
+}
+.custom-carousel-control{
+ position: absolute;
+ top: 50%;
+ bottom: 0;
+ font-size: 25px;
+ color: #666;
+}
+.carousel-inner{
+ padding: 10px 15px 0px 15px;
+}
