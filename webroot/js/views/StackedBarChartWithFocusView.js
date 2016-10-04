@@ -18,6 +18,10 @@ define([
                 self = this, deferredObj = $.Deferred(),
                 widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ? viewConfig.widgetConfig : null;
 
+
+            self.tooltipDiv = d3.select("body").append("div")
+                            .attr("class", "stack-bar-chart-tooltip")
+                            .style("opacity", 0);
             cfDataSource = viewConfig.cfDataSource;
             if (self.model === null && viewConfig['modelConfig'] != null) {
                 self.model = new ContrailListModel(viewConfig['modelConfig']);
@@ -211,9 +215,10 @@ define([
                                 .attr("dx", ".75em")
                                 .attr("transform", "rotate(-90)")
                                 .text(yAxisLabel);
-            var tooltipDiv = d3.select("body").append("div")
-                            .attr("class", "stack-bar-chart-tooltip")
-                            .style("opacity", 0);
+            var tooltipDiv = self.tooltipDiv;
+            // var tooltipDiv = d3.select("body").append("div")
+            //                 .attr("class", "stack-bar-chart-tooltip")
+            //                 .style("opacity", 0);
             var formatTime = d3.time.format("%e %b %X");
             if(brush && addOverviewChart) {
                 overview = svg.append("g")
