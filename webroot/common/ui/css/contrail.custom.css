@@ -1094,7 +1094,7 @@ button#close-error-popup{
  opacity: 1;
 }
 .custom-chart-legend{
- padding: 10px 0px 0px 0px;
+ padding: 0px 0px 0px 10px;
 }
 
 .grid-stack-item-content  {
