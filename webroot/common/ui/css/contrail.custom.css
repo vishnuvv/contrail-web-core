@@ -1097,8 +1097,8 @@ button#close-error-popup{
  padding: 0px 0px 0px 10px;
 }
 
-.grid-stack-item-content  {
-    border : 1px solid lightblue;
+.grid-stack-item-content:hover  {
+    border : 1px solid lightgray;
 }
 .grid-stack-item header {
     background-color:lightblue;
