@@ -14,13 +14,13 @@ define(['underscore', 'contrail-view'], function(_, ContrailView){
             self.currIndex = 0;
             self.lastIndex = viewConfig.pages.length;
 
-            self.$el.html(carouselTemplate);
+            self.$el.html(carouselTemplate({pages:self.viewList}));
             self.viewPlaceHolder = self.$el.find(".carousel-content");
             activateView(self, self.currIndex, false);
         },
         next: function(){
             var self = this;
-
+            deActivateCarouselIndicator(self.currIndex);
             self.currIndex = self.currIndex + 1;
             if(self.currIndex >= self.lastIndex){
                 self.currIndex = 0;
@@ -32,7 +32,7 @@ define(['underscore', 'contrail-view'], function(_, ContrailView){
         },
         prev: function(){
             var self = this;
-
+            deActivateCarouselIndicator(self.currIndex);
             self.currIndex = self.currIndex - 1;
             if(self.currIndex < 0){
                 self.currIndex = self.lastIndex - 1;
@@ -52,18 +52,18 @@ define(['underscore', 'contrail-view'], function(_, ContrailView){
         var height = $('div.carousel').height(),
             page = self.viewList[index].page,
             model = ifNull(self.viewList[index].model, '');
-
+        activateCarouselIndicator(self.currIndex);
         if(!doAnimate){
             self.renderView4Config(self.viewPlaceHolder,  model, page);
         }else{
-            var slideDirection = ['right','left'],
+            var slideDirection = ['left','right'],
                 height = $('div.carousel').height();
 
             if(direction === 'prev')
-                slideDirection = ['left','right'];
+                slideDirection = ['right','left'];
 
-            $("div.carousel-content").hide("slide", { direction: slideDirection[0] }, 300, function() {
-                $('div.carousel').height(height);
+            $("div.carousel-content").hide("slide", { direction: slideDirection[0] }, 800, function() {
+                //$('div.carousel').height(height);
                 self.$el.find(".carousel-content").remove();
                 self.$el.find(".carousel-inner").append($('<div class="carousel-content">'));
                 $("div.carousel-content").show("slide", { direction: slideDirection[1] }, 300, function(){
@@ -75,6 +75,14 @@ define(['underscore', 'contrail-view'], function(_, ContrailView){
                 });
             });
         }
+    }
+
+    function activateCarouselIndicator(index, prevIndex){
+        $(".carousel-indicators li#"+index).addClass('active');
+    }
+
+    function deActivateCarouselIndicator(index){
+        $(".carousel-indicators li#"+index).removeClass('active');
     }
 
     return CarouselView;

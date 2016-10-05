@@ -1602,7 +1602,7 @@ define([
                     for (var j = 0; j < groupByMapLen; j++) {
                         var groupByObj = groupByMap[j],
                             groupByObjKey = groupByObj['key'],
-                            groupByObjVal = parseInt(groupByObj['value']),
+                            groupByObjVal = groupByObj['value'] + 0,
                             parseDataKey = groupByObjKey;
                         //total += groupByObjVal;
                         if (failureCheckFn) {
