@@ -64,9 +64,10 @@ define(['underscore', 'contrail-view'], function(_, ContrailView){
 
             $("div.carousel-content").hide("slide", { direction: slideDirection[0] }, 300, function() {
                 $('div.carousel').height(height);
-                $(".carousel-content").empty();
+                self.$el.find(".carousel-content").remove();
+                self.$el.find(".carousel-inner").append($('<div class="carousel-content">'));
                 $("div.carousel-content").show("slide", { direction: slideDirection[1] }, 300, function(){
-                   self.renderView4Config(self.viewPlaceHolder,  model, page, null, null, null, function(){
+                   self.renderView4Config(self.$el.find('.carousel-content'),  model, page, null, null, null, function(){
                        //setTimeout(function(){
                            //$('div.carousel').height($("div.carousel-inner").children().height() * 2);
                        //}, 1000);
