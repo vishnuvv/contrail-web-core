@@ -154,6 +154,7 @@ define([
                                   .attr("text-anchor", "end")
                                   .attr("x", width/2)
                                   .attr("y", height + 40)
+                                  .style('font-size', '10px')
                                   .text(xAxisLabel);
               var yaxisLabel = svg.append("text")
                                   .attr("class", "axis-label")
@@ -162,6 +163,7 @@ define([
                                   .attr("x", -height/2)
                                   .attr("dy", ".75em")
                                   .attr("dx", ".75em")
+                                  .style('font-size', '10px')
                                   .attr("transform", "rotate(-90)")
                                   .text(yAxisLabel);
               chart.tooltip.contentGenerator(function (obj) { return tooltipFn(obj.point,yAxisFormatter)})

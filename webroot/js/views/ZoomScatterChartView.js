@@ -103,8 +103,15 @@ define([
 
         renderMessage: function(message, selector) {
             var self = this,
-                message = contrail.handleIfNull(message, ""),
-                selector = contrail.handleIfNull(selector, $(self.$el)),
+                chartOptions = self.attributes.viewConfig['chartOptions'],
+                message;
+                if(!chartOptions.fetchDataLabel){
+                message = "";
+                }
+                else{
+                    message = contrail.handleIfNull(message, "");
+                }
+                var selector = contrail.handleIfNull(selector, $(self.$el)),
                 chartSVG = d3.select($(selector).find("svg")[0]),
                 chartModel = self.chartModel,
                 margin = chartModel.margin,
