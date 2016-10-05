@@ -6,8 +6,9 @@ define([
     'underscore',
     'contrail-view',
     'contrail-list-model',
-    'legend-view'
-], function (_, ContrailView,  ContrailListModel, LegendView) {
+    'legend-view',
+    'core-constants'
+], function (_, ContrailView,  ContrailListModel, LegendView, cowc) {
     var cfDataSource;
     var stackedAreaChartView = ContrailView.extend({
         render: function () {
@@ -48,6 +49,11 @@ define([
                     self.renderChart($(self.$el), viewConfig, self.model);
                 });
 /* window resize may not be require since the nvd3 also provides a smoother refresh*/
+                self.resizeFunction = _.debounce(function (e) {
+                    self.renderChart($(self.$el), viewConfig, self.model);
+                },cowc.THROTTLE_RESIZE_EVENT_TIME);
+                $(window).on('resize',self.resizeFunction);
+
 //                var resizeFunction = function (e) {
 //                    self.renderChart($(self.$el), viewConfig, self.model);
 //                };
@@ -55,13 +61,13 @@ define([
 //                $(window)
 //                    .off('resize', resizeFunction)
 //                    .on('resize', resizeFunction);
-                if ($(self.$el).closest('.gs-container').length > 0 ) {
-                    $(self.$el).closest('.gs-container').on("resize",function(){
-                        clearTimeout(resizeId);
-                        resizeId = setTimeout(doneResizing, 500);
-                        //self.renderChart($(self.$el), viewConfig, self.model);
-                    });
-                }
+                // if ($(self.$el).closest('.gs-container').length > 0 ) {
+                //     $(self.$el).closest('.gs-container').on("resize",function(){
+                //         clearTimeout(resizeId);
+                //         resizeId = setTimeout(doneResizing, 500);
+                //         //self.renderChart($(self.$el), viewConfig, self.model);
+                //     });
+                // }
                 self.renderChart($(self.$el), viewConfig, self.model);
             }
         },

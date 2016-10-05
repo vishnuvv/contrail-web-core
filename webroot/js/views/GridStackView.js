@@ -22,13 +22,19 @@ define([
                 float:false,
                 handle:'header',
                 verticalMargin:8,
-                cellHeight:72*2,
+                // cellHeight:72*2,
+                cellHeight: 20,
                 // cellHeight:1,
                 // minHeight:4,
                 // width:self.COLUMN_CNT,   /#<{(|self.VIRTUAL_COLUMNS,
                 animate:false,
                 acceptWidgets:'label'
             }).data('gridstack');
+            
+            // self.gridStack.grid.cleanNodes();
+            // self.gridStack.grid.nodes = [];
+
+            //Trigger resize on widgets on resizestop
         },
         render: function() {
             var self = this;
@@ -46,12 +52,18 @@ define([
             var currElem = $($('#gridstack-widget-template').text()).attr('data-gs-height',2);
             var itemAttr = ifNull(cfg['itemAttr'],{});
             var defaultWidth = ifNull(self.gridAttr['defaultWidth'],1);
+            var defaultHeight = ifNull(self.gridAttr['defaultHeight'],1);
             if(itemAttr['width'] != null) {
                 itemAttr['width'] = itemAttr['width']*defaultWidth;
                 $(currElem).attr('data-gs-width',itemAttr['width']);
             }
+            if(itemAttr['height'] != null) {
+                itemAttr['height'] = itemAttr['height']*defaultHeight;
+                $(currElem).attr('data-gs-height',itemAttr['height']);
+            }
             var widgetCnt = self.widgets.length;
-            self.gridStack.addWidget(currElem,widgetCnt/self.COLUMN_CNT,(widgetCnt%self.COLUMN_CNT)/**self.VIRTUAL_COLUMNS*/,ifNull(itemAttr['width'],defaultWidth),ifNull(itemAttr['height'],2),true);
+            self.gridStack.addWidget(currElem,widgetCnt/self.COLUMN_CNT,(widgetCnt%self.COLUMN_CNT)/**self.VIRTUAL_COLUMNS*/,
+                ifNull(itemAttr['width'],defaultWidth),ifNull(itemAttr['height'],defaultHeight),true);
             self.widgets.push(currElem);
             var modelCfg = cfg['modelCfg'];
             if(cowu.getValueByJsonPath(cfg,'modelCfg;_type') != 'contrailListModel')

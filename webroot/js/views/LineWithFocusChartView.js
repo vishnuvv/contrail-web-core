@@ -8,8 +8,9 @@ define([
     'core-basedir/js/models/LineWithFocusChartModel',
     'contrail-list-model',
     'nv.d3',
-    'chart-utils'
-], function (_, ContrailView, LineWithFocusChartModel, ContrailListModel, nv, chUtils) {
+    'chart-utils',
+    'core-constants',
+], function (_, ContrailView, LineWithFocusChartModel, ContrailListModel, nv, chUtils, cowc) {
     var LineWithFocusChartView = ContrailView.extend({
         render: function () {
             var viewConfig = this.attributes.viewConfig,
@@ -119,9 +120,13 @@ define([
                 setData2Chart(self, chartViewConfig, chartViewModel, chartModel);
             }
 
-            nv.utils.windowResize(function () {
+            self.resizeFunction = _.debounce(function (e) {
                 chUtils.updateChartOnResize(selector, chartModel);
-            });
+            },cowc.THROTTLE_RESIZE_EVENT_TIME);
+            $(window).on('resize',self.resizeFunction);
+            // nv.utils.windowResize(function () {
+            //     chUtils.updateChartOnResize(selector, chartModel);
+            // });
             //Seems like in d3 chart renders with some delay so this deferred object helps in that situation,which resolves once the chart is rendered
             if (chartOptions['deferredObj'] != null)
                 chartOptions['deferredObj'].resolve();

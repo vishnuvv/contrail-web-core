@@ -4,11 +4,12 @@
  */
 
 define([
-    'underscore',
+    'lodash',
     'contrail-view',
     'contrail-list-model',
-    'legend-view'
-], function (_, ContrailView,  ContrailListModel, LegendView) {
+    'legend-view',
+    'core-constants'
+], function (_, ContrailView,  ContrailListModel, LegendView, cowc) {
     var cfDataSource;
     var stackedBarChartWithFocusChartView = ContrailView.extend({
 
@@ -55,23 +56,26 @@ define([
                     self.renderChart($(self.$el), viewConfig, self.model);
                 });
 
-                var resizeFunction = function (e) {
+                self.resizeFunction = _.debounce(function (e) {
+                    // console.info("Resizing stackedBarChartWithFocusChartView",$(self.$el).selector);
                     self.renderChart($(self.$el), viewConfig, self.model);
-                };
+                },cowc.THROTTLE_RESIZE_EVENT_TIME);
 
-                $(window)
-                .off('resize', resizeFunction)
-                .on('resize', resizeFunction);
-                if ($(self.$el).closest('.gs-container').length > 0 ) {
-               $(self.$el).closest('.gs-container').on("resize",function(){
-                   clearTimeout(resizeId);
-                   resizeId = setTimeout(doneResizing, 500);
-                   //self.renderChart($(self.$el), viewConfig, self.model);
-               });
-           }
-           function doneResizing(){
-               self.renderChart($(self.$el), viewConfig, self.model);
-           }
+                $(window).on('resize',self.resizeFunction);
+
+                // $(window)
+                // .off('resize', resizeFunction)
+                // .on('resize', _.debounce(resizeFunction,250));
+                // if ($(self.$el).closest('.gs-container').length > 0 ) {
+                //     $(self.$el).closest('.gs-container').on("resize",function(){
+                //         clearTimeout(resizeId);
+                //         resizeId = setTimeout(doneResizing, 500);
+                //         //self.renderChart($(self.$el), viewConfig, self.model);
+                //     });
+                // }
+                // function doneResizing(){
+                //     self.renderChart($(self.$el), viewConfig, self.model);
+                // }
 
             }
         },
