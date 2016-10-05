@@ -54,6 +54,8 @@ define([
 
             if (contrail.checkIfFunction(viewConfig['parseFn'])) {
                 data = viewConfig['parseFn'](data);
+            } else if (data != null && data.length > 0) {
+                data = cowu.parseLineBarChartWithFocus(data, viewConfig.chartOptions);
             }
 
             chartViewConfig = self.getChartViewConfig(data, viewConfig.chartOptions);

@@ -26,7 +26,7 @@ define([
                 self.model = new ContrailListModel(viewConfig['modelConfig']);
             }
 
-            self.renderChart(selector, viewConfig, self.model);
+            self.renderChart(selector, $.extend(true, {}, viewConfig), self.model);
 
             if (self.model !== null) {
                 if(self.model.loadedFromCache || !(self.model.isRequestInProgress())) {
