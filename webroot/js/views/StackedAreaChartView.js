@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2016 Juniper Networks, Inc. All rights reserved.
- * Credits : http://bl.ocks.org/godds/ec089a2cf3e06a2cd5fc
  */
 
 define([
@@ -48,7 +47,7 @@ define([
                 $($(self.$el)).bind("refresh", function () {
                     self.renderChart($(self.$el), viewConfig, self.model);
                 });
-
+/* window resize may not be require since the nvd3 also provides a smoother refresh*/
 //                var resizeFunction = function (e) {
 //                    self.renderChart($(self.$el), viewConfig, self.model);
 //                };
@@ -56,6 +55,13 @@ define([
 //                $(window)
 //                    .off('resize', resizeFunction)
 //                    .on('resize', resizeFunction);
+                if ($(self.$el).closest('.gs-container').length > 0 ) {
+                    $(self.$el).closest('.gs-container').on("resize",function(){
+                        clearTimeout(resizeId);
+                        resizeId = setTimeout(doneResizing, 500);
+                        //self.renderChart($(self.$el), viewConfig, self.model);
+                    });
+                }
                 self.renderChart($(self.$el), viewConfig, self.model);
             }
         },
@@ -66,7 +72,10 @@ define([
             var widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ?
                     viewConfig.widgetConfig : null;
             var chartOptions = getValueByJsonPath(viewConfig, 'chartOptions', {});
-            var totalHeight = getValueByJsonPath(chartOptions,'height',300);
+//            var totalHeight = getValueByJsonPath(chartOptions,'height',300);
+            var totalHeight = ($(selector).closest('.gridstack-item').length > 0 )? 
+                    $(selector).closest('.gridstack-item').height() - 50:
+                        300;
 
             chartOptions['timeRange'] =  getValueByJsonPath(self, 'model;queryJSON');
             var totalWidth = $(selector).find('.stacked-area-chart-container').width();
@@ -119,7 +128,7 @@ define([
                     self.colors = colors;
                 }
             }
-            
+
             nv.addGraph(function() {
               var chart = nv.models.stackedAreaChart()
                             .x(function(d) { return d['x'] })   //We can modify the data accessor functions...
@@ -136,18 +145,32 @@ define([
 //                  .tickFormat(function(d) { 
 //                    return customTimeFormat(new Date(d)) 
 //            });
-                  
-              
+//
 
+//              chart.yAxis
+//                  .tickFormat(yAxisFormatter);
+//              var svg = d3.select($(selector).find('.stacked-area-chart-container')[0])
+//                  .append("svg")
+//                  .attr("width", width + margin.left + margin.right)
+//                  .attr("height", height + margin.top + margin.bottom);
+//              svg.datum(data)
+//                .call(chart);
+//              
+              //y-axis tickformatter
               chart.yAxis
                   .tickFormat(yAxisFormatter);
+
+              //set the svg width and height
               var svg = d3.select($(selector).find('.stacked-area-chart-container')[0])
-                  .append("svg")
-                  .attr("width", width + margin.left + margin.right)
-                  .attr("height", height + margin.top + margin.bottom);
+                          .append("svg")
+                          .attr("width", width + margin.left + margin.right)
+                          .attr("height", height + margin.top + margin.bottom);
+
+              //initialize the chart in the svg element
+              chart.interpolate("monotone");
               svg.datum(data)
-                .call(chart);
-              
+                .call(chart)
+
               //Add the axis labels
               var xaxisLabel = svg.append("text")
                                   .attr("class", "axis-label")
@@ -166,8 +189,11 @@ define([
                                   .style('font-size', '10px')
                                   .attr("transform", "rotate(-90)")
                                   .text(yAxisLabel);
+              //Use the tooltip formatter if present
               chart.tooltip.contentGenerator(function (obj) { return tooltipFn(obj.point,yAxisFormatter)})
-              
+
+              //Add the modified legends
+              showControls=false;
               if (showControls == true || showLegend == true) {
                   var colorsMap = self.colors,
                       nodeLegend = [],
