@@ -183,14 +183,6 @@ config.analytics.authProtocol = 'http';
 config.analytics.strictSSL = false;
 config.analytics.ca = '';
 
-/* Discovery Service */
-config.discoveryService = {};
-config.discoveryService.server_port = '5998';
-/* Specifiy true if subscription to discovery server should be enabled, else
- * specify false. Other than true/false value here is treated as true
- */
-config.discoveryService.enable = true;
-
 /* Job Server */
 config.jobServer = {};
 config.jobServer.server_ip = '127.0.0.1';
@@ -438,7 +430,6 @@ config.proxy.analytics_node_ports = [
     '8104', /* HttpPortAnalyticsNodemgr */
 ];
 config.proxy.config_node_ports = [
-    '5998', /* DiscoveryServerPort */
     '8082', /* ApiServerPort */
     '8084', /* HttpPortApiServer */
     '8087', /* HttpPortSchemaTransformer */
