@@ -42,6 +42,12 @@ define([
                         self.renderChart(selector, viewConfig, self.model);
                     });
                 }
+                self.resizeFunction = _.debounce(function (e) {
+                    $('.stack-bar-chart-tooltip').remove();
+                     self.renderChart($(self.$el), viewConfig, self.model);
+                 },cowc.THROTTLE_RESIZE_EVENT_TIME);
+
+                $(window).on('resize',self.resizeFunction);
             }
         },
 
@@ -74,7 +80,9 @@ define([
                 viewConfig.chartOptions.defaultDataStatusMessage = false;
                 data.push(defData);
             }
-
+            if (cowu.isGridStackWidget($(selector)) && $(selector).parents('.gridstack-item').height() != 0) {
+                viewConfig['chartOptions']['height'] = $(selector).parents('.gridstack-item').height() - 40;
+            }
             chartViewConfig = self.getChartViewConfig(data, viewConfig);
             chartOptions = chartViewConfig['chartOptions'];
             chartModel = new LineWithFocusChartModel(chartOptions);

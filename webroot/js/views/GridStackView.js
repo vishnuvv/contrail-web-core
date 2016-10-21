@@ -20,7 +20,7 @@ define([
             self.$el.addClass('grid-stack grid-stack-12');
             self.gridStack = $(self.$el).gridstack({
                 float:false,
-                handle:'header',
+                handle:'.item-content',
                 verticalMargin:8,
                 cellHeight: 20,
                 animate:false,
@@ -28,6 +28,9 @@ define([
             }).data('gridstack');
             
             //Trigger resize on widgets on resizestop
+            self.$el.on('resizestop',function() {
+                $(window).trigger('resize');
+            });
         },
         render: function() {
             var self = this;
