@@ -6,12 +6,13 @@ define([
     'underscore',
     'contrail-view',
     'contrail-list-model',
-    'legend-view'
-], function (_, ContrailView,  ContrailListModel, LegendView) {
+    'legend-view',
+    'core-constants'
+], function (_, ContrailView,  ContrailListModel, LegendView, cowc) {
     var cfDataSource;
     var stackedAreaChartView = ContrailView.extend({
         render: function () {
-            var viewConfig = this.attributes.viewConfig,
+            var viewConfig = this.attributes.viewConfig,tooltipElementObj,
                 ajaxConfig = viewConfig['ajaxConfig'],
                 self = this, deferredObj = $.Deferred(),
                 widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ?
@@ -49,20 +50,13 @@ define([
                 $($(self.$el)).bind("refresh", function () {
                     self.renderChart($(self.$el), viewConfig, self.model);
                 });
-/* window resize may not be require since the nvd3 also provides a smoother refresh*/
-                var resizeFunction = function (e) {
-                    clearTimeout(resizeId);
-                    resizeId = setTimeout(function(){
+                /* window resize may not be require since the nvd3 also provides a smoother refresh*/
+                self.resizeFunction = _.debounce(function (e) {
                         self.renderChart($(self.$el), viewConfig, self.model);
-                    }, 500);
-                };
+                },cowc.THROTTLE_RESIZE_EVENT_TIME);
+                $(window).on('resize',self.resizeFunction);
 
-                $(window)
-                    .off('resize', resizeFunction)
-                    .on('resize', resizeFunction);
-                if ($(self.$el).closest('.gs-container').length > 0 ) {
-                    $(self.$el).closest('.gs-container').on("resize",resizeFunction);
-                }
+                self.renderChart($(self.$el), viewConfig, self.model);
             }
         },
         renderChart: function (selector, viewConfig, chartViewModel) {
@@ -74,7 +68,7 @@ define([
             var chartOptions = getValueByJsonPath(viewConfig, 'chartOptions', {});
             var totalHeight = getValueByJsonPath(chartOptions,'height',300);
             totalHeight = ($(selector).closest('.gridstack-item').length > 0 )?
-                    $(selector).closest('.gridstack-item').height() - 50:
+                    $(selector).closest('.gridstack-item').height() - 20:
                         totalHeight;
 
             chartOptions['timeRange'] =  getValueByJsonPath(self, 'model;queryJSON');
@@ -269,7 +263,7 @@ define([
                 var tooltipElementTemplate = contrail.getTemplate4Id(cowc.TMPL_ELEMENT_TOOLTIP),
                 tooltipElementTitleTemplate = contrail.getTemplate4Id(cowc.TMPL_ELEMENT_TOOLTIP_TITLE),
                 tooltipElementContentTemplate = contrail.getTemplate4Id(cowc.TMPL_ELEMENT_TOOLTIP_CONTENT),
-                tooltipElementObj, tooltipElementTitleObj, tooltipElementContentObj;
+                tooltipElementTitleObj, tooltipElementContentObj;
                 tooltipConfig = $.extend(true, {}, cowc.DEFAULT_CONFIG_ELEMENT_TOOLTIP, tooltipConfig);
                 tooltipElementObj = $(tooltipElementTemplate(tooltipConfig));
                 tooltipElementTitleObj = $(tooltipElementTitleTemplate(tooltipConfig.title));

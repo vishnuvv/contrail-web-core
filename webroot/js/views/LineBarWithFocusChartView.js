@@ -16,7 +16,8 @@ define([
                 ajaxConfig = viewConfig['ajaxConfig'],
                 self = this, deferredObj = $.Deferred(),
                 selector = $(self.$el),
-                modelMap = contrail.handleIfNull(self.modelMap, {});
+                modelMap = contrail.handleIfNull(self.modelMap, {}),
+                resizeId;
 
             if (contrail.checkIfExist(viewConfig.modelKey) && contrail.checkIfExist(modelMap[viewConfig.modelKey])) {
                 self.model = modelMap[viewConfig.modelKey]
@@ -42,6 +43,13 @@ define([
                         self.updateChart(selector, viewConfig, self.model);
                     });
                 }
+                self.resizeFunction = _.debounce(function (e) {
+                    $('.stack-bar-chart-tooltip').remove();
+                     self.renderChart($(self.$el), viewConfig, self.model);
+                 },cowc.THROTTLE_RESIZE_EVENT_TIME);
+
+                 $(window).on('resize',self.resizeFunction);
+
             }
         },
 
@@ -55,7 +63,9 @@ define([
             if (contrail.checkIfFunction(viewConfig['parseFn'])) {
                 data = viewConfig['parseFn'](data, viewConfig['chartOptions']);
             }
-
+            if (cowu.isGridStackWidget($(selector)) && $(selector).parents('.gridstack-item').height() != 0) {
+                viewConfig['chartOptions']['height'] = $(selector).parents('.gridstack-item').height() - 20;
+            }
             chartViewConfig = self.getChartViewConfig(data, viewConfig.chartOptions);
             chartOptions = chartViewConfig['chartOptions'];
             //viewConfig.chartOptions = chartOptions;

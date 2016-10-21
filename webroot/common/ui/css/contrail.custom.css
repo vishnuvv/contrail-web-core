@@ -1217,3 +1217,6 @@ button#close-error-popup{
 .carousel-control-cover-story:hover{
   text-decoration: underline;
 }
+.grid-stack .grid-stack-item .item-content {
+    height: 100%;
+}

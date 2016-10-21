@@ -7,8 +7,9 @@ define([
     'underscore',
     'contrail-view',
     'contrail-list-model',
-    'legend-view'
-], function (_, ContrailView,  ContrailListModel, LegendView) {
+    'legend-view',
+    'core-constants'
+], function (_, ContrailView,  ContrailListModel, LegendView, cowc) {
     var cfDataSource;
     var stackedBarChartWithFocusChartView = ContrailView.extend({
 
@@ -19,6 +20,10 @@ define([
                 widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ? viewConfig.widgetConfig : null,
                 resizeId;
 
+
+            self.tooltipDiv = d3.select("body").append("div")
+                            .attr("class", "stack-bar-chart-tooltip")
+                            .style("opacity", 0);
             cfDataSource = viewConfig.cfDataSource;
             if (self.model === null && viewConfig['modelConfig'] != null) {
                 self.model = new ContrailListModel(viewConfig['modelConfig']);
@@ -51,23 +56,13 @@ define([
                     self.renderChart($(self.$el), viewConfig, self.model);
                 });
 
-                var resizeFunction = function (e) {
+                self.resizeFunction = _.debounce(function (e) {
+                   $('.stack-bar-chart-tooltip').remove();
                     self.renderChart($(self.$el), viewConfig, self.model);
-                };
+                },cowc.THROTTLE_RESIZE_EVENT_TIME);
 
-                $(window)
-                .off('resize', resizeFunction)
-                .on('resize', resizeFunction);
-                if ($(self.$el).closest('.gs-container').length > 0 ) {
-               $(self.$el).closest('.gs-container').on("resize",function(){
-                   clearTimeout(resizeId);
-                   resizeId = setTimeout(doneResizing, 500);
-                   //self.renderChart($(self.$el), viewConfig, self.model);
-               });
-           }
-           function doneResizing(){
+                $(window).on('resize',self.resizeFunction);
                self.renderChart($(self.$el), viewConfig, self.model);
-           }
 
             }
         },
@@ -240,9 +235,7 @@ define([
                                 .attr("dx", ".75em")
                                 .attr("transform", "rotate(-90)")
                                 .text(yAxisLabel);
-            var tooltipDiv = d3.select("body").append("div")
-                            .attr("class", "stack-bar-chart-tooltip")
-                            .style("opacity", 0);
+            var tooltipDiv = self.tooltipDiv;
             var formatTime = d3.time.format("%e %b %X");
             if(brush && addOverviewChart) {
                 overview = svg.append("g")
