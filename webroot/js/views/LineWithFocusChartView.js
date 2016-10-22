@@ -42,12 +42,20 @@ define([
                         self.updateChart(selector, viewConfig, self.model);
                     });
                 }
+                var prevDimensions = chUtils.getDimensionsObj(self.$el);
                 self.resizeFunction = _.debounce(function (e) {
                     $('.stack-bar-chart-tooltip').remove();
+                    if(!chUtils.isReRenderRequired({
+                        prevDimensions:prevDimensions,
+                        elem:self.$el})) {
+                        return;
+                    }
                      self.renderChart($(self.$el), viewConfig, self.model);
                  },cowc.THROTTLE_RESIZE_EVENT_TIME);
 
-                $(window).on('resize',self.resizeFunction);
+                // $(window).on('resize',self.resizeFunction);
+                window.addEventListener('resize',self.resizeFunction);
+                $(self.$el).parents('.grid-stack-item').on('resize',self.resizeFunction);
             }
         },
 

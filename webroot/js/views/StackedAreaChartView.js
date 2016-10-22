@@ -7,8 +7,9 @@ define([
     'contrail-view',
     'contrail-list-model',
     'legend-view',
-    'core-constants'
-], function (_, ContrailView,  ContrailListModel, LegendView, cowc) {
+    'core-constants',
+    'chart-utils'
+], function (_, ContrailView,  ContrailListModel, LegendView, cowc,chUtils) {
     var cfDataSource;
     var stackedAreaChartView = ContrailView.extend({
         render: function () {
@@ -50,16 +51,27 @@ define([
                 $($(self.$el)).bind("refresh", function () {
                     self.renderChart($(self.$el), viewConfig, self.model);
                 });
+                var prevDimensions = chUtils.getDimensionsObj(self.$el);
                 /* window resize may not be require since the nvd3 also provides a smoother refresh*/
                 self.resizeFunction = _.debounce(function (e) {
-                        self.renderChart($(self.$el), viewConfig, self.model);
+                    if(!chUtils.isReRenderRequired({
+                        prevDimensions:prevDimensions,
+                        elem:self.$el})) {
+                        return;
+                    }
+                    prevDimensions = chUtils.getDimensionsObj(self.$el);
+                    self.renderChart($(self.$el), viewConfig, self.model);
                 },cowc.THROTTLE_RESIZE_EVENT_TIME);
-                $(window).on('resize',self.resizeFunction);
-
-                self.renderChart($(self.$el), viewConfig, self.model);
+                // $(window).on('resize',self.resizeFunction);
+                window.addEventListener('resize',self.resizeFunction);
+                $(self.$el).parents('.grid-stack-item').on('resize',self.resizeFunction);
             }
         },
         renderChart: function (selector, viewConfig, chartViewModel) {
+            if (!($(selector).is(':visible'))) {
+                return;
+            }
+            console.info(new Date(),"Rendering stackedAreaChart");
             var self = this;
             var data = chartViewModel.getFilteredItems();
             var chartTemplate = contrail.getTemplate4Id('core-stacked-area-chart-template');

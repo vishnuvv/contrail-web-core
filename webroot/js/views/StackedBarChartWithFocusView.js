@@ -8,8 +8,9 @@ define([
     'contrail-view',
     'contrail-list-model',
     'legend-view',
-    'core-constants'
-], function (_, ContrailView,  ContrailListModel, LegendView, cowc) {
+    'core-constants',
+    'chart-utils'
+], function (_, ContrailView,  ContrailListModel, LegendView, cowc, chUtils) {
     var cfDataSource;
     var stackedBarChartWithFocusChartView = ContrailView.extend({
 
@@ -55,19 +56,31 @@ define([
                 $($(self.$el)).bind("refresh", function () {
                     self.renderChart($(self.$el), viewConfig, self.model);
                 });
+                var prevDimensions = chUtils.getDimensionsObj(self.$el);
 
                 self.resizeFunction = _.debounce(function (e) {
                    $('.stack-bar-chart-tooltip').remove();
+                    if(!chUtils.isReRenderRequired({
+                        prevDimensions:prevDimensions,
+                        elem:self.$el})) {
+                        return;
+                    }
+                    prevDimensions = chUtils.getDimensionsObj(self.$el);
                     self.renderChart($(self.$el), viewConfig, self.model);
                 },cowc.THROTTLE_RESIZE_EVENT_TIME);
 
-                $(window).on('resize',self.resizeFunction);
-               self.renderChart($(self.$el), viewConfig, self.model);
+                // $(window).on('resize',self.resizeFunction);
+                window.addEventListener('resize',self.resizeFunction);
+                $(self.$el).parents('.grid-stack-item').on('resize',self.resizeFunction);
+               // self.renderChart($(self.$el), viewConfig, self.model);
 
             }
         },
 
         renderChart: function (selector, viewConfig, chartViewModel) {
+            if (!($(selector).is(':visible'))) {
+                return;
+            }
             var self = this;
             var data = chartViewModel.getFilteredItems();
             var chartTemplate = contrail.getTemplate4Id('core-stacked-bar-chart-template');

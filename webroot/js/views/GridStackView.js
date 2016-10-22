@@ -21,6 +21,9 @@ define([
             self.gridStack = $(self.$el).gridstack({
                 float:false,
                 handle:'.item-content',
+                resizable: {
+                    handles:'sw,se',
+                },
                 verticalMargin:8,
                 cellHeight: 20,
                 animate:false,
@@ -28,8 +31,8 @@ define([
             }).data('gridstack');
             
             //Trigger resize on widgets on resizestop
-            self.$el.on('resizestop',function() {
-                $(window).trigger('resize');
+            self.$el.on('resizestop',function(event,ui) {
+                $(ui.element[0]).trigger('resize');
             });
         },
         render: function() {
