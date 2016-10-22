@@ -113,6 +113,25 @@ define([
                 .on("mouseout", function(d) {
                     $('body').find('.nvtooltip').remove();
                 });
+        },
+        getDimensionsObj: function(elem) {
+            return {
+                width: $(window).width(),
+                height:$(window).height(),
+                elemWidth:$(elem).width(),
+                elemHeight:$(elem).height()
+            }
+        },
+        isReRenderRequired: function(cfg) {
+            var elem = cfg['elem'];
+            var prevDimensions = cfg['prevDimensions'];
+            // console.info("last Dimensions",lastWidth,lastHeight,lastElemWidth,lastElemHeight);
+            // console.info("current Dimensions",$(window).height(),$(window).width(),$(self.$el).width(),$(self.$el).height());
+            if(prevDimensions['width'] == $(window).width() && prevDimensions['height'] == $(window).height() && 
+                prevDimensions['elemWidth'] == $(self.$el).width() && prevDimensions['elemHeight'] == $(self.$el).height()) {
+                return false;
+            }
+            return true;
         }
     };
 

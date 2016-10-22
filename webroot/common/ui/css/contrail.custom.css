@@ -1220,3 +1220,13 @@ button#close-error-popup{
 .grid-stack .grid-stack-item .item-content {
     height: 100%;
 }
+.grid-stack .grid-stack-item.gridstack-item .item-content .nv-axislabel, 
+.grid-stack .grid-stack-item.gridstack-item .item-content .axis-label, 
+.grid-stack .grid-stack-item.gridstack-item .item-content .contrail-chart-title text {
+    text-anchor: middle;
+    font-weight: 600;
+    font-size: 11px !important;
+}
+/*.grid-stack .gridstack-item:hover {
+    border: 1px solid #f2f2f2;
+}*/

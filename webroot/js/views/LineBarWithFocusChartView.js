@@ -8,8 +8,9 @@ define([
     'core-basedir/js/models/LineBarWithFocusChartModel',
     'contrail-list-model',
     'nv.d3',
-    'chart-utils'
-], function (_, ContrailView, LineBarWithFocusChartModel, ContrailListModel, nv, chUtils) {
+    'chart-utils',
+    'core-constants'
+], function (_, ContrailView, LineBarWithFocusChartModel, ContrailListModel, nv, chUtils, cowc) {
     var LineBarWithFocusChartView = ContrailView.extend({
         render: function () {
             var viewConfig = this.attributes.viewConfig,
@@ -43,17 +44,29 @@ define([
                         self.renderChart(selector, viewConfig, self.model);
                     });
                 }
+                var prevDimensions = chUtils.getDimensionsObj(self.$el);
                 self.resizeFunction = _.debounce(function (e) {
                     $('.stack-bar-chart-tooltip').remove();
+                    if(!chUtils.isReRenderRequired({
+                        prevDimensions:prevDimensions,
+                        elem:self.$el})) {
+                        return;
+                    }
+                    prevDimensions = chUtils.getDimensionsObj(self.$el);
                      self.renderChart($(self.$el), viewConfig, self.model);
                  },cowc.THROTTLE_RESIZE_EVENT_TIME);
 
-                 $(window).on('resize',self.resizeFunction);
+                 // $(window).on('resize',self.resizeFunction);
+                window.addEventListener('resize',self.resizeFunction);
+                $(self.$el).parents('.grid-stack-item').on('resize',self.resizeFunction);
 
             }
         },
 
         renderChart: function (selector, viewConfig, chartViewModel) {
+            if (!($(selector).is(':visible'))) {
+                return;
+            }
             var self = this,
                 data = chartViewModel.getItems(),
                 chartTemplate = contrail.getTemplate4Id(cowc.TMPL_CHART),
@@ -120,16 +133,17 @@ define([
                 } else {
                     setData2Chart(self, chartViewConfig, chartViewModel, chartModel);
                 }
-                var resizeFunction = function (e) {
-                    if ($(selector).is(':visible')) {
-                        setData2Chart(self, chartViewConfig, chartViewModel, chartModel);
-                    }
-                };
-                $(window)
-                    .off('resize', resizeFunction)
-                    .on('resize', resizeFunction);
+                // var resizeFunction = _.debounce(function (e) {
+                //     if ($(selector).is(':visible')) {
+                //         setData2Chart(self, chartViewConfig, chartViewModel, chartModel);
+                //     }
+                // },cowc.THROTTLE_RESIZE_EVENT_TIME);
+                // $(window)
+                //     .off('resize', resizeFunction)
+                //     .on('resize', resizeFunction);
 
-                nv.utils.windowResize(chartModel.update);
+                // nv.utils.windowResize(chartModel.update);
+                // window.addEventListener('resize',self.resizeFunction);
 
                 chartModel.dispatch.on('stateChange', function (e) {
                     nv.log('New State:', JSON.stringify(e));
