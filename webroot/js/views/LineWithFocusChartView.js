@@ -260,6 +260,9 @@ define([
             chartOptions = chartViewConfig['chartOptions'];
 
         d3.select($(self.$el)[0]).select('svg').datum(chartDataObj).call(chartModel);
+        d3.select($(self.$el)[0]).select('svg text.nv-axislabel').data([{
+            'x-axis-label' : chartOptions.xAxisLabel,
+            'y-axis-label' : chartOptions.yAxisLabel}]).call(chUtils.make_editable,'y-axis-label');
 
         if (chartOptions.defaultDataStatusMessage) {
             var messageHandler = chartOptions.statusMessageHandler;

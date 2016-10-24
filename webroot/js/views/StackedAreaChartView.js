@@ -158,6 +158,8 @@ define([
 
               //initialize the chart in the svg element
               chart.interpolate("monotone");
+              data['x-axis-label'] = xAxisLabel;
+              data['y-axis-label'] = yAxisLabel;
               svg.datum(data)
                 .call(chart)
 
@@ -168,7 +170,8 @@ define([
                                   .attr("x", width/2)
                                   .attr("y", height + 40)
                                   .style('font-size', '10px')
-                                  .text(xAxisLabel);
+                                  .text(xAxisLabel)
+                                  .call(chUtils.make_editable,'x-axis-label');
               var yaxisLabel = svg.append("text")
                                   .attr("class", "axis-label")
                                   .attr("text-anchor", "end")
@@ -178,7 +181,8 @@ define([
                                   .attr("dx", ".75em")
                                   .style('font-size', '10px')
                                   .attr("transform", "rotate(-90)")
-                                  .text(yAxisLabel);
+                                  .text(yAxisLabel)
+                                  .call(chUtils.make_editable,'y-axis-label');
               //Use the tooltip formatter if present
               chart.tooltip.contentGenerator(function (obj) {
                       return tooltipFn(obj.point,yAxisFormatter)})

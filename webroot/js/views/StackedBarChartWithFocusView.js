@@ -133,6 +133,8 @@ define([
             }
 
             var colorNodes = _.without(_.pluck(data, 'key'), failureLabel);
+            data['x-axis-label'] = xAxisLabel;
+            data['y-axis-label'] = yAxisLabel;
             self.parsedValues = data;
             self.parsedData = _.indexBy(data, 'key');
             if (colors != null && colorNodes[0] != 'DEFAULT') {
@@ -238,7 +240,9 @@ define([
                                 .attr("text-anchor", "end")
                                 .attr("x", width/2)
                                 .attr("y", height + 40)
-                                .text(xAxisLabel);
+                                .text(xAxisLabel)
+                                // .data({'x-axis-label':xAxisLabel})
+                                .call(chUtils.make_editable,'x-axis-label');
             var yaxisLabel = main.append("text")
                                 .attr("class", "axis-label")
                                 .attr("text-anchor", "end")
@@ -247,7 +251,16 @@ define([
                                 .attr("dy", ".75em")
                                 .attr("dx", ".75em")
                                 .attr("transform", "rotate(-90)")
-                                .text(yAxisLabel);
+                                .text(yAxisLabel)
+                                .call(chUtils.make_editable,'y-axis-label');
+            main.selectAll('text').data(
+                [{
+                    'y-axis-label': yAxisLabel,
+                    'x-axis-label': xAxisLabel
+                },{
+                    'y-axis-label': yAxisLabel,
+                    'x-axis-label': xAxisLabel
+                }]);
             var tooltipDiv = self.tooltipDiv;
             var formatTime = d3.time.format("%e %b %X");
             if(brush && addOverviewChart) {
