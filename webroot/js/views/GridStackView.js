@@ -3,8 +3,11 @@ define([
     'backbone',
     'contrail-view',
     'gridstack',
-    'contrail-list-model'
-], function (_, Backbone,ContrailView,gridstack, ContrailListModel) {
+    'contrail-list-model',
+    'core-utils',
+    'chart-utils'
+], function (_, Backbone,ContrailView,gridstack, ContrailListModel,CoreUtils,chUtils) {
+    var cowu = new CoreUtils();
     var GridStackView = ContrailView.extend({
         initialize: function(options) {
             var self = this;
@@ -66,8 +69,15 @@ define([
             self.widgets.push(currElem);
             var modelCfg = cfg['modelCfg'];
             //Maintain a mapping of cacheId vs contrailListModel and if found,return that
-            if(cowu.getValueByJsonPath(cfg,'modelCfg;_type') != 'contrailListModel' && modelCfg != null)
+            if(typeof(cowu.getValueByJsonPath(cfg,'modelCfg;statsConfig')) == 'object') {
+                modelCfg = new ContrailListModel(cowu.getStatsModelConfig(modelCfg['statsConfig']));
+            } else if(cowu.getValueByJsonPath(cfg,'modelCfg;listModel','') != '') {
+                modelCfg = modelCfg['listModel'];
+            } else if(cowu.getValueByJsonPath(cfg,'modelCfg;_type') != 'contrailListModel' && modelCfg != null) {
                 modelCfg = new ContrailListModel(modelCfg);
+            }
+            var viewType = cowu.getValueByJsonPath(cfg,'viewCfg;view','');
+            cfg['viewCfg'] = $.extend(true,{},chUtils.getDefaultViewConfig(viewType),cfg['viewCfg']);
             self.renderView4Config($(currElem).find('.item-content'), modelCfg, cfg['viewCfg']);
         }
     });
