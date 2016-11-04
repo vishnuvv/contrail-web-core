@@ -1688,6 +1688,7 @@ define([
                       } else if(response.length === 0 && defaultZeroLineDisplay && groupBy!=null){
                           parsedData['DEFAULT'].values.push({
                               date: new Date(i/1000),
+                              x: ifNull(i, 0)/1000,
                               y: failedBarCnt,
                               name: '',
                               total: total,
@@ -1705,6 +1706,7 @@ define([
                          date: new Date(ifNull(i, 0)/1000),
                          timestampExtent: timestampExtent,
                          name: yAxisLabel,
+                         x: ifNull(i, 0)/1000,
                          y: maxValue,
                          total: maxValue
                      });
