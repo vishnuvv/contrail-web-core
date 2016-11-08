@@ -9,6 +9,7 @@ define([
         var self = this;
 
         this.THROTTLE_RESIZE_EVENT_TIME = 500;
+
         this.TMPL_SUFFIX_ID = "-template";
         this.RESULTS_SUFFIX_ID = "-results";
         this.ERROR_SUFFIX_ID = "_error";
@@ -1987,13 +1988,13 @@ define([
         this.OTHERS_COLORS = '#a3b8a0';
 
         this.OTHERS = 'Others';
-        this.FAILURE_LABEL = 'Failures';
 
         // Query Engine constants
         this.TMPL_QUERY_PAGE = "query-page-template";
         this.TMPL_QUERY_QUEUE_PAGE = "query-queue-page-template";
         this.TMPL_QUERY_TEXT = "query-text-template";
         this.TMPL_QUERY_SELECT = "query-select-popup-template";
+        this.FAILURE_LABEL = 'Failures';        
     };
     //Export to global scope
     cowc = new CoreConstants();
