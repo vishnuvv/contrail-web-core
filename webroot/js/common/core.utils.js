@@ -1087,6 +1087,7 @@ define([
 
         this.loadAlertsPopup = function(cfgObj) {
             var prefixId = 'dashboard-alerts';
+            var notificationView = true;
             var cfgObj = ifNull(cfgObj,{});
             var modalTemplate =
                 contrail.getTemplate4Id('core-modal-template');
@@ -1104,9 +1105,10 @@ define([
             if(!self.getAlarmsFromAnalytics) {
                 modalConfig['title'] = 'Alerts';
             }
-            cowu.createModal(modalConfig);
+            
 
             if(cfgObj.model == null && !self.getAlarmsFromAnalytics) {
+                cowu.createModal(modalConfig);
                 require(['mon-infra-node-list-model','monitor-infra-parsers',
                     'monitor-infra-constants','monitor-infra-utils'],
                     function(NodeListModel,MonitorInfraParsers,MonitorInfraConstants,
@@ -1151,7 +1153,56 @@ define([
                             });
                         }
                     });
+            } else if (notificationView) {
+                require(['js/views/NotificationView', 'core-alarm-parsers', 'core-alarm-utils'],
+                 function (NotificationView, coreAlarmParsers, coreAlarmUtils) {
+
+                    var notificationView = new NotificationView({
+                        el: $("#alarms-popup-link"),
+                        viewConfig: {
+                            parseFn: function (data) {
+                                var options = {
+                                    date: 'T',
+                                    text: 'alarm_msg',
+                                    type: 'severity',
+                                    title: 'display_name',
+                                    severityBubble: true,
+                                    template: 'notification-template'
+                                };
+                                return cowu.notificationDataFormatter(data, options)
+                            },
+                            modelConfig: {
+                                remote: {
+                                    ajaxConfig: {
+                                        url: cowc.URL_ALARM_DETAILS,
+                                        type: "GET",
+                                    },
+                                    dataParser: coreAlarmParsers.alarmDataParser
+                                },
+                                vlRemoteConfig : {
+                                    vlRemoteList : [{
+                                        getAjaxConfig : function() {
+                                            return {
+                                                url:ctwl.ANALYTICSNODE_SUMMARY_URL
+                                            };
+                                        },
+                                        successCallback : function(response, contrailListModel) {
+                                            coreAlarmUtils
+                                                .parseAndAddDerivedAnalyticsAlarms(
+                                                    response, contrailListModel);
+                                        }
+                                    }
+                                    ]
+                                },
+                                cacheConfig: {
+                                }
+                            }
+                        }    
+                    });
+                    notificationView.render();
+                });
             } else {
+                cowu.createModal(modalConfig);
                 if(self.getAlarmsFromAnalytics) {
                     require(['js/views/AlarmGridView'], function(AlarmGridView) {
                         var alarmGridView = new AlarmGridView({
@@ -1499,6 +1550,38 @@ define([
                 buckets[xBucket]['data'].push(obj);
             });
             return buckets;
+        };
+
+        this.notificationDataFormatter = function (notifications, options) {
+            var date = cowu.getValueByJsonPath(options, 'date', 'date'),
+                title = cowu.getValueByJsonPath(options, 'title', 'title'),
+                text = cowu.getValueByJsonPath(options, 'text', 'text'),
+                severity = cowu.getValueByJsonPath(options, 'type', 'type'),
+                severityBubble = cowu.getValueByJsonPath(options, 'severityBubble', false),
+                templateId = cowu.getValueByJsonPath(options, 'template'),
+                template = null;
+            if (templateId != null) {
+                template = contrail.getTemplate4Id(templateId);
+            }
+            $.each(notifications, function (idx, obj) {
+                if (typeof obj[date] == 'number') {
+                    obj[date] = diffDates(new XDate(obj[date]/1000),new XDate());
+                }
+                obj['text'] = obj[text];
+                obj['time'] = obj[date];
+                obj['severityBubble'] = severityBubble;
+                obj['title'] = obj[title];
+                obj['type'] = obj[severity];
+                if (template != null) {
+                    obj['text'] = template(obj);
+                } else if (obj[title] != null) {
+                    obj['text'] = {
+                        text: obj[text],
+                        title: obj[title]
+                    };
+                }
+            });
+            return notifications;
         };
 
         this.chartDataFormatter = function (response, options) {

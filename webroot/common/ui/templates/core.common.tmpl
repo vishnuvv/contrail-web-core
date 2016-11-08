@@ -2469,3 +2469,31 @@
 <script type="text/x-handlebars-template" id="grid-tag-template">
     <span class='badge' style='background-color:{{bgcolor}}'>{{celltext}}</span>
 </script>
+
+<script type="text/x-handlebars-template" id="notification-template">
+    <dl>
+        <dt>
+        {{#IfCompare severityBubble true}}
+            {{#IfCompare severity 1 operator='<='}}
+                <div data-color=red class="circle red {{#IfCompare ack false}}filled{{/IfCompare}} alarms-circle-grid-style alarms-circle-display-flex"></div>
+            {{/IfCompare}}
+            {{#IfCompare severity 1 operator='>'}}
+                <div data-color=orange class="circle orange {{#IfCompare ack false}}filled{{/IfCompare}} alarms-circle-grid-style alarms-circle-display-flex"></div>
+            {{/IfCompare}}
+        {{/IfCompare}}
+        <dt>
+        <dd class="alarm_message">
+            {{#IfCompare title null operator='!='}}
+                <div> {{title}} </div>
+            {{/IfCompare}}
+            {{#IfCompare text null operator='!='}}
+                <span> {{text}} </span>
+            {{/IfCompare}}
+        </dd>
+        <dd class="time_stamp">
+        {{#IfCompare time null operator='!='}}
+            <span> {{time}} </span>
+        {{/IfCompare}}
+        </dd>
+    </dl>
+</script>
