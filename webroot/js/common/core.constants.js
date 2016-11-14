@@ -152,6 +152,8 @@ define([
         this.TMPL_NOT_FOUND_MESSAGE = "core-not-found-message-template";
         this.TMPL_INFOBOXES_VIEW = "core-infobox-template";
 
+        this.TMPL_GRIDSTACK_ZOOMED_SCATTER_CHART = "gridstack-zoomed-scatter-chart-template";
+
         //stacked bar chart
         this.TMPL_CUSTOM_CHART_LEGEND = 'custom-chart-legend';
 

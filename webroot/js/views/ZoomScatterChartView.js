@@ -81,7 +81,11 @@ define([
             self.isMyRenderInProgress = true;
 
             if (!contrail.checkIfExist(self.chartModel)) {
-                $(selector).html(contrail.getTemplate4Id(cowc.TMPL_ZOOMED_SCATTER_CHART));
+                if($(selector).parents('.custom-grid-stack-item')) {
+                    $(selector).html(contrail.getTemplate4Id(cowc.TMPL_GRIDSTACK_ZOOMED_SCATTER_CHART));
+                } else {
+                    $(selector).html(contrail.getTemplate4Id(cowc.TMPL_ZOOMED_SCATTER_CHART));
+                }
 
                 chartConfig = getChartConfig(selector, chartOptions);
                 self.chartModel = new ZoomScatterChartModel(dataListModel, chartConfig);
