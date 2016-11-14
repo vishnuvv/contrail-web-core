@@ -165,6 +165,7 @@ define([
         this.COOKIE_CHART_SETTINGS = "chartData";
         this.NUM_OF_COLORS = "6";
         /* Color Settings - End */
+        this.TMPL_GRIDSTACK_ZOOMED_SCATTER_CHART = "gridstack-zoomed-scatter-chart-template";
         //stacked bar chart
         this.TMPL_CUSTOM_CHART_LEGEND = 'custom-chart-legend';
         this.TOOLTIP_TEMPLATE = "tooltip-template";
