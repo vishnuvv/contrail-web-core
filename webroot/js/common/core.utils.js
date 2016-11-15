@@ -1537,7 +1537,10 @@ define([
         this.bucketizeStats = function (stats, options) {
             var bucketSize = getValueByJsonPath(options, 'bucketSize', cowc.DEFAULT_BUCKET_DURATION),
                 insertEmptyBuckets = getValueByJsonPath(options, 'insertEmptyBuckets', true),
-                timeRange = getValueByJsonPath(options, 'timeRange'),
+                timeRange = getValueByJsonPath(options, 'timeRange', {
+                    start_time: Date.now() * 1000 - (2 * 60 * 60 * 1000 * 1000), // converting to micros secs
+                    end_time: Date.now() * 1000
+                }),
                 stats = ifNull(stats, []);
             bucketSize = parseFloat(bucketSize) * 60 * 1000 * 1000 //Converting to micros seconds
             var timestampField = 'T';
@@ -1648,6 +1651,7 @@ define([
                 }
             } else if (groupBy != null) {
                 var groupByMap = groupDim.group().all(),
+                    groupByMap = _.sortBy(groupByMap, 'key'),
                     groupByMapLen = groupByMap.length,
                     groupByKeys = _.pluck(groupByMap, 'key');
                 if (colors != null && typeof colors == 'function') {
@@ -2050,6 +2054,11 @@ define([
                             },
                             dataParser : function (response) {
                                 var data = response['data'];
+                                if (response['queryJSON'] != null) {
+                                    data = _.map(data, function(obj) { 
+                                        return _.extend({}, obj, {queryJSON: response['queryJSON']});
+                                    });
+                                }
                                 if (statsConfig['parser'] != null && typeof statsConfig['parser'] == "function") {
                                     data = statsConfig['parser'](data);
                                 }

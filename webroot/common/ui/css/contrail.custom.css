@@ -1488,3 +1488,9 @@ color settings styles - begin
 /*
 color settings styles - end
 */
+/*
+Stack area chart opacity
+*/
+.custom-grid-stack-item .nvd3.nv-stackedarea path.nv-area {
+    fill-opacity: 1 !important;
+}

@@ -95,7 +95,7 @@ define([
                     $(selector).closest('.custom-grid-stack-item').height() - 20:
                         cowu.getValueByJsonPath(chartOptions, 'height', 300);
 
-            chartOptions['timeRange'] =  getValueByJsonPath(self, 'model;queryJSON');
+            chartOptions['timeRange'] =  getValueByJsonPath(data, '0;queryJSON');
             var totalWidth = $(selector).find('.stacked-area-chart-container').width();
             var totalOverviewHeight = totalWidth * 0.1;
             var margin =  { top: 20, right: 20, bottom: totalOverviewHeight, left: 20 };

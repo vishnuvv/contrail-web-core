@@ -132,12 +132,13 @@ define([
             if(typeof chartOptions["colors"] != 'function') {
                 chartOptions["colors"] = cowc.FIVE_NODE_COLOR;
             }
+            chartOptions['timeRange'] =  getValueByJsonPath(data, '0;queryJSON');
             if (contrail.checkIfFunction(viewConfig['parseFn'])) {
                 data = viewConfig['parseFn'](data, chartOptions);
               //Need to check and remove the data.length condition because invalid for object
             } else {
                 if (data === null || data.length === 0 && defaultZeroLineDisplay){
-                    var start = Date.now() - (2 * 60 * 60 * 1000),
+                    var start = Date.now() - (cowc.DEFAULT_CHART_DURATION * 60 * 60 * 1000),
                         end = Date.now();
                         chartOptions['timeRange'] = {'start_time': parseInt(start.toString()+'000'), 
                                 'end_time': parseInt(end.toString()+'000')};
