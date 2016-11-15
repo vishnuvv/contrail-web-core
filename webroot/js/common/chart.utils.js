@@ -164,6 +164,7 @@ define([
                         class: 'mon-infra-chart chartMargin',
                         parseFn: cowu.chartDataFormatter,
                         chartOptions : {
+                            defaultDataStatusMessage: false,
                             brush: false,
                             xAxisLabel: '',
                             yAxisLabel: '',
@@ -183,7 +184,7 @@ define([
                             },
                             tickPadding: 8,
                             hideFocusChart: true,
-                            forceY: false,
+                            forceY: [0, 0.01],
                             yFormatter : function(d){
                                 return d;
                             },

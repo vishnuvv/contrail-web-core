@@ -1983,7 +1983,7 @@ define([
         //Node color schemes
         this.SINGLE_NODE_COLOR = ['#6f97ae'];
         this.THREE_NODE_COLOR = ['#a8c0d1', '#6f97ae', '#617683'];
-        this.FIVE_NODE_COLOR = ['#819eb5', '#6b8295', '#876f8a', '#b2a198', '#eccc9b'];
+        this.FIVE_NODE_COLOR = ['rgb(168,192,209)', 'rgb(111,151,174)', 'rgb(97,118,131)', 'rgb(197,161,216)', 'rgb(142,125,162)'];
         this.FAILURE_COLOR = '#d95436';
         this.OTHERS_COLORS = '#a3b8a0';
 
