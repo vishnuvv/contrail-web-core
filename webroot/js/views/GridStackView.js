@@ -40,8 +40,18 @@ define([
                 acceptWidgets:'label'
             }).data('gridstack');
             
+            self.$el.on('dragstart',function(event,ui) {
+                $('.custom-grid-stack').addClass('show-borders');
+            });
+            self.$el.on('dragstop',function(event,ui) {
+                $('.custom-grid-stack').removeClass('show-borders');
+            });
+            self.$el.on('resizestart',function(event,ui) {
+                $('.custom-grid-stack').addClass('show-borders');
+            });
             //Trigger resize on widgets on resizestop
             self.$el.on('resizestop',function(event,ui) {
+                $('.custom-grid-stack').removeClass('show-borders');
                 $(ui.element[0]).trigger('resize');
             });
         },
