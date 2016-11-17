@@ -59,6 +59,12 @@ define([
             self.$el.on('drag','.grid-stack-item',function(event,ui) {
                 $('.custom-grid-stack').addClass('show-borders');
             });
+            self.$el.on('dragstart',function(event,ui) {
+                self.$el.find('.grid-stack-item').on('drag',function(event,ui) {
+                    $('.custom-grid-stack').addClass('show-borders');
+                });
+                $('.custom-grid-stack').addClass('show-borders');
+            });
             self.$el.on('dragstop',function(event,ui) {
                 self.doSaveLayout = true;
                 console.info('dragstop');
