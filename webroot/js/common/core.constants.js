@@ -151,9 +151,9 @@ define([
         this.TMPL_LOADING_SPINNER = "core-loading-spinner-template";
         this.TMPL_NOT_FOUND_MESSAGE = "core-not-found-message-template";
         this.TMPL_INFOBOXES_VIEW = "core-infobox-template";
-
         //stacked bar chart
         this.TMPL_CUSTOM_CHART_LEGEND = 'custom-chart-legend';
+        this.TOOLTIP_TEMPLATE = "tooltip-template";
 
         this.TMPL_NODE_DETAIL_SPARKLINE_BOX = 'node-details-sparkline-template';
         this.TMPL_NODE_DETAIL_INFOBOXES_BOX = 'node-details-infoboxes-template';

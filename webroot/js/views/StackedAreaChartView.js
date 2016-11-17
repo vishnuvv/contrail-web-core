@@ -144,7 +144,7 @@ define([
               var chart = nv.models.stackedAreaChart()
                             .x(function(d) { return d['x'] })   //We can modify the data accessor functions...
                             .y(function(d) { return d['y'] })   //...in case your data is formatted differently.
-                            .useInteractiveGuideline(false)    //Tooltips which show all data points. Very nice!
+                            .useInteractiveGuideline(true)    //Tooltips which show all data points. Very nice!
                             .showControls(false)       //Allow user to choose 'Stacked', 'Stream', 'Expanded' mode.
                             .showLegend(false)
                             .clipEdge(true);
@@ -189,9 +189,11 @@ define([
                                   .attr("transform", "rotate(-90)")
                                   .text(yAxisLabel);
               //Use the tooltip formatter if present
-              chart.tooltip.contentGenerator(function (obj) {
-                      return tooltipFn(obj.point,yAxisFormatter)})
-
+               if(chartOptions.tooltipFn) {
+                   chart.interactiveLayer.tooltip.contentGenerator(function (obj) {
+                                return chartOptions.tooltipFn(obj,chartOptions);
+                            })
+                        }
               //Add the modified legends
               showControls=false;
               if (showControls == true || showLegend == true) {
