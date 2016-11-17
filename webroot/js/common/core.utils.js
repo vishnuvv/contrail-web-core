@@ -1822,11 +1822,25 @@ define([
                   "from_time_utc": Date.now() - (2 * 60 * 60 * 1000),
                   "to_time": Date.now(),
                   "to_time_utc": Date.now(),
+                  // "from_time": "now-2h",
+                  // "to_time": "now",
+                  // "from_time_utc": "now-30m",
+                  // "to_time_utc": "now",
                   "time_granularity_unit": "secs",
                   "time_granularity": 150,
                   "limit": "150000"
                 }
             };
+
+            if (statsConfig['table_name'] != null) {
+                postData['formModelAttrs']['table_name'] = statsConfig['table_name'];
+            }
+            if (statsConfig['from_time_utc'] != null) {
+                postData['formModelAttrs']['from_time_utc'] = statsConfig['from_time_utc'];
+            }
+            if (statsConfig['to_time_utc'] != null) {
+                postData['formModelAttrs']['to_time_utc'] = statsConfig['to_time_utc'];
+            }
 
             if (statsConfig['table_name'] != null) {
                 postData['formModelAttrs']['table_name'] = statsConfig['table_name'];
