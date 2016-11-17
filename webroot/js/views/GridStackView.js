@@ -42,9 +42,22 @@ define([
                 animate:false,
                 acceptWidgets:'label'
             }).data('gridstack');
-
+            
+            self.$el.on('dragstart',function(event,ui) {
+                self.$el.find('.grid-stack-item').on('drag',function(event,ui) {
+                    $('.custom-grid-stack').addClass('show-borders');
+                });
+                $('.custom-grid-stack').addClass('show-borders');
+            });
+            self.$el.on('dragstop',function(event,ui) {
+                $('.custom-grid-stack').removeClass('show-borders');
+            });
+            self.$el.on('resizestart',function(event,ui) {
+                $('.custom-grid-stack').addClass('show-borders');
+            });
             //Trigger resize on widgets on resizestop
             self.$el.on('resizestop',function(event,ui) {
+                $('.custom-grid-stack').removeClass('show-borders');
                 $(ui.element[0]).trigger('resize');
             });
             //Listen for change events once gridStack is rendered else it's getting triggered even while adding widgets for the first time
