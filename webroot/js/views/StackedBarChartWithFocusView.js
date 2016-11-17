@@ -133,6 +133,7 @@ define([
             if(typeof chartOptions["colors"] != 'function' && chartOptions['applySettings'] != false) {
                 chartOptions["colors"] = cowc.FIVE_NODE_COLOR;
             }
+            chartOptions['timeRange'] =  getValueByJsonPath(data, '0;queryJSON');
             if (contrail.checkIfFunction(viewConfig['parseFn'])) {
                 data = viewConfig['parseFn'](data, chartOptions);
               //Need to check and remove the data.length condition because invalid for object
