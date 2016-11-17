@@ -318,7 +318,7 @@
     {{#if actions}}
     <div class="popover-tooltip-footer">
         {{#each actions}}
-        <button class="btn btn-mini pull-right" data-action="{{@index}}"><i class="{{iconClass}}"></i> {{text}} </button>
+            <button class="btn btn-mini pull-right" data-action="{{@index}}"><i class="{{iconClass}}"></i> {{text}} </button>
         {{/each}}
     </div>
     {{/if}}
@@ -2389,6 +2389,14 @@
             <header>Widget</header>
             <div class='item-content'>
             </div>
+        </div>
+    </div>
+</script>
+<script type="text/x-handlebars-template" id="eventdrops-widget-template">
+    <div class='eventdrops-widget'>
+        <div class='eventdrops-widget-title'>
+        </div>
+        <div class='eventdrops-chart'>
         </div>
     </div>
 </script>

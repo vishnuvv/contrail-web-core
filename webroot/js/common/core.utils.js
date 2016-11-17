@@ -2014,6 +2014,20 @@ define([
             return false;
         }
 
+        this.getXPathValuesFromXmlDoc = function(data, xpathObj) {
+            var doc = (new DOMParser).parseFromString(data, 'text/xml');
+            var retObj = {};
+            _.each(xpathObj,function(value,key) {
+                var it = doc.evaluate(value, doc, null, 5, null);
+                var node = it.iterateNext();
+                retObj[key] = '';
+                if(node != null)
+                    retObj[key] = node.textContent;
+
+            });
+            return retObj;
+        }
+
         self.parseAndMergeStats = function (response,primaryDS) {
             var primaryData = primaryDS.getItems();
             if(primaryData.length == 0) {
@@ -2105,6 +2119,19 @@ define([
                     }
                 };
 
+                if (statsConfig['from_time_utc'] != null) {
+                    postData['formModelAttrs']['from_time_utc'] = statsConfig['from_time_utc'];
+                }
+                if (statsConfig['to_time_utc'] != null) {
+                    postData['formModelAttrs']['to_time_utc'] = statsConfig['to_time_utc'];
+                }
+
+                if (statsConfig['table_name'] != null) {
+                    postData['formModelAttrs']['table_name'] = statsConfig['table_name'];
+                }
+                if (statsConfig['table_type'] != null) {
+                    postData['formModelAttrs']['table_type'] = statsConfig['table_type'];
+                }
                 if (statsConfig['table_name'] != null) {
                     postData['formModelAttrs']['table_name'] = statsConfig['table_name'];
                 }

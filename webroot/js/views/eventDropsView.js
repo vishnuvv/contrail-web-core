@@ -13,12 +13,18 @@ define([
 ], function (_, ContrailView,  ContrailListModel, LegendView, cowc,chUtils) {
     var cfDataSource;
     var eventDropsView = ContrailView.extend({
+        initialize: function(options) {
+            var self = this;
+            self.viewCfg = cowu.getValueByJsonPath(options,'attributes;viewConfig',{});
+        },
         render: function () {
             var self = this;
             self.tooltipDiv = d3.select("body").append("div")
                             .attr("class", "event-drops-tooltip")
                             .style("opacity", 0);
             self.model.onAllRequestsComplete.subscribe(function() {
+                var eventDropsWidgetTmpl = contrail.getTemplate4Id('eventdrops-widget-template');
+                self.$el.html(eventDropsWidgetTmpl);
                 self.renderChart();
             });
         },
@@ -26,7 +32,7 @@ define([
             d3.select('body').selectAll('.event-drops-tooltip').remove();
             var self = this;
             var FONT_SIZE = 12; // in pixels
-            var TOOLTIP_WIDTH = 10; // in rem
+            var TOOLTIP_WIDTH = 30; // in rem
             var tooltip = d3.select("body").append("div")
                             .attr("class", "event-drops-tooltip")
                             .style("opacity", 0);
@@ -38,7 +44,7 @@ define([
                 })
                 .style('opacity', 1);
             var rightOrLeftLimit = FONT_SIZE * TOOLTIP_WIDTH;
-            rightOrLeftLimit = 200;
+            rightOrLeftLimit = 300;
             //Check if tooltip can be accomodated on right
             var direction = d3.event.pageX > rightOrLeftLimit ? 'right' : 'left';
 
@@ -48,48 +54,136 @@ define([
                 d3.event.pageX - rightOrLeftLimit + 30 :
                 d3.event.pageX - ARROW_MARGIN * FONT_SIZE - ARROW_WIDTH / 2;
 
-            tooltip.html('<div>' + d3.time.format("%d/%m/%y %H:%M:%S")(new Date(d['MessageTS']/1000)) + '</div>' +
-                        '<div>' + d.Source + '</div>' +
-                        '<div>' + d.Category + '</div>' +
-                        '<div>' + d.Xmlmessage + '</div>')
-                .classed(direction,true)
-                .style({
-                    left: left + 'px',
-                    top: (d3.event.pageY + 16) + 'px',
-                    position: 'absolute'
-                });
+
+
+            var jsonField = '';
+            if(d['ObjectLog'] != null) {
+                jsonField = 'ObjectLog';
+                // var xmlMessageJSON = cowu.formatXML2JSON(d.Xmlmessage);
+                // tooltip.html('<div>' + d3.time.format("%d/%m/%y %H:%M:%S")(new Date(d['MessageTS']/1000)) + '</div>' +
+                //             '<div>' + d.Source + '</div>' +
+                //             '<div>' + d.Category + '</div>' +
+                //             '<div>' + xmlMessage.join(' ') + '</div>')
+            } else if(d['body'] != null) {
+                jsonField = 'body';
+            } else {
+                jsonField = 'Xmlmessage';
+            }
+            var xmlMessageJSON;
+            if(typeof(d[jsonField]) == 'string') {
+                xmlMessageJSON = JSON.parse(d[jsonField]);
+            } else {
+                xmlMessageJSON = cowu.formatXML2JSON(d[jsonField]);
+            }
+            var tooltipColumns = [
+                { field:'MessageTS',
+                  label: 'Time',
+                  formatter: function(d) {
+                    return d3.time.format("%d/%m/%y %H:%M:%S")(new Date(d/1000))
+                  }
+                },{
+                    field:'Source',
+                    label:'Source'
+                },{
+                    field:'useragent',
+                    label:'Useragent'
+                },{
+                    field:'remote_ip',
+                    label:'Remote IP'
+                },{
+                    field:'domain',
+                    label:'Domain'
+                },{
+                    field:'project',
+                    label:'Project'
+                },{
+                    field:'operation',
+                    label:'Operation'
+                }
+            ]
+            var xmlMessage = '<pre class="pre-format-JSON2HTML">' + contrail.formatJsonObject(xmlMessageJSON) + '</pre>';
+            var tooltipContent = '';
+            tooltipContent += '<div class="event-drops popover-remove">' + 
+                '<i class="fa fa-remove pull-right popover-remove-icon"></i>'+ 
+            '</div>';
+            $.each(tooltipColumns,function(idx,tooltipCfg) {
+                tooltipContent += '<div>'; 
+                tooltipContent += '<b>' + tooltipCfg['label'] + ': </b>'; 
+                if(typeof(tooltipCfg['formatter']) == 'function') {
+                    tooltipContent += tooltipCfg['formatter'](d[tooltipCfg['field']]);
+                } else {
+                    tooltipContent += d[tooltipCfg['field']];
+                }
+                tooltipContent += '</div>';
+            });
+            // var tooltipTemplate = contrail.getTemplate4Id(cowc.TMPL_ELEMENT_TOOLTIP_CONTENT);
+            tooltip.html(tooltipContent + 
+                        '<hr/>' + 
+                        '<div><b>' + 'Config object:'  + '</b></div>' + 
+                        '<div>' + xmlMessage  + '</div>');
+            // tooltip.html(tooltipTemplate({info: [{label:'Hello',value:'Hai'},
+            //                                 {label:'Hello',value:'Hai'}]}));
+            $('.event-drops.popover-remove').on('click',function() {
+                $('.event-drops-tooltip').remove()
+            });
+
+            tooltip
+            .classed(direction,true)
+            .style({
+                left: left + 'px',
+                top: (d3.event.pageY + 16) + 'px',
+                position: 'absolute'
+            });
         },
         hideTooltip : function() {
-            d3.select('.event-drops-tooltip').transition()
+            /*d3.select('.event-drops-tooltip').transition()
                 .duration(200)
                 .each('end', function end() {
                     this.remove();
                 })
-                .style('opacity', 0);
+                .style('opacity', 0);*/
         },
         renderChart: function() {
             var self = this;
             var colors =  d3.scale.category10();
-            // colors = cowc.FIVE_NODE_COLOR;
+            colors = cowc.FIVE_NODE_COLOR;
+            colors = ["rgb(13,81,156)","rgb(50,129,189)","rgb(106,174,214)"]
             var data = self.model.getItems();
-            data = _.groupBy(data,function(d) { return d.Messagetype; });
-            data = _.map(data,function(value,key) {
-                return {
-                    name: key,
-                    data: value
-                }
-            });
+            var labelsWidth = 160;
+            if(self.viewCfg.groupBy != null) {
+                data = _.groupBy(data,function(d) { return ifNull(d[self.viewCfg.groupBy],d.Messagetype); });
+                data = _.map(data,function(value,key) {
+                    return {
+                        name: key,
+                        data: value
+                    }
+                });
+            } else {
+                data = [{
+                    name: '',
+                    data: data
+                }]
+                labelsWidth = 0;
+            }
             var eventDropsChart = d3.chart.eventDrops()
-                .start(new Date(new Date().getTime() - 2 * 60 * 60 * 1000)) //last 2 hours
-                .end(new Date())
-                .eventLineColor(function(d, i) { return colors[i]})
-                .labelsWidth(200)
+                // .start(new Date(new Date().getTime() - 0.5 * 60 * 60 * 1000)) //last 2 hours
+                // .end(new Date(new Date().getTime() + .15 * 60 * 60 * 1000))
+                // .start(new Date('2016/11/17 16:35:18')) //last 2 hours
+                // .end(new Date('2016/11/17 17:35:18'))
+                .start(new Date('2016/11/17 13:20:18')) //last 2 hours
+                .end(new Date('2016/11/17 13:25:18'))
+                // .zoomable(false)
+                //.eventLineColor(function(d, i) { return colors(i)})
+                .eventLineColor(function(d, i) { return colors[i%colors.length]})
+                .labelsWidth(labelsWidth)
                 .mouseover(self.showTooltip)
                 .mouseout(self.hideTooltip)
                 .date(function(d){
                     return new Date(d.MessageTS/1000);
                 });
-            d3.select(self.$el[0])
+            self.$el.find('.eventdrops-widget-title').text(self.viewCfg['title']);
+            self.$el.find('.eventdrops-widget-title').addClass('drag-handle');
+            d3.select(self.$el.find('.eventdrops-chart')[0])
             .datum(data)
             .call(eventDropsChart);
         }
