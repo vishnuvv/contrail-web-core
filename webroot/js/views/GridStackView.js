@@ -210,10 +210,12 @@ define([
             }
             var viewType = cowu.getValueByJsonPath(cfg,'viewCfg;view','');
             if(viewType.match(/eventDropsView/)) {
-                $(currElem).find('header').addClass('drag-handle');
+                // $(currElem).find('header').addClass('drag-handle');
+                $(currElem).find('eventdrops-widget-title').addClass('drag-handle');
             } else {
                 $(currElem).find('.item-content').addClass('drag-handle');
             }
+            // $(currElem).find('.item-content').addClass('drag-handle');
             cfg['viewCfg'] = $.extend(true,{},chUtils.getDefaultViewConfig(viewType),cfg['viewCfg']);
             self.renderView4Config($(currElem).find('.item-content'), model, cfg['viewCfg']);
         }
