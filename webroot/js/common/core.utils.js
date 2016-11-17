@@ -2060,6 +2060,11 @@ define([
                             },
                             dataParser : function (response) {
                                 var data = response['data'];
+                                if (response['queryJSON'] != null) {
+                                    data = _.map(data, function(obj) { 
+                                        return _.extend({}, obj, {queryJSON: response['queryJSON']});
+                                    });
+                                }
                                 if (statsConfig['parser'] != null && typeof statsConfig['parser'] == "function") {
                                     data = statsConfig['parser'](data);
                                 }
