@@ -97,6 +97,9 @@ define([
                     store_callback: false
                 });
             }
+            $('#alarms-popup-link div.pointer').toggle();
+            var headerTemplate = contrail.getTemplate4Id('notification-header');
+            $.notificationcenter.newAlert(headerTemplate(), null, false, null, null, true);
             $.each(data, function (idx, obj){
                 $.notificationcenter.newAlert(obj['text'], null, false, null, new Date().getTime(), true);
             });

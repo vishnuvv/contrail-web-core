@@ -1665,7 +1665,7 @@ body {
     box-shadow: inset 2px 0 5px 1px rgba(0, 0, 0, 0.5);
     color: #fff;
     /* text-shadow: 0 2px 1px rgba(0, 0, 0, 1); */
-    background-color: #37373d;
+    background-color: white;
     background-image: linear-gradient(left, #3f4046, #37373d);
     background-image: -o-linear-gradient(left, #3f4046, #37373d);
     background-image: -moz-linear-gradient(left, #3f4046, #37373d);
@@ -1776,7 +1776,9 @@ body {
    /* padding-left: 25px;*/
     border-collapse: initial;
 }
-
+/*.notifcenterbox: first-child {
+	width: 294px;
+}*/ 
 .notifcenterbox .notiftext {
     display: table-cell;
     padding-right: 10px;
@@ -2076,4 +2078,62 @@ dd.time_stamp:before {
     padding-left: 14px;
     margin-top: 3px;
     display: block;
+}
+
+.notification_heading {
+    background-color: #f5f5f5;
+    height: 36px;
+    color: #4682b4;
+    width: 294px;
+    margin: -5px;
+}
+.notification_heading label {
+    padding: 10px;
+    font-size: 13px;
+}
+.notification_heading a.close_btn {
+    float: right;
+    padding: 8px 10px;
+    color: #b0b0b0;
+    font-size: 16px;
+}
+ 
+#notificationcenterpanel .pointer, #alarms-popup-link .pointer{
+    height: 20px;
+    width: 20px;
+    position:relative;
+    -ms-transform: rotate(180deg); /* IE 9 */
+    -webkit-transform: rotate(180deg); /* Chrome, Safari, Opera */
+    transform: rotate(180deg);
+    width: 100%;
+    margin-top:-5px
+}
+#notificationcenterpanel .pointer div, #alarms-popup-link .pointer div{
+    position:absolute;
+    width:100%;
+    height:20px;
+    top:9px;
+    left:-14px;
+    overflow:hidden;
+}
+#notificationcenterpanel .pointer div:after, #alarms-popup-link .pointer div:after{
+    content:'';
+    width:20px;
+    height:20px;
+    background:#f5f5f5;
+    position:absolute;
+    -moz-transform:rotate(45deg);
+    -webkit-transform:rotate(45deg);
+    transform:rotate(45deg);
+    border-right:#dbdbdb solid 1px;
+    border-bottom:#dbdbdb solid 1px;
+    top:-10px;
+    left:50%;
+}
+.nvd3.nv-stackedarea path.nv-area {
+	fill-opacity: 1; !important
+}
+
+.centerlist ul li:first-child {
+	margin: 0px;
 }
