@@ -2081,7 +2081,7 @@ dd.time_stamp:before {
 }
 
 .notification_heading {
-    background-color: #f5f5f5;
+    background-color: #599ac9;
     height: 36px;
     color: #4682b4;
     width: 294px;
@@ -2090,11 +2090,12 @@ dd.time_stamp:before {
 .notification_heading label {
     padding: 10px;
     font-size: 13px;
+    color: #ffffff;
 }
 .notification_heading a.close_btn {
     float: right;
     padding: 8px 10px;
-    color: #b0b0b0;
+    color: #ffffff;
     font-size: 16px;
 }
  
@@ -2120,15 +2121,35 @@ dd.time_stamp:before {
     content:'';
     width:20px;
     height:20px;
-    background:#f5f5f5;
     position:absolute;
     -moz-transform:rotate(45deg);
     -webkit-transform:rotate(45deg);
     transform:rotate(45deg);
-    border-right:#dbdbdb solid 1px;
-    border-bottom:#dbdbdb solid 1px;
     top:-10px;
     left:50%;
+    background:#599ac9;
+    border-right:#599ac9 solid 1px;
+    border-bottom:#599ac9 solid 1px
+}
+
+#notificationcenterpanel .ack_info{
+    float:left;
+    color:#929292;
+    }
+#notificationcenterpanel .notification_menu{
+    background-color:#fdfdfd;
+    height:35px;
+    margin: 5px -5px -5px -5px;
+    padding:8px 10px 8px 10px;
+}
+#notificationcenterpanel .widget-toolbar{
+    line-height:1;
+    padding: 2px 8px;
+}
+#notificationcenterpanel .widget-toolbar > a{
+    color:#3182BD;
+    font-size:16px;
+    line-height:1;
 }
 .nvd3.nv-stackedarea path.nv-area {
 	fill-opacity: 1 !important;
