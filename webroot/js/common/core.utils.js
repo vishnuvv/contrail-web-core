@@ -1858,7 +1858,7 @@ define([
                     groupByMapLen = groupByMap.length,
                     groupByKeys = _.pluck(groupByMap, 'key');
                 if (colors != null && typeof colors == 'function') {
-                    colors = colors(groupByKeys, options.resetColor);
+                    colors = colors(groupByKeys, options.type);
                 }
                 for (var i = 0; i < groupByMapLen; i++) {
                     parsedData.push({

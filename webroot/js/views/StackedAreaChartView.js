@@ -8,8 +8,9 @@ define([
     'contrail-list-model',
     'legend-view',
     'core-constants',
-    'chart-utils'
-], function (_, ContrailView,  ContrailListModel, LegendView, cowc,chUtils) {
+    'chart-utils',
+    'color-mapping'
+], function (_, ContrailView,  ContrailListModel, LegendView, cowc,chUtils, ColorMapping) {
     var cfDataSource;
     var stackedAreaChartView = ContrailView.extend({
         settingsChanged: function(newSettings) {
@@ -98,7 +99,7 @@ define([
             chartOptions['timeRange'] =  getValueByJsonPath(data, '0;queryJSON');
             var totalWidth = $(selector).find('.stacked-area-chart-container').width();
             var totalOverviewHeight = totalWidth * 0.1;
-            var margin =  { top: 20, right: 20, bottom: totalOverviewHeight, left: 20 };
+            var margin =  { top: 20, right: 0, bottom: totalOverviewHeight, left: 20 };
             var showLegend = getValueByJsonPath(chartOptions,'showLegend', true);
             var showControls = getValueByJsonPath(chartOptions,'showControls',true);
             var title = getValueByJsonPath(chartOptions,'title',null);
@@ -107,7 +108,9 @@ define([
             var failureCheckFn = getValueByJsonPath(chartOptions,'failureCheckFn',null);
             var failureLabel = getValueByJsonPath(chartOptions,'failureLabel', cowc.FAILURE_LABEL);
             var tooltipFn = getValueByJsonPath(chartOptions,'tooltipFn', defaultTooltipFn);
-            var colors = getValueByJsonPath(chartOptions,'colors', {yAxisLabel: cowc.DEFAULT_COLOR});
+            //var colors = getValueByJsonPath(chartOptions,'colors', {yAxisLabel: cowc.DEFAULT_COLOR});
+            var colors = chartOptions['colors'] = ColorMapping.getColorMapByType;
+            console.log("same instance ",colors === ColorMapping.getColorMapByType);
             var resetColor = getValueByJsonPath(chartOptions,'resetColor',false);
             var yAxisOffset = getValueByJsonPath(chartOptions,'yAxisOffset',0);
             var yAxisFormatter = getValueByJsonPath(chartOptions,'yAxisFormatter',function (value) {
@@ -136,7 +139,7 @@ define([
             }
             if (colors != null) {
                 if (typeof colors == 'function') {
-                    self.colors = colors(_.without(_.pluck(data, 'key'), failureLabel), resetColor);
+                    self.colors = colors(_.without(_.pluck(data, 'key'), failureLabel), chartOptions.type);
                 } else if (typeof colors == 'object') {
                     self.colors = colors;
                 }

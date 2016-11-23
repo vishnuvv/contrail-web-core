@@ -2131,7 +2131,7 @@ dd.time_stamp:before {
     left:50%;
 }
 .nvd3.nv-stackedarea path.nv-area {
-	fill-opacity: 1; !important
+	fill-opacity: 1 !important;
 }
 
 .centerlist ul li:first-child {

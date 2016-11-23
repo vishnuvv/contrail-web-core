@@ -9,8 +9,9 @@ define([
     'contrail-list-model',
     'legend-view',
     'core-constants',
-    'chart-utils'
-], function (_, ContrailView,  ContrailListModel, LegendView, cowc, chUtils) {
+    'chart-utils',
+    'color-mapping'
+], function (_, ContrailView,  ContrailListModel, LegendView, cowc, chUtils, ColorMapping) {
     var cfDataSource;
     var stackedBarChartWithFocusChartView = ContrailView.extend({
         settingsChanged: function(newSettings) {
@@ -129,6 +130,9 @@ define([
             var defaultZeroLineDisplay = getValueByJsonPath(chartOptions,'defaultZeroLineDisplay', false);
             var groupBy = chartOptions['groupBy'], groups = [], yAxisMaxValue;
             var resetColor = getValueByJsonPath(chartOptions,'resetColor',false);
+
+            //chartOptions['colors'] = ColorMapping.getColorMapByType;
+
             //settings
             if(typeof chartOptions["colors"] != 'function' && chartOptions['applySettings'] != false) {
                 chartOptions["colors"] = cowc.FIVE_NODE_COLOR;

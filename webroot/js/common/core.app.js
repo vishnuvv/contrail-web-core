@@ -106,6 +106,7 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
         'qe-module'                   : coreWebDir + '/reports/qe/ui/js/qe.module',
         'udd-module'                  : coreWebDir + '/reports/udd/ui/js/udd.module',
         'legend-view'                 : coreWebDir + '/js/views/LegendView',
+        'color-mapping'               : coreWebDir + '/js/common/color.mapping'
     };
 
     //Separate out aliases that need to be there for both prod & dev environments
