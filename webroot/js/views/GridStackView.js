@@ -148,13 +148,21 @@ define([
             }
             self.widgets.push(currElem);
             var modelCfg = cfg['modelCfg'];
+            //Add cache Config
+            var modelId = cfg['modelCfg']['modelId'];
+            //if there exists a mapping of modelId in widgetConfigManager.modelInstMap, use it
             //Maintain a mapping of cacheId vs contrailListModel and if found,return that
-            if(cowu.getValueByJsonPath(cfg,'modelCfg;source') == 'STATTABLE') {
+            if(widgetConfigManager.modelInstMap[modelId] != null) {
+                modelCfg = widgetConfigManager.modelInstMap[modelId];
+            } else if(cowu.getValueByJsonPath(cfg,'modelCfg;source','').match(/STATTABLE|LOG|OBJECT/)) {
                 modelCfg = new ContrailListModel(cowu.getStatsModelConfig(modelCfg['config']));
             } else if(cowu.getValueByJsonPath(cfg,'modelCfg;listModel','') != '') {
                 modelCfg = modelCfg['listModel'];
             } else if(cowu.getValueByJsonPath(cfg,'modelCfg;_type') != 'contrailListModel' && modelCfg != null) {
-                modelCfg = new ContrailListModel(modelCfg);
+                modelCfg = new ContrailListModel(modelCfg['config']);
+            }
+            if(modelId != null && widgetConfigManager.modelInstMap[modelId] == null) {
+                widgetConfigManager.modelInstMap[modelId] = modelCfg;
             }
             var viewType = cowu.getValueByJsonPath(cfg,'viewCfg;view','');
             if(viewType.match(/eventDropsView/)) {
