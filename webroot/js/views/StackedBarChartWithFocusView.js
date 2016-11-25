@@ -672,7 +672,9 @@ define([
             }
             function onclickBar(data) {
                 var xExtent = data.timestampExtent;
-                clearToolTip(false);
+                if(chartOptions.onClickBar != false){
+                    clearToolTip(false);
+                }
                 xExtent = xExtent.map(function(date){
                     return new Date(date).getTime(); //convert to millisecs
                 });

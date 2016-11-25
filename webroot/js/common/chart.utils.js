@@ -218,6 +218,7 @@ define([
                             // bucketSize: this.STATS_BUCKET_DURATION,
                             bucketSize: 2.5,
                             colors: {},
+                            onClickBar:false,
                             title: '',
                             axisLabelDistance : 0,
                             margin: {
