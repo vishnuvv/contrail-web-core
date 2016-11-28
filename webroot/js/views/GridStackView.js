@@ -152,8 +152,14 @@ define([
             var modelId = cfg['modelCfg']['modelId'];
             //if there exists a mapping of modelId in widgetConfigManager.modelInstMap, use it
             //Maintain a mapping of cacheId vs contrailListModel and if found,return that
-            if(widgetConfigManager.modelInstMap[modelId] != null) {
-                modelCfg = widgetConfigManager.modelInstMap[modelId];
+            var cachedModelObj = widgetConfigManager.modelInstMap[modelId];
+            var isCacheExpired = true;
+            if(cachedModelObj != null && 
+               (_.now() - cachedModelObj['time']) < cowc.INFRA_MODEL_CACHE_TIMEOUT * 1000) {
+                isCacheExpired = false;
+            }
+            if(!isCacheExpired) {
+                modelCfg = widgetConfigManager.modelInstMap[modelId]['model'];
             } else if(cowu.getValueByJsonPath(cfg,'modelCfg;source','').match(/STATTABLE|LOG|OBJECT/)) {
                 modelCfg = new ContrailListModel(cowu.getStatsModelConfig(modelCfg['config']));
             } else if(cowu.getValueByJsonPath(cfg,'modelCfg;listModel','') != '') {
@@ -161,8 +167,11 @@ define([
             } else if(cowu.getValueByJsonPath(cfg,'modelCfg;_type') != 'contrailListModel' && modelCfg != null) {
                 modelCfg = new ContrailListModel(modelCfg['config']);
             }
-            if(modelId != null && widgetConfigManager.modelInstMap[modelId] == null) {
-                widgetConfigManager.modelInstMap[modelId] = modelCfg;
+            if(isCacheExpired) {
+                widgetConfigManager.modelInstMap[modelId] = {
+                    model: modelCfg,
+                    time: _.now()
+                };
             }
             var viewType = cowu.getValueByJsonPath(cfg,'viewCfg;view','');
             if(viewType.match(/eventDropsView/)) {
