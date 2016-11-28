@@ -1612,11 +1612,13 @@ define([
             return buckets;
         };
 
+      
         this.chartDataFormatter = function (response, options) {
             var cf = crossfilter(response);
             var timeStampField = 'T',
                 parsedData = [], failureCheckFn = getValueByJsonPath(options, 'failureCheckFn'),
-                colors = getValueByJsonPath(options, 'colors',cowc.FIVE_NODE_COLOR),
+                colors =  (options.alarmColorCheck == true)? getValueByJsonPath(options, 'colorsAlarm')
+                        : getValueByJsonPath(options, 'colors',cowc.FIVE_NODE_COLOR),
                 groupBy = getValueByJsonPath(options, 'groupBy'),
                 yField = getValueByJsonPath(options, 'yField'),
                 yFieldOperation = getValueByJsonPath(options, 'yFieldOperation'),

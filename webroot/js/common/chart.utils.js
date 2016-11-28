@@ -249,7 +249,8 @@ define([
                             showLegend: false,
                             defaultZeroLineDisplay: true,
                             legendView: LegendView,
-                            tooltipFn: this.defaultLineAreaTooltipFn
+                            tooltipFn: this.defaultLineAreaTooltipFn,
+                            alarmColorCheck:false
                         }
                     }
                 },

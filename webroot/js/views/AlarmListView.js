@@ -140,7 +140,7 @@ define([
                                         view: "WidgetView",
                                         viewConfig: {
                                             header: {
-                                                title: 'Alarms',
+                                                title: 'Alarms'
                                                 // iconClass: "icon-search"
                                             },
                                             controls: {
@@ -160,12 +160,14 @@ define([
                                         showLegend: false,
                                         showControls: false,
                                         groupBy: 'severity',
+                                        insertEmptyBuckets:false,
                                         yAxisFormatter: d3.format('d'),
-                                        colors: {
+                                        colorsAlarm: {
                                             '0': '#dc6660',//Critical Red
                                             '1': '#dc6660',//Major Red
                                             '2': '#ffbf87'//Minor Orange
                                         },
+                                        alarmColorCheck:true,
                                         brush: true,
                                         tooltipFn: function (d) {
                                             return d3.time.format("%e %b %X")(d.date) + "<br/>"  + d.y + " Alarm(s)"
