@@ -166,7 +166,6 @@ define([
 
               //Format x-axis labels with custom function.
               chart.xAxis.tickFormat(function(d) { return d3.time.format('%H:%M')(new Date(d)) });
-
               //y-axis tickformatter
               chart.yAxis
                   .tickFormat(yAxisFormatter);
@@ -206,6 +205,7 @@ define([
                                   .style('font-size', '10px')
                                   .attr("transform", "rotate(-90)")
                                   .text(yAxisLabel);
+              chart.stacked.dispatch.on("areaClick.toggle", null);
               //Use the tooltip formatter if present
                if(chartOptions.tooltipFn) {
                    chart.interactiveLayer.tooltip.contentGenerator(function (obj) {
