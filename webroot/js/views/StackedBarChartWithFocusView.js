@@ -519,6 +519,9 @@ define([
                             obj['values'] = cowu.getValueByJsonPath(obj, 'values;'+i, {});
                             tooltipData.push(obj);
                         });
+                        if (chartOptions.tooltipDataFormatter) {
+                            tooltipData = chartOptions.tooltipDataFormatter(tooltipData);
+                        }
                         //if (chartView.sliceTooltip) {
                             var event = d3.event;
                             var x = tooltipData;
