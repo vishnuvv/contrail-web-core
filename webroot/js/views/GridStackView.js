@@ -147,7 +147,7 @@ define([
                     ifNull(itemAttr['width'],defaultWidth),ifNull(itemAttr['height'],defaultHeight),true);
             }
             self.widgets.push(currElem);
-            var modelCfg = cfg['modelCfg'];
+            var modelCfg = cfg['modelCfg'],model;
             //Add cache Config
             var modelId = cfg['modelCfg']['modelId'];
             //if there exists a mapping of modelId in widgetConfigManager.modelInstMap, use it
@@ -156,20 +156,24 @@ define([
             var isCacheExpired = true;
             if(cachedModelObj != null && 
                (_.now() - cachedModelObj['time']) < cowc.INFRA_MODEL_CACHE_TIMEOUT * 1000) {
-                isCacheExpired = false;
+                model = widgetConfigManager.modelInstMap[modelId]['model'];
+                if(model.errorList.length == 0) {
+                    isCacheExpired = false;
+                    model.loadedFromCache = true;
+                }
             }
             if(!isCacheExpired) {
-                modelCfg = widgetConfigManager.modelInstMap[modelId]['model'];
+                model = widgetConfigManager.modelInstMap[modelId]['model'];
             } else if(cowu.getValueByJsonPath(cfg,'modelCfg;source','').match(/STATTABLE|LOG|OBJECT/)) {
-                modelCfg = new ContrailListModel(cowu.getStatsModelConfig(modelCfg['config']));
+                model = new ContrailListModel(cowu.getStatsModelConfig(modelCfg['config']));
             } else if(cowu.getValueByJsonPath(cfg,'modelCfg;listModel','') != '') {
-                modelCfg = modelCfg['listModel'];
+                model = modelCfg['listModel'];
             } else if(cowu.getValueByJsonPath(cfg,'modelCfg;_type') != 'contrailListModel' && modelCfg != null) {
-                modelCfg = new ContrailListModel(modelCfg['config']);
+                model = new ContrailListModel(modelCfg['config']);
             }
             if(isCacheExpired) {
                 widgetConfigManager.modelInstMap[modelId] = {
-                    model: modelCfg,
+                    model: model,
                     time: _.now()
                 };
             }
@@ -181,7 +185,7 @@ define([
             }
             cfg['viewCfg'] = $.extend(true,{},chUtils.getDefaultViewConfig(viewType),cfg['viewCfg']);
             $(currElem).data('data-cfg', cfg);
-            self.renderView4Config($(currElem).find('.item-content'), modelCfg, cfg['viewCfg']);
+            self.renderView4Config($(currElem).find('.item-content'), model, cfg['viewCfg']);
         }
     });
     return GridStackView;
