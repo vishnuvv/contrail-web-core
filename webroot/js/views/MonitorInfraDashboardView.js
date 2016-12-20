@@ -25,9 +25,9 @@ define([
             var self = this;
             self.isRendered = true;
             var dashboardTmpl = contrail.getTemplate4Id(cowc.TMPL_INFRA_DASHBOARD);
-            $(contentContainer).html(dashboardTmpl);
+            $(self.$el).html(dashboardTmpl);
             this.infoBoxView = new InfoboxesView({
-                el: $(contentContainer).
+                el: $(self.$el).
                     find('#dashboard-infoboxes')
             });
             self.nodeListModel = new NodeListModel();
