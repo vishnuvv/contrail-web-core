@@ -51,7 +51,7 @@ define([
     'mon-infra-alert-grid-view',
     'mon-infra-log-list-view',
     'mon-infra-sysinfo-view',
-    'mon-infra-dashboard-view'
+    //'mon-infra-dashboard-view'
 
 ], function (CoreHandlebarsUtils, CoreUtils, CoreHashUtils, CoreConstants, CoreFormatters, Cache, CoreLabels,
              CoreMessages, CoreViewsDefaultConfig, Contrail, CoreContrailFormElements, ChartUtils, CoreCommonTmpls) {
