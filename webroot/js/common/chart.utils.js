@@ -226,7 +226,8 @@ define([
                             xAxisLabel: '',
                             yAxisLabel: '',
                             groupBy: 'Source',
-                            overViewText: false,
+                            overViewText: true,
+                            yAxisOffset: 0,
                             showXMinMax: true,
                             showYMinMax: true,
                             yField: '',
@@ -332,6 +333,20 @@ define([
                 }
             }
             return chartObj;
+        },
+        calculateDomainBasedOnOffset: function (data, offset) {
+            var domain = [];
+            var stackedData = _.pluck(data, 'values');
+            var allObjs = _.reduce(stackedData, function (result, value) {
+                return result.concat(value);
+            }, []);
+            var maxValue = d3.max(allObjs, function(d) { return d.total; });
+            var minValue = d3.min(allObjs, function(d) { return d.total; });
+            domain[0] = minValue;
+            domain[1] = maxValue + (offset/100) * maxValue;
+            if (domain[1] == 0)
+                domain = [0, 1];
+            return domain;
         }
     };
 

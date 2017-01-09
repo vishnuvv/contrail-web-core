@@ -54,7 +54,7 @@ define(
                         self.updateAlarmBell(alarmCounts);
                         self.startUpdateBellTimer();
                     });
-                    self.fetchAlarms(alarmDeferredObj);
+                    //self.fetchAlarms(alarmDeferredObj);
                 };
 
                 self.updateAlarmBell = function (alarmCounts) {

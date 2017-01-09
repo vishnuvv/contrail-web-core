@@ -87,6 +87,7 @@ define([
                 data = modelData.slice(0), //work with shallow copy
                 widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ? viewConfig.widgetConfig : null,
                 chartViewConfig, chartOptions, chartViewModel,
+                yAxisOffset = getValueByJsonPath(viewConfig, 'chartOptions;yAxisOffset', 0),
                 defaultZeroLineDisplay = getValueByJsonPath(viewConfig,'chartOptions;defaultZeroLineDisplay', false);
                 
 
@@ -212,7 +213,6 @@ define([
             updateDataStatusMessage(self, chartViewConfig, dataModel);
         }
     });
-
     function setData2Chart(self, chartViewConfig, chartDataModel, chartViewModel) {
         var chartDataObj = {
                 data: chartViewConfig.chartData,
