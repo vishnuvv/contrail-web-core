@@ -10,10 +10,10 @@ function MonInfraDashboardLoader() {
             hashParams = paramObject['hashParams'],
             renderFn = paramObject['function'];
 
-        require(['mon-infra-dashboard-view'], function (MonitorInfraDashboardView) {
-            var monitorInfraDashboardView = MonitorInfraDashboardView;
-            monitorInfraDashboardView.render({
-                el:$(contentContainer)
+        require(['core-basedir/js/views/DashboardListView'], function (DashboardListView) {
+            var dashboardListView = new DashboardListView();
+            dashboardListView.render({
+                el: $(contentContainer)
             });
         });
     };

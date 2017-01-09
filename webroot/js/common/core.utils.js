@@ -1666,17 +1666,19 @@ define([
         this.chartDataFormatter = function (response, options) {
             var cf = crossfilter(response);
             var timeStampField = 'T',
-                parsedData = [], failureCheckFn = getValueByJsonPath(options, 'failureCheckFn'),
-                substractFailures = getValueByJsonPath(options, 'substractFailures'),
-                colors = getValueByJsonPath(options, 'colors',cowc.FIVE_NODE_COLOR),
-                groupBy = getValueByJsonPath(options, 'groupBy'),
-                yField = getValueByJsonPath(options, 'yField'),
-                yFieldOperation = getValueByJsonPath(options, 'yFieldOperation'),
-                failureLabel = getValueByJsonPath(options, 'failureLabel', cowc.FAILURE_LABEL),
-                yAxisLabel = getValueByJsonPath(options, 'yAxisLabel'),
-                defaultZeroLineDisplay = getValueByJsonPath(options,'defaultZeroLineDisplay', false),
+                parsedData = [], failureCheckFn = cowu.getValueByJsonPath(options, 'failureCheckFn'),
+                substractFailures = cowu.getValueByJsonPath(options, 'substractFailures'),
+                colors = cowu.getValueByJsonPath(options, 'colors',cowc.FIVE_NODE_COLOR),
+                groupBy = cowu.getValueByJsonPath(options, 'groupBy'),
+                yField = cowu.getValueByJsonPath(options, 'yField'),
+                yFieldOperation = cowu.getValueByJsonPath(options, 'yFieldOperation'),
+                failureLabel = cowu.getValueByJsonPath(options, 'failureLabel', cowc.FAILURE_LABEL),
+                yAxisLabel = cowu.getValueByJsonPath(options, 'yAxisLabel'),
+                defaultZeroLineDisplay = cowu.getValueByJsonPath(options,'defaultZeroLineDisplay', false),
                 // limit is for requirements like top 5 records etc;
-                limit = getValueByJsonPath(options, 'limit'),
+                limit = cowu.getValueByJsonPath(options, 'limit'),
+                area = cowu.getValueByJsonPath(options, 'area', false),
+                showTextAtCenter = cowu.getValueByJsonPath(options, 'showTextAtCenter', false),
                 groupDim;
             if (response != null && getValueByJsonPath(response, '0;T') == null) {
                 timeStampField = 'T=';
@@ -1697,14 +1699,18 @@ define([
                 parsedData.push({
                    key: failureLabel,
                    color: cowu.getValueByJsonPath(options, 'failureColor', cowc.FAILURE_COLOR),
-                   values: []
+                   values: [],
+                   area: area,
+                   showTextAtCenter: showTextAtCenter
                 });
             }
             if(response.length === 0 && defaultZeroLineDisplay && groupBy!=null){
                 parsedData.push({
                     key: 'DEFAULT',
                     color: cowc.DEFAULT_COLOR,
-                    values: []
+                    values: [],
+                    area: area,
+                    showTextAtCenter: showTextAtCenter
                 });
             }
             if (limit != null) {
@@ -1719,13 +1725,17 @@ define([
                 parsedData.push({
                     key: cowc.OTHERS,
                     color: cowc.OTHERS_COLORS,
-                    values: []
+                    values: [],
+                    area: area,
+                    showTextAtCenter: showTextAtCenter
                 });
                 for (var i = 0; i < limit; i++) {
                     parsedData.push({
                         key: i,
                         color: colors[i],
-                        values: []
+                        values: [],
+                        area: area,
+                        showTextAtCenter: showTextAtCenter
                     });
                 }
             } else if (groupBy != null) {
@@ -1741,7 +1751,9 @@ define([
                         key: groupByMap[i]['key'],
                         color: (colors[groupByMap[i]['key']] == null)? colors[i % colors.length]
                                 : colors[groupByMap[i]['key']],
-                        values: []
+                        values: [],
+                        area: area,
+                        showTextAtCenter: showTextAtCenter
                     });
                 }
             } else {
@@ -1749,7 +1761,9 @@ define([
                     key: yAxisLabel,
                     color: (colors != null)?  ($.isArray(colors) ? colors[0] : colors) :
                                     ($.isArray(cowc.DEFAULT_COLOR) ? cowc.DEFAULT_COLOR[0] : cowc.DEFAULT_COLOR),
-                    values: []
+                    values: [],
+                    area: area,
+                    showTextAtCenter: showTextAtCenter
                 });
             }
 
@@ -1911,10 +1925,12 @@ define([
             var yFields = getValueByJsonPath(options,'yFields',[]);
             var parsedData = [];
             var colors = getValueByJsonPath(options,'colors',cowc.FIVE_NODE_COLOR);
-            var yLabels = getValueByJsonPath(options,'yLabels', []);
+            var yLabels = getValueByJsonPath(options,'yLabels', []),
+                area = cowu.getValueByJsonPath(options, 'area', false),
+                text = cowu.getValueByJsonPath(options, 'showTextAtCenter', false);
             $.each(yFields,function(i,yField){
                 var key = yLabels[i] != null ? yLabels[i]: getLabelForPercentileYField(yField);
-                parsedData[yField] = {"key":key,"color":colors[i],values:[]};
+                parsedData[yField] = {"key":key,"color":colors[i],values:[], area: area, showTextAtCenter: text};
                 var values = parsedData[yField]['values'];
                 $.each(data,function(j,d){
                     values.push({x:parseInt(getValueByJsonPath(d,"T=",0))/1000,y:getValueByJsonPath(d,yField,0)});

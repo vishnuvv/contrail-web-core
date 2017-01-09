@@ -869,7 +869,7 @@
 </script>
 
 <script type="text/x-handlebars-template" id="core-section-view-template">
-    <div data-bind="{{#if viewConfig.visible}} visible: {{viewConfig.visible}} {{/if}}">
+    <div data-bind="{{#if viewConfig.visible}} visible: {{viewConfig.visible}} {{/if}}" class="{{#if viewConfig.cssClass}} {{viewConfig.cssClass}} {{/if}}">
         {{#if viewConfig.title}}
             <h5 class="margin-0-0-10">{{viewConfig.title}}</h5>
         {{/if}}
@@ -2064,7 +2064,7 @@
         {{/IfCompare}}
         {{#if overViewText}}
             <div class="chart-overview-wrapper flex flex-dir-row flex-5">
-                <div class="overview-text flex-1"></div>
+                <div class="overview-text {{#if overviewCss}} {{overviewCss}} {{else}} flex-1 {{/if}}"></div>
                 <div class="main-chart flex-5">
                     <svg class="nvd3-svg"></svg>
                 </div>

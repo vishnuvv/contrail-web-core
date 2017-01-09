@@ -161,6 +161,7 @@ define([
                     availableHeight1 = nv.utils.availableHeight(height, container, margin) - height2,
                     availableHeight2 = height2 - margin2.top - margin2.bottom;
 
+                var yDomain = chUtils.calculateDomainBasedOnOffset(data, cowu.getValueByJsonPath(chartOptions, 'yAxisOffset', 0));
                 chartModel.update = function () {
                     container.transition().duration(transitionDuration).call(chartModel)
                 };
@@ -192,6 +193,7 @@ define([
                 yScale = lines.yScale();
                 x2 = lines2.xScale();
                 y2 = lines2.yScale();
+                yScale.domain(yDomain);
 
                 // Setup containers and skeleton of chart
                 var wrap = container.selectAll('g.nv-wrap.nv-lineWithFocusChart').data([data]);
@@ -750,6 +752,7 @@ define([
                   .useInteractiveGuideline(true);
 
         chartModel.interpolate(chUtils.interpolateSankey);
+        
 
         if (showXAxis) {
             chartModel.xAxis.axisLabel(chartOptions.xAxisLabel)
