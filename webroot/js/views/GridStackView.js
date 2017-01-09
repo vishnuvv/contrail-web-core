@@ -43,12 +43,25 @@ define([
                 animate:false,
                 acceptWidgets:'label'
             }).data('gridstack');
+
+            //Listen for dragstart on grid-stack-item's only and ignore dragging on outside widgets area
+            self.$el.on('dragstart','.grid-stack-item',function(event,ui) {
+                console.info('dragstart');
+            });
+
+            self.$el.on('dragstart',function(event,ui) {
+                console.info('dragstart empty space');
+            });
+            self.$el.on('drag',function(event,ui) {
+                console.info('drag empty space');
+            });
             
             self.$el.on('drag','.grid-stack-item',function(event,ui) {
                 $('.custom-grid-stack').addClass('show-borders');
             });
             self.$el.on('dragstop',function(event,ui) {
                 self.doSaveLayout = true;
+                console.info('dragstop');
                 $('.custom-grid-stack').removeClass('show-borders');
             });
             self.$el.on('resizestart',function(event,ui) {
@@ -193,6 +206,7 @@ define([
                     model.loadedFromCache = true;
                 }
             }
+            isCacheExpired = true;
             if(!isCacheExpired) {
                 model = widgetConfigManager.modelInstMap[modelId]['model'];
             } else if(cowu.getValueByJsonPath(cfg,'modelCfg;source','').match(/STATTABLE|LOG|OBJECT/)) {
