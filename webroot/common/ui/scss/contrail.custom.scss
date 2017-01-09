@@ -1635,10 +1635,11 @@ div.stack-bar-chart-tooltip > .popover.popover-tooltip {
 .carousel-control-cover-story{
     z-index: 1;
 }
-grid-stack.grid-stack-24 .grid-stack-item{
+.grid-stack.grid-stack-24 .grid-stack-item{
     $gridstack-columns: 24;
 
     @for $i from 1 through $gridstack-columns {
+
         &[data-gs-width='#{$i}'] { width: (100% / $gridstack-columns) * $i; }
         &[data-gs-x='#{$i}'] { left: (100% / $gridstack-columns) * $i; }
         &.grid-stack-item[data-gs-min-width='#{$i}'] { min-width: (100% / $gridstack-columns) * $i; }
@@ -1658,10 +1659,36 @@ grid-stack.grid-stack-24 .grid-stack-item{
             align-content: center;
         }
         .value {
-            font-size: 30px !important;
+            font-size: 30px;
+            padding-bottom: 30px;
             .unit {
                 font-size: 25px;
             }
         }
-    }   
+    }
+ }   
+.chart-container .center-text {
+    font-size: 20px;
+}
+#dashboard-carousel-view { 
+ background-color: #f3f4f5 !important;
+    .panel {
+        margin-bottom: 0px;
+    }
+    h5 {
+        margin: 10px !important;
+    }
+}
+.utilization-chart {
+    height: 90px;
+    display: flex;
+    .nv-groups .nv-series-0{
+        fill-opacity: 1 !important;
+    }
+    .title {
+        font-size: 11px;
+    }
+    .value {
+        font-size: 23px !important;
+    }
 }
