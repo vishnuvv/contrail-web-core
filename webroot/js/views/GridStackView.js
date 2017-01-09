@@ -79,7 +79,12 @@ define([
                 el = $(el);
                 var node = el.data('_gridstack_node');
                 //itemAttr contains properties from both itemAttr (view.config file) & customItemAttr (ListView)
-                var itemAttr = (el.data('data-cfg') != null)? el.data('data-cfg').itemAttr: {};
+                var itemAttr = {},
+                    viewCfg = {};
+                if (el.data('data-cfg') != null) {
+                    itemAttr = el.data('data-cfg').itemAttr;
+                    viewCfg = el.data('data-cfg').viewCfg;
+                }
                 // console.assert(el.attr('data-widget-id') != null);
                 // console.assert(node.width != null || node.height != null, "Node width/height is null while serializing");
                 if(node == null || node.x == null || node.height == null | node.width == null || node.y == null) {
@@ -87,6 +92,7 @@ define([
                 }
                 return {
                     id: el.attr('data-widget-id'),
+                    viewCfg: viewCfg,
                     itemAttr: $.extend(itemAttr,{
                         x: node.x,
                         y: node.y,
@@ -136,7 +142,8 @@ define([
                 self.add({
                     widgetCfg: widgetCfgList[i],
                     modelCfg: currWidgetCfg['modelCfg'],
-                    viewCfg: currWidgetCfg['viewCfg'],
+                    //viewCfg: currWidgetCfg['viewCfg'],
+                    viewCfg: $.extend(true, {},currWidgetCfg['viewCfg'], cowu.getValueByJsonPath(widgetCfgList, i+';viewCfg', {})),
                     itemAttr: $.extend({},currWidgetCfg['itemAttr'],widgetCfgList[i]['itemAttr'])
                 });
             }

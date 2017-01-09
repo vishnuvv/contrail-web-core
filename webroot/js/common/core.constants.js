@@ -183,6 +183,7 @@ define([
         this.DASHBOARD_ALERTS_GRID_SECTION_ID = "infra-dashboard-alerts-section";
         this.DASHBOARD_ALERTS_GRID_ID = "infra-dashboard-alerts-grid";
         this.DASHBOARD_ALERTS_GRID_TITLE = "Alerts";
+        this.DASHBOARD_LIST_SECTION_ID = 'dashboard-list-section';
 
         this.NODE_DETAILS_CHARTS = 'mon-infra-node-details-chart';
 

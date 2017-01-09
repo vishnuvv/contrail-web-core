@@ -157,8 +157,6 @@ constants.controllerModules = [
               "controller-basedir/monitor/infrastructure/databasenode/ui/js/views/DatabaseNodeView",
               "controller-basedir/monitor/infrastructure/databasenode/ui/js/views/DatabaseNodeListView",
               "controller-basedir/monitor/infrastructure/databasenode/ui/js/views/PercentileBarView",
-
-
               "monitor-infra-analyticsnode-model",
               "monitor-infra-databasenode-model",
               "monitor-infra-confignode-model",
