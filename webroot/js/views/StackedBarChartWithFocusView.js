@@ -62,11 +62,11 @@ define([
                     });
                 }
 
-                if (viewConfig.loadChartInChunks) {
+                // if (viewConfig.loadChartInChunks) {
                     self.model.onDataUpdate.subscribe(function () {
                         self.renderChart($(self.$el), viewConfig, self.model);
                     });
-                }
+                // }
 
                 $($(self.$el)).bind("refresh", function () {
                     self.renderChart($(self.$el), viewConfig, self.model);
@@ -752,7 +752,12 @@ define([
             /**
              * Actual chart code ENDS
              */
+        },
+        destroy : function() {
+            var self = this;
+            $(self.$el).parents('.custom-grid-stack-item').off('resize');
         }
+
     });
 
     return stackedBarChartWithFocusChartView;

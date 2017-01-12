@@ -202,6 +202,12 @@ define([
         endMyRendering: function() {
             this.endMyViewRendering();
             this.endMyModelRendering();
+        },
+
+        
+        destroy : function() {
+            var self = this;
+            $(self.$el).parents('.custom-grid-stack-item').off('resize');
         }
     });
 
