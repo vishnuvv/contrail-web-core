@@ -77,96 +77,6 @@ define([
             self.cfDataSource = viewConfig.cfDataSource;
             ChartView.prototype.bindListeners.call(self);
             self.renderChart($(self.$el), viewConfig, self.model);
-
-            /*if(self.model instanceof Backbone.Model) {
-                self.model.on("change",function() {
-                    self.renderChart($(self.$el), viewConfig, self.model);
-                });
-            } else {
-                cfDataSource = viewConfig.cfDataSource;
-                if (self.model === null && viewConfig['modelConfig'] != null) {
-                    self.model = new ContrailListModel(viewConfig['modelConfig']);
-                }
-
-                if (self.model !== null) {
-                    if(cfDataSource == null) {
-                        self.renderChart($(self.$el), viewConfig, self.model);
-<<<<<<< HEAD
-                    });
-                    //Need to render if the callbacks have already kicked 
-                    //in before coming here
-                    self.renderChart($(self.$el), viewConfig, self.model);
-                } else {
-                    if (self.model.isRequestInProgress() != true) {
-                        self.renderChart($(self.$el), viewConfig, self.model);
-                    }
-                    self.model.onAllRequestsComplete.subscribe(function () {
-=======
-                    } else if(self.model.loadedFromCache == true) {
->>>>>>> 69b44009... Backup
-                        self.renderChart($(self.$el), viewConfig, self.model);
-                    }
-
-<<<<<<< HEAD
-                if (viewConfig.loadChartInChunks) {
-                    self.model.onDataUpdate.subscribe(function () {
-                        self.renderChart($(self.$el), viewConfig, self.model);
-                    });
-                }
-=======
-                    if(cfDataSource != null) {
-                        cfDataSource.addCallBack('updateChart',function(data) {
-                            self.renderChart($(self.$el), viewConfig, self.model);
-                        });
-                    } else {
-                        self.model.onAllRequestsComplete.subscribe(function () {
-                            self.renderChart($(self.$el), viewConfig, self.model);
-                        });
-                    }
->>>>>>> 69b44009... Backup
-
-                    // if (viewConfig.loadChartInChunks) {
-                        self.model.onDataUpdate.subscribe(function () {
-                            self.renderChart($(self.$el), viewConfig, self.model);
-                        });
-                    // }
-                }
-            }*/
-
-
-                /*self.resizeFunction = _.debounce(function (e, refreshSource) {
-                   $('.stack-bar-chart-tooltip').remove();
-                    if(!chUtils.isReRenderRequired({
-                        prevDimensions:prevDimensions,
-                        elem:self.$el})) {
-                        return;
-                    }
-                    prevDimensions = chUtils.getDimensionsObj(self.$el);
-                    self.renderChart($(self.$el), viewConfig, self.model, refreshSource);
-                },cowc.THROTTLE_RESIZE_EVENT_TIME);
-
-                window.addEventListener('resize',function(e){self.resizeFunction(e,'windowResize')});
-                $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);
-            }*/
-
-            /*$($(self.$el)).bind("refresh", function () {
-                self.renderChart($(self.$el), viewConfig, self.model);
-            });
-            var prevDimensions = chUtils.getDimensionsObj(self.$el);
-
-            self.resizeFunction = _.debounce(function (e) {
-                $('.stack-bar-chart-tooltip').remove();
-                if(!chUtils.isReRenderRequired({
-                    prevDimensions:prevDimensions,
-                    elem:self.$el})) {
-                    return;
-                }
-                prevDimensions = chUtils.getDimensionsObj(self.$el);
-                self.renderChart($(self.$el), viewConfig, self.model);
-            },cowc.THROTTLE_RESIZE_EVENT_TIME);
-
-            window.addEventListener('resize',self.resizeFunction);
-            $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);*/
         },
 
         renderChart: function (selector, viewConfig, chartViewModel, refreshSource) {
@@ -961,7 +871,12 @@ define([
             if (hideTicks) {
                 $('.stacked-bar-chart-container .tick > line').css('opacity','0')
             }
+        },
+        destroy : function() {
+            var self = this;
+            $(self.$el).parents('.custom-grid-stack-item').off('resize');
         }
+
     });
 
     return stackedBarChartWithFocusChartView;

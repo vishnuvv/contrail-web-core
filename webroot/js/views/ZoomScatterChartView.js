@@ -54,7 +54,6 @@ define([
                 // }
             }
 
-
                 /*
                 $(selector).bind("refresh", function () {
                     self.renderChart(selector, viewConfig, self.model);
@@ -144,6 +143,10 @@ define([
                 selector = contrail.handleIfNull(selector, $(self.$el));
 
             $(selector).find('.nv-noData').remove();
+        },
+        destroy : function() {
+            var self = this;
+            $(self.$el).parents('.custom-grid-stack-item').off('resize');
         }
     });
 

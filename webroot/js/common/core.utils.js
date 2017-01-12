@@ -730,6 +730,7 @@ define([
 
                 require([viewPath], function(ElementView) {
                     elementView = new ElementView({el: parentElement, model: model, attributes: viewAttributes, rootView: rootView, onAllViewsRenderCompleteCB: onAllViewsRenderCompleteCB, onAllRenderCompleteCB: onAllRenderCompleteCB});
+                    $(parentElement).data('ContrailView',elementView);
                     elementView.viewName = viewName;
                     elementView.modelMap = modelMap;
                     elementView.beginMyViewRendering();
@@ -2412,7 +2413,7 @@ define([
             var primaryRemoteConfig ;
             var vlRemoteList = [];
             for (var i = 0; i < config.length; i++) {
-                var statsConfig = config[i];
+				var statsConfig = config[i],whereDefObj = $.Deferred();
                 var noSanitize = cowu.getValueByJsonPath(statsConfig,'no_sanitize',false);
                 var queryType = cowu.getValueByJsonPath(statsConfig,'type','Aggregate');
                 var postData = {
@@ -2454,7 +2455,18 @@ define([
                         postData['formModelAttrs']['select'] = statsConfig['select'];
                     }
                     if (statsConfig['where'] != null) {
-                        postData['formModelAttrs']['where'] = statsConfig['where'];
+                        if(matchArr = statsConfig['where'].match(/node-type = (.*)/)) {
+                            monitorInfraUtils.fetchHostNamesForNodeType({nodeType:matchArr[1]}).
+                            done(function(whereClause) {
+                                postData['formModelAttrs']['where'] = monitorInfraUtils.getWhereClauseForSystemStats(whereClause);
+                                whereDefObj.resolve(whereClause);
+                            });
+                        } else {
+                            postData['formModelAttrs']['where'] = statsConfig['where'];
+                            whereDefObj.resolve();
+                        }
+                    } else {
+                        whereDefObj.resolve();
                     }
                     if (statsConfig['time_granularity'] != null) {
                         postData['formModelAttrs']['time_granularity'] = statsConfig['time_granularity'];
@@ -2501,6 +2513,7 @@ define([
                             dataParser : (statsConfig['parser'])? statsConfig['parser'] :
                                 function (response) {
                                     var data = getValueByJsonPath(response,'data',[]);
+                                    //Copying queryJSON property from request to response
                                     if (response['queryJSON'] != null) {
                                         data = _.map(data, function(obj) {
                                             return _.extend({}, obj, {queryJSON: response['queryJSON']});

@@ -51,47 +51,6 @@ define([
             self.renderChart(selector, viewConfig, self.model);
 
             ChartView.prototype.bindListeners.call(self);
-
-            /*if (self.model !== null) {
-                if(self.model.loadedFromCache || !(self.model.isRequestInProgress())) {
-                    self.updateChart(selector, viewConfig, self.model);
-                }
-
-                self.model.onAllRequestsComplete.subscribe(function() {
-                    self.updateChart(selector, viewConfig, self.model);
-                });
-
-                if(viewConfig.loadChartInChunks) {
-                    self.model.onDataUpdate.subscribe(function() {
-                        self.updateChart(selector, viewConfig, self.model);
-                    });
-<<<<<<< HEAD
-                }
-                var prevDimensions = chUtils.getDimensionsObj(self.$el);
-                self.resizeFunction = _.debounce(function (e) {
-                    if(!chUtils.isReRenderRequired({
-                        prevDimensions:prevDimensions,
-                        elem:self.$el})) {
-                        return;
-                    }
-                     self.renderChart($(self.$el), viewConfig, self.model);
-                 },cowc.THROTTLE_RESIZE_EVENT_TIME);
-=======
-                //}
-            }*/
-            /*
-            var prevDimensions = chUtils.getDimensionsObj(self.$el);
-            self.resizeFunction = _.debounce(function (e) {
-                if(!chUtils.isReRenderRequired({
-                    prevDimensions:prevDimensions,
-                    elem:self.$el})) {
-                    return;
-                }
-                    self.renderChart($(self.$el), viewConfig, self.model);
-                },cowc.THROTTLE_RESIZE_EVENT_TIME);
->>>>>>> 69b44009... Backup
-
-            $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction); */
         },
 
         renderChart: function (selector, viewConfig, chartDataModel) {
@@ -176,15 +135,6 @@ define([
             }
 
         },
-
-        /*resize: function() {
-            var self = this;
-<<<<<<< HEAD
-            _.isFunction(self.resizeFn) && self.resizeFn();
-        },
-=======
-            _.isFuntion(self.resizeFn) && self.resizeFn();
-        },*/
 
         getChartViewConfig: function(chartData, viewConfig, isRequestInProgress) {
             var chartViewConfig = {},

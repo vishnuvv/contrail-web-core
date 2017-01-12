@@ -20,7 +20,6 @@ define([ 'lodash',
         var widgetCfgMap = {},
         widgetViewCfgMap = {},
         widgetModelCfgMap = {};
-
         //Populate the available widget config maps
         $.extend(widgetCfgMap, ControlNodeWidgetCfg, VRouterWidgetCfg,
                 DatabaseNodeWidgetCfg, AnalyticsNodeWidgetCfg,

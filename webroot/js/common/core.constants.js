@@ -2144,7 +2144,7 @@ define([
         this.TMPL_QUERY_SELECT = "query-select-popup-template";
         //Grid stack
         this.GRID_STACK_COLUMN_CNT = 24;
-        this.GRID_STACK_DEFAULT_WIDTH = 12;
+        this.GRID_STACK_DEFAULT_WIDTH = 24;
         this.LAYOUT_PREFERENCE = 'layout-preference';
         //Global controller constants
         this.GLOBAL_CONTROLLER_ALL_REGIONS = "All Regions";
