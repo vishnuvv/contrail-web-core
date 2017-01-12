@@ -7,8 +7,9 @@ define([
     'moment',
     'handlebars',
     'lodash',
-    "core-constants"
-], function (_, moment, Handlebars, lodash, cowc) {
+    "core-constants",
+    'contrail-list-model'
+], function (_, moment, Handlebars, lodash, cowc,ContrailListModel) {
     var serializer = new XMLSerializer(),
         domParser = new DOMParser();
 
@@ -708,6 +709,7 @@ define([
 
                 require([viewPath], function(ElementView) {
                     elementView = new ElementView({el: parentElement, model: model, attributes: viewAttributes, rootView: rootView, onAllViewsRenderCompleteCB: onAllViewsRenderCompleteCB, onAllRenderCompleteCB: onAllRenderCompleteCB});
+                    $(parentElement).data('ContrailView',elementView);
                     elementView.viewName = viewName;
                     elementView.modelMap = modelMap;
                     elementView.beginMyViewRendering();
@@ -2120,14 +2122,15 @@ define([
          * The first one is considered as primary req and the rest are added as
          * vl config
          */
-        self.getStatsModelConfig = function (config) {
+        self.fetchStatsListModel = function (config) {
+            var listModel = new ContrailListModel({data:[]});
             if (!_.isArray(config)) {
                 config = [config];
             }
             var primaryRemoteConfig ;
             var vlRemoteList = [];
             for (var i = 0; i < config.length; i++) {
-                var statsConfig = config[i];
+                var statsConfig = config[i],whereDefObj = $.Deferred();
                 var postData = {
                     "autoSort": true,
                     "async": false,
@@ -2159,7 +2162,18 @@ define([
                         postData['formModelAttrs']['select'] = statsConfig['select'];
                     }
                     if (statsConfig['where'] != null) {
-                        postData['formModelAttrs']['where'] = statsConfig['where'];
+                        if(matchArr = statsConfig['where'].match(/node-type = (.*)/)) {
+                            monitorInfraUtils.fetchHostNamesForNodeType({nodeType:matchArr[1]}).
+                            done(function(whereClause) {
+                                postData['formModelAttrs']['where'] = monitorInfraUtils.getWhereClauseForSystemStats(whereClause);
+                                whereDefObj.resolve(whereClause);
+                            });
+                        } else {
+                            postData['formModelAttrs']['where'] = statsConfig['where'];
+                            whereDefObj.resolve();
+                        }
+                    } else {
+                        whereDefObj.resolve();
                     }
                     if (statsConfig['time_granularity'] != null) {
                         postData['formModelAttrs']['time_granularity'] = statsConfig['time_granularity'];
@@ -2172,6 +2186,28 @@ define([
                     if (statsConfig['type'] != null && statsConfig['type'] == "non-stats-query"){
                         primaryRemoteConfig = remoteConfig;
                     } else {
+                        whereDefObj.done(function() {
+                            $.ajax({
+                                url : "/api/qe/query/" + _.result(postData,'formModelAttrs.table_name'),
+                                type: 'POST',
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                data: JSON.stringify(postData)
+                            }).done(function(response) {
+                                if(typeof(statsConfig['parser']) == 'function') {
+                                    listModel.setData(statsConfig['parser'](response));
+                                } else {
+                                    var data = getValueByJsonPath(response,'data',[]);
+                                    //Copying queryJSON property from request to response
+                                    if (response['queryJSON'] != null) {
+                                        data = _.map(data, function(obj) { 
+                                            return _.extend({}, obj, {queryJSON: response['queryJSON']});
+                                        });
+                                    }
+                                    listModel.setData(data);
+                                }
+                            });
+                        });
                         var remoteObj = {
                             ajaxConfig : {
                                 url : "/api/qe/query",
@@ -2181,6 +2217,7 @@ define([
                             dataParser : (statsConfig['parser'])? statsConfig['parser'] :
                                 function (response) {
                                     var data = getValueByJsonPath(response,'data',[]);
+                                    //Copying queryJSON property from request to response
                                     if (response['queryJSON'] != null) {
                                         data = _.map(data, function(obj) { 
                                             return _.extend({}, obj, {queryJSON: response['queryJSON']});
@@ -2223,7 +2260,7 @@ define([
                     vlRemoteList.push (vlRemoteObj);
                 }
             }
-            var listModelConfig =  {
+            /*var listModelConfig =  {
                 remote : primaryRemoteConfig,
                 cacheConfig:{
                     cacheTimeout: 5*60*1000
@@ -2235,8 +2272,8 @@ define([
             }
             if (statsConfig['modelId'] != null) {
                 listModelConfig['cacheConfig']['ucid'] = statsConfig['modelId'];
-            }
-            return listModelConfig;
+            }*/
+            return listModel;
         };
     };
 

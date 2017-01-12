@@ -217,6 +217,10 @@ define([
 
             setData2Chart(self, chartViewConfig, chartDataModel, self.chartViewModel);
             updateDataStatusMessage(self, chartViewConfig, chartDataModel);
+        },
+        destroy : function() {
+            var self = this;
+            $(self.$el).parents('.custom-grid-stack-item').off('resize');
         }
     });
 

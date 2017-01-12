@@ -47,11 +47,11 @@ define([
                     });
                 }
 
-                if (viewConfig.loadChartInChunks !== false) {
+                // if (viewConfig.loadChartInChunks !== false) {
                     self.model.onDataUpdate.subscribe(function () {
                         self.renderChart(selector, viewConfig, self.model);
                     });
-                }
+                // }
 
                 $(selector).bind("refresh", function () {
                     self.renderChart(selector, viewConfig, self.model);
@@ -139,6 +139,10 @@ define([
                 selector = contrail.handleIfNull(selector, $(self.$el));
 
             $(selector).find('.nv-noData').remove();
+        },
+        destroy : function() {
+            var self = this;
+            $(self.$el).parents('.custom-grid-stack-item').off('resize');
         }
     });
 

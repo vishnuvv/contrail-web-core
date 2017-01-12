@@ -58,11 +58,11 @@ define([
                     self.updateChart(selector, viewConfig, self.model);
                 });
 
-                if(viewConfig.loadChartInChunks) {
+                //if(viewConfig.loadChartInChunks) {
                     self.model.onDataUpdate.subscribe(function() {
                         self.updateChart(selector, viewConfig, self.model);
                     });
-                }
+                //}
                 var prevDimensions = chUtils.getDimensionsObj(self.$el);
                 self.resizeFunction = _.debounce(function (e) {
                     if(!chUtils.isReRenderRequired({
