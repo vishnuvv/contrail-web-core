@@ -6,13 +6,14 @@ define([ 'lodash',
         'analyticsnode-widgetcfg','confignode-widgetcfg','monitor-infra-widgetcfg',
         'confignode-modelcfg','controlnode-modelcfg','vrouter-modelcfg',
         'databasenode-modelcfg','analyticsnode-modelcfg','monitor-infra-modelcfg',
-        'monitor-infra-viewcfg','confignode-viewcfg'
+        'monitor-infra-viewcfg','confignode-viewcfg', 'databasenode-viewcfg',
+        'vrouter-viewcfg'
         ], function(
         _,ControlNodeWidgetCfg, VRouterWidgetCfg, DatabaseNodeWidgetCfg,
         AnalyticsNodeWidgetCfg, CfgNodeWidgetCfg,MonitorInfraWidgetCfg,
         CfgNodeModelCfg,ControlNodeModelCfg,VRouterModelCfg,DatabaseNodeModelCfg,
         AnaltyicsNodeModelCfg,MonitorInfraModelCfg,
-        MonitorInfraViewCfg,CfgNodeViewCfg) {
+        MonitorInfraViewCfg,CfgNodeViewCfg, DBNodeViewCfg, VRouterViewCfg) {
     var widgetCfgManager = function() {
         var self = this;
         var widgetCfgMap = {},
@@ -27,7 +28,7 @@ define([ 'lodash',
         $.extend(widgetModelCfgMap, CfgNodeModelCfg,ControlNodeModelCfg,VRouterModelCfg,
         DatabaseNodeModelCfg,AnaltyicsNodeModelCfg,MonitorInfraModelCfg);
 
-        $.extend(widgetViewCfgMap, MonitorInfraViewCfg,CfgNodeViewCfg);
+        $.extend(widgetViewCfgMap, MonitorInfraViewCfg, CfgNodeViewCfg, DBNodeViewCfg, VRouterViewCfg);
         //,ControlNodeViewCfg,VRouterViewCfg,DatabaseNodeViewCfg,AnaltyicsNodeViewCfg,);
 
         self.get = function(widgetId,overrideCfg) {

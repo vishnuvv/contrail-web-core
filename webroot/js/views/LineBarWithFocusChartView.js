@@ -93,11 +93,17 @@ define([
                 data = viewConfig['parseFn'](data, viewConfig['chartOptions']);
             }
             if ($(selector).parents('.custom-grid-stack-item').length != 0) {
-                viewConfig['chartOptions']['height'] = $(selector).parents('.custom-grid-stack-item').height() - 20;
+                viewConfig['chartOptions']['height'] = $(selector).parents('.custom-grid-stack-item').height();
             }
             chartViewConfig = self.getChartViewConfig(data, viewConfig.chartOptions);
             chartOptions = chartViewConfig['chartOptions'];
             //viewConfig.chartOptions = chartOptions;
+            var chartOptionsForSize = ChartView.prototype.getChartOptionsFromDimension(selector);
+            chartOptions = $.extend(true, {}, chartOptions, chartOptionsForSize);
+            var showLegend = chartOptions['showLegend'];
+            if (showLegend) {
+                chartOptions['height'] -= 30;
+            }
             chartViewModel = new LineBarWithFocusChartModel(chartOptions);
             chartViewModel.chartOptions = chartOptions;
 

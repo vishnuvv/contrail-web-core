@@ -5,9 +5,37 @@
 define([
     'underscore',
     'contrail-view',
-    'chart-utils'
-], function (_, ContrailView, chUtils) {
+    'chart-utils',
+    'chart-config'
+], function (_, ContrailView, chUtils, ChartConfig) {
     var ChartView = ContrailView.extend({
+        getChartOptionsFromDimension: function (selector) {
+             var height = $(selector).height(),
+                width = $(selector).width();
+            var chartOptions = new ChartConfig().config;
+            var widthOptions = cowu.getValueByJsonPath(chartOptions, 'min-width', {});
+            var heightOptions = cowu.getValueByJsonPath(chartOptions, 'min-height', {});
+            var widthsArray = _.keys(widthOptions),
+                widthsArrLen = widthsArray.length;
+            var heightsArray = _.keys(heightOptions),
+                heightsArrLen = heightsArray.length;
+            var selectedWidthOptions, selectedHeightOptions;
+            for (var i = 0; i < widthsArrLen; i++) {
+                var widthItem = widthsArray[i];
+                if (widthItem >= width) {
+                    selectedWidthOptions = widthOptions[widthItem];
+                    break;
+                }
+            }
+            for (var i = 0; i < heightsArrLen; i++) {
+                var heightItem = heightsArray[i];
+                if (heightItem >= height) {
+                    selectedHeightOptions = heightOptions[heightItem];
+                    break;
+                }
+            }
+            return $.extend({}, selectedWidthOptions, selectedHeightOptions);
+        },
         render: function () {
         },
         showText: function (data, viewConfig) {

@@ -106,17 +106,18 @@ define([
                 data = chartViewModel.getFilteredItems();
             }
             viewConfig = self.viewConfig;
+            var chartOptionsForSize = ChartView.prototype.getChartOptionsFromDimension(selector);
             var chartTemplate = contrail.getTemplate4Id('core-stacked-area-chart-template');
             var widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ?
                     viewConfig.widgetConfig : null;
             var chartOptions = getValueByJsonPath(viewConfig, 'chartOptions', {});
+            chartOptions = $.extend(true, {}, chartOptions, chartOptionsForSize);
             var totalHeight = ($(selector).closest('.custom-grid-stack-item').length > 0 )?
-                    $(selector).closest('.custom-grid-stack-item').height() - 20:
+                    $(selector).closest('.custom-grid-stack-item').height():
                         cowu.getValueByJsonPath(chartOptions, 'height', 300);
 
             var totalWidth = $(selector).find('.stacked-area-chart-container').width();
-            var totalOverviewHeight = totalWidth * 0.1;
-            var margin =  { top: 20, right: 20, bottom: totalOverviewHeight, left: 20 };
+            var margin =  cowu.getValueByJsonPath(chartOptions, 'margin', { top: 20, right: 20, bottom: 20, left: 20 });
             var showLegend = getValueByJsonPath(chartOptions,'showLegend', true);
             var showControls = getValueByJsonPath(chartOptions,'showControls',true);
             var title = getValueByJsonPath(chartOptions,'title',null);
@@ -128,6 +129,23 @@ define([
             var colors = getValueByJsonPath(chartOptions,'colors', {yAxisLabel: cowc.DEFAULT_COLOR});
             var resetColor = getValueByJsonPath(chartOptions,'resetColor',false);
             var yAxisOffset = getValueByJsonPath(chartOptions,'yAxisOffset',0);
+            var showXAxis = cowu.getValueByJsonPath(chartOptions, 'showXAxis', true);
+            var showYAxis = cowu.getValueByJsonPath(chartOptions, 'showYAxis', true);
+            var showXLabel = cowu.getValueByJsonPath(chartOptions, 'showXLabel', true);
+            var showYLabel = cowu.getValueByJsonPath(chartOptions, 'showYLabel', true);
+            var showXMinMax = cowu.getValueByJsonPath(chartOptions, 'showXMinMax', false);
+            var showYMinMax = cowu.getValueByJsonPath(chartOptions, 'showYMinMax', false);
+            if (!showXAxis) {
+                // Bottom we are subtracting only 20 because there may be overview chart in bottom for which we may need
+                // the bottom margin
+                margin['bottom'] = margin['bottom'] - 20;
+            }
+            if (!showYAxis) {
+                margin['right'] = 0;
+            }
+            if (showLegend) {
+                totalHeight -= 30; //we can make dynamic by getting the legend div height
+            }
             var yAxisFormatter = getValueByJsonPath(chartOptions,'yAxisFormatter',function (value) {
                 return cowu.numberFormatter(value);
             });
@@ -194,6 +212,10 @@ define([
               //y-axis tickformatter
               chart.yAxis
                   .tickFormat(yAxisFormatter);
+              chUtils.updateTickOptionsInChart(chart, chartOptions);
+              chart.showXAxis(showXAxis);
+              chart.showYAxis(showYAxis);
+              chart.margin(margin);
               if (yAxisOffset != 0) {
                   var domain = chart.yAxis.domain();
                   var stackedData = _.pluck(data, 'values');
@@ -213,15 +235,18 @@ define([
                 .call(chart)
 
               //Add the axis labels
-              var xaxisLabel = svg.append("text")
-                                  .attr("class", "axis-label")
+              if (showXLabel) {
+                svg.append("text")
+                                  .attr("class", "xaxis axis-label")
                                   .attr("text-anchor", "middle")
                                   .attr("x", width/2)
                                   .attr("y", height + 40)
                                   .style('font-size', '10px')
                                   .text(xAxisLabel);
-              var yaxisLabel = svg.append("text")
-                                  .attr("class", "axis-label")
+              }
+              if (showYLabel) {
+                svg.append("text")
+                                  .attr("class", "yaxis axis-label")
                                   .attr("text-anchor", "middle")
 //                                  .attr("y", -margin.left)
                                   .attr("x", -totalHeight/2)
@@ -230,6 +255,7 @@ define([
                                   .style('font-size', '10px')
                                   .attr("transform", "rotate(-90)")
                                   .text(yAxisLabel);
+              }
               chart.stacked.dispatch.on("areaClick.toggle", null);
               //Use the tooltip formatter if present
                if(chartOptions.tooltipFn) {
@@ -290,7 +316,7 @@ define([
                       });
               //}
 //              nv.utils.windowResize(chart.update); Not using since we need to do other stuff on resize
-
+              $(selector).data('chart', chart);
               return chart;
             });
             function defaultTooltipFn (d, yAxisFormatter) {

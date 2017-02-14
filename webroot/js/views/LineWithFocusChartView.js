@@ -4,14 +4,13 @@
 
 define([
     'underscore',
-    'contrail-view',
     'chart-view',
     'core-basedir/js/models/LineWithFocusChartModel',
     'contrail-list-model',
     'nv.d3',
     'chart-utils'
-], function (_, ContrailView, ChartView, LineWithFocusChartModel, ContrailListModel, nv, chUtils) {
-    var LineWithFocusChartView = ContrailView.extend({
+], function (_, ChartView, LineWithFocusChartModel, ContrailListModel, nv, chUtils) {
+    var LineWithFocusChartView = ChartView.extend({
         settingsChanged: function(newSettings) {
             var self = this,
                 vc = self.attributes.viewConfig;
@@ -89,7 +88,6 @@ define([
                 chartTemplate = contrail.getTemplate4Id(cowc.TMPL_CHART),
                 widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ? viewConfig.widgetConfig : null,
                 chartViewConfig, chartOptions, chartViewModel,
-                showLegend = getValueByJsonPath(viewConfig,'chartOptions;showLegend',false),
                 defaultZeroLineDisplay = getValueByJsonPath(viewConfig,'chartOptions;defaultZeroLineDisplay', false);
 
             if (contrail.checkIfFunction(viewConfig['parseFn'])) {
@@ -99,10 +97,17 @@ define([
                 data = viewConfig['parseFn'](data, viewConfig['chartOptions']);
             }
             if ($(selector).parents('.custom-grid-stack-item').length != 0) {
-                viewConfig['chartOptions']['height'] = $(selector).parents('.custom-grid-stack-item').height() - 40;
+                viewConfig['chartOptions']['height'] = $(selector).parents('.custom-grid-stack-item').height();
             }
             chartViewConfig = self.getChartViewConfig(data, viewConfig);
             chartOptions = chartViewConfig['chartOptions'];
+            var chartOptionsForSize = ChartView.prototype.getChartOptionsFromDimension(selector);
+            //TODO Need to check overview chart enabled cases on resize
+            chartOptions = $.extend(true, {}, chartOptions, chartOptionsForSize);
+            var showLegend = getValueByJsonPath(chartOptions,'showLegend',false);
+            if (showLegend) {
+                chartOptions['height'] -= 30; //we can make dynamic by getting the legend div height
+            }
             chartViewModel = new LineWithFocusChartModel(chartOptions);
             chartViewModel.chartOptions = chartOptions;
 
@@ -117,7 +122,7 @@ define([
             //Store the chart object as a data attribute so that the chart can be updated dynamically
             $(selector).data('chart', chartViewModel);
 
-            if (chartOptions['showLegend'] && chartOptions['legendView'] != null) {
+            if (showLegend && chartOptions['legendView'] != null) {
                 self.legendView = new chartOptions['legendView']({
                     el: $(selector),
                     viewConfig: getLegendViewConfig(chartOptions, data)
