@@ -1242,8 +1242,15 @@ button#close-error-popup{
 .custom-grid-stack.show-borders .custom-grid-stack-item {
     border: 1px solid #f2f2f2;
 }
-
-
+.custom-grid-stack .custom-grid-stack-item g.nv-axisMin-x text {
+    text-anchor: start !important;
+}
+.custom-grid-stack .custom-grid-stack-item g.nv-axisMax-x text {
+    text-anchor: end !important;
+}
+.custom-grid-stack .custom-grid-stack-item g.x g.tick text:first {
+    text-anchor: start !important;
+}
 /* Start - Event-drops css */
 /*.event-drops-tooltip {
     position: absolute;
@@ -1790,5 +1797,16 @@ Alarms popup css
     .fa.fa-remove {
         right: 20px;
         position: absolute;
+    }
+}
+
+.grid-stack.grid-stack-24 .grid-stack-item{
+    $gridstack-columns: 24;
+
+    @for $i from 1 through $gridstack-columns {
+        &[data-gs-width='#{$i}'] { width: (100% / $gridstack-columns) * $i; }
+        &[data-gs-x='#{$i}'] { left: (100% / $gridstack-columns) * $i; }
+        &.grid-stack-item[data-gs-min-width='#{$i}'] { min-width: (100% / $gridstack-columns) * $i; }
+        &.grid-stack-item[data-gs-max-width='#{$i}'] { max-width: (100% / $gridstack-columns) * $i; }
     }
 }

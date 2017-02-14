@@ -33,10 +33,10 @@ define([
             self.CELL_HEIGHT_MULTIPLER = 1;
             //Default is 12 columns. To have 3 column layout, set defaultWidth as 4
             if(self.gridAttr['defaultWidth'] != null)
-                self.COLUMN_CNT = 12/self.gridAttr['defaultWidth'];
+                self.COLUMN_CNT = 24/self.gridAttr['defaultWidth'];
 
             self.$el.append($('#gridstack-template').text());
-            self.$el.find('.custom-grid-stack').addClass('grid-stack grid-stack-12');
+            self.$el.find('.custom-grid-stack').addClass('grid-stack grid-stack-24');
             self.$el.attr('data-widget-id',self.elementId);
             self.gridStack = $(self.$el).find('.custom-grid-stack').gridstack({
                 float:true,
@@ -47,7 +47,8 @@ define([
                 verticalMargin:8/self.CELL_HEIGHT_MULTIPLER,
                 cellHeight: 20,
                 animate:false,
-                acceptWidgets:'label'
+                acceptWidgets:'label',
+                width: 24
             }).data('gridstack');
             
             self.$el.find('.fa-plus').on('click',function() {
@@ -190,6 +191,7 @@ define([
         add: function(cfg, isMoved) {
             var self = this;
             var currElem = $($('#gridstack-widget-template').text()).attr('data-gs-height',2);
+
             var widthMultiplier = ifNull(self.gridAttr['widthMultiplier'],1);
             var heightMultiplier = ifNull(self.gridAttr['heightMultiplier'],1)*self.CELL_HEIGHT_MULTIPLER;
             var widgetIdx = self.widgets.length;
