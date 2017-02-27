@@ -85,10 +85,10 @@ define([
             var self = this,
                 modelData = (chartDataModel instanceof Backbone.Model) ? chartDataModel.get('data') : chartDataModel.getItems(),
                 data = modelData.slice(0), //work with shallow copy
-                chartTemplate = contrail.getTemplate4Id(cowc.TMPL_CHART),
                 widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ? viewConfig.widgetConfig : null,
                 chartViewConfig, chartOptions, chartViewModel,
                 defaultZeroLineDisplay = getValueByJsonPath(viewConfig,'chartOptions;defaultZeroLineDisplay', false);
+                
 
             if (contrail.checkIfFunction(viewConfig['parseFn'])) {
                 if(viewConfig['parseFn'] === cowu.chartDataFormatter && chartDataModel instanceof Backbone.Model) {
@@ -96,39 +96,22 @@ define([
                 }
                 data = viewConfig['parseFn'](data, viewConfig['chartOptions']);
             }
-            if ($(selector).parents('.custom-grid-stack-item').length != 0) {
-                viewConfig['chartOptions']['height'] = $(selector).parents('.custom-grid-stack-item').height();
-            }
             chartViewConfig = self.getChartViewConfig(data, viewConfig);
             chartOptions = chartViewConfig['chartOptions'];
             var chartOptionsForSize = ChartView.prototype.getChartOptionsFromDimension(selector);
             //TODO Need to check overview chart enabled cases on resize
             chartOptions = $.extend(true, {}, chartOptions, chartOptionsForSize);
             var showLegend = getValueByJsonPath(chartOptions,'showLegend',false);
-            if (showLegend) {
-                chartOptions['height'] -= 30; //we can make dynamic by getting the legend div height
-            }
+            ChartView.prototype.appendTemplate(selector, chartOptions);
+            ChartView.prototype.renderLegend(selector, chartOptions, getLegendViewConfig(chartOptions, data));
+            selector = $(selector).find('.main-chart');
             chartViewModel = new LineWithFocusChartModel(chartOptions);
             chartViewModel.chartOptions = chartOptions;
 
             self.chartViewModel = chartViewModel;
 
-            if ($(selector).find("svg") != null) {
-                $(selector).empty();
-            }
-
-            $(selector).append(chartTemplate(chartOptions));
-
             //Store the chart object as a data attribute so that the chart can be updated dynamically
             $(selector).data('chart', chartViewModel);
-
-            if (showLegend && chartOptions['legendView'] != null) {
-                self.legendView = new chartOptions['legendView']({
-                    el: $(selector),
-                    viewConfig: getLegendViewConfig(chartOptions, data)
-                });
-                self.legendView.render();
-            }
 
             /*$(selector).find('svg').bind("refresh", function () {
                 self.updateChart(selector, viewConfig, chartDataModel);
@@ -219,8 +202,9 @@ define([
             //Todo remove the dependency to calculate the chartData and chartOptions via below function.
             var chartViewConfig = self.getChartViewConfig(data, viewConfig);
             //If legendView exist, update with new config built from new data.
-            if (self.legendView) self.legendView.update(getLegendViewConfig(chartViewConfig.chartOptions, data));
-
+            //if (self.legendView) self.legendView.update(getLegendViewConfig(chartViewConfig.chartOptions, data));
+            ChartView.prototype.renderLegend(selector, chartViewConfig['chartOptions'],
+                 getLegendViewConfig(chartViewConfig['chartOptions'], data));
             setData2Chart(self, chartViewConfig, dataModel, self.chartViewModel);
             if (cowu.getValueByJsonPath(viewConfig, 'chartOptions;showTextAtCenter', false)) {
                 self.showText(data, viewConfig);

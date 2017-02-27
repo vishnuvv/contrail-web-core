@@ -1535,6 +1535,36 @@ color settings styles - end
 /*
 Stack area chart opacity
 */
+
+/**
+* Flex related CSS
+**/
+.flex {
+    display: flex;
+}
+.flex-dir-row {
+    flex-direction: row;
+}
+.flex-dir-column {
+    flex-direction: column;
+}
+.flex-dir-row-rev {
+    flex-direction: row-reverse;
+}
+.flex-dir-column-rev {
+    flex-direction: column-reverse;
+}
+@for $i from 1 through 10 {
+    .flex-#{$i} {
+        display: flex;
+        flex: $i
+    }
+}
+
+.flex-1 {
+    display: flex;
+    flex: 1;
+}
 .custom-grid-stack-item .nvd3.nv-stackedarea path.nv-area {
     fill-opacity: 1 !important;
 }
@@ -1576,8 +1606,23 @@ Stack area chart opacity
 }
 /* Custom tooltip CSS - Ends*/
 .custom-grid-stack > .custom-grid-stack-item > .grid-stack-item-content {
-    z-index: auto !important;
+    
 }
+.grid-stack-item-content > .item-content.contrail-grid {
+    display:block !important;
+}
+.grid-stack-item-content {
+    z-index: auto !important;
+    display: flex;
+    flex-direction: column;
+    > .item-content {
+        @extend .flex-1
+    }
+}
+/*.chart-container {
+    @extend .flex-1
+}*/
+
 div.stack-bar-chart-tooltip > .popover.popover-tooltip {
     opacity: 1;
 }
