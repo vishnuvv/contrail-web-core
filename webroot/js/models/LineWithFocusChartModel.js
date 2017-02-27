@@ -747,7 +747,7 @@ define([
         //------------------------------------------------------------
 
         chartModel.brushExtent(chartOptions['brushExtent'])
-                  .useInteractiveGuideline(true);
+                  // .useInteractiveGuideline(true);
 
         chartModel.interpolate(chUtils.interpolateSankey);
 

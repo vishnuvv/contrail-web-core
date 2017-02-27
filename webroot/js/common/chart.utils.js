@@ -328,10 +328,7 @@ define([
                 chartObj.xAxis.ticks(xTickCnt);
             }
             if (yTickCnt) {
-                if (chartObj.y1Axis != null) {
-                    chartObj.y1Axis.ticks(yTickCnt)
-                }
-                chartObj.yAxis.ticks(yTickCnt);
+                chartObj.y1Axis != null ? chartObj.y1Axis.ticks(0): chartObj.yAxis.ticks(0);
             }
             if (!showTicks) {
                 chartObj.xAxis.ticks(0);

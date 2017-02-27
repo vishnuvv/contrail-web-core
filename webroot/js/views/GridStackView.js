@@ -32,10 +32,10 @@ define([
             //Default is 12 columns. To have 3 column layout, set defaultWidth as 4
             if(self.gridAttr['defaultWidth'] != null)
                 self.COLUMN_CNT = cowc.GRID_STACK_COLUMN_CNT/self.gridAttr['defaultWidth'];
-
-            self.$el.addClass('grid-stack grid-stack-24 custom-grid-stack');
+            self.$el.append($('#gridstack-template').text());
+            self.$el.find('.custom-grid-stack').addClass('grid-stack grid-stack-24');
             self.$el.attr('data-widget-id',self.elementId);
-            self.gridStack = $(self.$el).gridstack({
+            self.gridStack = $(self.$el).find('.custom-grid-stack').gridstack({
                 float: false,
                 handle:'.drag-handle',
                 resizable: {
@@ -49,7 +49,22 @@ define([
                 acceptWidgets:'label',
                 width: 24
             }).data('gridstack');
+            self.$el.find('.fa-plus').on('click',function() {
+                self.add();
+            });
 
+            self.$el.on('dragstart',function(event,ui) {
+                self.$el.find('.grid-stack-item').on('drag',function(event,ui) {
+                    $('.custom-grid-stack').addClass('show-borders');
+                });
+            });
+            
+            self.$el.on('mouseenter','.grid-stack-item',function() {
+                $(this).find('.flip-button').show();
+            });
+            self.$el.on('mouseleave','.grid-stack-item', function() {
+                $(this).find('.flip-button').hide();
+            });
             self.$el.on('drag','.grid-stack-item',function(event,ui) {
                 if($(ui.drag).find('.brush').length == 0) {
                     $('.custom-grid-stack').addClass('show-borders');
@@ -177,8 +192,8 @@ define([
             var itemAttr = ifNull(cfg['itemAttr'],{});
             var widgetTemplate = contrail.getTemplate4Id('gridstack-widget-template');
             var currElem = $(widgetTemplate(itemAttr)).attr('data-gs-height',2);
-            var defaultWidth = ifNull(self.gridAttr['defaultWidth'],1);
-            var defaultHeight = ifNull(self.gridAttr['defaultHeight'],1)*self.CELL_HEIGHT_MULTIPLER;
+            var defaultWidth = ifNull(self.gridAttr['widthMultiplier'],1);
+            var defaultHeight = ifNull(self.gridAttr['heightMultiplier'],1)*self.CELL_HEIGHT_MULTIPLER;
             var widgetCfg = cfg['widgetCfg'];
             var widgetCnt = self.widgets.length;
             $(currElem).attr('data-widget-id',widgetCfg['id']);
@@ -214,6 +229,68 @@ define([
                 region = "Default"
             }
             //if there exists a mapping of modelId in widgetConfigManager.modelInstMap, use it
+
+            /*$(currElem).find('.widget-dropdown').contrailDropdown({
+                dataTextField: "name",
+                dataValueField: "value",
+                dropdownCssClass: 'min-width-150',
+                defaultValueId: 0,
+                data: _.map(widgetConfigManager.getWidgetList(),function(val,idx) {
+                    return {
+                        name: val['val'],
+                        value: val['id']
+                    };
+                }),
+                change: function(e) {
+                    //Remove the current widget
+                    var currView = $(currElem).find('.item-content').data('ContrailView');
+                    if(currView != null)
+                    currView.destroy();
+                    $(currElem).find('.item-content').empty();
+                    self.renderWidget({widgetCfg:{id:e.val}},currElem);
+                }
+            });*/
+
+            $(currElem).find('.widget-dropdown').select2({
+                data: widgetConfigManager.getWidgetList(),
+                change: function(e) {
+                }
+            });
+            $(currElem).find('.widget-dropdown').on('change',function(e) {
+                //Remove the current widget
+                var currView = $(currElem).find('.item-content').data('ContrailView');
+                if(currView != null)
+                currView.destroy();
+                $(currElem).find('.item-content').empty();
+                self.renderWidget({widgetCfg:{id:e.val}},currElem);
+            });
+
+            //Listener for flipping widget
+            $(currElem).find('.flip-button').on('click',function() {
+                //Add transform-3d property
+                $(currElem).find('.flip').css("transform-style", "preserve-3d");
+                $(currElem).find('.flip').css("transform", "rotateX(180deg)");
+            });
+            $(currElem).find('.btn-widget-update').on('click',function() {
+                $(this).blur();
+                $(currElem).find('.flip').css("transform-style", "");
+                $(currElem).find('.flip').css("transform", "");
+            });
+            $(currElem).find('.btn-widget-cancel').on('click',function() {
+                $(this).blur();
+                $(currElem).find('.flip').css("transform-style", "");
+                $(currElem).find('.flip').css("transform", "");
+            });
+            //Listener for removing widgets
+            $(currElem).find('.fa-remove').on('click',function() {
+                self.gridStack.removeWidget($(currElem));
+            });
+
+            self.widgets.push(currElem);
+            self.renderWidget(cfg,currElem);
+        },
+        getModelForCfg: function(cfg,options) {
+            //If there exists a mapping of modelId in widgetConfigManager.modelInstMap, use it
             //Maintain a mapping of cacheId vs contrailListModel and if found,return that
             var cachedModelObj = cowu.getValueByJsonPath(widgetConfigManager.modelInstMap,region + ';' + modelId);
             var isCacheExpired = true;
@@ -227,13 +304,78 @@ define([
                 }
             }
             if(!isCacheExpired) {
-                model = cowu.getValueByJsonPath(widgetConfigManager.modelInstMap,region + ';' + modelId+ ';model');
-            } else if(cowu.getValueByJsonPath(cfg,'modelCfg;source','').match(/STATTABLE|LOG|OBJECT/)) {
-                model = new ContrailListModel(cowu.getStatsModelConfig(modelCfg['config']));
-            } else if(cowu.getValueByJsonPath(cfg,'modelCfg;listModel','') != '') {
-                model = modelCfg['listModel'];
-            } else if(cowu.getValueByJsonPath(cfg,'modelCfg;_type') != 'contrailListModel' && modelCfg != null) {
-                model = new ContrailListModel(modelCfg['config']);
+                model = widgetConfigManager.modelInstMap[modelId]['model'];
+            } else if(cowu.getValueByJsonPath(cfg,'source','').match(/STATTABLE|LOG|OBJECT/)) {
+                if(options['needContrailListModel'] == true) {
+                    model = cowu.fetchStatsListModel(cfg['config']);
+                } else {
+                    BbCollection = Backbone.Collection.extend({});
+                    BbModel = Backbone.Model.extend({
+                        defaults: {
+                            type: cfg['type'],
+                            data: []
+                        },
+                        isRequestInProgress: function() {
+                            if(model.fetched == false) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        },
+                        getItems: function() {
+                            return this.get('data');
+                        },
+                        initialize: function(options) {
+                            this.cfg = options['cfg'];
+                        },
+                        sync: function(method,model,options) {
+                            var defObj;
+                            if(method == "read") {
+                                defObj = cowu.fetchStatsListModel(this.cfg);
+                            }
+                            defObj.done(function(data) {
+                                model.fetched = true;
+                                options['success'](data); 
+                            });
+                        },
+                        parse: function(data) {
+                            var self = this;
+                            this.set({data: data});
+                        }
+                    });
+                    bbModelInst = new BbModel({
+                        cfg:cfg['config']
+                    });
+                    bbModelInst.fetch();
+                    model = bbModelInst;
+                }
+            } else if(cowu.getValueByJsonPath(cfg,'listModel','') != '') {
+                model = cfg['listModel'];
+            } else if(cowu.getValueByJsonPath(cfg,'_type') != 'contrailListModel' && cfg != null) {
+                model = new ContrailListModel(cfg['config']);
+            }
+            function updateCache() {
+                if(isCacheExpired && modelId != null) {
+                    widgetConfigManager.modelInstMap[modelId] = {
+                        model: model,
+                        time: _.now()
+                    };
+                }
+            }
+            // if(defObj != null) {
+            //     defObj.done(function(response) {
+            //         listModel.setItems(response);
+            //         updateCache();
+            //     });
+            // } else {
+            //     updateCache();
+            // }
+            return model;
+        },
+        renderWidget: function(cfg,currElem) {
+            //While instantiating a new empty widget,cfg will be empty
+            if(typeof(cfg) == 'undefined') {
+                return;
             }
             if(isCacheExpired && modelId != null) {
                 widgetConfigManager.modelInstMap[region] = {};
@@ -242,7 +384,21 @@ define([
                     time: _.now()
                 };
             }
+            $(currElem).attr('data-widget-id',widgetCfg['id']);
+            $(currElem).data('data-cfg', cfg);
+            var self = this;
+            //Add cache Config
             var viewType = cowu.getValueByJsonPath(cfg,'viewCfg;view','');
+            var needContrailListModel = false;
+            if(viewType.match(/GridView/)) {
+                needContrailListModel = true;
+            }
+            model = self.getModelForCfg(cfg['modelCfg'],{needContrailListModel: needContrailListModel});
+            if(viewType.match(/eventDropsView/)) {
+                $(currElem).find('header').addClass('drag-handle');
+            } else {
+                $(currElem).find('.item-content').addClass('drag-handle');
+            }
             cfg['viewCfg'] = $.extend(true,{},chUtils.getDefaultViewConfig(viewType),cfg['viewCfg']);
             self.renderView4Config($(currElem).find('.item-content'), model, cfg['viewCfg'], null, null, null, function () {
                 if(viewType.match(/eventDropsView/) || viewType.match(/VRouterCrossFiltersView/)) {

@@ -4,7 +4,7 @@
 
 define([
     'underscore',
-    'core-basedir/js/views/ChartView',
+    'chart-view',
     'core-basedir/js/models/LineBarWithFocusChartModel',
     'contrail-list-model',
     'nv.d3',
@@ -47,6 +47,10 @@ define([
 
             self.renderChart(selector, viewConfig, self.model);
 
+            self.viewConfig = viewConfig;
+            ChartView.prototype.bindListeners.call(self);
+
+            /*
             if (self.model !== null) {
                 if (self.model.loadedFromCache || !(self.model.isRequestInProgress())) {
                     self.updateChart(selector, viewConfig, self.model);
@@ -74,7 +78,7 @@ define([
 
                 $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);
 
-            }
+            }*/
         },
 
         renderChart: function (selector, viewConfig, chartDataModel) {
@@ -122,7 +126,7 @@ define([
             }
 
             nv.addGraph(function () {
-                self.resizeFn = _.debounce(function () {
+                /*self.resizeFn = _.debounce(function () {
                     chUtils.updateChartOnResize($(self.$el), self.chartViewModel);
                 }, 500);
                 nv.utils.windowResize(self.resizeFn);
@@ -139,7 +143,7 @@ define([
                 if (($(selector).is(':visible'))) {
                     setData2Chart(self, chartViewConfig, chartDataModel, chartViewModel);
                 }
-                updateDataStatusMessage(self, chartViewConfig, chartDataModel);
+                updateDataStatusMessage(self, chartViewConfig, chartDataModel);*/
                 return chartViewModel;
             });
 
@@ -178,10 +182,10 @@ define([
         },
 
 
-        resize: function () {
+        /*resize: function () {
             var self = this;
             _.isFunction(self.resizeFn) && self.resizeFn();
-        },
+        },*/
 
         getChartViewConfig: function(chartData, chartOptions) {
             var chartViewConfig = {};

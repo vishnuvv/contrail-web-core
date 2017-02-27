@@ -116,6 +116,7 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
     if(env == "dev") {
         var devAliasMap = {
             //Start - Core-bundle aliases
+            'toolbar-view'                : coreWebDir + '/js/views/ToolbarView',
             'core-utils'                  : coreWebDir + '/js/common/core.utils',
             'core-hash-utils'             : coreWebDir + '/js/common/core.hash.utils',
             'core-constants'              : coreWebDir + '/js/common/core.constants',
@@ -128,6 +129,7 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
             'contrail-remote-data-handler': coreWebDir + '/js/handlers/ContrailRemoteDataHandler',
             'cf-datasource'               : coreWebDir + '/js/common/cf.datasource',
             'contrail-view'               : coreWebDir + '/js/views/ContrailView',
+            'chart-view'                  : coreWebDir + '/js/views/ChartView',
             'contrail-model'              : coreWebDir + '/js/models/ContrailModel',
             'contrail-view-model'         : coreWebDir + '/js/models/ContrailViewModel',
             'contrail-list-model'         : coreWebDir + '/js/models/ContrailListModel',
@@ -214,7 +216,8 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
             'global-controller-viewconfig': 'empty:',
             'security-dashboard-viewconfig': 'empty:',
             'core-alarm-utils'            :  coreWebDir + '/js/common/core.alarms.utils',
-            'alarms-viewconfig'           : coreWebDir + '/js/views/alarms/alarms.viewconfig'
+            'alarms-viewconfig'           : coreWebDir + '/js/views/alarms/alarms.viewconfig',
+            'multi-chart-view'            : coreBaseDir + '/js/views/nvd3/MultiChartView'
         };
         //Merge common (for both prod & dev) alias
         for(var currAlias in devAliasMap)
@@ -1273,6 +1276,13 @@ if (typeof document !== 'undefined' && document) {
                                 require(['contrail-charts'],function(contrailCharts) { coCharts = contrailCharts;});
                                 require(['lodashv4'],function(lodashv4) { lodashv4 = lodashv4;});
                                 layoutHandler.load(menuXML);
+                                //Initialize toolbar
+                                require(['toolbar-view'],function(ToolbarView) {
+                                    new ToolbarView({
+                                        el: $('#toolbar'),
+                                        viewCfg: ctwvc.getToolbarViewConfig()
+                                    });
+                                });
                         });
                     });
                 });

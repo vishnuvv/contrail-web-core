@@ -8,7 +8,7 @@ define([
     var CoreConstants = function () {
         var self = this;
 
-        this.INFRA_MODEL_CACHE_TIMEOUT = 5 * 60;
+        this.INFRA_MODEL_CACHE_TIMEOUT = 0 * 60;
         this.ENABLE_CAROUSEL = false;
         this.THROTTLE_RESIZE_EVENT_TIME = 500;
 
@@ -307,9 +307,13 @@ define([
         this.COLOR_PALETTE = 'color_palette';
         this.CHART_SETTINGS = 'chart_settings';
         this.CONTAINER_SETTINGS = 'container_settings';
+        this.CONTAINER_SETTINGS_CLASS = 'fa-bar-chart-o';
+        this.FULL_SCREEN = 'full_screen';
+        this.ADD_WIDGET = 'add_widget';
         this.COLOR_PALETTE_CLASS = 'contrailGlyph-palette';
         this.CHART_SETTINGS_CLASS = 'fa-bar-chart-o';
-        this.CONTAINER_SETTINGS_CLASS = 'fa-bar-chart-o';
+        this.FULLSCREEN_CLASS = 'fa-arrows-alt';
+        this.ADD_WIDGET_CLASS = 'fa-plus';
         this.SETTINGS_MODAL_ID = 'settings_modal';
         this.SETTINGS_PREFIX_ID = 'toolbar_settings';
         this.CHART_MENU_CLASS= 'contrailGlyph-menu';

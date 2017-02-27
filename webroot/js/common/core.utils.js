@@ -9,9 +9,9 @@ define([
     'lodash',
     "core-constants",
     'contrail-list-model',
-    'core-alarm-parsers'
-    
-], function (_, moment, Handlebars, lodash, cowc, ContrailListModel, CoreAlarmsParsers) {
+    'core-alarm-parsers',
+    'node-color-mapping'
+], function (_, moment, Handlebars, lodash, cowc,ContrailListModel, CoreAlarmsParsers, NodeColorMapping) {
     var serializer = new XMLSerializer(),
     domParser = new DOMParser();
 
@@ -316,14 +316,26 @@ define([
         };
 
         this.getRequestState4Model = function(model, data, checkEmptyDataCB) {
-            if (model.isRequestInProgress()) {
-                return cowc.DATA_REQUEST_STATE_FETCHING;
-            } else if (model.error === true) {
-                return cowc.DATA_REQUEST_STATE_ERROR;
-            } else if (model.empty === true || (contrail.checkIfFunction(checkEmptyDataCB) && checkEmptyDataCB(data))) {
-                return cowc.DATA_REQUEST_STATE_SUCCESS_EMPTY;
+            if(model instanceof Backbone.Model) {
+                if(model.fetched == false) {
+                    return cowc.DATA_REQUEST_STATE_FETCHING;
+                } else if(model.error == true) {
+                    return cowc.DATA_REQUEST_STATE_ERROR;
+                } else if(model.empty === true || (contrail.checkIfFunction(checkEmptyDataCB) && checkEmptyDataCB(data))) {
+                    return cowc.DATA_REQUEST_STATE_SUCCESS_EMPTY;
+                } else {
+                    return cowc.DATA_REQUEST_STATE_SUCCESS_NOT_EMPTY
+                }
             } else {
-                return cowc.DATA_REQUEST_STATE_SUCCESS_NOT_EMPTY
+                if (model.isRequestInProgress()) {
+                    return cowc.DATA_REQUEST_STATE_FETCHING;
+                } else if (model.error === true) {
+                    return cowc.DATA_REQUEST_STATE_ERROR;
+                } else if (model.empty === true || (contrail.checkIfFunction(checkEmptyDataCB) && checkEmptyDataCB(data))) {
+                    return cowc.DATA_REQUEST_STATE_SUCCESS_EMPTY;
+                } else {
+                    return cowc.DATA_REQUEST_STATE_SUCCESS_NOT_EMPTY
+                }
             }
         };
 
@@ -704,6 +716,13 @@ define([
                     'core-basedir/js/views/GridStackView' : 'gs-view'
                 }
                 viewPath = ifNull(pathMapping[viewPath],viewPath);
+
+                var viewMapping = {
+                    'MultiChartView' : 'multi-chart-view'
+                }
+                if(viewMapping[viewName] != null) {
+                    viewPath = viewMapping[viewName];
+                }
 
                 onAllViewsRenderCompleteCB = renderConfig['onAllViewsRenderCompleteCB'];
                 onAllRenderCompleteCB = renderConfig['onAllRenderCompleteCB'];
@@ -1847,8 +1866,12 @@ define([
                     groupByMap = _.sortBy(groupByMap, 'key'),
                     groupByMapLen = groupByMap.length,
                     groupByKeys = _.pluck(groupByMap, 'key');
-                if (colors != null && typeof colors == 'function') {
-                    colors = colors(groupByKeys, options.resetColor);
+                if ((options.type != null) || (colors != null && typeof colors == 'function')) {
+                    if(options.type != null) {
+                        colors = NodeColorMapping.getNodeColorMap(groupByKeys,options.resetColor,options.type);
+                    } else {
+                        colors = colors(groupByKeys, options.resetColor);
+                    }
                 }
                 for (var i = 0; i < groupByMapLen; i++) {
                     parsedData.push({
@@ -2138,7 +2161,8 @@ define([
                     key: obj['key'],
                     values: [],
                     bar: true,
-                    color: colors[obj['key']] != null ? colors[obj['key']] : cowc.D3_COLOR_CATEGORY5[1]
+                    // color: colors[obj['key']] != null ? colors[obj['key']] : cowc.D3_COLOR_CATEGORY5[1]
+                    color: cowc.D3_COLOR_CATEGORY5[1]
                 };
                 chartData.push(nodeMap[obj['key']]);
             });
@@ -2333,7 +2357,6 @@ define([
                 self.updateLayoutPreference(elementId, preferences);
                 localStorage.removeItem(elementId);
             }
-
             if (localStorage.getItem(cowc.LAYOUT_PREFERENCE) != null) {
                 return _.result(JSON.parse(localStorage.getItem(cowc.LAYOUT_PREFERENCE)), elementId);
             }
@@ -2352,12 +2375,35 @@ define([
             }
             localStorage.setItem(cowc.LAYOUT_PREFERENCE, JSON.stringify(layoutPref));
         }
+        // toggle full screen
+        this.toggleFullScreen = function() {
+            if (!document.fullscreenElement &&    // alternative standard method
+                    !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                }
+            } else {
+                if (document.cancelFullScreen) {
+                    document.cancelFullScreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitCancelFullScreen) {
+                    document.webkitCancelFullScreen();
+                }
+            }
+        }
         /**
          * Takes input as an array of configs.
          * The first one is considered as primary req and the rest are added as
          * vl config
          */
-        self.getStatsModelConfig = function (config,timeRange) {
+        self.fetchStatsListModel = function (config, timeRange) {
+            var listModel = new ContrailListModel({data:[]});
+            var defObj = $.Deferred();
             if (!_.isArray(config)) {
                 config = [config];
             }
@@ -2421,6 +2467,31 @@ define([
                     if (statsConfig['type'] != null && statsConfig['type'] == "non-stats-query"){
                         primaryRemoteConfig = remoteConfig;
                     } else {
+                        whereDefObj.done(function() {
+                            $.ajax({
+                                url : "/api/qe/query/" + _.result(postData,'formModelAttrs.table_name'),
+                                type: 'POST',
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                data: JSON.stringify(postData)
+                            }).done(function(response) {
+                                if(typeof(statsConfig['parser']) == 'function') {
+                                    var data = statsConfig['parser'](response);
+                                    listModel.setData(data);
+                                    defObj.resolve(data);
+                                } else {
+                                    var data = getValueByJsonPath(response,'data',[]);
+                                    //Copying queryJSON property from request to response
+                                    if (response['queryJSON'] != null) {
+                                        data = _.map(data, function(obj) { 
+                                            return _.extend({}, obj, {queryJSON: response['queryJSON']});
+                                        });
+                                    }
+                                    defObj.resolve(data);
+                                    listModel.setData(data);
+                                }
+                            });
+                        });
                         var remoteObj = {
                             ajaxConfig : {
                                 url : "/api/qe/query",
@@ -2502,7 +2573,7 @@ define([
                     vlRemoteList.push (vlRemoteObj);
                 }
             }
-            var listModelConfig =  {
+            /*var listModelConfig =  {
                 remote : primaryRemoteConfig,
                 cacheConfig:{
                     cacheTimeout: 5*60*1000
@@ -2514,8 +2585,9 @@ define([
             }
             if (statsConfig['modelId'] != null) {
                 listModelConfig['cacheConfig']['ucid'] = statsConfig['modelId'];
-            }
-            return listModelConfig;
+            }*/
+            return defObj;
+            return listModel;
         };
 
         self.modifyTimeRangeInRemoteConfig = function (remoteConfig,timeExtent) {
@@ -2797,7 +2869,8 @@ define([
                           }
                         }
                     }
-                }else if(typeof checkArrayContainsObject(updatedObj[i]) == 'object' && checkArrayContainsObject(updatedObj[i]) !== null && checkArrayContainsObject(updatedObj[i]).constructor !== Array){
+                }else if(typeof checkArrayContainsObject(updatedObj[i]) == 'object' && checkArrayContainsObject(updatedObj[i]) !== null 
+                    && checkArrayContainsObject(updatedObj[i]).constructor !== Array){
                     for(var j = 0; j < updatedObj[i].length; j++){
                             if(oldJson !== undefined && oldJson !== null){
                                 if(oldJson[i] !== undefined){

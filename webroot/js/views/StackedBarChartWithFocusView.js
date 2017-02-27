@@ -5,7 +5,7 @@
 
 define([
     'underscore',
-    'core-basedir/js/views/ChartView',
+    'chart-view',
     'contrail-list-model',
     'legend-view',
     'core-constants',
@@ -27,6 +27,9 @@ define([
             self.renderChart($(self.$el), vc, self.model);
         },
 
+        initialize: function() {
+
+        },
         render: function () {
             var viewConfig = this.attributes.viewConfig,
                 ajaxConfig = viewConfig['ajaxConfig'],
@@ -66,17 +69,29 @@ define([
             if (self.model === null && viewConfig['modelConfig'] != null) {
                 self.model = new ContrailListModel(viewConfig['modelConfig']);
             }
+            self.tooltipDiv = d3.select("body").append("div")
+                            .attr("class", "stack-bar-chart-tooltip")
+                            .style("opacity", 0);
+        
 
-            if (self.model !== null) {
-                if(cfDataSource == null) {
+            self.cfDataSource = viewConfig.cfDataSource;
+            ChartView.prototype.bindListeners.call(self);
+            self.renderChart($(self.$el), viewConfig, self.model);
+
+            /*if(self.model instanceof Backbone.Model) {
+                self.model.on("change",function() {
                     self.renderChart($(self.$el), viewConfig, self.model);
-                } else if(self.model.loadedFromCache == true) {
-                    self.renderChart($(self.$el), viewConfig, self.model);
+                });
+            } else {
+                cfDataSource = viewConfig.cfDataSource;
+                if (self.model === null && viewConfig['modelConfig'] != null) {
+                    self.model = new ContrailListModel(viewConfig['modelConfig']);
                 }
 
-                if(cfDataSource != null) {
-                    cfDataSource.addCallBack('updateChart',function(data) {
+                if (self.model !== null) {
+                    if(cfDataSource == null) {
                         self.renderChart($(self.$el), viewConfig, self.model);
+<<<<<<< HEAD
                     });
                     //Need to render if the callbacks have already kicked 
                     //in before coming here
@@ -86,22 +101,40 @@ define([
                         self.renderChart($(self.$el), viewConfig, self.model);
                     }
                     self.model.onAllRequestsComplete.subscribe(function () {
+=======
+                    } else if(self.model.loadedFromCache == true) {
+>>>>>>> 69b44009... Backup
                         self.renderChart($(self.$el), viewConfig, self.model);
-                    });
-                }
+                    }
 
+<<<<<<< HEAD
                 if (viewConfig.loadChartInChunks) {
                     self.model.onDataUpdate.subscribe(function () {
                         self.renderChart($(self.$el), viewConfig, self.model);
                     });
                 }
+=======
+                    if(cfDataSource != null) {
+                        cfDataSource.addCallBack('updateChart',function(data) {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    } else {
+                        self.model.onAllRequestsComplete.subscribe(function () {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    }
+>>>>>>> 69b44009... Backup
 
-                $($(self.$el)).bind("refresh", function () {
-                    self.renderChart($(self.$el), viewConfig, self.model);
-                });
-                var prevDimensions = chUtils.getDimensionsObj(self.$el);
+                    // if (viewConfig.loadChartInChunks) {
+                        self.model.onDataUpdate.subscribe(function () {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    // }
+                }
+            }*/
 
-                self.resizeFunction = _.debounce(function (e, refreshSource) {
+
+                /*self.resizeFunction = _.debounce(function (e, refreshSource) {
                    $('.stack-bar-chart-tooltip').remove();
                     if(!chUtils.isReRenderRequired({
                         prevDimensions:prevDimensions,
@@ -114,7 +147,26 @@ define([
 
                 window.addEventListener('resize',function(e){self.resizeFunction(e,'windowResize')});
                 $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);
-            }
+            }*/
+
+            /*$($(self.$el)).bind("refresh", function () {
+                self.renderChart($(self.$el), viewConfig, self.model);
+            });
+            var prevDimensions = chUtils.getDimensionsObj(self.$el);
+
+            self.resizeFunction = _.debounce(function (e) {
+                $('.stack-bar-chart-tooltip').remove();
+                if(!chUtils.isReRenderRequired({
+                    prevDimensions:prevDimensions,
+                    elem:self.$el})) {
+                    return;
+                }
+                prevDimensions = chUtils.getDimensionsObj(self.$el);
+                self.renderChart($(self.$el), viewConfig, self.model);
+            },cowc.THROTTLE_RESIZE_EVENT_TIME);
+
+            window.addEventListener('resize',self.resizeFunction);
+            $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);*/
         },
 
         renderChart: function (selector, viewConfig, chartViewModel, refreshSource) {
@@ -122,7 +174,7 @@ define([
                 return;
             }
             var self = this;
-            var data = chartViewModel.getFilteredItems();
+            var data = chartViewModel.get('data');
             var chartTemplate = contrail.getTemplate4Id('core-stacked-bar-chart-template');
             var widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ?
                     viewConfig.widgetConfig : null;
@@ -178,6 +230,7 @@ define([
             }
             var hideTicks = getValueByJsonPath(chartOptions,'hideTicks',false);
             self.grouped = getValueByJsonPath(chartOptions,'grouped',false);
+
             //settings
             if(typeof chartOptions["colors"] != 'function' && chartOptions['applySettings'] != false) {
                 chartOptions["colors"] = cowc.FIVE_NODE_COLOR;
@@ -299,6 +352,7 @@ define([
                             .outerTickSize(0)
                             .tickPadding(tickPadding)
                             .tickFormat((useCustomTimeFormat)? customTimeFormat: xAxisFormatter);
+                           
             var yAxis = d3.svg.axis()
                             .scale(y)
                             .orient("left")
@@ -340,7 +394,8 @@ define([
                                 .attr("transform", "rotate(-90)")
                                 .text(yAxisLabel);
             }
-// var tooltipDiv = self.tooltipDiv;
+
+            var tooltipDiv = self.tooltipDiv;
             var formatTime = d3.time.format("%e %b %X");
             if (hideTicks) {
                 $('.stacked-bar-chart-container .tick > line').css('opacity','0')
