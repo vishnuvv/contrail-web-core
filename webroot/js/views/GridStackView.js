@@ -235,14 +235,12 @@ define([
                 dataValueField: "value",
                 dropdownCssClass: 'min-width-150',
                 data: _.map(widgetConfigManager.getWidgetList(),function(val,idx) {
-                    console.info(val);
                     return {
                         name: val['val'],
                         value: val['id']
                     };
                 }),
                 change: function(e) {
-                    console.info(e,e.val);
                     //Remove the current widget
                     var currView = $(currElem).find('.item-content').data('ContrailView');
                     if(currView != null)
