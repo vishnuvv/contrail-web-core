@@ -2049,9 +2049,49 @@
 </script>
 
 <script type="text/x-handlebars-template" id="core-chart-template">
-    <div class="chart-container">
-        <svg style="height:{{height}}px;"></svg></div>
-    </div>
+    {{#if showLegend}}
+        {{#IfCompare legendPosition 'top' operator='=='}}
+            <div class="chart-container flex-1 flex-dir-column-rev {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+        {{/IfCompare}}
+        {{#IfCompare legendPosition 'bottom' operator='=='}}
+            <div class="chart-container flex-1 flex-dir-column {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+        {{/IfCompare}}
+        {{#IfCompare legendPosition 'left' operator='=='}}
+            <div class="chart-container flex-1 flex-dir-row-rev {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+        {{/IfCompare}}
+        {{#IfCompare legendPosition 'right' operator='=='}}
+            <div class="chart-container flex-1 flex-dir-row {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+        {{/IfCompare}}
+        {{#if overViewText}}
+            <div class="chart-overview-wrapper flex flex-dir-row flex-5">
+                <div class="overview-text flex-1"></div>
+                <div class="main-chart flex-5">
+                    <svg class="nvd3-svg"></svg>
+                </div>
+            </div>
+        {{else}}
+            <div class="main-chart flex-5">
+                <svg class="nvd3-svg"></svg>
+            </div>
+        {{/if}}
+            <div class="legend flex-1"></div>
+        </div>
+    {{else}}
+        {{#if overViewText}}
+            <div class="chart-container flex-1 flex-dir-row {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+                <div class="overview-text flex-1"></div>
+                <div class="main-chart flex-5">
+                    <svg class="nvd3-svg"></svg>
+                </div>
+            </div>
+        {{else}}
+            <div class="chart-container flex-1 {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+                <div class="main-chart flex-1">
+                    <svg class="nvd3-svg" {{#IfCompare height null operator='!=' style='height:height px'}}{{/IfCompare}}></svg>    
+                </div>
+            </div>
+        {{/if}}        
+    {{/if}}
 </script>
 
 <script type="text/x-handlebars-template" id="core-zoomed-scatter-chart-control-panel-legend-template">
