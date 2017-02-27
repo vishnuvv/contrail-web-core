@@ -107,19 +107,20 @@ define([
             }
             viewConfig = self.viewConfig;
             var chartOptionsForSize = ChartView.prototype.getChartOptionsFromDimension(selector);
-            var chartTemplate = contrail.getTemplate4Id('core-stacked-area-chart-template');
             var widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ?
                     viewConfig.widgetConfig : null;
             var chartOptions = getValueByJsonPath(viewConfig, 'chartOptions', {});
             chartOptions = $.extend(true, {}, chartOptions, chartOptionsForSize);
-            var totalHeight = ($(selector).closest('.custom-grid-stack-item').length > 0 )?
-                    $(selector).closest('.custom-grid-stack-item').height():
-                        cowu.getValueByJsonPath(chartOptions, 'height', 300);
+            chartOptions['cssClass'] = chartOptions['cssClass'] != null ? contrail.format('{0} {1}', chartOptions['cssClass'], 'stacked-area-chart-container') :
+                'stacked-area-chart-container' ;
+            ChartView.prototype.appendTemplate(selector, chartOptions);
 
-            var totalWidth = $(selector).find('.stacked-area-chart-container').width();
+            var totalWidth = $(selector).find('.main-chart').width();
+            var totalHeight = $(selector).find('.main-chart').height();
             var margin =  cowu.getValueByJsonPath(chartOptions, 'margin', { top: 20, right: 20, bottom: 20, left: 20 });
             var showLegend = getValueByJsonPath(chartOptions,'showLegend', true);
-            var showControls = getValueByJsonPath(chartOptions,'showControls',true);
+            var legendPosition = cowu.getValueByJsonPath(chartOptions, 'legendPosition', 'top');
+            var overViewText = cowu.getValueByJsonPath(chartOptions, 'overViewText', false);            
             var title = getValueByJsonPath(chartOptions,'title',null);
             var xAxisLabel = getValueByJsonPath(chartOptions,'xAxisLabel',"Time");
             var yAxisLabel = getValueByJsonPath(chartOptions,'yAxisLabel',"Count");
@@ -138,13 +139,10 @@ define([
             if (!showXAxis) {
                 // Bottom we are subtracting only 20 because there may be overview chart in bottom for which we may need
                 // the bottom margin
-                margin['bottom'] = margin['bottom'] - 20;
+                margin['bottom'] -= 20;
             }
             if (!showYAxis) {
                 margin['right'] = 0;
-            }
-            if (showLegend) {
-                totalHeight -= 30; //we can make dynamic by getting the legend div height
             }
             var yAxisFormatter = getValueByJsonPath(chartOptions,'yAxisFormatter',function (value) {
                 return cowu.numberFormatter(value);
@@ -186,23 +184,19 @@ define([
 
             //empty and add the svg
             d3.select($(selector).find('.stacked-area-chart-container')[0]).empty();
-            $(selector).html(chartTemplate);
             if (widgetConfig !== null) {
                 this.renderView4Config($(selector).
                         find('.stacked-area-chart-container'), null, widgetConfig,
                         null, null, null);
             }
-            //set the svg width and height
-            var svg = d3.select($(selector).find('.stacked-area-chart-container')[0])
-                        .append("svg")
-                        .attr("width", width + margin.left + margin.right)
-                        .attr("height", height + margin.top + margin.bottom);
+            
+            var svg = d3.select($(selector).find('svg')[0])
 
             nv.addGraph(function() {
-              var chart = nv.models.stackedAreaChart()
+              var chart = nv.models.multiBarChart()
                             .x(function(d) { return d['x'] })   //We can modify the data accessor functions...
                             .y(function(d) { return d['y'] })   //...in case your data is formatted differently.
-                            .useInteractiveGuideline(true)    //Tooltips which show all data points. Very nice!
+                            //.useInteractiveGuideline(true)    //Tooltips which show all data points. Very nice!
                             .showControls(false)       //Allow user to choose 'Stacked', 'Stream', 'Expanded' mode.
                             .showLegend(false)
                             .clipEdge(true);
@@ -230,7 +224,7 @@ define([
                       chart.yDomain(domain);
               }
               //initialize the chart in the svg element
-              chart.interpolate("monotone");
+              //chart.interpolate("monotone");
               svg.datum(data)
                 .call(chart)
 
@@ -256,64 +250,16 @@ define([
                                   .attr("transform", "rotate(-90)")
                                   .text(yAxisLabel);
               }
-              chart.stacked.dispatch.on("areaClick.toggle", null);
+              //chart.stacked.dispatch.on("areaClick.toggle", null);
               //Use the tooltip formatter if present
-               if(chartOptions.tooltipFn) {
+               /*if(chartOptions.tooltipFn) {
                    chart.interactiveLayer.tooltip.contentGenerator(function (obj) {
-                                return chartOptions.tooltipFn(obj,chartOptions, yAxisFormatter);
-                            })
-                        }
-              //Add the modified legends
-              showControls=false;
+                        return chartOptions.tooltipFn(obj,chartOptions, yAxisFormatter);
+                    })
+               }*/
               //if (showControls == true || showLegend == true) {
-                  var colorsMap = self.colors,
-                      nodeLegend = [],
-                      legendData = [];
-                  $.each(colorsMap, function (key, value) {
-                      nodeLegend.push({
-                          name: key,
-                          color: value
-                      });
-                  });
-                  legendData.push({
-                      label: title,
-                      legend: nodeLegend
-                  });
-                  if (failureCheckFn != null && typeof failureCheckFn == 'function') {
-                      legendData.push({
-                          label: failureLabel,
-                          legend: [{
-                              name: failureLabel,
-                              color: cowu.getValueByJsonPath(chartOptions, 'failureColor', cowc.FAILURE_COLOR),
-                          }]
-                      });
-                  }
-                  var legendView = new LegendView({
-                      el: $(selector),
-                      viewConfig: {
-                          showControls: showControls,
-                          controlsData: [{label: 'Stacked', cssClass: 'stacked filled'},
-                              {label: 'Grouped', cssClass: 'grouped'}],
-                          showLegend: showLegend,
-                          legendData: legendData
-                      }
-                  });
-                  legendView.render();
-                  //Bind the click handlers to legend
-                  $(selector).find('.custom-chart-legend')
-                      .find('div.square, div.circle')
-                      .on('click', function (e) {
-                          if ($(e.target).hasClass('square') && !$(e.target).hasClass('filled')) {
-                              $(selector).find('div.square').toggleClass('filled');
-                          } else if ($(e.target).hasClass('circle') && !$(e.target).hasClass('filled')) {
-                              $(selector).find('div.circle').toggleClass('filled');
-                          }
-                          if ($(e.target).hasClass('grouped')) {
-                              transitionGrouped(self);
-                          } else if ($(e.target).hasClass('stacked')) {
-                              transitionStacked(self);
-                          }
-                      });
+              ChartView.prototype.renderLegend(selector, chartOptions, self.getLegendViewConfig(chartOptions));
+
               //}
 //              nv.utils.windowResize(chart.update); Not using since we need to do other stuff on resize
               $(selector).data('chart', chart);
@@ -366,6 +312,39 @@ define([
                 tooltipElementObj.find('.popover-content').append(tooltipElementContentObj);
                 return $(tooltipElementObj).wrapAll('<div>').parent().html();
             }
+        },
+        getLegendViewConfig: function (chartOptions) {
+            var self = this,
+                failureCheckFn = cowu.getValueByJsonPath(chartOptions,'failureCheckFn',null),
+                failureLabel = getValueByJsonPath(chartOptions,'failureLabel', cowc.FAILURE_LABEL),
+                showLegend = getValueByJsonPath(chartOptions,'showLegend', true),
+                title = getValueByJsonPath(chartOptions,'title',null);
+            var colorsMap = self.colors,
+                nodeLegend = [],
+                legendData = [];
+            $.each(colorsMap, function (key, value) {
+                nodeLegend.push({
+                    name: key,
+                    color: value
+                });
+            });
+            legendData.push({
+                label: title,
+                legend: nodeLegend
+            });
+            if (failureCheckFn != null && typeof failureCheckFn == 'function') {
+                legendData.push({
+                    label: failureLabel,
+                    legend: [{
+                        name: failureLabel,
+                        color: cowu.getValueByJsonPath(chartOptions, 'failureColor', cowc.FAILURE_COLOR),
+                    }]
+                });
+            }
+            return {
+                showLegend: showLegend,
+                legendData: legendData
+            };
         },
         destroy : function() {
             var self = this;
