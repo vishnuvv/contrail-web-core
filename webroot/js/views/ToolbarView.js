@@ -43,8 +43,16 @@ define([
                 }
                 self.removeSelectedClass()
             });
+            // $('i.fa.fa-arrows-alt').on('click',function() {
+            //     $('#content-container').fullScreen(true);
+            // });
             $(eleSettings).on('toolbarItemClick', function(event, item){
-                self.renderOnClick($(item).attr('id'));
+                if($(item).attr('id') == cowc.FULL_SCREEN) {
+                    $('.main-content-inner').fullScreen(true);
+                    // $('#content-container').fullScreen(true);
+                } else {
+                    self.renderOnClick($(item).attr('id'));
+                }
             });
             $($("#toolbar_section").parent()).addClass(eleSettingsParentStyle);
         },
@@ -123,6 +131,9 @@ define([
             switch(id){
                 case cowc.COLOR_PALETTE :
                     classStyle = cowc.COLOR_PALETTE_CLASS;
+                    break;
+                case cowc.FULL_SCREEN :
+                    classStyle = cowc.FULLSCREEN_CLASS;
                     break;
                 case cowc.CHART_SETTINGS :
                     classStyle = cowc.CHART_SETTINGS_CLASS;

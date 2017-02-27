@@ -19,6 +19,8 @@ define([
         'jquery.panzoom',
         'jquery.event.drag',
         'jquery.datetimepicker',
+        'jquery.flip',
+        'jquery.fullscreen',
 
         'slick.grid',
         'slick.checkboxselectcolumn',

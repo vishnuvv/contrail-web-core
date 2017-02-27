@@ -162,6 +162,9 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
             'jquery.panzoom'            : coreWebDir + "/assets/jquery/js/jquery.panzoom.min",
             'jquery.event.drag'         : coreWebDir + "/assets/slickgrid/js/jquery.event.drag-2.2",
             'jquery.datetimepicker'     : coreWebDir + "/assets/datetimepicker/js/jquery.datetimepicker",
+
+            'jquery.fullscreen'         : coreWebDir + "/assets/jquery/js/jquery.fullscreen-min",
+            'jquery.flip'               : coreWebDir + "/assets/jquery/js/jquery.flip.min",
             //End - jquery.dep.libs aliases
             //Start - thirdparty-libs aliases
             'handlebars'                : coreWebDir + "/assets/handlebars/handlebars",
