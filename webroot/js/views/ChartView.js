@@ -41,6 +41,19 @@ define([
 
             return $.extend({}, selectedWidthOptions, selectedHeightOptions);
         },
+        appendTemplate: function (selector, chartOptions) {
+            var chartTemplateId = cowu.getValueByJsonPath(chartOptions, 'chartTemplate', cowc.TMPL_CHART),
+                chartTemplate = contrail.getTemplate4Id(chartTemplateId);
+            $(selector).html(chartTemplate(chartOptions));
+        },
+        renderLegend: function (selector, chartOptions, viewConfig) {
+            var legendContainer = $(selector).find('div.legend');
+            var legendView = new chartOptions['legendView']({
+                el: $(legendContainer),
+                viewConfig: viewConfig
+            });
+            legendView.render();
+        },
         render: function () {
             var loadingSpinnerTemplate = contrail.getTemplate4Id(cowc.TMPL_LOADING_SPINNER),
                 viewConfig = this.attributes.viewConfig,

@@ -195,6 +195,8 @@ define([
                             showLegend: false,
                             showControls: false,
                             tickPadding: 8,
+                            overViewText: false,
+                            legendPosition: 'top',
                             margin: {
                                 left: 45,
                                 top: 15,
@@ -205,6 +207,7 @@ define([
                             showXMinMax: true,
                             showYMinMax: true,
                             forceY: [0, 0.01],
+                            legendView: LegendView,
                             defaultZeroLineDisplay: true,
                             tooltipFn: this.defaultLineAreaTooltipFn
                         }
@@ -224,6 +227,7 @@ define([
                             xAxisLabel: '',
                             yAxisLabel: '',
                             groupBy: 'Source',
+                            overViewText: false,
                             showXMinMax: true,
                             showYMinMax: true,
                             yField: '',
@@ -254,6 +258,7 @@ define([
                                 return d3.format('.2f')(value);
                             },
                             showLegend: false,
+                            legendPosition: 'top',
                             defaultZeroLineDisplay: true,
                             legendView: LegendView,
                             tooltipFn: this.defaultLineAreaTooltipFn
