@@ -259,7 +259,7 @@ define([
             self.widgets.push(currElem);
             self.renderWidget(cfg,currElem);
         },
-        getModelForCfg: function(cfg) {
+        getModelForCfg: function(cfg,options) {
             //If there exists a mapping of modelId in widgetConfigManager.modelInstMap, use it
             //Maintain a mapping of cacheId vs contrailListModel and if found,return that
             var modelId = cfg['modelId'];
@@ -278,7 +278,49 @@ define([
             if(!isCacheExpired) {
                 model = widgetConfigManager.modelInstMap[modelId]['model'];
             } else if(cowu.getValueByJsonPath(cfg,'source','').match(/STATTABLE|LOG|OBJECT/)) {
-                model = cowu.fetchStatsListModel(cfg['config']);
+                if(options['needContrailListModel'] == true) {
+                    model = cowu.fetchStatsListModel(cfg['config']);
+                } else {
+                    BbCollection = Backbone.Collection.extend({});
+                    BbModel = Backbone.Model.extend({
+                        defaults: {
+                            type: cfg['type'],
+                            data: []
+                        },
+                        isRequestInProgress: function() {
+                            if(model.fetched == false) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        },
+                        getItems: function() {
+                            return this.get('data');
+                        },
+                        initialize: function(options) {
+                            this.cfg = options['cfg'];
+                        },
+                        sync: function(method,model,options) {
+                            var defObj;
+                            if(method == "read") {
+                                defObj = cowu.fetchStatsListModel(this.cfg);
+                            }
+                            defObj.done(function(data) {
+                                model.fetched = true;
+                                options['success'](data); 
+                            });
+                        },
+                        parse: function(data) {
+                            var self = this;
+                            this.set({data: data});
+                        }
+                    });
+                    bbModelInst = new BbModel({
+                        cfg:cfg['config']
+                    });
+                    bbModelInst.fetch();
+                    model = bbModelInst;
+                }
             } else if(cowu.getValueByJsonPath(cfg,'listModel','') != '') {
                 model = cfg['listModel'];
             } else if(cowu.getValueByJsonPath(cfg,'_type') != 'contrailListModel' && cfg != null) {
@@ -318,8 +360,12 @@ define([
             $(currElem).data('data-cfg', cfg);
             var self = this;
             //Add cache Config
-            model = self.getModelForCfg(cfg['modelCfg']);
             var viewType = cowu.getValueByJsonPath(cfg,'viewCfg;view','');
+            var needContrailListModel = false;
+            if(viewType.match(/GridView/)) {
+                needContrailListModel = true;
+            }
+            model = self.getModelForCfg(cfg['modelCfg'],{needContrailListModel: needContrailListModel});
             if(viewType.match(/eventDropsView/)) {
                 $(currElem).find('header').addClass('drag-handle');
             } else {

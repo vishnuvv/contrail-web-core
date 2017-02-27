@@ -5,13 +5,15 @@
 define([
     'underscore',
     'contrail-view',
+    'chart-view',
     'contrail-list-model',
     'legend-view',
     'core-constants',
-    'chart-utils'
-], function (_, ContrailView,  ContrailListModel, LegendView, cowc,chUtils) {
+    'chart-utils',
+    'node-color-mapping'
+], function (_, ContrailView,  ChartView, ContrailListModel, LegendView, cowc,chUtils, NodeColorMapping) {
     var cfDataSource;
-    var stackedAreaChartView = ContrailView.extend({
+    var stackedAreaChartView = ChartView.extend({
         settingsChanged: function(newSettings) {
             var self = this,
                 vc = self.attributes.viewConfig;
@@ -35,26 +37,37 @@ define([
                 resizeId;
             //settings
             cowu.updateSettingsWithCookie(viewConfig);
-            cfDataSource = viewConfig.cfDataSource;
-            if (self.model === null && viewConfig['modelConfig'] != null) {
-                self.model = new ContrailListModel(viewConfig['modelConfig']);
-            }
 
-            if (self.model !== null) {
-                if(cfDataSource == null) {
+            self.viewConfig = viewConfig;
+
+            ChartView.prototype.bindListeners.call(self);
+            /*
+            if(self.model instanceof Backbone.Model) {
+                self.model.on("change",function() {
                     self.renderChart($(self.$el), viewConfig, self.model);
-                } else if(self.model.loadedFromCache == true) {
-                    self.renderChart($(self.$el), viewConfig, self.model);
+                });
+            } else {
+                cfDataSource = viewConfig.cfDataSource;
+                if (self.model === null && viewConfig['modelConfig'] != null) {
+                    self.model = new ContrailListModel(viewConfig['modelConfig']);
                 }
 
-                if(cfDataSource != null) {
-                    cfDataSource.addCallBack('updateChart',function(data) {
+                if (self.model !== null) {
+                    if(cfDataSource == null) {
                         self.renderChart($(self.$el), viewConfig, self.model);
-                    });
-                } else {
-                    self.model.onAllRequestsComplete.subscribe(function () {
+                    } else if(self.model.loadedFromCache == true) {
                         self.renderChart($(self.$el), viewConfig, self.model);
-                    });
+                    }
+
+                    if(cfDataSource != null) {
+                        cfDataSource.addCallBack('updateChart',function(data) {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    } else {
+                        self.model.onAllRequestsComplete.subscribe(function () {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    }
                 }
 
                 // if (viewConfig.loadChartInChunks) {
@@ -62,31 +75,37 @@ define([
                         self.renderChart($(self.$el), viewConfig, self.model);
                     });
                 // }
+            }*/
 
-                $($(self.$el)).bind("refresh", function () {
-                    self.renderChart($(self.$el), viewConfig, self.model);
-                });
-                var prevDimensions = chUtils.getDimensionsObj(self.$el);
-                /* window resize may not be require since the nvd3 also provides a smoother refresh*/
-                self.resizeFunction = _.debounce(function (e) {
-                    if(!chUtils.isReRenderRequired({
-                        prevDimensions:prevDimensions,
-                        elem:self.$el})) {
-                        return;
-                    }
-                    prevDimensions = chUtils.getDimensionsObj(self.$el);
-                    self.renderChart($(self.$el), viewConfig, self.model);
-                },cowc.THROTTLE_RESIZE_EVENT_TIME);
-                window.addEventListener('resize',self.resizeFunction);
-                $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);
-            }
+            /*$($(self.$el)).bind("refresh", function () {
+                self.renderChart($(self.$el), viewConfig, self.model);
+            });
+            var prevDimensions = chUtils.getDimensionsObj(self.$el);
+            // window resize may not be require since the nvd3 also provides a smoother refresh
+            self.resizeFunction = _.debounce(function (e) {
+                if(!chUtils.isReRenderRequired({
+                    prevDimensions:prevDimensions,
+                    elem:self.$el})) {
+                    return;
+                }
+                prevDimensions = chUtils.getDimensionsObj(self.$el);
+                self.renderChart($(self.$el), viewConfig, self.model);
+            },cowc.THROTTLE_RESIZE_EVENT_TIME);
+            window.addEventListener('resize',self.resizeFunction);
+            $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction); */
         },
         renderChart: function (selector, viewConfig, chartViewModel) {
             if (!($(selector).is(':visible'))) {
                 return;
             }
             var self = this;
-            var data = chartViewModel.getFilteredItems();
+            var data;
+            if(chartViewModel instanceof Backbone.Model) {
+                data = chartViewModel.get('data');
+            } else {
+                data = chartViewModel.getFilteredItems();
+            }
+            viewConfig = self.viewConfig;
             var chartTemplate = contrail.getTemplate4Id('core-stacked-area-chart-template');
             var widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ?
                     viewConfig.widgetConfig : null;
@@ -132,6 +151,9 @@ define([
               //Need to check and remove the data.length condition because invalid for object
             } else {
                 data = cowu.chartDataFormatter(data, chartOptions);
+            }
+            if(self.model instanceof Backbone.Model && self.model.get('type') != null) {
+                self.colors = NodeColorMapping.getNodeColorMap(_.without(_.pluck(data, 'key'), failureLabel),resetColor, self.model.get('type'));
             }
             if (colors != null) {
                 if (typeof colors == 'function') {

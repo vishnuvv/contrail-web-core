@@ -40,53 +40,64 @@ define([
             self.tooltipDiv = d3.select("body").append("div")
                             .attr("class", "stack-bar-chart-tooltip")
                             .style("opacity", 0);
-            cfDataSource = viewConfig.cfDataSource;
-            if (self.model === null && viewConfig['modelConfig'] != null) {
-                self.model = new ContrailListModel(viewConfig['modelConfig']);
-            }
+        
 
-            if (self.model !== null) {
-                if(cfDataSource == null) {
-                    self.renderChart($(self.$el), viewConfig, self.model);
-                } else if(self.model.loadedFromCache == true) {
-                    self.renderChart($(self.$el), viewConfig, self.model);
-                }
+            self.cfDataSource = viewConfig.cfDataSource;
+            ChartView.prototype.bindListeners.call(self);
 
-                if(cfDataSource != null) {
-                    cfDataSource.addCallBack('updateChart',function(data) {
-                        self.renderChart($(self.$el), viewConfig, self.model);
-                    });
-                } else {
-                    self.model.onAllRequestsComplete.subscribe(function () {
-                        self.renderChart($(self.$el), viewConfig, self.model);
-                    });
-                }
-
-                // if (viewConfig.loadChartInChunks) {
-                    self.model.onDataUpdate.subscribe(function () {
-                        self.renderChart($(self.$el), viewConfig, self.model);
-                    });
-                // }
-
-                $($(self.$el)).bind("refresh", function () {
+            /*if(self.model instanceof Backbone.Model) {
+                self.model.on("change",function() {
                     self.renderChart($(self.$el), viewConfig, self.model);
                 });
-                var prevDimensions = chUtils.getDimensionsObj(self.$el);
+            } else {
+                cfDataSource = viewConfig.cfDataSource;
+                if (self.model === null && viewConfig['modelConfig'] != null) {
+                    self.model = new ContrailListModel(viewConfig['modelConfig']);
+                }
 
-                self.resizeFunction = _.debounce(function (e) {
-                   $('.stack-bar-chart-tooltip').remove();
-                    if(!chUtils.isReRenderRequired({
-                        prevDimensions:prevDimensions,
-                        elem:self.$el})) {
-                        return;
+                if (self.model !== null) {
+                    if(cfDataSource == null) {
+                        self.renderChart($(self.$el), viewConfig, self.model);
+                    } else if(self.model.loadedFromCache == true) {
+                        self.renderChart($(self.$el), viewConfig, self.model);
                     }
-                    prevDimensions = chUtils.getDimensionsObj(self.$el);
-                    self.renderChart($(self.$el), viewConfig, self.model);
-                },cowc.THROTTLE_RESIZE_EVENT_TIME);
 
-                window.addEventListener('resize',self.resizeFunction);
-                $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);
-            }
+                    if(cfDataSource != null) {
+                        cfDataSource.addCallBack('updateChart',function(data) {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    } else {
+                        self.model.onAllRequestsComplete.subscribe(function () {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    }
+
+                    // if (viewConfig.loadChartInChunks) {
+                        self.model.onDataUpdate.subscribe(function () {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    // }
+                }
+            }*/
+
+            /*$($(self.$el)).bind("refresh", function () {
+                self.renderChart($(self.$el), viewConfig, self.model);
+            });
+            var prevDimensions = chUtils.getDimensionsObj(self.$el);
+
+            self.resizeFunction = _.debounce(function (e) {
+                $('.stack-bar-chart-tooltip').remove();
+                if(!chUtils.isReRenderRequired({
+                    prevDimensions:prevDimensions,
+                    elem:self.$el})) {
+                    return;
+                }
+                prevDimensions = chUtils.getDimensionsObj(self.$el);
+                self.renderChart($(self.$el), viewConfig, self.model);
+            },cowc.THROTTLE_RESIZE_EVENT_TIME);
+
+            window.addEventListener('resize',self.resizeFunction);
+            $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);*/
         },
 
         renderChart: function (selector, viewConfig, chartViewModel) {

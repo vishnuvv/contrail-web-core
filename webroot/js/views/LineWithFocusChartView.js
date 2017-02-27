@@ -5,11 +5,12 @@
 define([
     'underscore',
     'contrail-view',
+    'chart-view',
     'core-basedir/js/models/LineWithFocusChartModel',
     'contrail-list-model',
     'nv.d3',
     'chart-utils'
-], function (_, ContrailView, LineWithFocusChartModel, ContrailListModel, nv, chUtils) {
+], function (_, ContrailView, ChartView, LineWithFocusChartModel, ContrailListModel, nv, chUtils) {
     var LineWithFocusChartView = ContrailView.extend({
         settingsChanged: function(newSettings) {
             var self = this,
@@ -38,6 +39,7 @@ define([
                 modelMap = contrail.handleIfNull(self.modelMap, {});
             //settings
             cowu.updateSettingsWithCookie(viewConfig);
+            self.viewConfig = viewConfig;
 
             if (contrail.checkIfExist(viewConfig.modelKey) && contrail.checkIfExist(modelMap[viewConfig.modelKey])) {
                 self.model = modelMap[viewConfig.modelKey]
@@ -49,7 +51,9 @@ define([
 
             self.renderChart(selector, viewConfig, self.model);
 
-            if (self.model !== null) {
+            ChartView.prototype.bindListeners.call(self);
+
+            /*if (self.model !== null) {
                 if(self.model.loadedFromCache || !(self.model.isRequestInProgress())) {
                     self.updateChart(selector, viewConfig, self.model);
                 }
@@ -63,23 +67,24 @@ define([
                         self.updateChart(selector, viewConfig, self.model);
                     });
                 //}
-                var prevDimensions = chUtils.getDimensionsObj(self.$el);
-                self.resizeFunction = _.debounce(function (e) {
-                    if(!chUtils.isReRenderRequired({
-                        prevDimensions:prevDimensions,
-                        elem:self.$el})) {
-                        return;
-                    }
-                     self.renderChart($(self.$el), viewConfig, self.model);
-                 },cowc.THROTTLE_RESIZE_EVENT_TIME);
+            }*/
+            /*
+            var prevDimensions = chUtils.getDimensionsObj(self.$el);
+            self.resizeFunction = _.debounce(function (e) {
+                if(!chUtils.isReRenderRequired({
+                    prevDimensions:prevDimensions,
+                    elem:self.$el})) {
+                    return;
+                }
+                    self.renderChart($(self.$el), viewConfig, self.model);
+                },cowc.THROTTLE_RESIZE_EVENT_TIME);
 
-                $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);
-            }
+            $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction); */
         },
 
         renderChart: function (selector, viewConfig, chartDataModel) {
             var self = this,
-                modelData = chartDataModel.getItems(),
+                modelData = (chartDataModel instanceof Backbone.Model) ? chartDataModel.get('data') : chartDataModel.getItems(),
                 data = modelData.slice(0), //work with shallow copy
                 chartTemplate = contrail.getTemplate4Id(cowc.TMPL_CHART),
                 widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ? viewConfig.widgetConfig : null,
@@ -275,7 +280,7 @@ define([
     function setData2Chart(self, chartViewConfig, chartDataModel, chartViewModel) {
         var chartDataObj = {
                 data: chartViewConfig.chartData,
-                requestState: getDataRequestState(chartViewConfig, chartDataModel)
+                // requestState: getDataRequestState(chartViewConfig, chartDataModel)
             };
         d3.select($(self.$el)[0]).select('svg').datum(chartDataObj).call(chartViewModel);
     }
@@ -283,7 +288,11 @@ define([
     function getDataRequestState(chartViewConfig, chartDataModel) {
         var chartData = chartViewConfig.chartData,
             checkEmptyDataCB = function (data) {
-                return (!data || data.length === 0 || !data.filter(function (d) { return d.values.length; }).length);
+                if(chartDataModel instanceof Backbone.Model) {
+                    return chartDataModel.get('data').length;
+                } else {
+                    return (!data || data.length === 0 || !data.filter(function (d) { return d.values.length; }).length);
+                }
             };
         return cowu.getRequestState4Model(chartDataModel, chartData, checkEmptyDataCB);
     }

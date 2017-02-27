@@ -5,13 +5,14 @@
 define([
     'underscore',
     'contrail-view',
+    'chart-view',
     'core-basedir/js/models/LineBarWithFocusChartModel',
     'contrail-list-model',
     'nv.d3',
     'chart-utils',
     'core-constants'
-], function (_, ContrailView, LineBarWithFocusChartModel, ContrailListModel, nv, chUtils, cowc) {
-    var LineBarWithFocusChartView = ContrailView.extend({
+], function (_, ContrailView, ChartView, LineBarWithFocusChartModel, ContrailListModel, nv, chUtils, cowc) {
+    var LineBarWithFocusChartView = ChartView.extend({
         settingsChanged: function(newSettings) {
             var self = this,
                 vc = self.attributes.viewConfig;
@@ -47,6 +48,10 @@ define([
 
             self.renderChart(selector, viewConfig, self.model);
 
+            self.viewConfig = viewConfig;
+            ChartView.prototype.bindListeners.call(self);
+
+            /*
             if (self.model !== null) {
                 if (self.model.loadedFromCache || !(self.model.isRequestInProgress())) {
                     self.updateChart(selector, viewConfig, self.model);
@@ -74,7 +79,7 @@ define([
 
                 $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);
 
-            }
+            }*/
         },
 
         renderChart: function (selector, viewConfig, chartDataModel) {
