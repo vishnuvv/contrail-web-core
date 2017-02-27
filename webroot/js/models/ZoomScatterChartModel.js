@@ -18,11 +18,21 @@ define([
         self.loadedFromCache = dataListModel.loadedFromCache;
 
         self.isRequestInProgress = function() {
-            return dataListModel.isRequestInProgress()
+            if(dataListModel instanceof Backbone.Model) {
+                //rawData = dataListModel.get('data');
+            } else {
+                return dataListModel.isRequestInProgress()
+            }
         };
 
         self.isPrimaryRequestInProgress = function() {
-            return dataListModel.isPrimaryRequestInProgress()
+
+            if(dataListModel instanceof Backbone.Model) {
+                //rawData = dataListModel.get('data');
+            } else {
+                return dataListModel.isPrimaryRequestInProgress()
+            }
+            
         };
 
         self.isError = function() {
@@ -180,7 +190,12 @@ define([
             } else if(chartConfig.yLabelFormat != null) {
                 self.yAxis.tickFormat(chartConfig.yLabelFormat)
             }
-
+            if (chartConfig['showXMinMax']) {
+                self.xAxis.tickValues([self.xMin, self.xMax])
+            }
+            if (chartConfig['showYMinMax']) {
+                self.yAxis.tickValues([self.yMin, self.yMax])
+            }
             self.xMed = median(_.map(chartData, function (d) {
                 return d[chartConfig.xField];
             }));

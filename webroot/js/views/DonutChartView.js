@@ -65,10 +65,10 @@ define([
                 widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ? viewConfig.widgetConfig : null;
 
             if (contrail.checkIfFunction(viewConfig['parseFn'])) {
-                data = viewConfig['parseFn'](data);
+                data = viewConfig['parseFn'](data, viewConfig);
             }
             if ($(selector).parents('.custom-grid-stack-item').length != 0) {
-                viewConfig['chartOptions']['height'] = $(selector).parents('.custom-grid-stack-item').height() - 20;
+                delete viewConfig['chartOptions']['height'];
             }
             chartViewConfig = getChartViewConfig(data, viewConfig);
             chartOptions = chartViewConfig['chartOptions'];

@@ -969,7 +969,7 @@
 </script>
 
 <script type="text/x-handlebars-template" id="core-section-view-template">
-    <div data-bind="{{#if viewConfig.visible}} visible: {{viewConfig.visible}} {{/if}}">
+    <div data-bind="{{#if viewConfig.visible}} visible: {{viewConfig.visible}} {{/if}}" class="{{#if viewConfig.cssClass}} {{viewConfig.cssClass}} {{/if}}">
         {{#if viewConfig.title}}
             <h5 class="margin-0-0-10">{{viewConfig.title}}</h5>
         {{/if}}
@@ -2245,6 +2245,46 @@
 </div>
 </script>
 
+<script type="text/x-handlebars-template" id="gridstack-zoomed-scatter-chart-template">
+    {{#if overViewText}}
+        <div class="flex-1 flex-dir-column {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+            <div class="overview-text {{#if overviewCss}} {{overviewCss}} {{else}} flex-1 {{/if}} flex-dir-row">
+                {{#if overviewTextOptions}}
+                    
+                    <!--{{#if overviewTextOptions.template}}
+                        <div>template</div>
+                    {{else}}
+                        <div class='title flex-2'>{{title}}</div>
+                        <div class="flex-2 flex-dir-column lbl-value-wrapper">
+                            <div class="value flex-4">{{overviewTextOptions.value}}
+                            </div>
+                            <div class="flex-1 lbl">{{overviewTextOptions.label}}</div>
+                        </div>
+                    {{/if}}-->
+                {{else}}
+                    <div class='title'>{{title}}</div>
+                {{/if}}
+            </div>
+            <!--<div class="main-chart flex-5">-->
+            <div class="zoom-scatter-chart-container main-chart flex-5">
+                <div class="chart-container flex-1"></div>
+                </div>
+            </div>
+        </div>
+    {{else}}
+        <div class="zoom-scatter-chart-container colmask rightmenu">
+            <div class="colleft">
+                <div class="col1wrap">
+                    <div class="col1 chart-container">
+                    </div>
+                </div>
+                <div class="col2 chart-control-panel-container">
+                </div>
+                <div class="chart-control-panel-expanded-container control-panel-expanded-container hidden"></div>
+            </div>
+        </div>
+    {{/if}}
+</script>
 <script type="text/x-handlebars-template" id="core-zoomed-scatter-chart-template">
     <div class="zoom-scatter-chart-container colmask rightmenu">
         <div class="colleft">
@@ -2260,9 +2300,69 @@
 </script>
 
 <script type="text/x-handlebars-template" id="core-chart-template">
-    <div class="chart-container">
-        <svg style="height:{{height}}px;"></svg></div>
-    </div>
+    {{#if showLegend}}
+        {{#IfCompare legendPosition 'top' operator='=='}}
+            <div class="chart-container flex-1 flex-dir-column-rev {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+        {{/IfCompare}}
+        {{#IfCompare legendPosition 'bottom' operator='=='}}
+            <div class="chart-container flex-1 flex-dir-column {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+        {{/IfCompare}}
+        {{#IfCompare legendPosition 'left' operator='=='}}
+            <div class="chart-container flex-1 flex-dir-row-rev {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+        {{/IfCompare}}
+        {{#IfCompare legendPosition 'right' operator='=='}}
+            <div class="chart-container flex-1 flex-dir-row {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+        {{/IfCompare}}
+        {{#if overViewText}}
+            <div class="chart-overview-wrapper flex flex-dir-row flex-5">
+                <div class="overview-text ">
+                    {{#if overviewTextOptions}}
+                        <div class='title pull-left'>{{title}}</div>
+                        <div class="pull-right">
+                            <div class="value align-right">{{overviewTextOptions.value}}</div>
+                        <div class="pull-right lbl">{{overviewTextOptions.label}}</div>
+                     </div>
+                    {{else}}
+                        <div class='title'>{{title}}</div>
+                    {{/if}}
+                </div>
+                <div class="main-chart flex-5">
+                    <svg class="nvd3-svg"></svg>
+                </div>
+            </div>
+        {{else}}
+            <div class="main-chart flex-5">
+                <svg class="nvd3-svg"></svg>
+            </div>
+        {{/if}}
+            <div class="legend flex-1"></div>
+        </div>
+    {{else}}
+        {{#if overViewText}}
+            <div class="chart-container flex-1 flex-dir-column {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+                <div class="overview-text">
+                    {{#if overviewTextOptions}}
+                        <div class='title pull-left'>{{title}}</div>
+                        <div class="pull-right">
+                            <div class="value align-right">{{overviewTextOptions.value}}</div>
+                        <div class="pull-right lbl">{{overviewTextOptions.label}}</div>
+                     </div>
+                    {{else}}
+                        <div class='title'>{{title}}</div>
+                    {{/if}}
+                </div>
+                <div class="main-chart flex-5">
+                    <svg class="nvd3-svg"></svg>
+                </div>
+            </div>
+        {{else}}
+            <div class="chart-container flex-1 {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+                <div class="main-chart flex-1">
+                    <svg class="nvd3-svg" {{#IfCompare height null operator='!=' style='height:height px'}}{{/IfCompare}}></svg>    
+                </div>
+            </div>
+        {{/if}}        
+    {{/if}}
 </script>
 
 <script type="text/x-handlebars-template" id="core-zoomed-scatter-chart-control-panel-legend-template">
@@ -3523,6 +3623,21 @@
        </li>
       </ul>
  </script>
+
+ <script type="text/x-handlebars-template" id="dashboard-nodecntview-template">
+   <ul>
+       {{#each nodeMap}}
+           <li>
+           <span>{{this.totalCnt}}&nbsp;&nbsp;</span>{{this.display_type}}&nbsp;
+           {{#IfCompare this.dwnCnt 0 operator='>'}}
+                {{this.dwnCnt}}<span><img src="/img/down_arrow.svg"></img></span>
+           {{else}}
+                <span></span>
+           {{/IfCompare}}
+           </li>
+       {{/each}}
+  </ul>
+ </script>
 <script type="text/x-handlebars-template" id="dashboard-custom-tooltip">
     <div class="nvtooltip xy-tooltip nv-pointer-events-none" id="nvtooltip-58867">
         <table>
@@ -3610,4 +3725,30 @@
                 </a>
             </div>
     {{/each}}
+</script>
+<script type="text/x-handlebars-template" id="four-quadrant-template">
+    <div class="flex-1 flex-dir-column" style="margin: 15px;"> 
+    {{#if title}}
+        <div class="title" style="font-size: 15px;"> {{title}}</div>
+    {{/if}}
+        <div class="flex-1">
+          <div class="top-left widget-container flex-1"></div>
+          <div class="top-right widget-container flex-1"></div>
+        </div>
+        <div class="flex-1">
+          <div class="bottom-left widget-container flex-1"> </div>
+          <div class="bottom-right widget-container flex-1"></div>
+        </div>
+    </div>
+</script>
+<script type="text/x-handlebars-template" id="one-row-two-column-template">
+    <div class="flex-1 flex-dir-column"> 
+    {{#if title}}
+        <div class="title" style="font-size: 15px;"> {{title}}</div>
+    {{/if}}
+        <div class="flex-1">
+          <div class="top-left widget-container flex-1"></div>
+          <div class="top-right widget-container flex-1"></div>
+        </div>
+    </div>
 </script>

@@ -137,7 +137,12 @@ define([
                 el = $(el);
                 var node = el.data('_gridstack_node');
                 //itemAttr contains properties from both itemAttr (view.config file) & customItemAttr (ListView)
-                var itemAttr = (el.data('data-cfg') != null)? el.data('data-cfg').itemAttr: {};
+                var itemAttr = {},
+                    viewCfg = {};
+                if (el.data('data-cfg') != null) {
+                    itemAttr = el.data('data-cfg').itemAttr;
+                    viewCfg = el.data('data-cfg').viewCfg;
+                }
                 // console.assert(el.attr('data-widget-id') != null);
                 // console.assert(node.width != null || node.height != null, "Node width/height is null while serializing");
                 if(node == null || node.x == null || node.height == null | node.width == null || node.y == null) {
@@ -145,6 +150,7 @@ define([
                 }
                 return {
                     id: el.attr('data-widget-id'),
+                    viewCfg: viewCfg,
                     itemAttr: $.extend(itemAttr,{
                         x: node.x,
                         y: node.y,
@@ -209,7 +215,8 @@ define([
                 self.add({
                     widgetCfg: widgetCfgList[i],
                     modelCfg: currWidgetCfg['modelCfg'],
-                    viewCfg: currWidgetCfg['viewCfg'],
+                    //viewCfg: currWidgetCfg['viewCfg'],
+                    viewCfg: $.extend(true, {},currWidgetCfg['viewCfg'], cowu.getValueByJsonPath(widgetCfgList, i+';viewCfg', {})),
                     itemAttr: $.extend({},currWidgetCfg['itemAttr'],widgetCfgList[i]['itemAttr'])
                 });
             }
@@ -277,7 +284,6 @@ define([
                 region = "Default"
             }
             //if there exists a mapping of modelId in widgetConfigManager.modelInstMap, use it
-
             /*$(currElem).find('.widget-dropdown').contrailDropdown({
                 dataTextField: "name",
                 dataValueField: "value",
@@ -298,7 +304,12 @@ define([
                     self.renderWidget({widgetCfg:{id:e.val}},currElem);
                 }
             });*/
-
+            if (cowc.panelLayout) {
+                $(currElem).find('.grid-stack-item-content').addClass('panel panel-default');
+            }
+            if (itemAttr && itemAttr['cssClass'] != null) {
+                $(currElem).find('.grid-stack-item-content').addClass(cfg['itemAttr']['cssClass']);
+            }
             $(currElem).find('.widget-dropdown').select2({
                 data: widgetConfigManager.getWidgetList(),
                 change: function(e) {
@@ -338,8 +349,9 @@ define([
             self.renderWidget(cfg,currElem);
         },
         getModelForCfg: function(cfg,options) {
-            //If there exists a mapping of modelId in widgetConfigManager.modelInstMap, use it
+            //var model = cowu.getModelForCfg(cfg, options);
             //Maintain a mapping of cacheId vs contrailListModel and if found,return that
+            var modelCfg = cfg['modelCfg'],model;
             var modelId = cfg['modelId'];
             var region = contrail.getCookie('region');
             if(region == null) {
@@ -406,9 +418,9 @@ define([
                 }
             } else if(cowu.getValueByJsonPath(cfg,'listModel','') != '') {
                 model = cfg['listModel'];
-            } else if(cowu.getValueByJsonPath(cfg,'_type') != 'contrailListModel' && cfg != null) {
+            } else if(cowu.getValueByJsonPath(cfg,'_type') != 'contrailListModel' && !$.isEmptyObject(cfg) && cfg != null) {
                 model = new ContrailListModel(cfg['config']);
-            }
+            } 
             function updateCache() {
                 if(isCacheExpired && modelId != null) {
                     widgetConfigManager.modelInstMap[modelId] = {

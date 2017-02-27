@@ -21,8 +21,9 @@ define([
                 deferredObj = $.Deferred(),
                 cfDataSource = self.attributes.viewConfig.cfDataSource,
                 selector = $(self.$el);
-
-            if (self.model == null && viewConfig['modelConfig'] != null) {
+            self.viewConfig = viewConfig;
+            ChartView.prototype.bindListeners.call(self);
+            /*if (self.model == null && viewConfig['modelConfig'] != null) {
                 self.model = new ContrailListModel(viewConfig['modelConfig']);
             }
 
@@ -72,7 +73,6 @@ define([
 
                 window.addEventListener('resize',self.resizeFunction);
                 $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);*/
-                ChartView.prototype.bindListeners.call(self);
                 self.renderChart($(self.$el), viewConfig, self.model);
                 if (widgetConfig !== null) {
                     self.renderView4Config($(self.$el).find('.zoom-scatter-chart-container'), self.model, widgetConfig, null, null, null);
@@ -91,7 +91,11 @@ define([
             self.isMyRenderInProgress = true;
 
             if (!contrail.checkIfExist(self.chartModel)) {
-                $(selector).html(contrail.getTemplate4Id(cowc.TMPL_ZOOMED_SCATTER_CHART));
+                if($(selector).parents('.custom-grid-stack-item')) {
+                    $(selector).html(contrail.getTemplate4Id(cowc.TMPL_GRIDSTACK_ZOOMED_SCATTER_CHART)(chartOptions));
+                } else {
+                    $(selector).html(contrail.getTemplate4Id(cowc.TMPL_ZOOMED_SCATTER_CHART));
+                }
 
                 chartConfig = getChartConfig(selector, chartOptions, viewConfig);
                 self.chartModel = new ZoomScatterChartModel(dataListModel, chartConfig);
@@ -308,6 +312,7 @@ define([
             .attr("text-anchor", "middle")
             .attr("x", width / 2)
             .attr("y", height + margin.bottom - 10)
+            //.attr('dy', chartConfig.showXMinMax ? '-1em' : '0em')
             .text(chartConfig.xLabel);
 
         chartSVG.append("text")
@@ -315,7 +320,7 @@ define([
             .attr("text-anchor", "middle")
             .attr("x", -1 * (height / 2))
             .attr("y", -margin.left)
-            .attr("dy", ".75em")
+            .attr("dy", "1.5em")
             .attr("transform", "rotate(-90)")
             .text(chartConfig.yLabel);
 
@@ -1386,6 +1391,10 @@ define([
             doBucketize : chartOptions['doBucketize'],
             bubbleSizeFn: chartOptions['bubbleSizeFn'],
             defaultDataStatusMessage: true,
+            showXMinMax: chartOptions['showXMinMax'],
+            showYMinMax: chartOptions['showYMinMax'],
+            overViewText: chartOptions['overViewText'],
+            overviewTextOptions: chartOptions['overviewTextOptions'],
             showColorFilter: getValueByJsonPath(chartOptions,"showColorFilter",true),
             statusMessageHandler: cowm.getRequestMessage,
             bubbleDefMaxValue: getValueByJsonPath(chartOptions,'bubbleCfg;defaultMaxValue', 0) 

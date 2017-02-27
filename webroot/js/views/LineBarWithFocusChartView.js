@@ -46,6 +46,7 @@ define([
             }
 
             self.renderChart(selector, viewConfig, self.model);
+            self.updateOverviewText();
 
             self.viewConfig = viewConfig;
             ChartView.prototype.bindListeners.call(self);
@@ -83,16 +84,21 @@ define([
 
         renderChart: function (selector, viewConfig, chartDataModel) {
             var self = this,
-                data = chartDataModel.getItems(),
+                data = (chartDataModel instanceof Backbone.Model) ? chartDataModel.get('data') : chartDataModel.getItems(),
+                //data = modelData.slice(0), //work with shallow copy
                 chartTemplate = contrail.getTemplate4Id(cowc.TMPL_CHART),
                 widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ? viewConfig.widgetConfig : null,
                 chartViewConfig, chartOptions, chartViewModel;
 
             if (contrail.checkIfFunction(viewConfig['parseFn'])) {
+                if(viewConfig['parseFn'] === cowu.parseLineBarChartWithFocus && chartDataModel instanceof Backbone.Model) {
+                    viewConfig['chartOptions'].type = chartDataModel.get('type');
+                }
                 data = viewConfig['parseFn'](data, viewConfig['chartOptions']);
             }
             if (cowu.isGridStackWidget(selector)) {
                 viewConfig['chartOptions']['height'] = $(selector).parents('.custom-grid-stack-item').height();
+                delete viewConfig['chartOptions']['height'];
             }
             chartViewConfig = self.getChartViewConfig(data, viewConfig.chartOptions);
             chartOptions = chartViewConfig['chartOptions'];
@@ -103,16 +109,19 @@ define([
             if (showLegend) {
                 chartOptions['height'] -= 30;
             }
+            ChartView.prototype.appendTemplate(selector, chartOptions);
+            //selector = $(selector).find('.main-chart');
+            //self.$el = selector;
             chartViewModel = new LineBarWithFocusChartModel(chartOptions);
             chartViewModel.chartOptions = chartOptions;
 
             self.chartViewModel = chartViewModel;
 
-            if ($(selector).find("svg") != null) {
+            /*if ($(selector).find("svg") != null) {
                 $(selector).empty();
             }
 
-            $(selector).append(chartTemplate(chartOptions));
+            $(selector).append(chartTemplate(chartOptions));*/
 
             //Store the chart object as a data attribute so that the chart can be updated dynamically
             $(selector).data('chart', chartViewModel);

@@ -32,6 +32,10 @@ define(['underscore', 'chart-view', 'contrail-view', 'contrail-list-model'],
             var chartModelItems = chartViewModel.get('data'), self = this;
             var percentileXobjVal = getValueByJsonPath(chartModelItems, '0;percentileXobjVal', '-');
             var percentileYobjVal = getValueByJsonPath(chartModelItems, '0;percentileYobjVal', '-');
+            if (percentileTextViewTemplate == null) {
+                percentileTextViewTemplate = contrail.getTemplate4Id(
+                    ctwc.PERCENTILE_TEXT_VIEW_TEMPLATE);
+            }
             self.$el.html(percentileTextViewTemplate({percentileXobjVal: percentileXobjVal,
                 percentileYobjVal: percentileYobjVal,
                 percentileTitle: viewConfig.percentileTitle,

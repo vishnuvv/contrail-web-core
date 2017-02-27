@@ -40,6 +40,24 @@ define([
             }
             return $.extend({}, selectedWidthOptions, selectedHeightOptions);
         },
+        appendTemplate: function (selector, chartOptions) {
+            var self = this;
+
+            var chartTemplateId = cowu.getValueByJsonPath(chartOptions, 'chartTemplate', cowc.TMPL_CHART),
+                chartTemplate = contrail.getTemplate4Id(chartTemplateId);
+            $(selector).html(chartTemplate(chartOptions));
+        },
+        renderLegend: function (selector, chartOptions, viewConfig) {
+            var legendContainer = $(selector).find('div.legend');
+            if (chartOptions['legendView'] != null) {
+                var legendView = new chartOptions['legendView']({
+                    el: $(legendContainer),
+                    viewConfig: viewConfig
+                });
+                legendView.render();    
+            }
+            
+        },
         render: function () {
         },
         showText: function (data, viewConfig) {
@@ -63,11 +81,35 @@ define([
                       .attr('x', textPositionX)
                       .attr('y', textPositionY)
                       .text(function (d) {
-                            return d['text'] != null ? d['text'] : getLastYValue(data, viewConfig);
+                            return d['text'] != null ? d['text'] : chUtils.getLastYValue(data, viewConfig);
                       });
 
         },
 
+        updateOverviewText: function () {
+            var self = this,
+                viewConfig = self.viewConfig,
+                selector = contrail.handleIfNull(selector, $(self.$el)),
+                data = self.model.getItems(),
+                lastValue = '-', valueArr = [], html = '',
+                valueFn = cowu.getValueByJsonPath(viewConfig, 'chartOptions;overviewTextOptions;valueFn');
+
+            if (valueFn != null && $.isFunction(valueFn)) {
+                valueFn(selector, data, viewConfig);
+                return;
+            }
+            if (data.length) {
+                lastValue = chUtils.getLastYValue(data, viewConfig);
+            }
+            if ($.isNumeric(lastValue) || lastValue == '-') {
+                $(selector).find('.value').text(lastValue);
+            } else {
+                valueArr = lastValue.match(/([0-9]+)(.*)/);
+                html = ''+valueArr[1]+'<span class="unit">'+valueArr[2]+'</span>';
+                $(selector).find('.value').html(html);
+            }
+            
+        },
         renderMessage: function(message, selector, chartOptions) {
             var self = this,
                 message = contrail.handleIfNull(message, ""),
@@ -110,11 +152,46 @@ define([
         },
 
         bindListeners: function() {
-            var self = this;
+            var self = this,
+                viewConfig = cowu.getValueByJsonPath(self, 'viewConfig', cowu.getValueByJsonPath(self,'attributes;viewConfig'));
             if(self.model instanceof Backbone.Model) {
                 self.model.on("change",function() {
-                    self.render($(self.$el), self.viewConfig, self.model);
+                    if (self.renderChart != null && $.isFunction(self.renderChart)) {
+                        self.renderChart($(self.$el), viewConfig, self.model);
+                        self.updateOverviewText();
+                    } else if (self.renderTemplate != null && $.isFunction(self.renderTemplate)) {
+                        self.renderTemplate($(self.$el), viewConfig, self.model);
+                    }
                 });
+            } else {
+                cfDataSource = viewConfig.cfDataSource;
+                if (self.model === null && viewConfig['modelConfig'] != null) {
+                    self.model = new ContrailListModel(viewConfig['modelConfig']);
+                }
+
+                if (self.model != null) {
+                    if(cfDataSource == null) {
+                        self.renderChart($(self.$el), viewConfig, self.model);
+                    } else if(self.model.loadedFromCache == true) {
+                        self.renderChart($(self.$el), viewConfig, self.model);
+                    }
+
+                    if(cfDataSource != null) {
+                        cfDataSource.addCallBack('updateChart',function(data) {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    } else {
+                        self.model.onAllRequestsComplete.subscribe(function () {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    }
+
+                    if (viewConfig.loadChartInChunks) {
+                        self.model.onDataUpdate.subscribe(function () {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    }
+                }
             }
             $($(self.$el)).bind("refresh", function () {
                 self.render($(self.$el), viewConfig, self.model);
