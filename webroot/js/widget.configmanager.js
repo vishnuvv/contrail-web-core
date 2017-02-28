@@ -45,7 +45,7 @@ define([ 'lodash',
             }
             if(widgetCfg['baseView'] != null) {
                 baseViewCfg = widgetViewCfgMap[widgetCfg['baseView']];
-                if(widgetCfg['modelCfg'] != null) {
+                if(widgetCfg['viewCfg'] != null) {
                     $.extend(true,viewCfg,baseViewCfg,widgetCfg['viewCfg'])
                 } else {
                     viewCfg= baseViewCfg;

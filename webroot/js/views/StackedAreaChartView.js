@@ -150,6 +150,9 @@ define([
                 data = viewConfig['parseFn'](data, chartOptions);
               //Need to check and remove the data.length condition because invalid for object
             } else {
+                if(chartViewModel instanceof Backbone.Model) {
+                    chartOptions.type = chartViewModel.get('type');
+                }
                 data = cowu.chartDataFormatter(data, chartOptions);
             }
             if(self.model instanceof Backbone.Model && self.model.get('type') != null) {

@@ -177,10 +177,10 @@ define([
         },
 
 
-        resize: function () {
+        /*resize: function () {
             var self = this;
             _.isFunction(self.resizeFn) && self.resizeFn();
-        },
+        },*/
 
         getChartViewConfig: function(chartData, chartOptions) {
             var chartViewConfig = {};

@@ -10,6 +10,62 @@ define([
     var ChartView = ContrailView.extend({
         render: function () {
         },
+        showText: function (data, viewConfig) {
+            var self = this,
+                selector = contrail.handleIfNull(selector, $(self.$el)),
+                groups = d3.selectAll($(selector).find(".nv-group")),
+                textPositionX = ($(selector).find('.chart-container').width() - 20) / 2,
+                textPositionY = $(selector).find('.chart-container').height() / 2;
+                groups.selectAll('text.center-text').remove();
+                groups.selectAll('text')
+                      .data(function (d) {
+                            return [d];
+                      })
+                      .enter()
+                      .append('text')
+                      .style('text-anchor', 'middle')
+                      .style('fill', function (d) {
+                            return d['color'];
+                      })
+                      .attr('class', 'center-text')
+                      .attr('x', textPositionX)
+                      .attr('y', textPositionY)
+                      .text(function (d) {
+                            return d['text'] != null ? d['text'] : getLastYValue(data, viewConfig);
+                      });
+
+        },
+
+        renderMessage: function(message, selector, chartOptions) {
+            var self = this,
+                message = contrail.handleIfNull(message, ""),
+                selector = contrail.handleIfNull(selector, $(self.$el)),
+                chartOptions = contrail.handleIfNull(chartOptions, self.chartViewModel.chartOptions),
+                container = d3.select($(selector).find("svg")[0]),
+                requestStateText = container.selectAll('.nv-requestState').data([message]),
+                textPositionX = $(selector).width() / 2,
+                textPositionY = chartOptions.margin.top + $(selector).find('.nv-focus').heightSVG() / 2 + 10;
+
+            requestStateText
+                .enter().append('text')
+                .attr('class', 'nvd3 nv-requestState')
+                .attr('dy', '-.7em')
+                .style('text-anchor', 'middle');
+
+            requestStateText
+                .attr('x', textPositionX)
+                .attr('y', textPositionY)
+                .text(function(t){ return t; });
+
+        },
+
+        removeMessage: function(selector) {
+            var self = this,
+                selector = contrail.handleIfNull(selector, $(self.$el));
+
+            $(selector).find('.nv-requestState').remove();
+        },
+
         bindListeners: function() {
             var self = this;
             if(self.model instanceof Backbone.Model) {
@@ -40,11 +96,11 @@ define([
                         });
                     }
 
-                    // if (viewConfig.loadChartInChunks) {
+                    if (viewConfig.loadChartInChunks) {
                         self.model.onDataUpdate.subscribe(function () {
                             self.renderChart($(self.$el), viewConfig, self.model);
                         });
-                    // }
+                    }
                 }
             }
             $($(self.$el)).bind("refresh", function () {
