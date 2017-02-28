@@ -123,6 +123,7 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
             'contrail-remote-data-handler': coreWebDir + '/js/handlers/ContrailRemoteDataHandler',
             'cf-datasource'               : coreWebDir + '/js/common/cf.datasource',
             'contrail-view'               : coreWebDir + '/js/views/ContrailView',
+            'chart-view'                  : coreWebDir + '/js/views/ChartView',
             'contrail-model'              : coreWebDir + '/js/models/ContrailModel',
             'contrail-view-model'         : coreWebDir + '/js/models/ContrailViewModel',
             'contrail-list-model'         : coreWebDir + '/js/models/ContrailListModel',
@@ -204,8 +205,9 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
             'databasenode-viewconfig'     : 'empty:',
             'analyticsnode-viewconfig'    : 'empty:',
             'confignode-viewconfig'       : 'empty:',
-            'monitor-infra-viewconfig'    : 'empty:'
+            'monitor-infra-viewconfig'    : 'empty:',
 
+            'multi-chart-view'            : coreBaseDir + '/js/views/nvd3/MultiChartView'
         };
         //Merge common (for both prod & dev) alias
         for(var currAlias in devAliasMap)

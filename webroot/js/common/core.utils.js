@@ -703,6 +703,13 @@ define([
                 }
                 viewPath = ifNull(pathMapping[viewPath],viewPath);
 
+                var viewMapping = {
+                    'MultiChartView' : 'multi-chart-view'
+                }
+                if(viewMapping[viewName] != null) {
+                    viewPath = viewMapping[viewName];
+                }
+
                 onAllViewsRenderCompleteCB = renderConfig['onAllViewsRenderCompleteCB'];
                 onAllRenderCompleteCB = renderConfig['onAllRenderCompleteCB'];
                 lazyRenderingComplete  = renderConfig['lazyRenderingComplete'];
@@ -2124,6 +2131,7 @@ define([
          */
         self.fetchStatsListModel = function (config) {
             var listModel = new ContrailListModel({data:[]});
+            var defObj = $.Deferred();
             if (!_.isArray(config)) {
                 config = [config];
             }
@@ -2204,6 +2212,7 @@ define([
                                             return _.extend({}, obj, {queryJSON: response['queryJSON']});
                                         });
                                     }
+                                    defObj.resolve(data);
                                     listModel.setData(data);
                                 }
                             });
@@ -2273,6 +2282,7 @@ define([
             if (statsConfig['modelId'] != null) {
                 listModelConfig['cacheConfig']['ucid'] = statsConfig['modelId'];
             }*/
+            return defObj;
             return listModel;
         };
     };
@@ -2428,7 +2438,8 @@ define([
                           }
                         }
                     }
-                }else if(typeof checkArrayContainsObject(updatedObj[i]) == 'object' && checkArrayContainsObject(updatedObj[i]) !== null && checkArrayContainsObject(updatedObj[i]).constructor !== Array){
+                }else if(typeof checkArrayContainsObject(updatedObj[i]) == 'object' && checkArrayContainsObject(updatedObj[i]) !== null 
+                    && checkArrayContainsObject(updatedObj[i]).constructor !== Array){
                     for(var j = 0; j < updatedObj[i].length; j++){
                             if(oldJson !== undefined && oldJson !== null){
                                 if(oldJson[i] !== undefined){
