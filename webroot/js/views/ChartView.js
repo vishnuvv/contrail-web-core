@@ -37,6 +37,8 @@ define([
             return $.extend({}, selectedWidthOptions, selectedHeightOptions);
         },
         appendTemplate: function (selector, chartOptions) {
+            var self = this;
+
             var chartTemplateId = cowu.getValueByJsonPath(chartOptions, 'chartTemplate', cowc.TMPL_CHART),
                 chartTemplate = contrail.getTemplate4Id(chartTemplateId);
             $(selector).html(chartTemplate(chartOptions));
@@ -122,8 +124,37 @@ define([
             var self = this;
             if(self.model instanceof Backbone.Model) {
                 self.model.on("change",function() {
-                    self.render($(self.$el), self.viewConfig, self.model);
+                    self.renderChart($(self.$el), self.viewConfig, self.model);
                 });
+            } else {
+                cfDataSource = viewConfig.cfDataSource;
+                if (self.model === null && viewConfig['modelConfig'] != null) {
+                    self.model = new ContrailListModel(viewConfig['modelConfig']);
+                }
+
+                if (self.model !== null) {
+                    if(cfDataSource == null) {
+                        self.renderChart($(self.$el), viewConfig, self.model);
+                    } else if(self.model.loadedFromCache == true) {
+                        self.renderChart($(self.$el), viewConfig, self.model);
+                    }
+
+                    if(cfDataSource != null) {
+                        cfDataSource.addCallBack('updateChart',function(data) {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    } else {
+                        self.model.onAllRequestsComplete.subscribe(function () {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    }
+
+                    if (viewConfig.loadChartInChunks) {
+                        self.model.onDataUpdate.subscribe(function () {
+                            self.renderChart($(self.$el), viewConfig, self.model);
+                        });
+                    }
+                }
             }
             $($(self.$el)).bind("refresh", function () {
                 self.render($(self.$el), viewConfig, self.model);
