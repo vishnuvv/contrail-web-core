@@ -2,10 +2,8 @@ define([
     'underscore',
     'chart-view',
     'legend-view',
-    'core-constants',
-    'chart-utils',
-    'nv.d3'	
-], function (_, ChartView, LegendView, cowc, chUtils, nv) {
+    'chart-utils'
+], function (_, ChartView, LegendView, chUtils) {
 
     /* Inspired by Lee Byron's test data generator. */
 	function stream_layers(n, m, o) {

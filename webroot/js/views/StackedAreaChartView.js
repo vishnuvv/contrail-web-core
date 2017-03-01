@@ -32,6 +32,7 @@ define([
             var viewConfig = this.attributes.viewConfig,tooltipElementObj,
                 ajaxConfig = viewConfig['ajaxConfig'],
                 self = this, deferredObj = $.Deferred(),
+                selector = $(self.$el),
                 widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ?
                         viewConfig.widgetConfig : null,
                 resizeId;
@@ -39,7 +40,7 @@ define([
             cowu.updateSettingsWithCookie(viewConfig);
 
             self.viewConfig = viewConfig;
-
+            self.renderChart(selector, viewConfig, self.model);
             ChartView.prototype.bindListeners.call(self);
             /*
             if(self.model instanceof Backbone.Model) {
