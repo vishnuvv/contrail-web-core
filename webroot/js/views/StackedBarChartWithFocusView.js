@@ -5,7 +5,7 @@
 
 define([
     'underscore',
-    '/js/views/ChartView.js',
+    'chart-view',
     //'contrail-view',
     'contrail-list-model',
     'legend-view',
