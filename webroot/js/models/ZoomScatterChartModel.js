@@ -18,11 +18,21 @@ define([
         self.loadedFromCache = dataListModel.loadedFromCache;
 
         self.isRequestInProgress = function() {
-            return dataListModel.isRequestInProgress()
+            if(dataListModel instanceof Backbone.Model) {
+                //rawData = dataListModel.get('data');
+            } else {
+                return dataListModel.isRequestInProgress()
+            }
         };
 
         self.isPrimaryRequestInProgress = function() {
-            return dataListModel.isPrimaryRequestInProgress()
+
+            if(dataListModel instanceof Backbone.Model) {
+                //rawData = dataListModel.get('data');
+            } else {
+                return dataListModel.isPrimaryRequestInProgress()
+            }
+            
         };
 
         self.isError = function() {
@@ -43,7 +53,12 @@ define([
         };
 
         self.refresh = function(chartConfig) {
-            var rawData = dataListModel.getFilteredItems();
+            var rawData = [];
+            if(dataListModel instanceof Backbone.Model) {
+                rawData = dataListModel.get('data');
+            } else {
+                rawData = dataListModel.getFilteredItems();
+            }
             self.data = contrail.checkIfFunction(chartConfig['dataParser']) ? chartConfig['dataParser'](rawData,chartConfig) : rawData;
 
             if(chartConfig['doBucketize'] == true) {

@@ -121,7 +121,8 @@ define([
         },
 
         bindListeners: function() {
-            var self = this;
+            var self = this,
+                viewConfig = self.viewConfig;
             if(self.model instanceof Backbone.Model) {
                 self.model.on("change",function() {
                     self.renderChart($(self.$el), self.viewConfig, self.model);

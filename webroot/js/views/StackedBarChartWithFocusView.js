@@ -44,6 +44,7 @@ define([
         
 
             self.cfDataSource = viewConfig.cfDataSource;
+            self.viewConfig = viewConfig;
             ChartView.prototype.bindListeners.call(self);
 
             /*if(self.model instanceof Backbone.Model) {
@@ -106,7 +107,12 @@ define([
                 return;
             }
             var self = this;
-            var data = chartViewModel.getFilteredItems();
+            var data = [];
+            if(chartViewModel instanceof Backbone.Model) {
+                data = chartViewModel.get('data');
+            } else {
+                data = chartViewModel.getFilteredItems();
+            }
             var widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ?
                     viewConfig.widgetConfig : null;
             var chartOptions = getValueByJsonPath(viewConfig, 'chartOptions', {});

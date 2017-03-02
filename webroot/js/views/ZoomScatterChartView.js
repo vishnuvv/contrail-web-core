@@ -4,13 +4,13 @@
  
 define([
     'underscore',
-    'contrail-view',
+    'chart-view',
     'core-basedir/js/models/ZoomScatterChartModel',
     'contrail-list-model',
     'core-basedir/js/views/ControlPanelView',
     'chart-utils'
-], function (_, ContrailView, ZoomScatterChartModel, ContrailListModel, ControlPanelView, chUtils) {
-    var ZoomScatterChartView = ContrailView.extend({
+], function (_, ChartView, ZoomScatterChartModel, ContrailListModel, ControlPanelView, chUtils) {
+    var ZoomScatterChartView = ChartView.extend({
         render: function () {
             var self = this,
                 viewConfig = self.attributes.viewConfig,
@@ -20,11 +20,13 @@ define([
                 deferredObj = $.Deferred(),
                 cfDataSource = self.attributes.viewConfig.cfDataSource,
                 selector = $(self.$el);
-
-            if (self.model == null && viewConfig['modelConfig'] != null) {
+            self.viewConfig = viewConfig;
+            ChartView.prototype.bindListeners.call(self);
+            /*if (self.model == null && viewConfig['modelConfig'] != null) {
                 self.model = new ContrailListModel(viewConfig['modelConfig']);
             }
-
+            
+            
             if (self.model != null) {
                 if(cfDataSource == null) {
                     self.renderChart(selector, viewConfig, self.model);
@@ -70,7 +72,7 @@ define([
 
                 window.addEventListener('resize',self.resizeFunction);
                 $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);
-            }
+            }*/
 
             if (widgetConfig !== null) {
                 self.renderView4Config($(self.$el).find('.zoom-scatter-chart-container'), self.model, widgetConfig, null, null, null);

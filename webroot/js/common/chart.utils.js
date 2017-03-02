@@ -212,9 +212,8 @@ define([
                             tooltipFn: this.defaultLineAreaTooltipFn
                         }
                     }
-                };
+            };
             var defaultViewConfigMap = {
-                 'StackedBarChartWithFocusView' : stackChartConfig,
                  'StackedAreaChartView'         : stackChartConfig,
                  "LineWithFocusChartView": {
                     viewConfig: {

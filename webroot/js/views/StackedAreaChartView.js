@@ -137,6 +137,7 @@ define([
             var showYLabel = cowu.getValueByJsonPath(chartOptions, 'showYLabel', true);
             var showXMinMax = cowu.getValueByJsonPath(chartOptions, 'showXMinMax', false);
             var showYMinMax = cowu.getValueByJsonPath(chartOptions, 'showYMinMax', false);
+            var bar = cowu.getValueByJsonPath(chartOptions, 'bar', false)
             if (!showXAxis) {
                 // Bottom we are subtracting only 20 because there may be overview chart in bottom for which we may need
                 // the bottom margin
@@ -194,13 +195,33 @@ define([
             var svg = d3.select($(selector).find('svg')[0])
 
             nv.addGraph(function() {
-              var chart = nv.models.multiBarChart()
+              var chart;
+              if (bar) {
+                  chart = nv.models.multiBarChart()
                             .x(function(d) { return d['x'] })   //We can modify the data accessor functions...
                             .y(function(d) { return d['y'] })   //...in case your data is formatted differently.
                             //.useInteractiveGuideline(true)    //Tooltips which show all data points. Very nice!
                             .showControls(false)       //Allow user to choose 'Stacked', 'Stream', 'Expanded' mode.
                             .showLegend(false)
+                            .clipEdge(true)
+                            .stacked(true);    
+              } else {
+                  chart = nv.models.stackedAreaChart()
+                            .x(function(d) { return d['x'] })   //We can modify the data accessor functions...
+                            .y(function(d) { return d['y'] })   //...in case your data is formatted differently.
+                            .useInteractiveGuideline(true)    //Tooltips which show all data points. Very nice!
+                            .showControls(false)       //Allow user to choose 'Stacked', 'Stream', 'Expanded' mode.
+                            .showLegend(false)
                             .clipEdge(true);
+                  chart.stacked.dispatch.on("areaClick.toggle", null);
+                  //Use the tooltip formatter if present
+                   if(chartOptions.tooltipFn) {
+                       chart.interactiveLayer.tooltip.contentGenerator(function (obj) {
+                            return chartOptions.tooltipFn(obj,chartOptions, yAxisFormatter);
+                        })
+                   }
+                  chart.interpolate("monotone");
+              }
 
               //Format x-axis labels with custom function.
               chart.xAxis.tickFormat(function(d) { return d3.time.format('%H:%M')(new Date(d)) });
@@ -225,7 +246,7 @@ define([
                       chart.yDomain(domain);
               }
               //initialize the chart in the svg element
-              //chart.interpolate("monotone");
+              
               svg.datum(data)
                 .call(chart)
 
@@ -251,13 +272,6 @@ define([
                                   .attr("transform", "rotate(-90)")
                                   .text(yAxisLabel);
               }
-              //chart.stacked.dispatch.on("areaClick.toggle", null);
-              //Use the tooltip formatter if present
-               /*if(chartOptions.tooltipFn) {
-                   chart.interactiveLayer.tooltip.contentGenerator(function (obj) {
-                        return chartOptions.tooltipFn(obj,chartOptions, yAxisFormatter);
-                    })
-               }*/
               //if (showControls == true || showLegend == true) {
               ChartView.prototype.renderLegend(selector, chartOptions, self.getLegendViewConfig(chartOptions));
 
