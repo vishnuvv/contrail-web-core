@@ -8,8 +8,9 @@ define([
     'handlebars',
     'lodash',
     "core-constants",
-    'contrail-list-model'
-], function (_, moment, Handlebars, lodash, cowc,ContrailListModel) {
+    'contrail-list-model',
+    'node-color-mapping'
+], function (_, moment, Handlebars, lodash, cowc,ContrailListModel, NodeColorMapping) {
     var serializer = new XMLSerializer(),
         domParser = new DOMParser();
 
@@ -314,14 +315,26 @@ define([
         };
 
         this.getRequestState4Model = function(model, data, checkEmptyDataCB) {
-            if (model.isRequestInProgress()) {
-                return cowc.DATA_REQUEST_STATE_FETCHING;
-            } else if (model.error === true) {
-                return cowc.DATA_REQUEST_STATE_ERROR;
-            } else if (model.empty === true || (contrail.checkIfFunction(checkEmptyDataCB) && checkEmptyDataCB(data))) {
-                return cowc.DATA_REQUEST_STATE_SUCCESS_EMPTY;
+            if(model instanceof Backbone.Model) {
+                if(model.fetched == false) {
+                    return cowc.DATA_REQUEST_STATE_FETCHING;
+                } else if(model.error == true) {
+                    return cowc.DATA_REQUEST_STATE_ERROR;
+                } else if(model.empty === true || (contrail.checkIfFunction(checkEmptyDataCB) && checkEmptyDataCB(data))) {
+                    return cowc.DATA_REQUEST_STATE_SUCCESS_EMPTY;
+                } else {
+                    return cowc.DATA_REQUEST_STATE_SUCCESS_NOT_EMPTY
+                }
             } else {
-                return cowc.DATA_REQUEST_STATE_SUCCESS_NOT_EMPTY
+                if (model.isRequestInProgress()) {
+                    return cowc.DATA_REQUEST_STATE_FETCHING;
+                } else if (model.error === true) {
+                    return cowc.DATA_REQUEST_STATE_ERROR;
+                } else if (model.empty === true || (contrail.checkIfFunction(checkEmptyDataCB) && checkEmptyDataCB(data))) {
+                    return cowc.DATA_REQUEST_STATE_SUCCESS_EMPTY;
+                } else {
+                    return cowc.DATA_REQUEST_STATE_SUCCESS_NOT_EMPTY
+                }
             }
         };
 
@@ -1733,8 +1746,12 @@ define([
                     groupByMap = _.sortBy(groupByMap, 'key'),
                     groupByMapLen = groupByMap.length,
                     groupByKeys = _.pluck(groupByMap, 'key');
-                if (colors != null && typeof colors == 'function') {
-                    colors = colors(groupByKeys, options.resetColor);
+                if ((options.type != null) || (colors != null && typeof colors == 'function')) {
+                    if(options.type != null) {
+                        colors = NodeColorMapping.getNodeColorMap(groupByKeys,options.resetColor,options.type);
+                    } else {
+                        colors = colors(groupByKeys, options.resetColor);
+                    }
                 }
                 for (var i = 0; i < groupByMapLen; i++) {
                     parsedData.push({
