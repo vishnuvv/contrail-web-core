@@ -9,9 +9,9 @@ define([ 'lodash',
         'monitor-infra-viewcfg','confignode-viewcfg', 'databasenode-viewcfg',
         'vrouter-viewcfg'
         ], function(
-        _,ControlNodeWidgetCfg, VRouterWidgetCfg, DatabaseNodeWidgetCfg,
+        _,ControlNodeWidgetCfg, VRouterWidgetCfg, DBNodeWidgetCfg,
         AnalyticsNodeWidgetCfg, CfgNodeWidgetCfg,MonitorInfraWidgetCfg,
-        CfgNodeModelCfg,ControlNodeModelCfg,VRouterModelCfg,DatabaseNodeModelCfg,
+        CfgNodeModelCfg,ControlNodeModelCfg,VRouterModelCfg,DBNodeModelCfg,
         AnaltyicsNodeModelCfg,MonitorInfraModelCfg,
         MonitorInfraViewCfg,CfgNodeViewCfg, DBNodeViewCfg, VRouterViewCfg) {
     var widgetCfgManager = function() {
@@ -22,7 +22,7 @@ define([ 'lodash',
 
         //Populate the available widget config maps
         $.extend(widgetCfgMap, ControlNodeWidgetCfg, VRouterWidgetCfg,
-                DatabaseNodeWidgetCfg, AnalyticsNodeWidgetCfg,
+                DBNodeWidgetCfg, AnalyticsNodeWidgetCfg,
                 CfgNodeWidgetCfg,MonitorInfraWidgetCfg);
 
         //Populate the available model config maps

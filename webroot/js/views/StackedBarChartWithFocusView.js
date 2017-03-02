@@ -47,6 +47,7 @@ define([
         
 
             self.cfDataSource = viewConfig.cfDataSource;
+            self.viewConfig = viewConfig;
             ChartView.prototype.bindListeners.call(self);
             self.renderChart($(self.$el), viewConfig, self.model);
 

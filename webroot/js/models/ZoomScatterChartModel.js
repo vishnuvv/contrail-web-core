@@ -18,11 +18,21 @@ define([
         self.loadedFromCache = dataListModel.loadedFromCache;
 
         self.isRequestInProgress = function() {
-            return dataListModel.isRequestInProgress()
+            if(dataListModel instanceof Backbone.Model) {
+                //rawData = dataListModel.get('data');
+            } else {
+                return dataListModel.isRequestInProgress()
+            }
         };
 
         self.isPrimaryRequestInProgress = function() {
-            return dataListModel.isPrimaryRequestInProgress()
+
+            if(dataListModel instanceof Backbone.Model) {
+                //rawData = dataListModel.get('data');
+            } else {
+                return dataListModel.isPrimaryRequestInProgress()
+            }
+            
         };
 
         self.isError = function() {

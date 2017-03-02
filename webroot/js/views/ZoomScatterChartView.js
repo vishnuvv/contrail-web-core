@@ -21,8 +21,9 @@ define([
                 deferredObj = $.Deferred(),
                 cfDataSource = self.attributes.viewConfig.cfDataSource,
                 selector = $(self.$el);
-
-            if (self.model == null && viewConfig['modelConfig'] != null) {
+            self.viewConfig = viewConfig;
+            ChartView.prototype.bindListeners.call(self);
+            /*if (self.model == null && viewConfig['modelConfig'] != null) {
                 self.model = new ContrailListModel(viewConfig['modelConfig']);
             }
 
