@@ -28,9 +28,9 @@ define([
             self.CELL_HEIGHT_MULTIPLER = 1;
             //Default is 12 columns. To have 3 column layout, set defaultWidth as 4
             if(self.gridAttr['defaultWidth'] != null)
-                self.COLUMN_CNT = 12/self.gridAttr['defaultWidth'];
+                self.COLUMN_CNT = 24/self.gridAttr['defaultWidth'];
 
-            self.$el.addClass('grid-stack grid-stack-12 custom-grid-stack');
+            self.$el.addClass('grid-stack grid-stack-24 custom-grid-stack');
             self.$el.attr('data-widget-id',self.elementId);
             self.gridStack = $(self.$el).gridstack({
                 float:true,
@@ -41,7 +41,8 @@ define([
                 verticalMargin:8/self.CELL_HEIGHT_MULTIPLER,
                 cellHeight: 20,
                 animate:false,
-                acceptWidgets:'label'
+                acceptWidgets:'label',
+                width: 24
             }).data('gridstack');
             
             self.$el.on('drag','.grid-stack-item',function(event,ui) {
