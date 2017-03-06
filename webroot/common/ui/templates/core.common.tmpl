@@ -2080,8 +2080,20 @@
     {{/if}}
     {{#IfCompare showLegend false operator='=='}}
         {{#IfCompare overViewText true operator='=='}}
-            <div class="chart-container flex-1 flex-dir-row {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
-                <div class="overview-text flex-1"></div>
+            <div class="chart-container flex-1 flex-dir-column {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
+                <div class="overview-text flex-1 flex-dir-row">
+                    {{#if overviewTextOptions.label}}
+                        <div class='title flex-2'>{{title}}</div>
+                        <div class="flex-2 flex-dir-column lbl-value-wrapper">
+                            <div class="value flex-4">120
+                                <!--<span class="unit">KB</span>-->
+                            </div>
+                            <div class="flex-1 lbl">{{overviewTextOptions.label}}</div>
+                        </div>
+                    {{else}}
+                        <div class='title'>{{title}}</div>
+                    {{/if}}
+                </div>
                 <div class="main-chart flex-5">
                     <svg class="nvd3-svg"></svg>
                 </div>

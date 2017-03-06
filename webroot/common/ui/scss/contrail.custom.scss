@@ -1565,6 +1565,9 @@ Stack area chart opacity
     display: flex;
     flex: 1;
 }
+.nv-multibar .nv-groups .nv-group {
+    fill-opacity: 1 !important;
+}
 .custom-grid-stack-item .nvd3.nv-stackedarea path.nv-area {
     fill-opacity: 1 !important;
 }
@@ -1641,4 +1644,24 @@ grid-stack.grid-stack-24 .grid-stack-item{
         &.grid-stack-item[data-gs-min-width='#{$i}'] { min-width: (100% / $gridstack-columns) * $i; }
         &.grid-stack-item[data-gs-max-width='#{$i}'] { max-width: (100% / $gridstack-columns) * $i; }
     }
+}
+
+.chart-container .overview-text {
+    .title {
+        align-items: center;
+    }
+    .lbl-value-wrapper {
+        align-items: flex-end;
+        .lbl {
+            color: #393939;
+            font-size: 10px;
+            align-content: center;
+        }
+        .value {
+            font-size: 30px !important;
+            .unit {
+                font-size: 25px;
+            }
+        }
+    }   
 }

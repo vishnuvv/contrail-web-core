@@ -195,7 +195,7 @@ define([
                             showLegend: false,
                             showControls: false,
                             tickPadding: 8,
-                            overViewText: false,
+                            overViewText: true,
                             legendPosition: 'top',
                             margin: {
                                 left: 45,
