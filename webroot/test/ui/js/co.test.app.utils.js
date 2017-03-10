@@ -129,7 +129,7 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
             'mon-infra-alert-grid-view'   : coreWebDir + '/js/views/AlertGridView',
             'mon-infra-log-list-view'     : coreWebDir + '/js/views/LogListView',
             'mon-infra-sysinfo-view'      : coreWebDir + '/js/views/SystemInfoView',
-            'mon-infra-dashboard-view'    : coreWebDir + '/js/views/MonitorInfraDashboardView',
+            //'mon-infra-dashboard-view'    : coreWebDir + '/js/views/MonitorInfraDashboardView',
             //End - core-bundle aliases
             //Start - jquery.dep.libs aliases
             'jquery.xml2json'            : coreWebDir + '/assets/jquery/js/jquery.xml2json',
@@ -468,7 +468,7 @@ var coreBundles = {
             'mon-infra-alert-grid-view',
             'mon-infra-log-list-view',
             'mon-infra-sysinfo-view',
-            'mon-infra-dashboard-view'
+            //'mon-infra-dashboard-view'
         ],
         'contrail-core-views': [
             'core-basedir/js/views/GridView',

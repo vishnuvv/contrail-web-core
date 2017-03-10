@@ -181,7 +181,7 @@ constants.controllerModules = [
               "contrail-view",
               "controller-init",
               "contrail-model",
-              "mon-infra-dashboard-view",
+              //"mon-infra-dashboard-view",
               "core-basedir/js/views/LoginWindowView",
               "core-basedir/js/views/CarouselView",
               "gs-view",
