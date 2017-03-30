@@ -5,6 +5,7 @@
 
 config/*.js
 
+webroot/built/*
 webroot/dist/*
 webroot/assets/*
 webroot/menu_*

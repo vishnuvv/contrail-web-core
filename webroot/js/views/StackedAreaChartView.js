@@ -39,6 +39,7 @@ define([
             cowu.updateSettingsWithCookie(viewConfig);
 
             self.viewConfig = viewConfig;
+            self.renderChart($(self.$el), viewConfig, self.model);
 
             ChartView.prototype.bindListeners.call(self);
             /*
