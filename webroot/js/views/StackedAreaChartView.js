@@ -41,6 +41,7 @@ define([
             self.viewConfig = viewConfig;
 
             ChartView.prototype.bindListeners.call(self);
+            self.renderChart($(self.$el), viewConfig, self.model);
             /*
             if(self.model instanceof Backbone.Model) {
                 self.model.on("change",function() {
