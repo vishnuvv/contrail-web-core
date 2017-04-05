@@ -247,8 +247,10 @@ define([
         //Toolbar Constants
         this.COLOR_PALETTE = 'color_palette';
         this.CHART_SETTINGS = 'chart_settings';
+        this.FULL_SCREEN = 'full_screen';
         this.COLOR_PALETTE_CLASS = 'contrailGlyph-palette';
         this.CHART_SETTINGS_CLASS = 'fa-bar-chart-o';
+        this.FULLSCREEN_CLASS = 'fa-arrows-alt';
         this.SETTINGS_MODAL_ID = 'settings_modal';
         this.SETTINGS_PREFIX_ID = 'toolbar_settings';
 
