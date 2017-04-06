@@ -2386,14 +2386,21 @@
 <script type="text/x-handlebars-template" id="gridstack-widget-template">
     <div class='custom-grid-stack-item'>
         <div class='grid-stack-item-content'>
-            <!--<div class="front">-->
-                <div class='item-content'>
+            <div class="flip">
+                <div class="front">
+                    <div class='item-container'>
+                        <i class="fa fa-info-circle flip-button"></i>
+                        <div class='item-content'>
+                        </div>
+                    </div>
                 </div>
-            <!--</div>
-            <div class="back">
-                <div class='widget-dropdown slick-dropdown'></div>
-                <i class="fa fa-remove"></i>
-            </div>-->
+                <div class="back">
+                    <div>Select Widget</div>
+                    <div class='widget-dropdown slick-dropdown'></div>
+                    <button type="submit" class="btn btn-default">Submit</button>
+                    <!--<i class="fa fa-remove"></i>-->
+                </div>
+            </div>
         </div>
     </div>
 </script>

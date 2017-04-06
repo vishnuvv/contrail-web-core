@@ -252,6 +252,26 @@ define([
                 }
             });
 
+            $(currElem).find('.flip').flip({
+                // axis: 'x',
+                trigger: 'manual',
+                // forceWidth:true
+            });
+
+            //Listener for flipping widget
+            $(currElem).find('.flip-button').on('click',function() {
+            // $(currElem).dblclick(function() {
+                $(currElem).find('.flip').flip(true);
+            });
+            $(currElem).find('.btn-default').on('click',function() {
+                $(currElem).find('.flip').flip(false);
+                // $(currElem).flip({
+                //     axis: 'x',
+                //     trigger: 'manual',
+                //     // forceWidth:true
+                // });
+            });
+            //Listener for removing widgets
             $(currElem).find('.fa-remove').on('click',function() {
                 self.gridStack.removeWidget($(currElem));
             });

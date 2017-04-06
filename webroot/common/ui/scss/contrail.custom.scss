@@ -1221,20 +1221,29 @@ button#close-error-popup{
   color: #888;
   text-decoration:underline;
 }
-.custom-grid-stack .custom-grid-stack-item .item-content {
-    height: 100%;
-}
-.custom-grid-stack .drag-handle {
-    cursor: move;
+.custom-grid-stack {
+    // width:100%;
+    .drag-handle {
+        cursor: move;
+    }
+    .custom-grid-stack-item {
+        .item-container {
+            height: 100%;
+        }
+        .item-content {
+            height: 100%;
+            .nv-axislabel,.axis-label,.contrail-chart-title {
+                text {
+                    text-anchor: middle;
+                    font-weight: 600;
+                    font-size: 11px !important;
+
+                }
+            }
+        }
+    }
 }
 
-.custom-grid-stack .custom-grid-stack-item .item-content .nv-axislabel,
-.custom-grid-stack .custom-grid-stack-item .item-content .axis-label,
-.custom-grid-stack .custom-grid-stack-item .item-content .contrail-chart-title text {
-    text-anchor: middle;
-    font-weight: 600;
-    font-size: 11px !important;
-}
 .custom-grid-stack .custom-grid-stack-item:hover {
     border: 0px solid #f2f2f2;
 }
@@ -1794,9 +1803,17 @@ Alarms popup css
             display:none;
         }
     }
-    .fa.fa-remove {
-        right: 20px;
-        position: absolute;
+    .back {
+        position:relative;
+        .fa.fa-remove {
+            right: 20px;
+            position: absolute;
+        }
+    }
+    .flip-button {
+        position:absolute;
+        top:0px;
+        right:0px;
     }
 }
 
@@ -1810,3 +1827,17 @@ Alarms popup css
         &.grid-stack-item[data-gs-max-width='#{$i}'] { max-width: (100% / $gridstack-columns) * $i; }
     }
 }
+
+#toolbar {
+    position: fixed;
+    top: 89px;
+    right: 20px;
+    z-index: 2000;
+}
+
+#content-container {
+    // width:100%;
+}
+// #main-content {
+//     width:100%;
+// }
