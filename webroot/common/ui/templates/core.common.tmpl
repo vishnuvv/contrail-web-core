@@ -869,7 +869,7 @@
 </script>
 
 <script type="text/x-handlebars-template" id="core-section-view-template">
-    <div data-bind="{{#if viewConfig.visible}} visible: {{viewConfig.visible}} {{/if}}">
+    <div data-bind="{{#if viewConfig.visible}} visible: {{viewConfig.visible}} {{/if}}" class="{{#if viewConfig.cssClass}} {{viewConfig.cssClass}} {{/if}}">
         {{#if viewConfig.title}}
             <h5 class="margin-0-0-10">{{viewConfig.title}}</h5>
         {{/if}}
@@ -2069,7 +2069,7 @@
         {{/IfCompare}}
         {{#IfCompare overViewText true operator='=='}}
             <div class="chart-overview-wrapper flex flex-dir-row flex-5">
-                <div class="overview-text flex-1"></div>
+                <div class="overview-text {{#if overviewCss}} {{overviewCss}} {{else}} flex-1 {{/if}}"></div>
                 <div class="main-chart flex-5">
                     <svg class="nvd3-svg"></svg>
                 </div>
@@ -2081,14 +2081,16 @@
     {{#IfCompare showLegend false operator='=='}}
         {{#IfCompare overViewText true operator='=='}}
             <div class="chart-container flex-1 flex-dir-column {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
-                <div class="overview-text flex-1 flex-dir-row">
-                    {{#if overviewTextOptions.label}}
+                <div class="overview-text {{#if overviewCss}} {{overviewCss}} {{else}} flex-1 {{/if}} flex-dir-row">
+                    {{#if overviewTextOptions}}
                         <div class='title flex-2'>{{title}}</div>
                         <div class="flex-2 flex-dir-column lbl-value-wrapper">
                             <div class="value flex-4">{{overviewTextOptions.value}}
                                 <!--<span class="unit">KB</span>-->
                             </div>
-                            <div class="flex-1 lbl">{{overviewTextOptions.label}}</div>
+                            {{#if overviewTextOptions.label}}
+                                <div class="flex-1 lbl">{{overviewTextOptions.label}}</div>
+                            {{/if}}
                         </div>
                     {{else}}
                         <div class='title'>{{title}}</div>

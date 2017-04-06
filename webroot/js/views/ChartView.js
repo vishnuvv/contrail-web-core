@@ -48,11 +48,14 @@ define([
         },
         renderLegend: function (selector, chartOptions, viewConfig) {
             var legendContainer = $(selector).find('div.legend');
-            var legendView = new chartOptions['legendView']({
-                el: $(legendContainer),
-                viewConfig: viewConfig
-            });
-            legendView.render();
+            if (chartOptions['legendView'] != null) {
+                var legendView = new chartOptions['legendView']({
+                    el: $(legendContainer),
+                    viewConfig: viewConfig
+                });
+                legendView.render();    
+            }
+            
         },
         render: function () {
             var loadingSpinnerTemplate = contrail.getTemplate4Id(cowc.TMPL_LOADING_SPINNER),

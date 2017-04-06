@@ -2026,6 +2026,7 @@ define([
         this.HTTP_STATUS_CODE_AUTHORIZATION_FAILURE = 401;
 
         //Node color schemes
+        this.RESOURCE_UTILIZATION_CHART_COLOR = ['#599AC9'];
         this.SINGLE_NODE_COLOR = ['#6f97ae'];
         this.THREE_NODE_COLOR = ['#81d4fa', '#03a9f4', '#01579b'];
         this.FIVE_NODE_COLOR = ['#81d4fa', '#03a9f4', '#01579b', 'rgb(185,213,232)', 'rgb(209,230,245)'];

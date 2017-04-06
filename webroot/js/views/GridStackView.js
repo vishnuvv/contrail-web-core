@@ -185,10 +185,13 @@ define([
                 self.gridStack.addWidget(currElem,widgetCnt/self.COLUMN_CNT,(widgetCnt%self.COLUMN_CNT)/**self.VIRTUAL_COLUMNS*/,
                     ifNull(itemAttr['width'],defaultWidth),ifNull(itemAttr['height'],defaultHeight),true);
             }
+            if (cfg['itemAttr']['cssClass'] != null) {
+                $(currElem).find('.grid-stack-item-content').addClass(cfg['itemAttr']['cssClass']);
+            }
             self.widgets.push(currElem);
             var modelCfg = cfg['modelCfg'],model;
             //Add cache Config
-            var modelId = cfg['modelCfg']['modelId'];
+            var modelId = _.result(cfg, 'modelCfg.modelId', null);
             //if there exists a mapping of modelId in widgetConfigManager.modelInstMap, use it
             //Maintain a mapping of cacheId vs contrailListModel and if found,return that
             var cachedModelObj = widgetConfigManager.modelInstMap[modelId];

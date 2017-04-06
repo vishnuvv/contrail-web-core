@@ -28,22 +28,49 @@ define(
                                                 defaultHeight: 8
                                             },
                                             widgetCfgList: [{
+                                                id: 'dashboard-resource-utilization',
+                                                itemAttr: {
+                                                    height: 1,
+                                                    width: 1/2
+                                                }
+                                            },{
+                                                id: 'dashboard-virtualization-overview',
+                                                itemAttr: {
+                                                    height: 1,
+                                                    width: 1/2,
+                                                }
+                                            },{
+                                                id:'monitor-infra-scatterchart-view',
+                                                itemAttr:{
+                                                    height: 1,
+                                                    width: 1/3,
+                                                    cssClass: 'panel panel-default',
+                                                }
+                                            }, {
+                                                id:'vrouter-flow-rate-area-chart',
+                                                itemAttr: {
+                                                    cssClass: 'panel panel-default'    
+                                                }
+                                            },{
                                                 id: 'confignode-requests-served',
                                                 itemAttr: {
                                                     height: 1,
-                                                    width: 1/3
+                                                    width: 1/3,
+                                                    cssClass: 'panel panel-default'
                                                 }
                                             },{
                                                 id: 'analyticsnode-sandesh-message-info',
                                                 itemAttr: {
                                                     height: 1,
-                                                    width: 1/3
+                                                    width: 1/3,
+                                                    cssClass: 'panel panel-default'
                                                 }
-                                            }, {
+                                            },{
                                                 id:'databasenode-disk-usage-info',
                                                 itemAttr:{
                                                     height: 1,
                                                     width: 1/3,
+                                                    cssClass: 'panel panel-default',
                                                     config:{
                                                         nodeType:'database-node'
                                                     }
