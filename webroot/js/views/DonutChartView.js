@@ -5,16 +5,21 @@
 define([
     'underscore',
     'contrail-view',
+    'chart-view',
     'core-basedir/js/models/DonutChartModel',
     'contrail-list-model',
     'chart-utils'
-], function (_, ContrailView, DonutChartModel, ContrailListModel, chUtils) {
-    var DonutChartView = ContrailView.extend({
+], function (_, ContrailView, ChartView, DonutChartModel, ContrailListModel, chUtils) {
+    var DonutChartView = ChartView.extend({
         settingsChanged: function(colorModel) {
             var self = this,
                 vc = self.attributes.viewConfig;
             vc.resetColor = true;
             self.renderChart($(self.$el), vc, self.model);
+        },
+        initialize: function() {
+            var self = this;
+            ChartView.prototype.bindListeners.call(self);
         },
         render: function () {
             var self = this,
@@ -30,7 +35,7 @@ define([
 
             self.renderChart(selector, viewConfig, self.model);
 
-            if (self.model !== null) {
+            /*if (self.model !== null) {
                 if(self.model.loadedFromCache || !(self.model.isRequestInProgress())) {
                     self.renderChart(selector, viewConfig, self.model);
                 }
@@ -50,7 +55,7 @@ define([
 
                 $(window).on('resize',self.resizeFunction);
 
-            }
+            }*/
         },
 
         renderChart: function (selector, viewConfig, chartViewModel) {
