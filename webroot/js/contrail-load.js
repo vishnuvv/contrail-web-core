@@ -98,6 +98,7 @@ $(document).ready(function () {
             $('#sidebar').removeClass('scrolled');
             $('#breadcrumbs').removeClass('scrolled');
             $('#back-to-top').fadeOut();
+            $('#page-content').css('z-index',0);
         }
         else {
             $("#pageHeader").hide();
@@ -105,6 +106,7 @@ $(document).ready(function () {
             $('#sidebar').addClass('scrolled');
             $('#breadcrumbs').addClass('scrolled');
             $('#back-to-top').fadeIn();
+            $('#page-content').css('z-index',-1);
         }
         if (currentScroll < scrollHeight) {
             previousScroll = $(window).scrollTop();

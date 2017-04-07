@@ -1872,3 +1872,148 @@ Alarms popup css
     background-color: #aaa;
 }
 
+/*Gohan Config CSS Ends*/
+.sidebar #sidebar-shortcuts .sidebar-shortcuts-large-hover{
+    display:none;
+    background-color: #FFF;
+    -webkit-box-shadow: 2px 1px 2px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 1px 2px 0 rgba(0, 0, 0, 0.1);
+    border-color: #CCC;
+    position: absolute;
+    width: 175px;
+    margin-left:43px;
+    margin-top:-40px;
+}
+
+.sidebar #sidebar-shortcuts .sidebar-shortcuts-large-hover > .btn {
+    text-align: center;
+    width: 41px;
+    line-height: 33px;
+    padding: 0;
+    margin-bottom: 2px;
+    border-width: 0;
+}
+
+.breadcrum-drop-down-menu{
+    display: none;
+    position: absolute;
+    background-color: white;
+    left: 14px !important;
+    max-height: 700px;
+    width: auto;
+    margin: 5px auto;
+    padding: 0px;
+}
+.breadcrum-drop-down-menu ul{
+    list-style:none;
+}
+.l1menu-header{
+    font-size: 14px;
+    font-weight: 600;
+}
+.l2menu-header{
+    font-size: 13px;
+    font-weight:600;
+    color: #393939;
+}
+.l3menu-header{
+    font-size: 12px;
+    font-weight: 500;
+    color: #393939;
+}
+.l2menu-header:hover,
+.l3menu-header:hover{
+    color: #3182bd;
+    cursor: pointer;
+    background: #c6dbef;
+    font-weight: 600;
+}
+.breadcrumbs .breadcrumb > li:hover .breadcrum-drop-down-menu{
+    display: block;
+}
+#drop-down-l0-menu-area div:first-child{
+    overflow-y: auto;
+    overflow-x: none;
+    max-height: 700px;
+    max-width: 950px;
+}
+#drop-down-l0-menu-area #nav-search-input{
+    width: 300px;
+}
+#drop-down-l0-menu-area{
+    left: 0px !important;
+}
+#drop-down-l0-menu-area .row{
+    padding: 10px;
+}
+#drop-down-l1-menu-area{
+    width: 750px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+#drop-down-l2-menu-area{
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+/* #drop-down-l2-menu-area{
+    left: 205px !important;
+} */
+#drop-down-l2-menu-area .l3menu-header{
+    padding-left: 10px;
+}
+/* .l1menu-header > .l2menu-header{
+    padding-top:20px !important;
+}
+.l2menu-header > div:last-child{
+    margin-bottom:20px !important;
+} */
+.breadcrumbs .breadcrumb > li{
+    line-height: 27px;
+    position: relative;
+}
+.breadcrumb-menu-highlight-search{
+    border-bottom: 1px dashed #3182bd;
+    border-top: 1px dashed #3182bd;
+    text-decoration: none;
+    background-color: rgba(49, 189, 163, 0.79);
+}
+.breadcrumb-menu-highlight-search div{
+    color: #fff !important;
+    font-weight: 600;
+}
+.breadcrumb-menu-highlight{
+    color: #3182bd;
+    background: #c6dbef;
+    font-weight: 600;
+}
+.col-xs-15,
+.col-sm-15,
+.col-md-15,
+.col-lg-15 {
+    position: relative;
+    min-height: 1px;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+.col-xs-15 {
+    width: 20%;
+    float: left;
+}
+@media (min-width: 768px) {
+.col-sm-15 {
+        width: 20%;
+        float: left;
+    }
+}
+@media (min-width: 992px) {
+    .col-md-15 {
+        width: 20%;
+        float: left;
+    }
+}
+@media (min-width: 1200px) {
+    .col-lg-15 {
+        width: 20%;
+        float: left;
+    }
+}
