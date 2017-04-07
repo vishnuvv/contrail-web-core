@@ -2242,7 +2242,9 @@ define([
                                 data: JSON.stringify(postData)
                             }).done(function(response) {
                                 if(typeof(statsConfig['parser']) == 'function') {
-                                    listModel.setData(statsConfig['parser'](response));
+                                    var data = statsConfig['parser'](response);
+                                    listModel.setData(data);
+                                    defObj.resolve(data);
                                 } else {
                                     var data = getValueByJsonPath(response,'data',[]);
                                     //Copying queryJSON property from request to response
