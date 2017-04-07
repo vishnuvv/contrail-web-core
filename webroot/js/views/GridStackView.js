@@ -39,7 +39,7 @@ define([
             self.$el.find('.custom-grid-stack').addClass('grid-stack grid-stack-24');
             self.$el.attr('data-widget-id',self.elementId);
             self.gridStack = $(self.$el).find('.custom-grid-stack').gridstack({
-                float:true,
+                // float:true,
                 handle:'.drag-handle',
                 resizable: {
                     handles:'sw,se',
@@ -54,6 +54,7 @@ define([
             self.$el.find('.fa-plus').on('click',function() {
                 self.add();
             });
+
             self.$el.on('dragstart',function(event,ui) {
                 self.$el.find('.grid-stack-item').on('drag',function(event,ui) {
                     $('.custom-grid-stack').addClass('show-borders');
@@ -101,7 +102,7 @@ define([
             return true;
         },
         saveGrid : function () {
-            // return;
+            return;
             var self = this;
             var isValidLayout = true;
             var serializedData = _.map(self.$el.find('.custom-grid-stack-item:visible'), function (el) {
@@ -234,15 +235,14 @@ define([
                 dataTextField: "name",
                 dataValueField: "value",
                 dropdownCssClass: 'min-width-150',
+                defaultValueId: 0,
                 data: _.map(widgetConfigManager.getWidgetList(),function(val,idx) {
-                    console.info(val);
                     return {
                         name: val['val'],
                         value: val['id']
                     };
                 }),
                 change: function(e) {
-                    console.info(e,e.val);
                     //Remove the current widget
                     var currView = $(currElem).find('.item-content').data('ContrailView');
                     if(currView != null)
@@ -252,31 +252,17 @@ define([
                 }
             });
 
-            $(currElem).find('.flip').flip({
-                // axis: 'x',
-                trigger: 'manual',
-                // forceWidth:true
-            });
-
             //Listener for flipping widget
             $(currElem).find('.flip-button').on('click',function() {
-            // $(currElem).dblclick(function() {
-                $(currElem).find('.flip').flip(true);
+                $(currElem).find('.flip').css("transform", "rotateX(180deg)");
             });
-            $(currElem).find('.btn-default').on('click',function() {
-                $(currElem).find('.flip').flip(false);
-                // $(currElem).flip({
-                //     axis: 'x',
-                //     trigger: 'manual',
-                //     // forceWidth:true
-                // });
+            $(currElem).find('.btn-primary').on('click',function() {
+                $(currElem).find('.flip').css("transform", "");
             });
             //Listener for removing widgets
             $(currElem).find('.fa-remove').on('click',function() {
                 self.gridStack.removeWidget($(currElem));
             });
-
-            // $(currElem).find('.widget-dropdown').hide();
 
             self.widgets.push(currElem);
             self.renderWidget(cfg,currElem);
