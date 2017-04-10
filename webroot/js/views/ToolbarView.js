@@ -21,20 +21,23 @@ define([
             self.$el.html(template());
             $(".tool-container").remove();
             $(self.$el).append(toolBarContent());
+
             self.settings = cowu.getValueByJsonPath(options,
-                    "attributes;viewConfig;settings", []);
+                    "viewCfg;settings", []);
             _.each(self.settings, function(setting) {
                 var iconHtml = '<a id="' + setting.id + '" href="#"><i class="fa ' +
                     self.getStyleClassForIcon(setting.id) + '"></i></a>';
                 $(eleSettingItems).append(iconHtml);
             });
+
             self.toolbar = $(eleSettings).toolbar({
                 content: eleSettingItems,
                 position: "left",
-                adjustment: 35,
+                adjustment: 50,
                 event: 'click',
                 hideOnClick: true
             }).data('toolbar');
+
             $(eleSettings).on('toolbarHidden', function(){
                 $(".tool-container").removeClass("show-tool-container");
                 $("#" + cowc.SETTINGS_MODAL_ID).modal("hide");
@@ -43,9 +46,12 @@ define([
                 }
                 self.removeSelectedClass()
             });
+
             $(eleSettings).on('toolbarItemClick', function(event, item){
                 if($(item).attr('id') == cowc.FULL_SCREEN) {
                     cowu.toggleFullScreen();	
+                    $('.tool-container').hide();
+                    $('#toolbar_settings').removeClass('pressed');
                 } else {
                     self.renderOnClick($(item).attr('id'));
                 }
@@ -85,6 +91,9 @@ define([
                        'onSave': function() {
                            if(cfgObj.model) {
                                isSaveClicked = true;
+                               //Hide the toolbar
+                               $('.tool-container').hide();
+                               $('#toolbar_settings').removeClass('pressed');
                                cfgObj.model.onSave();
                            }
                            $("#" + modalId).modal('hide');
