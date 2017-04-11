@@ -2017,3 +2017,13 @@ Alarms popup css
         float: left;
     }
 }
+
+body {
+    position: relative;
+}
+.affix {
+    top: 0px;
+}
+.main-content-inner {
+    position: relative;
+}
