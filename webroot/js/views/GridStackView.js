@@ -256,7 +256,7 @@ define([
             $(currElem).find('.flip-button').on('click',function() {
                 $(currElem).find('.flip').css("transform", "rotateX(180deg)");
             });
-            $(currElem).find('.btn-primary').on('click',function() {
+            $(currElem).find('.btn-widget-update').on('click',function() {
                 $(currElem).find('.flip').css("transform", "");
             });
             //Listener for removing widgets

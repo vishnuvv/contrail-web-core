@@ -4,13 +4,14 @@
  
 define([
     'underscore',
+    'chart-view',
     'contrail-view',
     'core-basedir/js/models/ZoomScatterChartModel',
     'contrail-list-model',
     'core-basedir/js/views/ControlPanelView',
     'chart-utils'
-], function (_, ContrailView, ZoomScatterChartModel, ContrailListModel, ControlPanelView, chUtils) {
-    var ZoomScatterChartView = ContrailView.extend({
+], function (_, ChartView, ContrailView, ZoomScatterChartModel, ContrailListModel, ControlPanelView, chUtils) {
+    var ZoomScatterChartView = ChartView.extend({
         render: function () {
             var self = this,
                 viewConfig = self.attributes.viewConfig,
@@ -25,7 +26,7 @@ define([
                 self.model = new ContrailListModel(viewConfig['modelConfig']);
             }
 
-            if (self.model != null) {
+            /*if (self.model != null) {
                 if(cfDataSource == null) {
                     self.renderChart(selector, viewConfig, self.model);
                 } else if(self.model.loadedFromCache == true) {
@@ -69,12 +70,12 @@ define([
                 },cowc.THROTTLE_RESIZE_EVENT_TIME);
 
                 window.addEventListener('resize',self.resizeFunction);
-                $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);
-            }
-
-            if (widgetConfig !== null) {
-                self.renderView4Config($(self.$el).find('.zoom-scatter-chart-container'), self.model, widgetConfig, null, null, null);
-            }
+                $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);*/
+                ChartView.prototype.bindListeners.call(self);
+                self.renderChart($(self.$el), viewConfig, self.model);
+                if (widgetConfig !== null) {
+                    self.renderView4Config($(self.$el).find('.zoom-scatter-chart-container'), self.model, widgetConfig, null, null, null);
+                }
         },
 
         renderChart: function (selector, viewConfig, dataListModel) {
@@ -169,9 +170,9 @@ define([
 
         plotZoomScatterChart(chartView, chartConfig, chartOptions, selector);
 
-        if (chartModel.isPrimaryRequestInProgress() && !chartModel.loadedFromCache) {
+        /*if (chartModel.isPrimaryRequestInProgress() && !chartModel.loadedFromCache) {
             dataLoadingHandler(chartView, chartConfig, chartOptions, chartDataRequestState)
-        } else if (chartModel.isError() === true) {
+        } else*/ if (chartModel.isError() === true) {
             dataErrorHandler(chartView, chartConfig, chartDataRequestState);
         } else if(chartModel.isEmpty() === true) {
             dataEmptyHandler(chartView, chartConfig, chartDataRequestState)

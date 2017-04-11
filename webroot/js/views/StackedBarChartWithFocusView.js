@@ -28,6 +28,9 @@ define([
             self.renderChart($(self.$el), vc, self.model);
         },
 
+        initialize: function() {
+
+        },
         render: function () {
             var viewConfig = this.attributes.viewConfig,
                 ajaxConfig = viewConfig['ajaxConfig'],
@@ -45,6 +48,7 @@ define([
 
             self.cfDataSource = viewConfig.cfDataSource;
             ChartView.prototype.bindListeners.call(self);
+            self.renderChart($(self.$el), viewConfig, self.model);
 
             /*if(self.model instanceof Backbone.Model) {
                 self.model.on("change",function() {
@@ -106,7 +110,7 @@ define([
                 return;
             }
             var self = this;
-            var data = chartViewModel.getFilteredItems();
+            var data = chartViewModel.get('data');
             var chartTemplate = contrail.getTemplate4Id('core-stacked-bar-chart-template');
             var widgetConfig = contrail.checkIfExist(viewConfig.widgetConfig) ?
                     viewConfig.widgetConfig : null;
