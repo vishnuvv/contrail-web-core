@@ -2021,9 +2021,16 @@ Alarms popup css
 body {
     position: relative;
 }
-.affix {
+#sidebar.affix,
+#breadcrumbs.affix {
     top: 0px;
+}
+#toolbar_settings.affix {
+    top: 45px;
 }
 .main-content-inner {
     position: relative;
+}
+#main-container {
+    height: 700px;
 }

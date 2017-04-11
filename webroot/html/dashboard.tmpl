@@ -126,6 +126,7 @@
 </script>
 <script type="text/x-handlebars-template" id="app-container-tmpl">
 
+    <div id="toolbar"></div>
     <div id="pageHeader" class="navbar navbar-default ace-save-state">
         <div id="error-container" class="alert-error">
            <div id="msg-container"><span class="error-font-weight">Error : </span><span id="error-msg-container"></span></div>
@@ -179,14 +180,14 @@
     </div>
 
     <div id="main-container" class="main-container ace-save-state">
-        <div id="sidebar" class="sidebar responsive ace-save-state" data-sidebar=true" data-sidebar-scroll="true" data-sidebar-hover="true">
+        <div data-spy="affix" data-offset-top="45" id="sidebar" class="sidebar responsive ace-save-state" data-sidebar=true" data-sidebar-scroll="true" data-sidebar-hover="true">
             <div class="sidebar-shortcuts" id="sidebar-shortcuts"></div>
             <ul id="menu" class="nav nav-list"></ul>
         </div>
 
         <div id="main-content" class="main-content">
             <div class="main-content-inner">
-                <div id="breadcrumbs" class="breadcrumbs ace-save-state fixed">
+                <div data-spy="affix" data-offset-top="45" id="breadcrumbs" class="breadcrumbs ace-save-state fixed">
                     <ul id="breadcrumb" class="breadcrumb"></ul>
                     <div id="nav-search" class="nav-search">
                         <form id="search-form" onsubmit="searchSiteMap();">

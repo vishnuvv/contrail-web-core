@@ -111,6 +111,7 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
     if(env == "dev") {
         var devAliasMap = {
             //Start - Core-bundle aliases
+            'toolbar-view'                : coreWebDir + '/js/views/ToolbarView',
             'core-utils'                  : coreWebDir + '/js/common/core.utils',
             'core-hash-utils'             : coreWebDir + '/js/common/core.hash.utils',
             'core-constants'              : coreWebDir + '/js/common/core.constants',
@@ -1230,6 +1231,13 @@ if (typeof document !== 'undefined' && document) {
                         require(['core-bundle'],function() {
                             if(loadUtils.getCookie('region') != "All Regions")
                                 layoutHandler.load(menuXML);
+                                //Initialize toolbar
+                                require(['toolbar-view'],function(ToolbarView) {
+                                    new ToolbarView({
+                                        el: $('#toolbar'),
+                                        viewCfg: ctwvc.getToolbarViewConfig()
+                                    });
+                                });
                         });
                     });
                 });
