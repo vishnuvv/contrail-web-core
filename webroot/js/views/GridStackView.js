@@ -254,9 +254,12 @@ define([
 
             //Listener for flipping widget
             $(currElem).find('.flip-button').on('click',function() {
+                //Add transform-3d property
+                $(currElem).find('.flip').css("transform-style", "preserve-3d");
                 $(currElem).find('.flip').css("transform", "rotateX(180deg)");
             });
             $(currElem).find('.btn-widget-update').on('click',function() {
+                $(currElem).find('.flip').css("transform-style", "");
                 $(currElem).find('.flip').css("transform", "");
             });
             //Listener for removing widgets

@@ -1548,6 +1548,11 @@ Stack area chart opacity
     fill-opacity: 1 !important;
 }
 /* Custom tooltip CSS - Starts*/
+.custom-grid-stack-item {
+    .btn-widget-update {
+        margin-left: 10px;
+    }
+}
 .custom-grid-stack-item .popover.popover-tooltip .popover-content {
     margin-top: -74px;
 }
@@ -1842,17 +1847,18 @@ Alarms popup css
 //     width:100%;
 // }
 
+// Start - Flip Styles
 .flip-container {
     position: relative;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    // z-index: 1;
     perspective: 1000;
 }
 .flip {
     width: 100%;
     height: 100%;
-    transform-style: preserve-3d;
+    // transform-style: preserve-3d;
     transition: all 1.0s linear;
 }
 
@@ -1871,6 +1877,7 @@ Alarms popup css
     text-align: center;
     background-color: #aaa;
 }
+//End - flip styles
 
 /*Gohan Config CSS Ends*/
 .sidebar #sidebar-shortcuts .sidebar-shortcuts-large-hover{
