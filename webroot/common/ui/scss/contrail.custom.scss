@@ -1808,14 +1808,15 @@ Alarms popup css
         //     display:none;
         // }
     }
-    /*.back {
+    .back {
         position:relative;
         .fa.fa-remove {
             right: 20px;
             position: absolute;
         }
-    }*/
+    }
     .flip-button {
+        z-index: 1000;
         position:absolute;
         top:0px;
         right:0px;

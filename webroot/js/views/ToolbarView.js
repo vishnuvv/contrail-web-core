@@ -33,7 +33,7 @@ define([
             self.toolbar = $(eleSettings).toolbar({
                 content: eleSettingItems,
                 position: "left",
-                adjustment: 50,
+                adjustment: 65,
                 event: 'click',
                 hideOnClick: true
             }).data('toolbar');
@@ -47,11 +47,19 @@ define([
                 self.removeSelectedClass()
             });
 
+            function closeToolbar() {
+                $('.tool-container').hide();
+                $('#toolbar_settings').removeClass('pressed');
+            }
             $(eleSettings).on('toolbarItemClick', function(event, item){
                 if($(item).attr('id') == cowc.FULL_SCREEN) {
                     cowu.toggleFullScreen();	
-                    $('.tool-container').hide();
-                    $('#toolbar_settings').removeClass('pressed');
+                    closeToolbar();
+                } else if($(item).attr('id') == cowc.ADD_WIDGET) {
+                    var gridStackView = $('.carousel-content').data('ContrailView');
+                    gridStackView.add();
+                    $('.fa-info-circle:last').click();
+                    closeToolbar();
                 } else {
                     self.renderOnClick($(item).attr('id'));
                 }
@@ -139,6 +147,9 @@ define([
                     break;
                 case cowc.FULL_SCREEN :
                     classStyle = cowc.FULLSCREEN_CLASS;
+                    break;
+                case cowc.ADD_WIDGET :
+                    classStyle = cowc.ADD_WIDGET_CLASS;
                     break;
                 case cowc.CHART_SETTINGS :
                     classStyle = cowc.CHART_SETTINGS_CLASS;

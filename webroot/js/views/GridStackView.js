@@ -199,7 +199,7 @@ define([
 
             if(typeof(cfg) == 'undefined') {
                 currElem.attr('data-gs-height',8);
-                currElem.attr('data-gs-width',6);
+                currElem.attr('data-gs-width',12);
                 self.gridStack.addWidget(currElem);
             } else {
                 var itemAttr = ifNull(cfg['itemAttr'],{});
