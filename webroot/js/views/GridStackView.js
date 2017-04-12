@@ -231,7 +231,7 @@ define([
                 }
             }
 
-            $(currElem).find('.widget-dropdown').contrailDropdown({
+            /*$(currElem).find('.widget-dropdown').contrailDropdown({
                 dataTextField: "name",
                 dataValueField: "value",
                 dropdownCssClass: 'min-width-150',
@@ -250,6 +250,20 @@ define([
                     $(currElem).find('.item-content').empty();
                     self.renderWidget({widgetCfg:{id:e.val}},currElem);
                 }
+            });*/
+
+            $(currElem).find('.widget-dropdown').select2({
+                data: widgetConfigManager.getWidgetList(),
+                change: function(e) {
+                }
+            });
+            $(currElem).find('.widget-dropdown').on('change',function(e) {
+                //Remove the current widget
+                var currView = $(currElem).find('.item-content').data('ContrailView');
+                if(currView != null)
+                currView.destroy();
+                $(currElem).find('.item-content').empty();
+                self.renderWidget({widgetCfg:{id:e.val}},currElem);
             });
 
             //Listener for flipping widget

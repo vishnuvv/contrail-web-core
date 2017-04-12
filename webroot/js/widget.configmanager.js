@@ -19,6 +19,7 @@ define([ 'lodash',
         var widgetCfgMap = {},
         widgetViewCfgMap = {},
         widgetModelCfgMap = {};
+
         //Populate the available widget config maps
         $.extend(widgetCfgMap, ControlNodeWidgetCfg, VRouterWidgetCfg,
                 DatabaseNodeWidgetCfg, AnalyticsNodeWidgetCfg,
@@ -26,7 +27,7 @@ define([ 'lodash',
 
         //Populate the available model config maps
         $.extend(widgetModelCfgMap, CfgNodeModelCfg,ControlNodeModelCfg,VRouterModelCfg,
-        DatabaseNodeModelCfg,AnaltyicsNodeModelCfg,MonitorInfraModelCfg);
+            DatabaseNodeModelCfg,AnaltyicsNodeModelCfg,MonitorInfraModelCfg);
 
         $.extend(widgetViewCfgMap, MonitorInfraViewCfg, CfgNodeViewCfg, DBNodeViewCfg, VRouterViewCfg);
         //,ControlNodeViewCfg,VRouterViewCfg,DatabaseNodeViewCfg,AnaltyicsNodeViewCfg,);
@@ -42,8 +43,16 @@ define([ 'lodash',
                 } else {
                     modelCfg = baseModelCfg;
                 }
+                if(_.result(baseModelCfg,'type','')) {
+                    widgetCfg['tag'] = baseModelCfg['type'];
+                }
                 widgetCfg['modelCfg'] = modelCfg;
             }
+
+            if(_.result(widgetCfg,'modelCfg.type','')) {
+                widgetCfg['tag'] = _.result(widgetCfg,'modelCfg.type');
+            }
+
             if(widgetCfg['baseView'] != null) {
                 baseViewCfg = widgetViewCfgMap[widgetCfg['baseView']];
                 if(widgetCfg['viewCfg'] != null) {
@@ -57,17 +66,28 @@ define([ 'lodash',
         }
         //Returns list of available widgets
         self.getWidgetList = function() {
+            // return _.keys(widgetCfgMap);
             var widgetMap = _.map(_.keys(widgetCfgMap),function(widgetId) {
                     return  {
                         key: widgetId,
-                        value: self.get(widgetId)
+                        value: self.get(widgetId),
+                        tag: self.get(widgetId)['tag']
                     }
                 });
+            widgetMap = _.groupBy(widgetMap,function(d) {
+                return d.tag;
+            });
             //Pick yAxisLabel if exists else return widgetId
-            return _.map(widgetMap,function(widgetCfg) {
+            return _.map(widgetMap,function(value,key) {
                 return {
-                    id:widgetCfg['key'],
-                    val:_.result(widgetCfg['value'],'viewCfg.viewConfig.chartOptions.yAxisLabel',widgetCfg['key'])
+                    text: key,
+                    children: _.map(value, function(widgetCfg) {
+                        return {
+                            id:widgetCfg['key'],
+                            text:_.result(widgetCfg['value'],'viewCfg.viewConfig.chartOptions.yAxisLabel',widgetCfg['key'])
+                        }
+                    })
+                    // val:_.result(widgetCfg['value'],'viewCfg.viewConfig.chartOptions.yAxisLabel',widgetCfg['key'])
                 }
             });
         }
