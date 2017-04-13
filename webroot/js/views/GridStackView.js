@@ -39,7 +39,7 @@ define([
             self.$el.find('.custom-grid-stack').addClass('grid-stack grid-stack-24');
             self.$el.attr('data-widget-id',self.elementId);
             self.gridStack = $(self.$el).find('.custom-grid-stack').gridstack({
-                // float:true,
+                float:true,
                 handle:'.drag-handle',
                 resizable: {
                     handles:'sw,se',
@@ -237,8 +237,6 @@ define([
                         ifNull(itemAttr['width'],widthMultiplier),ifNull(itemAttr['height'],heightMultiplier),true);
                 }
             }
-<<<<<<< HEAD
-
             /*$(currElem).find('.widget-dropdown').contrailDropdown({
                 dataTextField: "name",
                 dataValueField: "value",
@@ -259,7 +257,9 @@ define([
                     self.renderWidget({widgetCfg:{id:e.val}},currElem);
                 }
             });*/
-
+            if (itemAttr['cssClass'] != null) {
+                $(currElem).find('.grid-stack-item-content').addClass(cfg['itemAttr']['cssClass']);
+            }
             $(currElem).find('.widget-dropdown').select2({
                 data: widgetConfigManager.getWidgetList(),
                 change: function(e) {
@@ -293,18 +293,12 @@ define([
             self.renderWidget(cfg,currElem);
         },
         getModelForCfg: function(cfg,options) {
-            //If there exists a mapping of modelId in widgetConfigManager.modelInstMap, use it
-            if (cfg['itemAttr']['cssClass'] != null) {
-                $(currElem).find('.grid-stack-item-content').addClass(cfg['itemAttr']['cssClass']);
-            }
-            self.widgets.push(currElem);
-            var modelCfg = cfg['modelCfg'],model;
-            //Add cache Config
-            var modelId = _.result(cfg, 'modelCfg.modelId', null);
-            //if there exists a mapping of modelId in widgetConfigManager.modelInstMap, use it
+            //var model = cowu.getModelForCfg(cfg, options);
             //Maintain a mapping of cacheId vs contrailListModel and if found,return that
             var defObj;
             // var listModel = new ContrailListModel([]);
+            var modelCfg = cfg['modelCfg'],model;
+            var modelId = cfg['modelId'];
             var cachedModelObj = widgetConfigManager.modelInstMap[modelId];
             var isCacheExpired = true;
             if(cachedModelObj != null && 
@@ -363,9 +357,9 @@ define([
                 }
             } else if(cowu.getValueByJsonPath(cfg,'listModel','') != '') {
                 model = cfg['listModel'];
-            } else if(cowu.getValueByJsonPath(cfg,'_type') != 'contrailListModel' && cfg != null) {
+            } else if(cowu.getValueByJsonPath(cfg,'_type') != 'contrailListModel' && !$.isEmptyObject(cfg) && cfg != null) {
                 model = new ContrailListModel(cfg['config']);
-            }
+            } 
             function updateCache() {
                 if(isCacheExpired && modelId != null) {
                     widgetConfigManager.modelInstMap[modelId] = {

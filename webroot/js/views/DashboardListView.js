@@ -24,16 +24,17 @@ define(
                                         viewConfig: {
                                             elementId: 'dashboard-grid-stackview-0',
                                             gridAttr: {
-                                                defaultWidth: 24,
-                                                defaultHeight: 8
+                                                 widthMultiplier: 24,
+                                                heightMultiplier: 10
                                             },
                                             widgetCfgList: [{
                                                 id: 'dashboard-resource-utilization',
                                                 itemAttr: {
+                                                    cssClass: 'panel panel-default',
                                                     height: 1,
                                                     width: 1/2
                                                 }
-                                            },{
+                                            },/*,{
                                                 id: 'dashboard-virtualization-overview',
                                                 itemAttr: {
                                                     height: 1,
@@ -46,7 +47,7 @@ define(
                                                     width: 1/3,
                                                     cssClass: 'panel panel-default',
                                                 }
-                                            }, {
+                                            },*/ {
                                                 id:'vrouter-flow-rate-area-chart',
                                                 itemAttr: {
                                                     cssClass: 'panel panel-default'    

@@ -9,8 +9,9 @@ define([
     'lodash',
     "core-constants",
     'contrail-list-model',
-    'node-color-mapping'
-], function (_, moment, Handlebars, lodash, cowc,ContrailListModel, NodeColorMapping) {
+    'node-color-mapping',
+    //'widget-configmanager',
+], function (_, moment, Handlebars, lodash, cowc, ContrailListModel, NodeColorMapping, widgetConfigManager) {
     var serializer = new XMLSerializer(),
         domParser = new DOMParser();
 
@@ -2342,6 +2343,75 @@ define([
             return defObj;
             return listModel;
         };
+
+        self.getModelForCfg = function (cfg, options) {
+            //Maintain a mapping of cacheId vs contrailListModel and if found,return that
+            var defObj;
+            // var listModel = new ContrailListModel([]);
+            var modelId = cfg['modelId'];
+            var cachedModelObj = widgetConfigManager.modelInstMap[modelId];
+            var isCacheExpired = true;
+            if(cachedModelObj != null && 
+               (_.now() - cachedModelObj['time']) < cowc.INFRA_MODEL_CACHE_TIMEOUT * 1000) {
+                model = widgetConfigManager.modelInstMap[modelId]['model'];
+                if(model.errorList.length == 0) {
+                    isCacheExpired = false;
+                    model.loadedFromCache = true;
+                }
+            }
+            if(!isCacheExpired) {
+                model = widgetConfigManager.modelInstMap[modelId]['model'];
+            } else if(cowu.getValueByJsonPath(cfg,'source','').match(/STATTABLE|LOG|OBJECT/)) {
+                if(options['needContrailListModel'] == true) {
+                    model = cowu.fetchStatsListModel(cfg['config']);
+                } else {
+                    BbCollection = Backbone.Collection.extend({});
+                    BbModel = Backbone.Model.extend({
+                        defaults: {
+                            type: cfg['type'],
+                            data: []
+                        },
+                        isRequestInProgress: function() {
+                            if(model.fetched == false) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        },
+                        getItems: function() {
+                            return this.get('data');
+                        },
+                        initialize: function(options) {
+                            this.cfg = options['cfg'];
+                        },
+                        sync: function(method,model,options) {
+                            var defObj;
+                            if(method == "read") {
+                                defObj = cowu.fetchStatsListModel(this.cfg);
+                            }
+                            defObj.done(function(data) {
+                                model.fetched = true;
+                                options['success'](data); 
+                            });
+                        },
+                        parse: function(data) {
+                            var self = this;
+                            this.set({data: data});
+                        }
+                    });
+                    bbModelInst = new BbModel({
+                        cfg:cfg['config']
+                    });
+                    bbModelInst.fetch();
+                    model = bbModelInst;
+                }
+            } else if(cowu.getValueByJsonPath(cfg,'listModel','') != '') {
+                model = cfg['listModel'];
+            } else if(cowu.getValueByJsonPath(cfg,'_type') != 'contrailListModel' && !$.isEmptyObject(cfg) && cfg != null) {
+                model = new ContrailListModel(cfg['config']);
+            } 
+            return model;
+        }
     };
 
     function filterXML(xmlString, is4SystemLogs) {

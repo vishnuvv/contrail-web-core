@@ -226,7 +226,7 @@ define([
                             xAxisLabel: '',
                             yAxisLabel: '',
                             groupBy: 'Source',
-                            overViewText: true,
+                            //overViewText: true,
                             yAxisOffset: 0,
                             showXMinMax: true,
                             showYMinMax: true,

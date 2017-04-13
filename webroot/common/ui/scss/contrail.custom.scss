@@ -1629,7 +1629,7 @@ Stack area chart opacity
     z-index: auto !important;
     display: flex;
     flex-direction: column;
-    > .item-content {
+    .item-content {
         @extend .flex-1
     }
 }
@@ -1646,7 +1646,6 @@ div.stack-bar-chart-tooltip > .popover.popover-tooltip {
 .carousel-control-cover-story{
     z-index: 1;
 }
-<<<<<<< HEAD
 
 /*
 Alarms popup css
@@ -1880,7 +1879,6 @@ Alarms popup css
         &.grid-stack-item[data-gs-max-width='#{$i}'] { max-width: (100% / $gridstack-columns) * $i; }
     }
 }
-<<<<<<< HEAD
 
 #toolbar_settings {
     position: fixed;
@@ -2138,3 +2136,33 @@ body {
         font-size: 23px !important;
     }
 }
+.nv-multibar .nv-groups .nv-group {
+    fill-opacity: 1 !important;
+}
+.chart-container .overview-text {
+    .title {
+        align-items: center;
+    }
+    .lbl-value-wrapper {
+        align-items: flex-end;
+        .lbl {
+            color: #393939;
+            font-size: 10px;
+            align-content: center;
+        }
+        .value {
+            font-size: 30px !important;
+            .unit {
+                font-size: 25px;
+            }
+        }
+    }   
+}
+.equal, .equal > div[class*='col-'] {  
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      flex:1 0 auto;
+  }

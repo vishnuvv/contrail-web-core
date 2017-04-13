@@ -136,7 +136,7 @@ define([
                     self.model = new ContrailListModel(viewConfig['modelConfig']);
                 }
 
-                if (self.model !== null) {
+                if (self.model != null) {
                     if(cfDataSource == null) {
                         self.renderChart($(self.$el), viewConfig, self.model);
                     } else if(self.model.loadedFromCache == true) {
