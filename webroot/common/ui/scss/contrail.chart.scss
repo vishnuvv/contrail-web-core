@@ -355,3 +355,12 @@ input.ace-input[type=radio] + .ace-lbl.inactive::before {
     fill: #777;
     font-weight: normal;
 }
+
+#dendrogram-chart-id-svg-wrapper .cc-svg .radial-dendrogram{
+    .arc-label {
+       text-anchor: middle;
+       alignment-baseline: middle;
+       font-size: 9px;
+       fill: #000000;
+    }
+}
