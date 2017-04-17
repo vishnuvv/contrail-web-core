@@ -2097,12 +2097,11 @@
     {{else}}
         {{#if overViewText}}
             <div class="chart-container flex-1 flex-dir-column {{#IfCompare cssClass null operator='!='}}{{cssClass}}{{/IfCompare}}">
-                <div class="overview-text flex-1 flex-dir-row">
-                    {{#if overviewTextOptions.label}}
+                <div class="overview-text {{#if overviewCss}} {{overviewCss}} {{else}} flex-1 {{/if}} flex-dir-row">
+                    {{#if overviewTextOptions}}
                         <div class='title flex-2'>{{title}}</div>
                         <div class="flex-2 flex-dir-column lbl-value-wrapper">
-                            <div class="value flex-4">120
-                                <!--<span class="unit">KB</span>-->
+                            <div class="value flex-4">{{overviewTextOptions.value}}
                             </div>
                             <div class="flex-1 lbl">{{overviewTextOptions.label}}</div>
                         </div>
@@ -2678,7 +2677,6 @@
     <div class="notification-content"><div>    
 </div>
 </script>
-<<<<<<< HEAD
 
 <script type="text/x-handlebars-template" id="globalController-dashbaord-template">
 <div class="container" id="globalControllerwrapper">
@@ -2909,12 +2907,17 @@
     {{/each}}
 </script>
 <script type="text/x-handlebars-template" id="four-quadrant-template">
-    <div class="flex-1">
-      <div class="top-left widget-container flex-1"></div>
-      <div class="top-right widget-container flex-1"></div>
-    </div>
-    <div class="flex-1">
-      <div class="bottom-left widget-container flex-1"> </div>
-      <div class="bottom-right widget-container flex-1"></div>
+    <div class="flex-1 flex-dir-column" style="margin-left: 15px;margin-top: 20px;"> 
+    {{#if title}}
+        <div class="title" style="font-size: 15px;"> {{title}}</div>
+    {{/if}}
+        <div class="flex-1">
+          <div class="top-left widget-container flex-1"></div>
+          <div class="top-right widget-container flex-1"></div>
+        </div>
+        <div class="flex-1">
+          <div class="bottom-left widget-container flex-1"> </div>
+          <div class="bottom-right widget-container flex-1"></div>
+        </div>
     </div>
 </script>

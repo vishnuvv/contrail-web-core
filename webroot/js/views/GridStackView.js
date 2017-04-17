@@ -257,7 +257,7 @@ define([
                     self.renderWidget({widgetCfg:{id:e.val}},currElem);
                 }
             });*/
-            if (itemAttr['cssClass'] != null) {
+            if (itemAttr && itemAttr['cssClass'] != null) {
                 $(currElem).find('.grid-stack-item-content').addClass(cfg['itemAttr']['cssClass']);
             }
             $(currElem).find('.widget-dropdown').select2({

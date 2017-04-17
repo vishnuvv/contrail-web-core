@@ -49,7 +49,7 @@ define([
             }
 
             self.renderChart(selector, viewConfig, self.model);
-
+            self.updateOverviewText();
             ChartView.prototype.bindListeners.call(self);
 
             /*if (self.model !== null) {
@@ -299,16 +299,6 @@ define([
                 legend: formatLegendData(data).line
             }]
         };
-    }
-
-    function getLastYValue (data, viewConfig) {
-        var yFormatter = cowu.getValueByJsonPath(viewConfig, 'chartOptions;yFormatter');
-        var valuesArrLen = cowu.getValueByJsonPath(data, '0;values', []).length;
-        var y = cowu.getValueByJsonPath(data, '0;values;'+ (valuesArrLen - 1 )+';y', '-');
-        if (yFormatter != null) {
-            y = yFormatter(y);
-        }
-        return y;
     }
 
     return LineWithFocusChartView;

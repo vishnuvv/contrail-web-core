@@ -1997,32 +1997,50 @@ define([
             var cf = crossfilter(data);
             var buckets = cowu.bucketizeStats(data, {
                 bucketSize: 4});
-            var groupBy = getValueByJsonPath(options, 'groupBy', 'Source');
+            var groupBy = getValueByJsonPath(options, 'groupBy');
             var y1Field = getValueByJsonPath(options, 'y1Field');
             var y2Field = getValueByJsonPath(options, 'y2Field');
             var y2FieldOperation = getValueByJsonPath(options, 'y2FieldOperation');
             var y1FieldOperation = getValueByJsonPath(options, 'y1FieldOperation');
+            var y1AxisLabel = getValueByJsonPath(options, 'y1AxisLabel');
             var y2AxisLabel = getValueByJsonPath(options, 'y2AxisLabel');
             var y2AxisColor = getValueByJsonPath(options, 'y2AxisColor');
+            var y1AxisColor = getValueByJsonPath(options, 'y1AxisColor');
             var colors = getValueByJsonPath(options, 'colors');
             var resetColor = getValueByJsonPath(options,'resetColor',false);
-            var tsDim = cf.dimension(function (d) {return d.T});
-            var groupDim = cf.dimension(function (d) {return d[groupBy]});
-            var groupDimData = groupDim.group().all();
-            var groupDimKeys = _.pluck(groupDimData, 'key');
-            if (typeof colors == 'function') {
-               colors = colors(_.sortBy(groupDimKeys), resetColor);
+            var time = 'T=';
+            if (cowu.getValueByJsonPath(data, '0;T') != null) {
+                time = 'T';
             }
-            var nodeMap = {}, chartData = [];
-            $.each(groupDimData, function (idx, obj) {
-                nodeMap[obj['key']] = {
-                    key: obj['key'],
-                    values: [],
+            var tsDim = cf.dimension(function (d) {return d[time]});
+            var groupDim, groupDimData, chartData = []
+            if (groupBy != null ) {
+                cf.dimension(function (d) {return d[groupBy]});
+                groupDimData = groupDim.group().all();
+                var groupDimKeys = _.pluck(groupDimData, 'key');
+                if (typeof colors == 'function') {
+                   colors = colors(_.sortBy(groupDimKeys), resetColor);
+                }
+                var nodeMap = {};
+                $.each(groupDimData, function (idx, obj) {
+                    nodeMap[obj['key']] = {
+                        key: obj['key'],
+                        values: [],
+                        bar: true,
+                        color: colors[obj['key']] != null ? colors[obj['key']] : cowc.D3_COLOR_CATEGORY5[1]
+                    };
+                    chartData.push(nodeMap[obj['key']]);
+                });
+            } else {
+                var barData = {
+                    key: y1AxisLabel,
+                    color: (colors != null)?  ($.isArray(colors) ? colors[0] : colors) :
+                                    ($.isArray(cowc.DEFAULT_COLOR) ? cowc.DEFAULT_COLOR[0] : cowc.DEFAULT_COLOR),
                     bar: true,
-                    color: colors[obj['key']] != null ? colors[obj['key']] : cowc.D3_COLOR_CATEGORY5[1]
+                    values: []
                 };
-                chartData.push(nodeMap[obj['key']]);
-            });
+                chartData.push(barData);
+            }
             var lineChartData = {
                 key: y2AxisLabel,
                 values: [],
@@ -2038,44 +2056,59 @@ define([
                 if (sampleCnt == 0) {
                     sampleCnt = 1;
                 }
-                groupDimData = groupDim.group().all();
-                groupDimData = _.sortBy(groupDimData, 'key');
-                $.each(groupDimData, function(idx, obj) {
-                    groupCnt[obj['key']] = obj['value'];
-                });
-                var y1FieldData = groupDim.group().reduceSum(function (d) {
-                    return d[y1Field];
-                });
-                var y2FieldData = groupDim.group().reduceSum(function (d) {
-                    return d[y2Field];
-                });
-                var y1DataArr = y1FieldData.top(Infinity);
-                var y2DataArr = y2FieldData.top(Infinity);
-                var y1DataArrLen = y1DataArr.length;
-                var y2DataArrLen = y2DataArr.length;
+                if (groupBy != null) {
+                    groupDimData = groupDim.group().all();
+                    groupDimData = _.sortBy(groupDimData, 'key');
+                    $.each(groupDimData, function(idx, obj) {
+                        groupCnt[obj['key']] = obj['value'];
+                    });
+                    var y1FieldData = groupDim.group().reduceSum(function (d) {
+                        return d[y1Field];
+                    });
+                    var y2FieldData = groupDim.group().reduceSum(function (d) {
+                        return d[y2Field];
+                    });
+                    var y1DataArr = y1FieldData.top(Infinity);
+                    var y2DataArr = y2FieldData.top(Infinity);
+                    var y1DataArrLen = y1DataArr.length;
+                    var y2DataArrLen = y2DataArr.length;
 
-                for (var j = 0; j < y1DataArrLen; j++) {
-                    var y1DataObj = y1DataArr[j];
-                    if (nodeMap[y1DataObj['key']] != null ) {
-                        y1Value = y1DataObj['value'];
-                        if (y1FieldOperation == 'average') {
-                            y1Value = y1DataObj['value']/groupCnt[y1DataObj['key']];
+                    for (var j = 0; j < y1DataArrLen; j++) {
+                        var y1DataObj = y1DataArr[j];
+                        if (nodeMap[y1DataObj['key']] != null ) {
+                            y1Value = y1DataObj['value'];
+                            if (y1FieldOperation == 'average') {
+                                y1Value = y1DataObj['value']/groupCnt[y1DataObj['key']];
+                            }
+                            //avgResTime = avgResTime/1000; // converting to milli secs
+                            nodeMap[y1DataObj['key']]['values'].push({
+                                x: Math.round(i/1000),
+                                y: y1Value
+                            });
                         }
-                        //avgResTime = avgResTime/1000; // converting to milli secs
-                        nodeMap[y1DataObj['key']]['values'].push({
-                            x: Math.round(i/1000),
-                            y: y1Value
-                        });
                     }
-                }
-
-                for (var j = 0; j < y2DataArrLen; j++) {
-                    y2Value += y2DataArr[j]['value'];
-                }
-                if (y2FieldOperation == 'average') {
-                    y2Value = y2Value/sampleCnt;
+                    for (var j = 0; j < y2DataArrLen; j++) {
+                        y2Value += y2DataArr[j]['value'];
+                    }
+                    if (y2FieldOperation == 'average') {
+                        y2Value = y2Value/sampleCnt;
+                    }
+                } else {
+                    var recordsArr = tsDim.top(Infinity);
+                    var y1Value = cowu.getValueByJsonPath(recordsArr, '0;1'+y1Field, 5);
+                    var y2Value = cowu.getValueByJsonPath(recordsArr, '0;'+y2Field, 0.5);
+                    barData.values.push({
+                        date: new Date(ifNull(i, 0)/1000),
+                        timestampExtent: timestampExtent,
+                        name: y1AxisLabel,
+                        x: ifNull(i, 0)/1000,
+                        y: y1Value,
+                        color: y1AxisColor
+                        //total: maxValue
+                    });
                 }
                 lineChartData['values'].push({
+
                     x: Math.round(i/1000),
                     y: y2Value
                 });
@@ -2097,13 +2130,13 @@ define([
         }
 
         self.parseAndMergeStats = function (response,primaryDS) {
-            var primaryData = primaryDS.getItems();
-            if(primaryData.length == 0) {
+            var primaryData = $.isArray(primaryDS)? primaryDS :primaryDS.getItems();
+            if(primaryData.length == 0 && primaryDS.setData) {
                 primaryDS.setData(response);
-                return;
+                return primaryDS;
             }
             if(response.length == 0) {
-                return;
+                return primaryDS;
             }
             //If both arrays are not having first element at same time
             //remove one item accordingly
@@ -2128,7 +2161,12 @@ define([
                     }
                 }
             }
-            primaryDS.updateData(primaryData);
+            if (primaryDS.updateData) {
+                primaryDS.updateData(primaryData);
+                return;
+            } else {
+                return primaryData;
+            }
         };
 
         self.getGridItemsForWidgetId = function(widgetId) {
@@ -2193,6 +2231,7 @@ define([
             }
             var primaryRemoteConfig ;
             var vlRemoteList = [];
+            var ajaxArr = [], mergeFn, parseFn;
             for (var i = 0; i < config.length; i++) {
                 var statsConfig = config[i],whereDefObj = $.Deferred();
                 var postData = {
@@ -2225,6 +2264,12 @@ define([
                     if (statsConfig['select'] != null) {
                         postData['formModelAttrs']['select'] = statsConfig['select'];
                     }
+                    if (statsConfig['time_granularity'] != null) {
+                        postData['formModelAttrs']['time_granularity'] = statsConfig['time_granularity'];
+                    }
+                    if (statsConfig['time_granularity_unit'] != null) {
+                        postData['formModelAttrs']['time_granularity_unit'] = statsConfig['time_granularity_unit'];
+                    }
                     if (statsConfig['where'] != null) {
                         if(matchArr = statsConfig['where'].match(/node-type = (.*)/)) {
                             monitorInfraUtils.fetchHostNamesForNodeType({nodeType:matchArr[1]}).
@@ -2237,13 +2282,20 @@ define([
                             whereDefObj.resolve();
                         }
                     } else {
-                        whereDefObj.resolve();
-                    }
-                    if (statsConfig['time_granularity'] != null) {
-                        postData['formModelAttrs']['time_granularity'] = statsConfig['time_granularity'];
-                    }
-                    if (statsConfig['time_granularity_unit'] != null) {
-                        postData['formModelAttrs']['time_granularity_unit'] = statsConfig['time_granularity_unit'];
+                        //whereDefObj.resolve();
+                        ajaxArr.push($.ajax({
+                            url : "/api/qe/query/" + _.result(postData,'formModelAttrs.table_name'),
+                            type: 'POST',
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            data: JSON.stringify(postData)
+                        }));
+                        if (statsConfig['mergeFn'] != null) {
+                            mergeFn = statsConfig['mergeFn'];
+                        }
+                        if (statsConfig['parser'] != null) {
+                            parseFn = statsConfig['parser'];
+                        }
                     }
                 }
                 if(i == 0) {
@@ -2312,7 +2364,7 @@ define([
                             function (response) {
                                 var data = getValueByJsonPath(response,'data',[]);
                                 if (response['queryJSON'] != null) {
-                                    data = _.map(data, function(obj) { 
+                                    data = _.map(data, function(obj) {
                                         return _.extend({}, obj, {queryJSON: response['queryJSON']});
                                     });
                                 }
@@ -2326,6 +2378,25 @@ define([
                     };
                     vlRemoteList.push (vlRemoteObj);
                 }
+            }
+            //as of now when callback
+            if (ajaxArr.length > 0) {
+                $.when.apply(this, ajaxArr).then(function (response1, response2/*, ... */) {
+                    var data = ajaxArr.length == 1 ? cowu.getValueByJsonPath(response1, 'data', []) : cowu.getValueByJsonPath(response1, '0;data', []);
+                    if (mergeFn != null) {
+                        data = cowu.parseAndMergeStats(cowu.getValueByJsonPath(response2, '0;data', []), cowu.getValueByJsonPath(response1, '0;data', []));
+                    }
+                    if (response1 && response1['queryJSON'] != null) {
+                        data = _.map(data, function(obj) {
+                                return _.extend({}, obj, {queryJSON: response1['queryJSON'] != null ? response1['queryJSON'] : response1[0]['queryJSON']});
+                        });
+                    }
+                    if (parseFn != null) {
+                        data = parseFn(data);
+                    }
+                    defObj.resolve(data);
+                    listModel.setData(data);
+                });
             }
             /*var listModelConfig =  {
                 remote : primaryRemoteConfig,

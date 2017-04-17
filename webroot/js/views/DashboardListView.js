@@ -9,6 +9,7 @@ define(
             var DashboardListView = ContrailView.extend({
                 render : function() {
                     var self = this;
+                    $('.page-content').addClass('margin-0 padding-0');
                     self.renderView4Config($(contentContainer), null,
                             getDashboardListViewConfig());
                 }
@@ -28,53 +29,53 @@ define(
                                                 heightMultiplier: 10
                                             },
                                             widgetCfgList: [{
-                                                id: 'dashboard-resource-utilization',
+                                                id: 'dashboard-resource-utilization-view',
                                                 itemAttr: {
                                                     cssClass: 'panel panel-default',
-                                                    height: 1,
+                                                    height: 0.8,
                                                     width: 1/2
                                                 }
-                                            },/*,{
-                                                id: 'dashboard-virtualization-overview',
+                                            },{
+                                                id: 'dashboard-virtualization-view',
                                                 itemAttr: {
-                                                    height: 1,
+                                                    cssClass: 'panel panel-default',
+                                                    height: 0.8,
                                                     width: 1/2,
                                                 }
                                             },{
                                                 id:'monitor-infra-scatterchart-view',
                                                 itemAttr:{
-                                                    height: 1,
+                                                    height: 0.8,
                                                     width: 1/3,
                                                     cssClass: 'panel panel-default',
                                                 }
-                                            },*/ {
-                                                id:'vrouter-flow-rate-area-chart',
+                                            },{
+                                                id:'vrouter-active-drop-flows-chart',
                                                 itemAttr: {
-                                                    cssClass: 'panel panel-default'    
+                                                    cssClass: 'panel panel-default',
+                                                    width: 2/3,
+                                                    height: 0.8
                                                 }
                                             },{
                                                 id: 'confignode-requests-served',
                                                 itemAttr: {
-                                                    height: 1,
+                                                    height: 0.8,
                                                     width: 1/3,
                                                     cssClass: 'panel panel-default'
                                                 }
                                             },{
                                                 id: 'analyticsnode-sandesh-message-info',
                                                 itemAttr: {
-                                                    height: 1,
+                                                    height: 0.8,
                                                     width: 1/3,
                                                     cssClass: 'panel panel-default'
                                                 }
                                             },{
                                                 id:'databasenode-disk-usage-info',
                                                 itemAttr:{
-                                                    height: 1,
+                                                    height: 0.8,
                                                     width: 1/3,
                                                     cssClass: 'panel panel-default',
-                                                    config:{
-                                                        nodeType:'database-node'
-                                                    }
                                                 }
                                             }]
                                         }

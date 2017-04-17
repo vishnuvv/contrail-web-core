@@ -347,6 +347,22 @@ define([
             if (domain[1] == 0)
                 domain = [0, 1];
             return domain;
+        },
+        getLastYValue: function (data, viewConfig) {
+            var yFormatter = cowu.getValueByJsonPath(viewConfig, 'chartOptions;yFormatter');
+            var valuesArrLen = ifNull(data, []).length;
+            var yField = cowu.getValueByJsonPath(viewConfig, 'chartOptions;yField', 'y');
+            var y = cowu.getValueByJsonPath(data, (valuesArrLen - 1 )+';'+yField, '-');
+            if (y != '-' && yFormatter != null) {
+                y = yFormatter(y);
+            }
+            if ($.isNumeric(y)) {
+                y = Math.round(y);
+            }
+            if (yField != null && yField.indexOf('cpu_share') > -1) {
+                y += ' %';
+            }
+            return y;
         }
     };
 

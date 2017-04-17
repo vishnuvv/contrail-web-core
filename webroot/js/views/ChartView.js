@@ -77,11 +77,19 @@ define([
                       .attr('x', textPositionX)
                       .attr('y', textPositionY)
                       .text(function (d) {
-                            return d['text'] != null ? d['text'] : getLastYValue(data, viewConfig);
+                            return d['text'] != null ? d['text'] : chUtils.getLastYValue(data, viewConfig);
                       });
 
         },
 
+        updateOverviewText: function () {
+            var self = this,
+                viewConfig = self.viewConfig,
+                selector = contrail.handleIfNull(selector, $(self.$el)),
+                data = self.model.getItems(),
+                lastValue = chUtils.getLastYValue(data, viewConfig);
+            $(selector).find('.lbl-value-wrapper .value').text(lastValue);
+        },
         renderMessage: function(message, selector, chartOptions) {
             var self = this,
                 message = contrail.handleIfNull(message, ""),
@@ -129,6 +137,7 @@ define([
             if(self.model instanceof Backbone.Model) {
                 self.model.on("change",function() {
                     self.renderChart($(self.$el), self.viewConfig, self.model);
+                    self.updateOverviewText();
                 });
             } else {
                 cfDataSource = viewConfig.cfDataSource;

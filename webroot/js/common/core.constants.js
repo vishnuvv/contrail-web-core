@@ -2032,8 +2032,8 @@ define([
         //Node color schemes
         this.RESOURCE_UTILIZATION_CHART_COLOR = ['#599AC9'];
         this.SINGLE_NODE_COLOR = ['#6f97ae'];
-        this.THREE_NODE_COLOR = ['#81d4fa', '#03a9f4', '#01579b'];
-        this.FIVE_NODE_COLOR = ['#81d4fa', '#03a9f4', '#01579b', 'rgb(185,213,232)', 'rgb(209,230,245)'];
+        this.THREE_NODE_COLOR = ['#01579b', '#03a9f4', '#81d4fa'];
+        this.FIVE_NODE_COLOR = ['#01579b', '#03a9f4', '#81d4fa', 'rgb(185,213,232)', 'rgb(209,230,245)'];
         this.FAILURE_COLOR = '#d95436';
         this.OTHERS_COLORS = 'rgb(177, 189, 197)';
         

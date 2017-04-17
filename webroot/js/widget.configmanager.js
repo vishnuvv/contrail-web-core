@@ -11,7 +11,7 @@ define([ 'lodash',
         ], function(
         _,ControlNodeWidgetCfg, VRouterWidgetCfg, DBNodeWidgetCfg,
         AnalyticsNodeWidgetCfg, CfgNodeWidgetCfg,MonitorInfraWidgetCfg,
-        CfgNodeModelCfg,ControlNodeModelCfg,VRouterModelCfg,DBNodeModelCfg,
+        CfgNodeModelCfg,ControlNodeModelCfg,VRouterModelCfg,DatabaseNodeModelCfg,
         AnaltyicsNodeModelCfg,MonitorInfraModelCfg,
         MonitorInfraViewCfg,CfgNodeViewCfg, DBNodeViewCfg, VRouterViewCfg) {
     var widgetCfgManager = function() {
