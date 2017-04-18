@@ -9,7 +9,7 @@ define(
             var DashboardListView = ContrailView.extend({
                 render : function() {
                     var self = this;
-                    $('.page-content').addClass('margin-0 padding-0');
+                    //$('.page-content').addClass('margin-0 padding-0');
                     self.renderView4Config($(contentContainer), null,
                             getDashboardListViewConfig());
                 }
@@ -47,7 +47,7 @@ define(
                                                 itemAttr:{
                                                     height: 0.8,
                                                     width: 1/3,
-                                                    cssClass: 'panel panel-default',
+                                                    cssClass: 'monitor-infra-all-node-chart panel panel-default',
                                                 }
                                             },{
                                                 id:'vrouter-active-drop-flows-chart',

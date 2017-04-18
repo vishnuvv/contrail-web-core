@@ -27,6 +27,22 @@ define(['underscore',
             self.model,
             getMonitorInfraNodeScatterChartViewConfig()
             );
+            self.model.onDataUpdate.subscribe(function() {
+                  var nodes = self.model.getItems();
+                  var template = contrail.getTemplate4Id('dashboard-nodecntview-template');
+                  var nodeMap = {};
+                  $.each(nodes, function (idx, obj) {
+                      if (nodeMap[obj['type']] == null) {
+                          nodeMap[obj['type']] = {display_type: obj['display_type']+'s', totalCnt: 0, dwnCnt: 0}; 
+                      }
+                      if (obj['color'] != null && obj['color'].indexOf('error') > -1) {
+                          nodeMap[obj['type']]['dwnCnt'] += 1;
+                      }
+                      nodeMap[obj['type']]['totalCnt'] += 1;
+                  })
+                  //console.log('ondataupdate', nodeMap);
+                  $('div.monitor-infra-all-node-chart').find('.overview-text').html(template({nodeMap: nodeMap}));
+            });
         }
     });
 
@@ -42,7 +58,15 @@ define(['underscore',
                      yLabel : 'Memory (MB)',
                      forceX : [ 0, 1 ],
                      forceY : [ 0, 20 ],
-                     margin: {top:10},
+                     margin: {top:10, bottom: 30, right: 20, left: 50},
+                     showXMinMax: true,
+                     //showYMinMax: true,
+                     yTickCount: 4,
+                     overViewText: true,
+                     overviewCss: 'flex-2',
+                     overviewTextOptions: {
+                        template: '' 
+                     },
                      dataParser : function(
                              response) {
                          var chartDataValues = [ ];
@@ -108,7 +132,7 @@ define(['underscore',
            var tooltipConfig = {
                title : {
                    name : data.name,
-                   type : 'Analytics Node'
+                   type : data.display_type
                },
                content : {
                    iconClass : false,

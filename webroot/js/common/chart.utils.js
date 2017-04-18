@@ -13,7 +13,7 @@ define([
                     var msg = $(selector).find('.nv-noData').text();
                     chart.update();
                     $(selector).find('.nv-noData').text(msg);
-                } else if($(selector).data('chart') != null)
+                } else if($(selector).data('chart') != null && $(selector).data('chart').update != null)
                     $(selector).data('chart').update();
             }
         },
@@ -349,9 +349,11 @@ define([
             return domain;
         },
         getLastYValue: function (data, viewConfig) {
-            var yFormatter = cowu.getValueByJsonPath(viewConfig, 'chartOptions;yFormatter');
+            var yFormatter = cowu.getValueByJsonPath(viewConfig, 'chartOptions;overviewTextOptions;formatter',
+                 cowu.getValueByJsonPath(viewConfig, 'chartOptions;yFormatter'));
             var valuesArrLen = ifNull(data, []).length;
-            var yField = cowu.getValueByJsonPath(viewConfig, 'chartOptions;yField', 'y');
+            var yField = cowu.getValueByJsonPath(viewConfig, 'chartOptions;overviewTextOptions;key',
+                 cowu.getValueByJsonPath(viewConfig, 'chartOptions;yField', 'y'));
             var y = cowu.getValueByJsonPath(data, (valuesArrLen - 1 )+';'+yField, '-');
             if (y != '-' && yFormatter != null) {
                 y = yFormatter(y);

@@ -87,8 +87,16 @@ define([
                 viewConfig = self.viewConfig,
                 selector = contrail.handleIfNull(selector, $(self.$el)),
                 data = self.model.getItems(),
-                lastValue = chUtils.getLastYValue(data, viewConfig);
-            $(selector).find('.lbl-value-wrapper .value').text(lastValue);
+                lastValue = chUtils.getLastYValue(data, viewConfig),
+                valueArr = [], html = '';
+            if ($.isNumeric(lastValue) || lastValue == '-') {
+                $(selector).find('.lbl-value-wrapper .value').text(lastValue);
+            } else {
+                valueArr = lastValue.match(/([0-9]+)(.*)/);
+                html = ''+valueArr[1]+'<span class="unit">'+valueArr[2]+'</span>';
+                $(selector).find('.lbl-value-wrapper .value').html(html);
+            }
+            
         },
         renderMessage: function(message, selector, chartOptions) {
             var self = this,
@@ -133,10 +141,12 @@ define([
 
         bindListeners: function() {
             var self = this,
-                viewConfig = self.viewConfig;
+                viewConfig = cowu.getValueByJsonPath(self, 'viewConfig', cowu.getValueByJsonPath(self,'attributes;viewConfig'));
             if(self.model instanceof Backbone.Model) {
                 self.model.on("change",function() {
-                    self.renderChart($(self.$el), self.viewConfig, self.model);
+                    if (self.renderChart != null && $.isFunction(self.renderChart)) {
+                        self.renderChart($(self.$el), viewConfig, self.model);
+                    }
                     self.updateOverviewText();
                 });
             } else {

@@ -72,7 +72,6 @@ define([
 
                 window.addEventListener('resize',self.resizeFunction);
                 $(self.$el).parents('.custom-grid-stack-item').on('resize',self.resizeFunction);*/
-                ChartView.prototype.bindListeners.call(self);
                 self.renderChart($(self.$el), viewConfig, self.model);
                 if (widgetConfig !== null) {
                     self.renderView4Config($(self.$el).find('.zoom-scatter-chart-container'), self.model, widgetConfig, null, null, null);
@@ -92,7 +91,7 @@ define([
 
             if (!contrail.checkIfExist(self.chartModel)) {
                 if($(selector).parents('.custom-grid-stack-item')) {
-                    $(selector).html(contrail.getTemplate4Id(cowc.TMPL_GRIDSTACK_ZOOMED_SCATTER_CHART));
+                    $(selector).html(contrail.getTemplate4Id(cowc.TMPL_GRIDSTACK_ZOOMED_SCATTER_CHART)(chartOptions));
                 } else {
                     $(selector).html(contrail.getTemplate4Id(cowc.TMPL_ZOOMED_SCATTER_CHART));
                 }
@@ -310,6 +309,7 @@ define([
             .attr("text-anchor", "middle")
             .attr("x", width / 2)
             .attr("y", height + margin.bottom - 10)
+            //.attr('dy', chartConfig.showXMinMax ? '-1em' : '0em')
             .text(chartConfig.xLabel);
 
         chartSVG.append("text")
@@ -317,7 +317,7 @@ define([
             .attr("text-anchor", "middle")
             .attr("x", -1 * (height / 2))
             .attr("y", -margin.left)
-            .attr("dy", ".75em")
+            .attr("dy", "1.5em")
             .attr("transform", "rotate(-90)")
             .text(chartConfig.yLabel);
 
@@ -1352,7 +1352,7 @@ define([
             chartSelector = $(selector).find('.chart-container'),
             width = $(chartSelector).width() - 10,
             height = ($(selector).closest('.custom-grid-stack-item').length > 0 )? 
-                    $(selector).closest('.custom-grid-stack-item').height() - 25:
+                    $(selector).find('.zoom-scatter-chart-container').height() :
                         (chartOptions['height'])? chartOptions['height'] : 275;
 
         var chartViewConfig = {
@@ -1384,6 +1384,10 @@ define([
             doBucketize : chartOptions['doBucketize'],
             bubbleSizeFn: chartOptions['bubbleSizeFn'],
             defaultDataStatusMessage: true,
+            showXMinMax: chartOptions['showXMinMax'],
+            showYMinMax: chartOptions['showYMinMax'],
+            overViewText: chartOptions['overViewText'],
+            overviewTextOptions: chartOptions['overviewTextOptions'],
             showColorFilter: getValueByJsonPath(chartOptions,"showColorFilter",true),
             statusMessageHandler: cowm.getRequestMessage,
             bubbleDefMaxValue: getValueByJsonPath(chartOptions,'bubbleCfg;defaultMaxValue', 0) 

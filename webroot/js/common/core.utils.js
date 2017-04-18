@@ -1996,7 +1996,7 @@ define([
         this.parseLineBarChartWithFocus = function (data, options) {
             var cf = crossfilter(data);
             var buckets = cowu.bucketizeStats(data, {
-                bucketSize: 4});
+                bucketSize: getValueByJsonPath(options, 'bucketSize', 2.5)});
             var groupBy = getValueByJsonPath(options, 'groupBy');
             var y1Field = getValueByJsonPath(options, 'y1Field');
             var y2Field = getValueByJsonPath(options, 'y2Field');
@@ -2015,7 +2015,7 @@ define([
             var tsDim = cf.dimension(function (d) {return d[time]});
             var groupDim, groupDimData, chartData = []
             if (groupBy != null ) {
-                cf.dimension(function (d) {return d[groupBy]});
+                groupDim = cf.dimension(function (d) {return d[groupBy]});
                 groupDimData = groupDim.group().all();
                 var groupDimKeys = _.pluck(groupDimData, 'key');
                 if (typeof colors == 'function') {
@@ -2027,7 +2027,7 @@ define([
                         key: obj['key'],
                         values: [],
                         bar: true,
-                        color: colors[obj['key']] != null ? colors[obj['key']] : cowc.D3_COLOR_CATEGORY5[1]
+                        //color: colors[obj['key']] != null ? colors[obj['key']] : cowc.D3_COLOR_CATEGORY5[1]
                     };
                     chartData.push(nodeMap[obj['key']]);
                 });
