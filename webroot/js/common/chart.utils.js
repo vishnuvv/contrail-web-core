@@ -3,7 +3,7 @@
  */
 
 define([
-    'underscore',
+    'lodash',
     'legend-view'
 ], function (_,LegendView) {
     var chartUtils = {
@@ -354,7 +354,18 @@ define([
             var valuesArrLen = ifNull(data, []).length;
             var yField = cowu.getValueByJsonPath(viewConfig, 'chartOptions;overviewTextOptions;key',
                  cowu.getValueByJsonPath(viewConfig, 'chartOptions;yField', 'y'));
+            var operator = cowu.getValueByJsonPath(viewConfig, 'chartOptions;overviewTextOptions;operator',
+                 cowu.getValueByJsonPath(viewConfig, 'chartOptions;yField', 'y'));
+            //Default operator is latest value
             var y = cowu.getValueByJsonPath(data, (valuesArrLen - 1 )+';'+yField, '-');
+            var yValueArr = _.pluck(data, yField);
+            if (operator == 'max') {
+                y = _.max(yValueArr);
+            } else if (operator == 'average') {
+                y = _.sum(yValueArr)/yValueArr.length
+            } else if (operator == 'sum') {
+                y = _.sum(yValueArr);
+            }
             if (y != '-' && yFormatter != null) {
                 y = yFormatter(y);
             }

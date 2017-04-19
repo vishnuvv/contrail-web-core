@@ -87,14 +87,16 @@ define([
                 viewConfig = self.viewConfig,
                 selector = contrail.handleIfNull(selector, $(self.$el)),
                 data = self.model.getItems(),
-                lastValue = chUtils.getLastYValue(data, viewConfig),
-                valueArr = [], html = '';
+                lastValue = '-', valueArr = [], html = '';
+            if (data.length) {
+                lastValue = chUtils.getLastYValue(data, viewConfig);
+            }
             if ($.isNumeric(lastValue) || lastValue == '-') {
-                $(selector).find('.lbl-value-wrapper .value').text(lastValue);
+                $(selector).find('.value').text(lastValue);
             } else {
                 valueArr = lastValue.match(/([0-9]+)(.*)/);
                 html = ''+valueArr[1]+'<span class="unit">'+valueArr[2]+'</span>';
-                $(selector).find('.lbl-value-wrapper .value').html(html);
+                $(selector).find('.value').html(html);
             }
             
         },
