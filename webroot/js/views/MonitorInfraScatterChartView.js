@@ -96,17 +96,10 @@ define(['underscore',
         };
 
        function onScatterChartClick(chartConfig) {
-           var analyticsNode = chartConfig.name, hashObj = {
-                type: "analyticsNode",
-                view: "details",
-                focusedElement: {
-                    node: analyticsNode,
-                    tab: 'details'
-                }
-            };
-
-           layoutHandler.setURLHashParams(hashObj, {
-               p : "mon_infra_analytics",
+          var analyticsNode = chartConfig.name,
+              rawData = chartConfig.rawData;
+           layoutHandler.setURLHashParams(rawData.link.q, {
+               p : rawData.link.p,
                merge : false,
                triggerHashChange : true
            });
@@ -132,7 +125,7 @@ define(['underscore',
            var tooltipConfig = {
                title : {
                    name : data.name,
-                   type : data.display_type
+                   type : analyticsNode.display_type
                },
                content : {
                    iconClass : false,
