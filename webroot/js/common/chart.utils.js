@@ -354,8 +354,7 @@ define([
             var valuesArrLen = ifNull(data, []).length;
             var yField = cowu.getValueByJsonPath(viewConfig, 'chartOptions;overviewTextOptions;key',
                  cowu.getValueByJsonPath(viewConfig, 'chartOptions;yField', 'y'));
-            var operator = cowu.getValueByJsonPath(viewConfig, 'chartOptions;overviewTextOptions;operator',
-                 cowu.getValueByJsonPath(viewConfig, 'chartOptions;yField', 'y'));
+            var operator = cowu.getValueByJsonPath(viewConfig, 'chartOptions;overviewTextOptions;operator');
             //Default operator is latest value
             var y = cowu.getValueByJsonPath(data, (valuesArrLen - 1 )+';'+yField, '-');
             var yValueArr = _.pluck(data, yField);

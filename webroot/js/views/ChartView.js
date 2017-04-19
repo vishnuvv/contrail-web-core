@@ -87,7 +87,13 @@ define([
                 viewConfig = self.viewConfig,
                 selector = contrail.handleIfNull(selector, $(self.$el)),
                 data = self.model.getItems(),
-                lastValue = '-', valueArr = [], html = '';
+                lastValue = '-', valueArr = [], html = '',
+                valueFn = cowu.getValueByJsonPath(viewConfig, 'chartOptions;overviewTextOptions;valueFn');
+
+            if (valueFn != null && $.isFunction(valueFn)) {
+                valueFn(selector, data, viewConfig);
+                return;
+            }
             if (data.length) {
                 lastValue = chUtils.getLastYValue(data, viewConfig);
             }
