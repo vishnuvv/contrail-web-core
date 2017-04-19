@@ -2179,6 +2179,10 @@ body {
 }
 .item-container {
 
+    .contrail-grid {
+        display: block;
+        margin: 5px 15px 5px 15px;
+    }
     .zoom-scatter-chart-container {
         text.label {
             font-size: 11px;
