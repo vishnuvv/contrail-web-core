@@ -103,7 +103,8 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
         'jquery-linedtextarea'        : coreWebDir + '/assets/jquery-linedtextarea/js/jquery-linedtextarea',
         'qe-module'                   : coreWebDir + '/reports/qe/ui/js/qe.module',
         'udd-module'                  : coreWebDir + '/reports/udd/ui/js/udd.module',
-        'chart-config'                : coreWebDir + '/js/chartconfig'
+        'chart-config'                : coreWebDir + '/js/chartconfig',
+        'contrail-charts-view'        : coreWebDir + '/js/views/ContrailChartsView'
     };
 
     //Separate out aliases that need to be there for both prod & dev environments
@@ -127,6 +128,8 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
             'contrail-list-model'         : coreWebDir + '/js/models/ContrailListModel',
             'contrail-element'            : coreWebDir + '/js/models/ContrailElement',
             'lodash'                      : coreWebDir + '/assets/lodash/lodash.min',
+            'lodashv4'                      : coreWebDir + '/js/coCharts/js/lodash',
+            'd3v4'                        : coreWebDir + '/js/coCharts/js/d3',
             'crossfilter'                 : coreWebDir + '/assets/crossfilter/js/crossfilter',
             'backbone'                    : coreWebDir + '/assets/backbone/backbone-min',
             'text'                        : coreWebDir + '/assets/requirejs/text',
@@ -205,7 +208,9 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
             'confignode-viewconfig'       : 'empty:',
             'monitor-infra-viewconfig'    : 'empty:',
             'global-controller-viewconfig': 'empty:',
-            'core-alarm-utils'            :  coreWebDir + '/js/common/core.alarms.utils'
+            'core-alarm-utils'            :  coreWebDir + '/js/common/core.alarms.utils',
+
+            'contrail-charts'             :  coreWebDir + '/js/coCharts/js/contrail-charts'
 
         };
         //Merge common (for both prod & dev) alias
@@ -236,6 +241,9 @@ var coreAppMap = {
 var coreAppShim =  {
     'core-bundle': {
         deps:['nonamd-libs', 'jquery-ui']
+    },
+    'd3v4' : {
+        exports: 'd3v4'
     },
     'jquery' : {
         exports: 'jQuery'
@@ -1275,6 +1283,9 @@ if (typeof document !== 'undefined' && document) {
                         if(globalObj['featureAppDefObj'] == null)
                             globalObj['featureAppDefObj'] = $.Deferred();
                         require(['core-bundle','thirdparty-libs'],function() {
+                                require(['d3v4'],function(d3) { d3v4 = d3;});
+                                require(['contrail-charts'],function(contrailCharts) { coCharts = contrailCharts;});
+                                require(['lodashv4'],function(lodashv4) { lodashv4 = lodashv4;});
                                 layoutHandler.load(menuXML);
                         });
                     });
