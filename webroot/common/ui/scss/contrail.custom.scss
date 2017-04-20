@@ -2290,3 +2290,36 @@ div.stack-bar-chart-tooltip > .popover.popover-tooltip {
     overflow:auto;}
 .grid-stack > .grid-stack-item > .grid-stack-item-content, .custom-grid-stack .custom-grid-stack-item, .grid-stack-item-content{overflow:visible;}
     }
+
+$label_color: #3182bd;
+.traffic-groups-view {
+    .dimension-dropdown,.where-dropdown {
+        width: 400px;
+        display: block;
+        margin-bottom: 10px;
+        .tag {
+            color: $label_color;
+        }
+    }
+    .select2-container {
+        margin-top: 8px;
+    }
+    label {
+        display: block;
+    }
+}
+
+#traffic-groups-radial-chart {
+    width: 800px;
+    height: 500px;
+    margin: auto;
+    .cc-svg {
+        height: 800px;
+    }
+}
+.btn-bar {
+    margin-top: 10px;
+    button {
+        margin-right: 10px;
+    }
+}

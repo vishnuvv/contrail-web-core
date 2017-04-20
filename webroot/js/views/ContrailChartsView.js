@@ -10,12 +10,6 @@ define([
     var ContrailChartsView = ChartView.extend({
         initialize: function() {
             var self = this;
-        },
-        updateChartConfig: function() {
-
-        },
-        render: function() {
-            var self = this;
             var radialColorScheme10 = [
                 '#3f51b5',
                 d3v4.schemeCategory10[0],
@@ -27,15 +21,8 @@ define([
                 '#fcc100',
                 '#2196f3',
                 '#c62828',
-            ]
-
-            var dendrogamData = {
-                data: cowu.getRadialChartData()
-            };
-
-            this.$el.append($('<div>',{id:'chartBox'}));
-
-            var chartConfig = {
+            ];
+            self.chartConfig = {
                 id: 'chartBox',
                 components: [/*{
                     type: 'LegendPanel',
@@ -65,7 +52,7 @@ define([
                     arcLabelYOffset: 25,
                     levels: [{ level: 0, label: 'Virtual Network' }, { level: 1, label: 'IP' }, { level: 2, label: 'Port' }],
                     levels: [{ level: 0, label: 'Virtual Network' }, { level: 1, label: 'IP' }],
-                    hierarchyConfig: {
+                    /*hierarchyConfig: {
                         parse: function parse(d) {
                             var srcHierarchy = [d.sourcevn, d.sourceip, d.sport];
                             srcHierarchy = [d.src_application, d.src_deployment];
@@ -83,7 +70,7 @@ define([
                             };
                             return [src, dst];
                         }
-                    },
+                    },*/
                     // drillDownLevel: 3,
                     drillDownLevel: 2,
                     tooltip: 'tooltip-id'
@@ -108,9 +95,28 @@ define([
                     }
                 }]
             };
+        },
+        updateConfig: function(config) {
+            var self = this;
+            if(typeof(config.hierarchyConfig.parse) == 'function') {
+                self['chartConfig']['components']['0']['config']['hierarchyConfig'] = {
+                    parse : config.hierarchyConfig.parse
+                };
+            }
+            // $.extend(true,self.chartConfig,config);
+        },
+        render: function() {
+            var self = this;
+
+            var dendrogamData = {
+                data: cowu.getRadialChartData()
+            };
+
+            this.$el.empty();
+            this.$el.append($('<div>',{id:'chartBox'}));
 
             var chartView = new coCharts.ChartView();
-            chartView.setConfig(chartConfig);
+            chartView.setConfig(self.chartConfig);
             // chartView.setData(dendrogamData.data);
             chartView.setData(this.model.get('data'));
             chartView.render();

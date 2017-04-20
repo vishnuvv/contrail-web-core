@@ -492,6 +492,16 @@
     </div>
 </script>
 
+<script type="text/x-handlebars-template" id="collapsable-widget-template">
+    <div class="widget-box transparent">
+        <!--<div class="widget-header"></div>-->
+        <div class="widget-body">
+            <div class="widget-main padding-4">
+            </div>
+        </div>
+    </div>
+</script>
+
 <script type="text/x-handlebars-template" id="mon-infra-dashboard">
     <div id='dashboard-infoboxes' style="/*height:430px*/">
     </div>
@@ -2456,6 +2466,25 @@
 <script type="text/x-handlebars-template" id="alarm-severity-template">
     <div data-color={{{color}}} class="circle {{{color}}} {{#IfCompare ack false}}filled{{/IfCompare}} alarms-circle-grid-style alarms-circle-display-flex"></div>
     {{#if showText}}<div class="alarms-display-inline">&nbsp;{{{text}}}</div>{{/if}}
+</script>
+
+<script type="text/x-handlebars-template" id="traffic-groups-template">
+    <div name="search-form">
+        <label for="multiselect-1">
+            Select
+            <div class="dimension-dropdown" id="multiselect-1"></div>
+        </label>
+        <label for="multiselect-2">
+            Where
+            <div class="where-dropdown" id="multiselect-2"></div>
+        </label>
+        <div class="btn-bar">
+            <button type="submit" id="widget-update-button" class="btn btn-mini btn-update btn-primary">Update</button>
+            <button type="submit" id="widget-cancel-button" class="btn btn-mini btn-reset btn-primary">Reset</button>
+        </div>
+    </div>
+
+    <div id="traffic-groups-radial-chart"></div>
 </script>
 
 <script type="text/x-handlebars-template" id="gridstack-widget-template">
