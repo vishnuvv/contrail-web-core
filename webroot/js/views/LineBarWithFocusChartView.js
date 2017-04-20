@@ -92,6 +92,9 @@ define([
                 chartViewConfig, chartOptions, chartViewModel;
 
             if (contrail.checkIfFunction(viewConfig['parseFn'])) {
+                if(viewConfig['parseFn'] === cowu.parseLineBarChartWithFocus && chartDataModel instanceof Backbone.Model) {
+                    viewConfig['chartOptions'].type = chartDataModel.get('type');
+                }
                 data = viewConfig['parseFn'](data, viewConfig['chartOptions']);
             }
             if ($(selector).parents('.custom-grid-stack-item').length != 0) {

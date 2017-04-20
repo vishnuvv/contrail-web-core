@@ -2020,14 +2020,16 @@ define([
                 var groupDimKeys = _.pluck(groupDimData, 'key');
                 if (typeof colors == 'function') {
                    colors = colors(_.sortBy(groupDimKeys), resetColor);
-                }
+                } else if(options.type != null) {
+                    colors = NodeColorMapping.getNodeColorMap(groupDimKeys, resetColor,options.type);
+                }    
                 var nodeMap = {};
                 $.each(groupDimData, function (idx, obj) {
                     nodeMap[obj['key']] = {
                         key: obj['key'],
                         values: [],
                         bar: true,
-                        //color: colors[obj['key']] != null ? colors[obj['key']] : cowc.D3_COLOR_CATEGORY5[1]
+                        color: colors[obj['key']] != null ? colors[obj['key']] : cowc.D3_COLOR_CATEGORY5[1]
                     };
                     chartData.push(nodeMap[obj['key']]);
                 });

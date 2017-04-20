@@ -2145,6 +2145,12 @@ body {
         font-size:16px !important;
         color:#616161;
     }
+    .overview-text {
+        .title {
+            font-weight: 400px !important;
+            font-size: 11px !important;
+        }
+    }
 }
 .nv-multibar .nv-groups .nv-group {
     fill-opacity: 1 !important;
@@ -2153,6 +2159,7 @@ body {
     .title {
         align-items: center;
         font-size: 12px;
+        font-weight: 400px;
         color: '#242424'
     }
     .lbl {
@@ -2271,10 +2278,15 @@ body {
         display: inline;
     }
 }
-.grid-stack-item-content .item-content {
-    padding: 15px;   
-}
 
+.grid-stack-item-content .item-content {
+    padding: 10px 15px;
+}
+.utilization-chart .overview-text img {
+    position: relative;
+    bottom: 3px;
+    padding-right: 2px;
+}
 .utilization-chart .overview-text dl {
     display: inline-block;
     font-size: 9px;
@@ -2291,4 +2303,7 @@ body {
     font-weight: normal;
     line-height: 1.3;
     text-align: left;
+}
+#page-content{
+    padding:10px;
 }

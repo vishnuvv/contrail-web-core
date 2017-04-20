@@ -75,9 +75,9 @@ define(['underscore',
                              chartDataValues
                                  .push({
                                      name : analyticsNode['name'],
-                                     y : analyticsNode['y'],
+                                     y : analyticsNode['memory'],
                                      x : contrail.handleIfNull(
-                                         analyticsNode['x'],
+                                         analyticsNode['cpu'],
                                          0),
                                      color : analyticsNode['color'],
                                      size : contrail.handleIfNull(

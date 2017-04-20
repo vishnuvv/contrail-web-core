@@ -154,8 +154,10 @@ define([
                 self.model.on("change",function() {
                     if (self.renderChart != null && $.isFunction(self.renderChart)) {
                         self.renderChart($(self.$el), viewConfig, self.model);
+                        self.updateOverviewText();
+                    } else if (self.renderTemplate != null && $.isFunction(self.renderTemplate)) {
+                        self.renderTemplate($(self.$el), viewConfig, self.model);
                     }
-                    self.updateOverviewText();
                 });
             } else {
                 cfDataSource = viewConfig.cfDataSource;
