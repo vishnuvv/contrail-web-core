@@ -118,7 +118,8 @@ define([
             var chartView = new coCharts.ChartView();
             chartView.setConfig(self.chartConfig);
             // chartView.setData(dendrogamData.data);
-            chartView.setData(this.model.get('data'));
+            // chartView.setData(this.model.get('data'));
+            chartView.setData(this.model.get('data').toJSON());
             chartView.render();
         }
     });
