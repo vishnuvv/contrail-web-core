@@ -82,7 +82,8 @@ define([
                     formatter: function formatter(data) {
                         var type = ['Virtual Network', 'IP', 'Port'];
                         type = ['Application','Deployment'];
-                        var content = { title: type[data.level - 1], items: [] };
+                        type = self.levels;
+                        var content = { title: _.startCase(type[data.level - 1]['label']), items: [] };
                         content.items.push({
                             label: 'Value',
                             value: data.name
@@ -102,6 +103,11 @@ define([
                 self['chartConfig']['components']['0']['config']['hierarchyConfig'] = {
                     parse : config.hierarchyConfig.parse
                 };
+            }
+            if(typeof(config.levels) != 'undefined') {
+                _.set(self,'chartConfig.components.0.config.levels',config.levels);
+                self.levels = config.levels;
+                // self['chartConfig']['components']['0']['config']['levels'] = config.levels;
             }
             // $.extend(true,self.chartConfig,config);
         },
