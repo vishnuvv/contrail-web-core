@@ -47,6 +47,34 @@
             </div>
         </div>
 </script>
+<script type="text/x-handlebars-template" id="config-networking-graph-template">
+    <div class="visualization-container">
+        <div class="graph-canvas" style="height: 350px; overflow: hidden;">
+            <div id="networking-graph" class="graph colmask holygrail">
+                <div class="top-row-config-elements" style="height:60px"></div>
+                <div class="colmid">
+                    <div class="colleft">
+                        <div class="col1wrap">
+                            <div class="col1">
+                                <div id="graph-connected-elements" class="graph-connected-elements row">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col2">
+                            <div id="graph-config-elements" class="graph-config-elements"></div>
+                        </div>
+                        <div id="graph-control-panel" class="col3"></div>
+                    </div>
+                </div>
+                <div class="graph-search-control-panel-expanded-container control-panel-expanded-container hidden"></div>
+                <div id="graph-loading" class="graph-loading">
+                     <p class="loading-message">Loading..<p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</script>
 <script type="text/x-handlebars-template" id="iframe-template">
     <iframe class="iframe-view" src={{this.url}}></iframe>
 </script>
