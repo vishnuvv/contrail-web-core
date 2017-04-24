@@ -13,11 +13,15 @@ define([
             var self = this,
                 graphConfig = viewConfig.graphModelConfig,
                 tooltipConfig, clickEventsConfig, controlPanelConfig,
+                data = viewConfig.data,
                 graphControlPanelId = '#'+ ctwl.GRAPH_CONTROL_PANEL_ID;
             self.model = viewConfig.model;
-            if(self.model == null) {
+            if(self.model == null && graphConfig != null) {
                 self.model = new ContrailGraphModel(graphConfig);
-            } 
+            } else if (data != null) {
+                self.model = new ContrailGraphModel();
+                self.model.setData(data);
+            }
             self.viewConfig = viewConfig;
 
             joint.dia.Paper.apply(self, arguments);
