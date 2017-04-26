@@ -2314,7 +2314,8 @@ $label_color: #3182bd;
     height: 500px;
     margin: auto;
     .cc-svg {
-        height: 800px;
+        // height: 600px;
+        // margin-top: -90px;
     }
 }
 .btn-bar {
@@ -2322,4 +2323,19 @@ $label_color: #3182bd;
     button {
         margin-right: 10px;
     }
+}
+
+// .traffic-groups-view #chartBox svg {
+//     transform: scale(.9) translate(0px,-240px);
+// }
+.traffic-groups-view #chartBox svg #dendrogram-chart-id {
+    transform: translate(400px, 300px);
+}
+
+.cc-svg .radial-dendrogram .arc-label {
+    text-anchor: start;
+    alignment-baseline: middle;
+    font-size: 10px;
+    fill: #000000;
+
 }
