@@ -39,41 +39,44 @@ define([
                     id: 'dendrogram-chart-id',
                     type: 'RadialDendrogram',
                     config: {
-                    parentSeparation: 1.0,
-                    parentSeparationShrinkFactor: 0.05,
-                    parentSeparationDepthThreshold: 4,
-                    colorScale: d3v4.scaleOrdinal().range(radialColorScheme10), // eslint-disable-line no-undef
-                    drawLinks: false,
-                    drawRibbons: true,
-                    arcWidth: 15,
-                    arcLabelLetterWidth: 5,
-                    showArcLabels: true,
-                    arcLabelXOffset: 2,
-                    arcLabelYOffset: 25,
-                    levels: [{ level: 0, label: 'Virtual Network' }, { level: 1, label: 'IP' }, { level: 2, label: 'Port' }],
-                    levels: [{ level: 0, label: 'Virtual Network' }, { level: 1, label: 'IP' }],
-                    /*hierarchyConfig: {
-                        parse: function parse(d) {
-                            var srcHierarchy = [d.sourcevn, d.sourceip, d.sport];
-                            srcHierarchy = [d.src_application, d.src_deployment];
-                            var src = {
-                                names: srcHierarchy,
-                                id: srcHierarchy.join('-'),
-                                value: d['agg-bytes']
-                            };
-                            var dstHierarchy = [d.destvn, d.destip, d.dport];
-                            dstHierarchy = [d.dst_application, d.dst_deployment];
-                            var dst = {
-                                names: dstHierarchy,
-                                id: dstHierarchy.join('-'),
-                                value: d['agg-bytes']
-                            };
-                            return [src, dst];
-                        }
-                    },*/
-                    // drillDownLevel: 3,
-                    drillDownLevel: 2,
-                    tooltip: 'tooltip-id'
+                        parentSeparation: 1.0,
+                        parentSeparationShrinkFactor: 0.05,
+                        parentSeparationDepthThreshold: 4,
+                        colorScale: d3v4.scaleOrdinal().range(radialColorScheme10), // eslint-disable-line no-undef
+                        drawLinks: false,
+                        drawRibbons: true,
+                        arcWidth: 40,
+                        arcLabelLetterWidth: 5,
+                        showArcLabels: true,
+                        arcLabelXOffset: 25,
+                        arcLabelYOffset: 25,
+                        chartHeight: 500,   //drill-down level 1
+                        chartHeight: 600,   //drill-down level 2
+                        // chartHeight: 700,   //drill-down level 3
+                        levels: [{ level: 0, label: 'Virtual Network' }, { level: 1, label: 'IP' }, { level: 2, label: 'Port' }],
+                        levels: [{ level: 0, label: 'Virtual Network' }, { level: 1, label: 'IP' }],
+                        /*hierarchyConfig: {
+                            parse: function parse(d) {
+                                var srcHierarchy = [d.sourcevn, d.sourceip, d.sport];
+                                srcHierarchy = [d.src_application, d.src_deployment];
+                                var src = {
+                                    names: srcHierarchy,
+                                    id: srcHierarchy.join('-'),
+                                    value: d['agg-bytes']
+                                };
+                                var dstHierarchy = [d.destvn, d.destip, d.dport];
+                                dstHierarchy = [d.dst_application, d.dst_deployment];
+                                var dst = {
+                                    names: dstHierarchy,
+                                    id: dstHierarchy.join('-'),
+                                    value: d['agg-bytes']
+                                };
+                                return [src, dst];
+                            }
+                        },*/
+                        // drillDownLevel: 3,
+                        drillDownLevel: 3,
+                        tooltip: 'tooltip-id'
                     }
                 }, {
                     id: 'tooltip-id',
@@ -88,7 +91,7 @@ define([
                             label: 'Value',
                             value: data.name
                         }, {
-                            label: 'Flow Count',
+                            label: 'Flows',
                             value: data.children.length
                         });
                         return content;
