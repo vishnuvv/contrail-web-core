@@ -2609,7 +2609,7 @@ define([
         }
 
         this.getTrafficGroupsData = function() {
-            var applicationArr = ['HR','Finance'],
+            var applicationArr = ['HR','Finance','Oracle','SAP'],
                 siteArr = ['Bangalore','Sunnyvale'],
                 tierArr = ['Web','Database'],
                 deploymentArr = ['Production','Development'];
@@ -2618,10 +2618,10 @@ define([
                 const bytes = _.random(74325736, 474325736)
 
                 const flow = {
-                    src_application: _.sample(applicationArr),
+                    /*src_application: _.sample(applicationArr),
                     src_site: _.sample(siteArr),
                     src_tier: _.sample(tierArr),
-                    src_deployment: _.sample(deploymentArr),
+                    src_deployment: _.sample(deploymentArr),*/
                     src: {
                         application: _.sample(applicationArr),
                         site: _.sample(siteArr),
@@ -2634,31 +2634,18 @@ define([
                         tier: _.sample(tierArr),
                         deployment: _.sample(deploymentArr)
                     },
-                    dst_application: _.sample(applicationArr),
+                    /*dst_application: _.sample(applicationArr),
                     dst_site: _.sample(siteArr),
                     dst_tier: _.sample(tierArr),
-                    dst_deployment: _.sample(deploymentArr),
+                    dst_deployment: _.sample(deploymentArr),*/
                     'agg-packets': _.round((bytes / 330), 0),
                     'agg-bytes': bytes,
-                    /*'UuidKey': 'b5ba466a-9e56-42e8-8cf5-e75d27c62' + i,
-                    'action': 'pass',
-                    'agg-packets': _.round((bytes / 330), 0),
-                    'destip': destIPArray[_.random(0, destIPArray.length - 1)],
-                    'destvn': destVNArray[_.random(0, destVNArray.length - 1)],
-                    'direction_ing': 1,
-                    'dport': destPortArray[_.random(0, destPortArray.length - 1)],
-                    'protocol': protocolArray[_.random(0, protocolArray.length - 1)],
-                    'setup_time': now,
-                    'sourceip': srcIPArray[_.random(0, srcIPArray.length - 1)],
-                    'sourcevn': srcVNArray[_.random(0, srcVNArray.length - 1)],
-                    'sport': srcPortArray[_.random(0, srcPortArray.length - 1)],
-                    'vrouter': 'a7s12'*/
                 }
 
                 data.push(flow)
             }
 
-            return data
+            return data;
         }
     };
 
