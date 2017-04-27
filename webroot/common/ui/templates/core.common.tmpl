@@ -49,9 +49,14 @@
 </script>
 <script type="text/x-handlebars-template" id="config-networking-graph-template">
     <div class="visualization-container">
+        <div class="top-row-config-elements">
+            <div class="network-create-elements"></div>
+            <div class="spinner blue" style="display:none;">
+                <i class="grid-header-icon-loading fa fa-spinner fa-spin" style="font-size:20px"></i>
+            </div>
+        </div>
         <div class="graph-canvas" style="height: 350px; overflow: hidden;">
-            <div id="networking-graph" class="graph colmask holygrail">
-                <div class="top-row-config-elements" style="height:60px"></div>
+            <div id="networking-graph" class="graph panel panel-default colmask holygrail">
                 <div class="colmid">
                     <div class="colleft">
                         <div class="col1wrap">

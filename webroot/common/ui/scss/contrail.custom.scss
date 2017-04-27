@@ -2253,10 +2253,22 @@ div.stack-bar-chart-tooltip > .popover.popover-tooltip {
     margin-top: 1px;
     padding: 0px;
 }
-.top-row-config-elements .font-element i {
-    font-size: 25px;
+.top-row-config-elements {
+    background: linear-gradient(to left, #f9f9f9 30%, #fff 30%);
+    height:40px; 
+    margin: 5px 0px;
+    .font-element {
+        cursor: pointer !important;
+    } 
+    .font-element i {
+        font-size: 25px;
+    }
 }
 .top-row-config-elements svg {
     width: 100% !important;
     height: 100% !important;
+}
+#networking-graph #graph-control-panel {
+    margin-right: 60px;
+    margin-top: 7px;
 }

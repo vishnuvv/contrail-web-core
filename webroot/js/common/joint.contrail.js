@@ -162,6 +162,19 @@ define([
         }, joint.shapes.contrail.Element.prototype.defaults)
     });
 
+    joint.shapes.contrail.FloatingIP = joint.shapes.contrail.FontElement.extend({
+        markup: '<g class="rotatable"><text/><g class="scalable"><rect class="FloatingIP"/></g></g>',
+
+        defaults: joint.util.deepSupplement({
+            type: 'contrail.FloatingIP.no-drag-element'
+        }, joint.shapes.contrail.FontElement.prototype.defaults)
+    });
+
+    joint.shapes.contrail.FloatingIPView = joint.shapes.contrail.FontElementView.extend({
+        defaults: joint.util.deepSupplement({
+            type: 'contrail.FloatingIPView'
+        }, joint.shapes.contrail.FontElementView.prototype.defaults)
+    });
     joint.shapes.contrail.NetworkPolicy = joint.shapes.contrail.FontElement.extend({
         markup: '<g class="rotatable"><text/><g class="scalable"><rect class="NetworkPolicy"/></g></g>',
 
@@ -173,6 +186,20 @@ define([
     joint.shapes.contrail.NetworkPolicyView = joint.shapes.contrail.FontElementView.extend({
         defaults: joint.util.deepSupplement({
             type: 'contrail.NetworkPolicyView'
+        }, joint.shapes.contrail.FontElementView.prototype.defaults)
+    });
+
+    joint.shapes.contrail.Port = joint.shapes.contrail.FontElement.extend({
+        markup: '<g class="rotatable"><text/><g class="scalable"><rect class="Port"/></g></g>',
+
+        defaults: joint.util.deepSupplement({
+            type: 'contrail.Port.no-drag-element'
+        }, joint.shapes.contrail.FontElement.prototype.defaults)
+    });
+
+    joint.shapes.contrail.PortView = joint.shapes.contrail.FontElementView.extend({
+        defaults: joint.util.deepSupplement({
+            type: 'contrail.PortView'
         }, joint.shapes.contrail.FontElementView.prototype.defaults)
     });
 
