@@ -29,6 +29,9 @@ define([
             case 'network-ipam':
                 contrailElement = new joint.shapes.contrail.NetworkIPAM(options);
                 break;
+            case 'floating-ip':
+                contrailElement = new joint.shapes.contrail.FloatingIP(options);
+                break;
             case 'router':
                 contrailElement = new joint.shapes.contrail.LogicalRouter(options);
                 break;
@@ -37,6 +40,9 @@ define([
                 break;
             case 'virtual-machine':
                 contrailElement = new joint.shapes.contrail.VirtualMachine(options);
+                break;
+            case 'port':
+                contrailElement = new joint.shapes.contrail.Port(options);
                 break;
 
             case 'chassis':
