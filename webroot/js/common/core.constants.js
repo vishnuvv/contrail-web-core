@@ -8,6 +8,7 @@ define([
     var CoreConstants = function () {
         var self = this;
 
+        this.panelLayout = false;
         this.INFRA_MODEL_CACHE_TIMEOUT = 0 * 60;
         this.ENABLE_CAROUSEL = false;
         this.THROTTLE_RESIZE_EVENT_TIME = 500;

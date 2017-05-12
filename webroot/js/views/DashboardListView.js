@@ -9,7 +9,6 @@ define(
             var DashboardListView = ContrailView.extend({
                 render : function() {
                     var self = this;
-                    //$('.page-content').addClass('margin-0 padding-0');
                     self.renderView4Config($(contentContainer), null,
                             getDashboardListViewConfig());
                 }

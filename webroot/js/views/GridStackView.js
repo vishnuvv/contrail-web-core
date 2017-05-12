@@ -257,7 +257,9 @@ define([
                     self.renderWidget({widgetCfg:{id:e.val}},currElem);
                 }
             });*/
-            $(currElem).find('.grid-stack-item-content').addClass('panel panel-default');
+            if (cowc.panelLayout) {
+                $(currElem).find('.grid-stack-item-content').addClass('panel panel-default');
+            }
             if (itemAttr && itemAttr['cssClass'] != null) {
                 $(currElem).find('.grid-stack-item-content').addClass(cfg['itemAttr']['cssClass']);
             }

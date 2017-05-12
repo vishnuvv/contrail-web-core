@@ -2118,7 +2118,6 @@ body {
     font-size: 20px;
 }
 #dashboard-carousel-view { 
- background-color: #f3f4f5 !important;
     .panel {
         margin-bottom: 0px;
     }
@@ -2306,4 +2305,7 @@ body {
 }
 #page-content{
     padding:10px;
+}
+.bg-color-grey {
+    background-color: #f3f4f5 !important;
 }
