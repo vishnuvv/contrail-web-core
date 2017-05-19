@@ -45,11 +45,11 @@ define([
                         colorScale: d3v4.scaleOrdinal().range(radialColorScheme10), // eslint-disable-line no-undef
                         drawLinks: false,
                         drawRibbons: true,
-                        arcWidth: 40,
+                        arcWidth: 10,
                         arcLabelLetterWidth: 5,
                         showArcLabels: true,
                         arcLabelXOffset: 25,
-                        arcLabelYOffset: 25,
+                        arcLabelYOffset: -5,
                         chartHeight: 500,   //drill-down level 1
                         chartHeight: 600,   //drill-down level 2
                         // chartHeight: 700,   //drill-down level 3

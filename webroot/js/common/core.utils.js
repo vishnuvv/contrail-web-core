@@ -2507,6 +2507,7 @@ define([
                 remoteConfig['hlRemoteConfig']['hlRemoteList'] = hlConfigs;
             }
             return new ContrailListModel(remoteConfig);
+        }
 
         this.getRadialChartData = function() {
             var radialColorScheme10 = [

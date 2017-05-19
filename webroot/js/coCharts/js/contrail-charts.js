@@ -6,8 +6,8 @@
 	else if(typeof exports === 'object')
 		exports["coCharts"] = factory(require(undefined), require(undefined), require(undefined), require(undefined));
 	else
-		root["coCharts"] = factory(root["d3"], root["lodash"], root["Backbone"], root["jQuery"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_27__, __WEBPACK_EXTERNAL_MODULE_47__) {
+		root["coCharts"] = factory(root["d3"], root["_"], root["Backbone"], root["jQuery"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_28__, __WEBPACK_EXTERNAL_MODULE_50__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 209);
+/******/ 	return __webpack_require__(__webpack_require__.s = 212);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -108,7 +108,7 @@ var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _contrailChartsEvents = __webpack_require__(150);
+var _contrailChartsEvents = __webpack_require__(153);
 
 var _contrailChartsEvents2 = _interopRequireDefault(_contrailChartsEvents);
 
@@ -234,15 +234,13 @@ var _d3Selection = __webpack_require__(0);
 
 var d3Selection = _interopRequireWildcard(_d3Selection);
 
-var _contrailView = __webpack_require__(157);
+var _contrailView = __webpack_require__(158);
 
 var _contrailView2 = _interopRequireDefault(_contrailView);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -302,7 +300,7 @@ var ContrailChartsView = function (_ContrailView) {
     value: function render(content) {
       if (this.isTagNameSvg(this.tagName)) {
         this._initSvg();
-        if (this.svg.select('.' + this.id).empty()) {
+        if (this.svg.select('#' + this.id).empty()) {
           this.el.setAttribute('data-order', this.zIndex);
           this.svg.node().append(this.el);
           // TODO constrain selector to direct descendants ":scope > g"
@@ -316,16 +314,6 @@ var ContrailChartsView = function (_ContrailView) {
         this._insertSorted(this.el);
       }
     }
-    /**
-     * Convenience method to get class name of selector
-     * Just remove leading dot
-     */
-
-  }, {
-    key: 'selectorClass',
-    value: function selectorClass(selectorName) {
-      return this.selectors[selectorName].substr(1);
-    }
   }, {
     key: 'show',
     value: function show(container) {
@@ -334,11 +322,13 @@ var ContrailChartsView = function (_ContrailView) {
         this.render();
       }
       this.d3.classed('hide', false);
+      this._visible = true;
     }
   }, {
     key: 'hide',
     value: function hide() {
       this.d3.classed('hide', true);
+      this._visible = false;
     }
     /**
      * Stop listening to config and model. Remove the view from the dom.
@@ -365,14 +355,14 @@ var ContrailChartsView = function (_ContrailView) {
         var wrapper = document.createElement('div');
         var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         wrapper.appendChild(svg);
-        svg.classList.add(this.selectors.svg.substr(1));
+        svg.classList.add(this.selectorClass('svg'));
         if (isSharedContainer) {
-          svg.classList.add(this.selectors.sharedSvg.substr(1));
+          svg.classList.add(this.selectorClass('sharedSvg'));
         } else {
           // create wrapper for this component only
           wrapper.setAttribute('id', this.id + '-svg-wrapper');
         }
-        wrapper.classList.add(this.selectors.svgWrapper.substr(1));
+        wrapper.classList.add(this.selectorClass('svgWrapper'));
         this._insertSorted(wrapper);
       }
       var wrapperPosition = this.svg.node().parentNode.dataset.order;
@@ -381,7 +371,7 @@ var ContrailChartsView = function (_ContrailView) {
         _wrapper.remove(); // detach
         this._insertSorted(_wrapper);
       }
-      this.svg.attr('width', this.params.chartWidth || this.svg.attr('width')).attr('height', this.params.chartHeight || this.svg.attr('height')).classed(this.selectors.sharedSvg.substr(1), isSharedContainer);
+      this.svg.classed(this.selectorClass('sharedSvg'), isSharedContainer).attr('width', this.params.width || this.svg.attr('width')).attr('height', this.params.height || this.svg.attr('height'));
     }
     /**
      * insert own element into the DOM in the right order
@@ -395,7 +385,7 @@ var ContrailChartsView = function (_ContrailView) {
       if (!this.config.get('isSharedContainer') || this.params.isPrimary) {
         el.dataset['order'] = this.config.get('order');
       }
-      el.classList.add(this.selectors.component.substr(1));
+      el.classList.add(this.selectorClass('component'));
       this._container.appendChild(el);
       if (this._container.childElementCount > 1 && this.config.has('order')) {
         this.container.selectAll('#' + this._container.id + ' > ' + this.selectors.component).datum(function () {
@@ -415,9 +405,10 @@ var ContrailChartsView = function (_ContrailView) {
       }
     }
   }, {
-    key: '_onClickNode',
-    value: function _onClickNode(d, el) {
-      var cb = this.config.get('onClickNode');
+    key: '_onEvent',
+    value: function _onEvent(d, el, e) {
+      var elementName = _lodash2.default.invert(this.selectors)['.' + el.classList[0]];
+      var cb = this.config.getAction(elementName, e.type);
       if (_lodash2.default.isFunction(cb)) cb(d.data);
     }
   }, {
@@ -428,13 +419,18 @@ var ContrailChartsView = function (_ContrailView) {
         component: '.cc-component',
         svgWrapper: '.svg-wrapper',
         svg: '.cc-svg',
-        sharedSvg: '.shared-svg'
+        sharedSvg: '.shared-svg',
+        node: '.node',
+        interactive: '.interactive'
       };
     }
   }, {
     key: 'events',
     get: function get() {
-      return _defineProperty({}, 'click ' + this.selectors.node, '_onClickNode');
+      return {
+        'click node': '_onEvent',
+        'dblclick node': '_onEvent'
+      };
     }
   }, {
     key: 'zIndex',
@@ -531,7 +527,7 @@ var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _contrailModel = __webpack_require__(156);
+var _contrailModel = __webpack_require__(157);
 
 var _contrailModel2 = _interopRequireDefault(_contrailModel);
 
@@ -550,9 +546,11 @@ var ContrailChartsConfigModel = function (_ContrailModel) {
   _inherits(ContrailChartsConfigModel, _ContrailModel);
 
   function ContrailChartsConfigModel() {
+    var p = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
     _classCallCheck(this, ContrailChartsConfigModel);
 
-    return _possibleConstructorReturn(this, (ContrailChartsConfigModel.__proto__ || Object.getPrototypeOf(ContrailChartsConfigModel)).apply(this, arguments));
+    return _possibleConstructorReturn(this, (ContrailChartsConfigModel.__proto__ || Object.getPrototypeOf(ContrailChartsConfigModel)).call(this, p));
   }
 
   _createClass(ContrailChartsConfigModel, [{
@@ -606,45 +604,37 @@ var ContrailChartsConfigModel = function (_ContrailModel) {
     value: function getLabel(data) {
       var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-      var getLabel = config.labelFormatter || config.label || config.accessor;
+      var getLabel = config.labelFormatter || config.label || config.accessor || config.getLabel;
       if (_lodash2.default.isString(getLabel)) return getLabel;
       if (_lodash2.default.isNil(data)) return undefined;
       if (_lodash2.default.isFunction(getLabel)) return getLabel(data);
     }
-    /**
-     * @param {Object} data to extract label from
-     * @param {Object} config on how to extract label from data
-     * TODO should the getColor function if provided be evaluated on empty data?
-     * Legend Panel needs to display a color not for particular data point but for the whole serie
-     */
-
   }, {
-    key: 'getColor',
-    value: function getColor(data) {
-      var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-      var getColor = config.color;
-      if (_lodash2.default.isString(getColor)) return getColor;
-      if (_lodash2.default.isNil(data)) return undefined;
-      if (_lodash2.default.isFunction(getColor)) return getColor(data);
-    }
-    /**
-     * Enable / disable event triggering with data preperation for specified component
-     * @param {String} type Component type
-     * @param {Boolean} enable Change state of this component
-     */
-
-  }, {
-    key: 'toggleComponent',
-    value: function toggleComponent(type, enable) {
-      this.set(type + 'Enabled', !enable, { silent: true });
+    key: 'getAction',
+    value: function getAction(selector, type) {
+      return this.get('action.' + type + ' ' + selector);
     }
   }, {
-    key: 'type',
-
+    key: 'hasAction',
+    value: function hasAction(selector, type) {
+      var actions = _lodash2.default.filter(this.attributes.action, function (action, key) {
+        return key.includes(selector);
+      });
+      return _lodash2.default.isFunction(actions[0]);
+    }
+  }, {
+    key: 'defaults',
+    get: function get() {
+      return {
+        duration: 300
+      };
+    }
     /**
      * @return {String} this class name without 'ConfigModel'
      */
+
+  }, {
+    key: 'type',
     get: function get() {
       return this.constructor.name.slice(0, -11);
     }
@@ -700,9 +690,9 @@ exports.init = init;
 exports.set = set;
 exports.get = get;
 
-var _d3Dispatch = __webpack_require__(161);
+var _d3Dispatch = __webpack_require__(162);
 
-var _d3Timer = __webpack_require__(42);
+var _d3Timer = __webpack_require__(46);
 
 var emptyOn = (0, _d3Dispatch.dispatch)("start", "end", "interrupt");
 var emptyTween = [];
@@ -860,7 +850,7 @@ var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _contrailEvents = __webpack_require__(17);
+var _contrailEvents = __webpack_require__(18);
 
 var _contrailEvents2 = _interopRequireDefault(_contrailEvents);
 
@@ -1015,15 +1005,6 @@ module.exports = Action;
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-// Create a simple path alias to allow browserify to resolve
-// the runtime on a supported path.
-module.exports = __webpack_require__(193)['default'];
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
 "use strict";
 
 
@@ -1152,6 +1133,15 @@ function appendContextPath(contextPath, id) {
 
 
 /***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Create a simple path alias to allow browserify to resolve
+// the runtime on a supported path.
+module.exports = __webpack_require__(195)['default'];
+
+
+/***/ }),
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1167,71 +1157,71 @@ exports.newId = newId;
 
 var _d3Selection = __webpack_require__(0);
 
-var _attr = __webpack_require__(88);
+var _attr = __webpack_require__(91);
 
 var _attr2 = _interopRequireDefault(_attr);
 
-var _attrTween = __webpack_require__(89);
+var _attrTween = __webpack_require__(92);
 
 var _attrTween2 = _interopRequireDefault(_attrTween);
 
-var _delay = __webpack_require__(90);
+var _delay = __webpack_require__(93);
 
 var _delay2 = _interopRequireDefault(_delay);
 
-var _duration = __webpack_require__(91);
+var _duration = __webpack_require__(94);
 
 var _duration2 = _interopRequireDefault(_duration);
 
-var _ease = __webpack_require__(92);
+var _ease = __webpack_require__(95);
 
 var _ease2 = _interopRequireDefault(_ease);
 
-var _filter = __webpack_require__(93);
+var _filter = __webpack_require__(96);
 
 var _filter2 = _interopRequireDefault(_filter);
 
-var _merge = __webpack_require__(94);
+var _merge = __webpack_require__(97);
 
 var _merge2 = _interopRequireDefault(_merge);
 
-var _on = __webpack_require__(95);
+var _on = __webpack_require__(98);
 
 var _on2 = _interopRequireDefault(_on);
 
-var _remove = __webpack_require__(96);
+var _remove = __webpack_require__(99);
 
 var _remove2 = _interopRequireDefault(_remove);
 
-var _select = __webpack_require__(97);
+var _select = __webpack_require__(100);
 
 var _select2 = _interopRequireDefault(_select);
 
-var _selectAll = __webpack_require__(98);
+var _selectAll = __webpack_require__(101);
 
 var _selectAll2 = _interopRequireDefault(_selectAll);
 
-var _selection = __webpack_require__(99);
+var _selection = __webpack_require__(102);
 
 var _selection2 = _interopRequireDefault(_selection);
 
-var _style = __webpack_require__(100);
+var _style = __webpack_require__(103);
 
 var _style2 = _interopRequireDefault(_style);
 
-var _styleTween = __webpack_require__(101);
+var _styleTween = __webpack_require__(104);
 
 var _styleTween2 = _interopRequireDefault(_styleTween);
 
-var _text = __webpack_require__(102);
+var _text = __webpack_require__(105);
 
 var _text2 = _interopRequireDefault(_text);
 
-var _transition = __webpack_require__(103);
+var _transition = __webpack_require__(106);
 
 var _transition2 = _interopRequireDefault(_transition);
 
-var _tween = __webpack_require__(16);
+var _tween = __webpack_require__(17);
 
 var _tween2 = _interopRequireDefault(_tween);
 
@@ -1285,20 +1275,78 @@ Transition.prototype = transition.prototype = {
 
 /***/ }),
 /* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _lodash = __webpack_require__(1);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _d3Scale = __webpack_require__(0);
+
+var d3Scale = _interopRequireWildcard(_d3Scale);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+exports.default = {
+  defaults: {
+    colorScheme: d3Scale.schemeCategory20
+  },
+
+  set: function set() {
+    var p = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var value = arguments[1];
+    var options = arguments[2];
+
+    // consider another set signature
+    if (!_lodash2.default.isObject(p)) p = _defineProperty({}, p, value);else options = value;
+
+    if (p.colorScheme && !p.colorScale) p.colorScale = d3Scale.scaleOrdinal(p.colorScheme);
+    return p;
+  },
+
+  /**
+   * @param {Object} data to extract label from
+   * @param {Object} config on how to extract label from data
+   * TODO should the getColor function if provided be evaluated on empty data?
+   * Legend Panel needs to display a color not for particular data point but for the whole serie
+   */
+  getColor: function getColor(data) {
+    var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    var getColor = config.color;
+    if (_lodash2.default.isString(getColor)) return getColor;
+    if (_lodash2.default.isNil(data)) return undefined;
+    if (_lodash2.default.isFunction(getColor)) return getColor(data);
+  }
+};
+
+/***/ }),
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_color__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_color__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_color___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__src_color__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "color", function() { return __WEBPACK_IMPORTED_MODULE_0__src_color___default.a; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__src_color__, "rgb")) __webpack_require__.d(__webpack_exports__, "rgb", function() { return __WEBPACK_IMPORTED_MODULE_0__src_color__["rgb"]; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__src_color__, "hsl")) __webpack_require__.d(__webpack_exports__, "hsl", function() { return __WEBPACK_IMPORTED_MODULE_0__src_color__["hsl"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_lab__ = __webpack_require__(56);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_lab__ = __webpack_require__(59);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_lab___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__src_lab__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "lab", function() { return __WEBPACK_IMPORTED_MODULE_1__src_lab___default.a; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_1__src_lab__, "hcl")) __webpack_require__.d(__webpack_exports__, "hcl", function() { return __WEBPACK_IMPORTED_MODULE_1__src_lab__["hcl"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_cubehelix__ = __webpack_require__(55);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_cubehelix__ = __webpack_require__(58);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_cubehelix___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__src_cubehelix__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "cubehelix", function() { return __WEBPACK_IMPORTED_MODULE_2__src_cubehelix___default.a; });
 
@@ -1307,7 +1355,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1320,7 +1368,7 @@ exports.hue = hue;
 exports.gamma = gamma;
 exports.default = nogamma;
 
-var _constant = __webpack_require__(34);
+var _constant = __webpack_require__(36);
 
 var _constant2 = _interopRequireDefault(_constant);
 
@@ -1355,7 +1403,7 @@ function nogamma(a, b) {
 }
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1442,8 +1490,8 @@ var XYChartSubView = function (_ContrailChartsView) {
       var _this2 = this;
 
       var domains = {};
-      var xAxisName = this.params.plot.x.axis;
-      var xAccessor = this.params.plot.x.accessor;
+      var xAxisName = this.config.get('plot.x.axis');
+      var xAccessor = this.config.get('plot.x.accessor');
       var getFullRange = false;
       if (this.model.data.length < 2) getFullRange = true;
       domains[xAxisName] = this.model.getRangeFor(xAccessor, getFullRange);
@@ -1479,10 +1527,10 @@ var XYChartSubView = function (_ContrailChartsView) {
   }, {
     key: '_onMouseout',
     value: function _onMouseout(d, el) {
-      if (this.config.get('tooltipEnabled')) {
-        var tooltipId = d && d.accessor ? d.accessor.tooltip : _lodash2.default.map(this.params.activeAccessorData, function (a) {
-          return a.tooltip;
-        });
+      var tooltipId = d && d.accessor ? d.accessor.tooltip : _lodash2.default.map(this.params.activeAccessorData, function (a) {
+        return a.tooltip;
+      });
+      if (!_lodash2.default.isEmpty(tooltipId)) {
         _Actionman2.default.fire('HideComponent', tooltipId);
       }
       var els = el ? this.d3.select(function () {
@@ -1505,13 +1553,13 @@ var XYChartSubView = function (_ContrailChartsView) {
   }, {
     key: 'width',
     get: function get() {
-      var delta = this.config.get('chartWidthDelta') || 0;
-      return (this.config.get('chartWidth') || this._container.getBoundingClientRect().width) + delta;
+      var delta = this.config.get('widthDelta') || 0;
+      return (this.config.get('width') || this._container.getBoundingClientRect().width) + delta;
     }
   }, {
     key: 'height',
     get: function get() {
-      return this.config.get('chartHeight') || Math.round(this.width / 2);
+      return this.config.get('height') || Math.round(this.width / 2);
     }
   }, {
     key: 'xScale',
@@ -1537,9 +1585,11 @@ var XYChartSubView = function (_ContrailChartsView) {
   }, {
     key: 'outerWidth',
     get: function get() {
-      var x = this.params.plot.x.accessor;
+      var x = this.config.get('plot.x.accessor');
       if (!_lodash2.default.isFunction(this.xScale)) return this.innerWidth;
-      return Math.abs(this.xScale(_lodash2.default.last(this.model.data)[x]) - this.xScale(this.model.data[0][x]));
+      var first = _lodash2.default.get((0, _lodash2.default)(this.model.data).first(), x);
+      var last = _lodash2.default.get((0, _lodash2.default)(this.model.data).last(), x);
+      return Math.abs(this.xScale(last) - this.xScale(first));
     }
   }, {
     key: 'xMarginInner',
@@ -1554,66 +1604,66 @@ var XYChartSubView = function (_ContrailChartsView) {
 exports.default = XYChartSubView;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_value__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_value__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_value___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__src_value__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolate", function() { return __WEBPACK_IMPORTED_MODULE_0__src_value___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_array__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_array__ = __webpack_require__(34);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_array___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__src_array__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateArray", function() { return __WEBPACK_IMPORTED_MODULE_1__src_array___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_basis__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_basis__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_basis___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__src_basis__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateBasis", function() { return __WEBPACK_IMPORTED_MODULE_2__src_basis___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_basisClosed__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_basisClosed__ = __webpack_require__(35);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_basisClosed___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__src_basisClosed__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateBasisClosed", function() { return __WEBPACK_IMPORTED_MODULE_3__src_basisClosed___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_date__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_date__ = __webpack_require__(37);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_date___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__src_date__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateDate", function() { return __WEBPACK_IMPORTED_MODULE_4__src_date___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_number__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_number__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_number___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__src_number__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateNumber", function() { return __WEBPACK_IMPORTED_MODULE_5__src_number___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_object__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_object__ = __webpack_require__(38);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_object___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__src_object__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateObject", function() { return __WEBPACK_IMPORTED_MODULE_6__src_object___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__src_round__ = __webpack_require__(63);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__src_round__ = __webpack_require__(66);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__src_round___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__src_round__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateRound", function() { return __WEBPACK_IMPORTED_MODULE_7__src_round___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__src_string__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__src_string__ = __webpack_require__(40);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__src_string___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__src_string__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateString", function() { return __WEBPACK_IMPORTED_MODULE_8__src_string___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__src_transform_index__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__src_transform_index__ = __webpack_require__(68);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__src_transform_index___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9__src_transform_index__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_9__src_transform_index__, "interpolateTransformCss")) __webpack_require__.d(__webpack_exports__, "interpolateTransformCss", function() { return __WEBPACK_IMPORTED_MODULE_9__src_transform_index__["interpolateTransformCss"]; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_9__src_transform_index__, "interpolateTransformSvg")) __webpack_require__.d(__webpack_exports__, "interpolateTransformSvg", function() { return __WEBPACK_IMPORTED_MODULE_9__src_transform_index__["interpolateTransformSvg"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__src_zoom__ = __webpack_require__(67);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__src_zoom__ = __webpack_require__(70);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__src_zoom___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10__src_zoom__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateZoom", function() { return __WEBPACK_IMPORTED_MODULE_10__src_zoom___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__src_rgb__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__src_rgb__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__src_rgb___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11__src_rgb__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateRgb", function() { return __WEBPACK_IMPORTED_MODULE_11__src_rgb___default.a; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_11__src_rgb__, "rgbBasis")) __webpack_require__.d(__webpack_exports__, "interpolateRgbBasis", function() { return __WEBPACK_IMPORTED_MODULE_11__src_rgb__["rgbBasis"]; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_11__src_rgb__, "rgbBasisClosed")) __webpack_require__.d(__webpack_exports__, "interpolateRgbBasisClosed", function() { return __WEBPACK_IMPORTED_MODULE_11__src_rgb__["rgbBasisClosed"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__src_hsl__ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__src_hsl__ = __webpack_require__(63);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__src_hsl___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_12__src_hsl__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateHsl", function() { return __WEBPACK_IMPORTED_MODULE_12__src_hsl___default.a; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_12__src_hsl__, "hslLong")) __webpack_require__.d(__webpack_exports__, "interpolateHslLong", function() { return __WEBPACK_IMPORTED_MODULE_12__src_hsl__["hslLong"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__src_lab__ = __webpack_require__(61);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__src_lab__ = __webpack_require__(64);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__src_lab___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_13__src_lab__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateLab", function() { return __WEBPACK_IMPORTED_MODULE_13__src_lab___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__src_hcl__ = __webpack_require__(59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__src_hcl__ = __webpack_require__(62);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__src_hcl___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_14__src_hcl__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateHcl", function() { return __WEBPACK_IMPORTED_MODULE_14__src_hcl___default.a; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_14__src_hcl__, "hclLong")) __webpack_require__.d(__webpack_exports__, "interpolateHclLong", function() { return __WEBPACK_IMPORTED_MODULE_14__src_hcl__["hclLong"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__src_cubehelix__ = __webpack_require__(58);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__src_cubehelix__ = __webpack_require__(61);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__src_cubehelix___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_15__src_cubehelix__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interpolateCubehelix", function() { return __WEBPACK_IMPORTED_MODULE_15__src_cubehelix___default.a; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_15__src_cubehelix__, "cubehelixLong")) __webpack_require__.d(__webpack_exports__, "interpolateCubehelixLong", function() { return __WEBPACK_IMPORTED_MODULE_15__src_cubehelix__["cubehelixLong"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__src_quantize__ = __webpack_require__(62);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__src_quantize__ = __webpack_require__(65);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__src_quantize___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_16__src_quantize__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "quantize", function() { return __WEBPACK_IMPORTED_MODULE_16__src_quantize___default.a; });
 
@@ -1636,7 +1686,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1694,7 +1744,7 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1711,7 +1761,7 @@ exports.default = function (a, b) {
 };
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1806,7 +1856,7 @@ function tweenValue(transition, name, value) {
 }
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1816,7 +1866,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _backbone = __webpack_require__(27);
+var _backbone = __webpack_require__(28);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
@@ -1827,7 +1877,7 @@ exports.default = _backbone2.default.Events; /*
                                               */
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1927,7 +1977,7 @@ function map(object, f) {
 exports.default = map;
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1945,7 +1995,7 @@ exports.Rgb = Rgb;
 exports.hslConvert = hslConvert;
 exports.hsl = hsl;
 
-var _define = __webpack_require__(20);
+var _define = __webpack_require__(21);
 
 var _define2 = _interopRequireDefault(_define);
 
@@ -2260,7 +2310,7 @@ function hsl2rgb(h, m1, m2) {
 }
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2284,7 +2334,7 @@ function extend(parent, definition) {
 }
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2314,7 +2364,7 @@ function basis(t1, v0, v1, v2, v3) {
 }
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2332,40 +2382,40 @@ exports.default = function (a, b) {
     return b == null || t === "boolean" ? (0, _constant2.default)(b) : (t === "number" ? _number2.default : t === "string" ? (c = (0, _d3Color.color)(b)) ? (b = c, _rgb2.default) : _string2.default : b instanceof _d3Color.color ? _rgb2.default : b instanceof Date ? _date2.default : Array.isArray(b) ? _array2.default : isNaN(b) ? _object2.default : _number2.default)(a, b);
 };
 
-var _d3Color = __webpack_require__(10);
+var _d3Color = __webpack_require__(11);
 
-var _rgb = __webpack_require__(37);
+var _rgb = __webpack_require__(39);
 
 var _rgb2 = _interopRequireDefault(_rgb);
 
-var _array = __webpack_require__(32);
+var _array = __webpack_require__(34);
 
 var _array2 = _interopRequireDefault(_array);
 
-var _date = __webpack_require__(35);
+var _date = __webpack_require__(37);
 
 var _date2 = _interopRequireDefault(_date);
 
-var _number = __webpack_require__(15);
+var _number = __webpack_require__(16);
 
 var _number2 = _interopRequireDefault(_number);
 
-var _object = __webpack_require__(36);
+var _object = __webpack_require__(38);
 
 var _object2 = _interopRequireDefault(_object);
 
-var _string = __webpack_require__(38);
+var _string = __webpack_require__(40);
 
 var _string2 = _interopRequireDefault(_string);
 
-var _constant = __webpack_require__(34);
+var _constant = __webpack_require__(36);
 
 var _constant2 = _interopRequireDefault(_constant);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2384,7 +2434,7 @@ exports.default = function (node, x0, y0, x1, y1) {
 };
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2520,7 +2570,7 @@ function sleep(time) {
 }
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2550,6 +2600,10 @@ var _contrailChartsConfigModel = __webpack_require__(4);
 
 var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
 
+var _ColoredChart = __webpack_require__(10);
+
+var _ColoredChart2 = _interopRequireDefault(_ColoredChart);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -2573,11 +2627,16 @@ var CompositeYChartConfigModel = function (_ContrailChartsConfig) {
   }
 
   _createClass(CompositeYChartConfigModel, [{
-    key: 'getScale',
-
+    key: 'set',
+    value: function set() {
+      _get(CompositeYChartConfigModel.prototype.__proto__ || Object.getPrototypeOf(CompositeYChartConfigModel.prototype), 'set', this).call(this, _ColoredChart2.default.set.apply(_ColoredChart2.default, arguments));
+    }
     /**
      * @param {String} name of the axis
      */
+
+  }, {
+    key: 'getScale',
     value: function getScale(name) {
       var axis = this.attributes.axis[name] || {};
       if (_lodash2.default.isFunction(axis.scale)) return axis.scale;
@@ -2601,58 +2660,35 @@ var CompositeYChartConfigModel = function (_ContrailChartsConfig) {
   }, {
     key: 'getColor',
     value: function getColor(data, accessor) {
-      var configuredColor = _get(CompositeYChartConfigModel.prototype.__proto__ || Object.getPrototypeOf(CompositeYChartConfigModel.prototype), 'getColor', this).call(this, data, accessor);
+      var configuredColor = _ColoredChart2.default.getColor(data, accessor);
       return configuredColor || this.attributes.colorScale(accessor.accessor);
     }
   }, {
     key: 'getAccessors',
     value: function getAccessors() {
-      return this.get('plot').y;
+      return this.get('plot.y');
     }
   }, {
     key: 'getDomain',
     value: function getDomain(axisName) {
-      return _lodash2.default.get(this, 'attributes.axis.' + axisName + '.domain');
-    }
-    /**
-     * Override parent
-     */
-
-  }, {
-    key: 'toggleComponent',
-    value: function toggleComponent(type, enable) {
-      switch (type) {
-        case 'Tooltip':
-          if (!this.attributes.crosshairEnabled) this.set('tooltipEnabled', enable, { silent: true });
-          break;
-        case 'Crosshair':
-          this.set('tooltipEnabled', !enable, { silent: true });
-          this.set('crosshairEnabled', enable, { silent: true });
-          break;
-        default:
-          break;
-      }
+      return this.get('axis.' + axisName + '.domain');
     }
   }, {
     key: 'defaults',
     get: function get() {
-      return {
+      return Object.assign(_get(CompositeYChartConfigModel.prototype.__proto__ || Object.getPrototypeOf(CompositeYChartConfigModel.prototype), 'defaults', this), _ColoredChart2.default.defaults, {
         isPrimary: true,
         // by default will use common shared container under the parent
         isSharedContainer: true,
 
-        // The chart width. If not provided will be calculated by View.
-        chartWidth: undefined,
+        // The component width. If not provided will be calculated by View.
+        width: undefined,
 
         // The difference by how much we want to modify the computed width.
-        chartWidthDelta: undefined,
+        widthDelta: undefined,
 
-        // The chart height. If not provided will be calculated by View.
-        chartHeight: undefined,
-
-        colorScale: d3Scale.scaleOrdinal(d3Scale.schemeCategory20),
-        // Duration of chart transitions.
-        duration: 300,
+        // The component height. If not provided will be calculated by View.
+        height: undefined,
 
         // Default axis ticks if not specified per axis.
         _xTicks: 10,
@@ -2675,7 +2711,7 @@ var CompositeYChartConfigModel = function (_ContrailChartsConfig) {
         // TODO move to the BarChartConfigModel
         // Padding between series in percents of bar width
         barPadding: 15
-      };
+      });
     }
   }]);
 
@@ -2685,13 +2721,13 @@ var CompositeYChartConfigModel = function (_ContrailChartsConfig) {
 exports.default = CompositeYChartConfigModel;
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(182);
+__webpack_require__(185);
 
 module.exports = function TitleView(container, text) {
   var selector = '.cc-title';
@@ -2707,13 +2743,13 @@ module.exports = function TitleView(container, text) {
  */
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_27__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_28__;
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2723,7 +2759,101 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _ColorPickerConfigModel = __webpack_require__(113);
+var _ShowComponent = __webpack_require__(113);
+
+Object.defineProperty(exports, 'ShowComponent', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ShowComponent).default;
+  }
+});
+
+var _HideComponent = __webpack_require__(108);
+
+Object.defineProperty(exports, 'HideComponent', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_HideComponent).default;
+  }
+});
+
+var _SelectSerie = __webpack_require__(112);
+
+Object.defineProperty(exports, 'SelectSerie', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SelectSerie).default;
+  }
+});
+
+var _SelectColor = __webpack_require__(111);
+
+Object.defineProperty(exports, 'SelectColor', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SelectColor).default;
+  }
+});
+
+var _SelectChartType = __webpack_require__(110);
+
+Object.defineProperty(exports, 'SelectChartType', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SelectChartType).default;
+  }
+});
+
+var _Zoom = __webpack_require__(115);
+
+Object.defineProperty(exports, 'Zoom', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Zoom).default;
+  }
+});
+
+var _Refresh = __webpack_require__(109);
+
+Object.defineProperty(exports, 'Refresh', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Refresh).default;
+  }
+});
+
+var _Freeze = __webpack_require__(107);
+
+Object.defineProperty(exports, 'Freeze', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Freeze).default;
+  }
+});
+
+var _Unfreeze = __webpack_require__(114);
+
+Object.defineProperty(exports, 'Unfreeze', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Unfreeze).default;
+  }
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _ColorPickerConfigModel = __webpack_require__(116);
 
 Object.defineProperty(exports, 'ColorPickerConfigModel', {
   enumerable: true,
@@ -2732,7 +2862,7 @@ Object.defineProperty(exports, 'ColorPickerConfigModel', {
   }
 });
 
-var _ColorPickerView = __webpack_require__(114);
+var _ColorPickerView = __webpack_require__(117);
 
 Object.defineProperty(exports, 'ColorPickerView', {
   enumerable: true,
@@ -2741,7 +2871,7 @@ Object.defineProperty(exports, 'ColorPickerView', {
   }
 });
 
-var _CompositeYChartConfigModel = __webpack_require__(25);
+var _CompositeYChartConfigModel = __webpack_require__(26);
 
 Object.defineProperty(exports, 'CompositeYChartConfigModel', {
   enumerable: true,
@@ -2750,7 +2880,7 @@ Object.defineProperty(exports, 'CompositeYChartConfigModel', {
   }
 });
 
-var _CompositeYChartView = __webpack_require__(41);
+var _CompositeYChartView = __webpack_require__(43);
 
 Object.defineProperty(exports, 'CompositeYChartView', {
   enumerable: true,
@@ -2759,7 +2889,7 @@ Object.defineProperty(exports, 'CompositeYChartView', {
   }
 });
 
-var _ControlPanelConfigModel = __webpack_require__(120);
+var _ControlPanelConfigModel = __webpack_require__(123);
 
 Object.defineProperty(exports, 'ControlPanelConfigModel', {
   enumerable: true,
@@ -2768,7 +2898,7 @@ Object.defineProperty(exports, 'ControlPanelConfigModel', {
   }
 });
 
-var _ControlPanelView = __webpack_require__(121);
+var _ControlPanelView = __webpack_require__(124);
 
 Object.defineProperty(exports, 'ControlPanelView', {
   enumerable: true,
@@ -2777,7 +2907,7 @@ Object.defineProperty(exports, 'ControlPanelView', {
   }
 });
 
-var _CrosshairConfigModel = __webpack_require__(122);
+var _CrosshairConfigModel = __webpack_require__(125);
 
 Object.defineProperty(exports, 'CrosshairConfigModel', {
   enumerable: true,
@@ -2786,7 +2916,7 @@ Object.defineProperty(exports, 'CrosshairConfigModel', {
   }
 });
 
-var _CrosshairView = __webpack_require__(123);
+var _CrosshairView = __webpack_require__(126);
 
 Object.defineProperty(exports, 'CrosshairView', {
   enumerable: true,
@@ -2795,7 +2925,7 @@ Object.defineProperty(exports, 'CrosshairView', {
   }
 });
 
-var _FilterView = __webpack_require__(125);
+var _FilterView = __webpack_require__(128);
 
 Object.defineProperty(exports, 'FilterView', {
   enumerable: true,
@@ -2804,7 +2934,7 @@ Object.defineProperty(exports, 'FilterView', {
   }
 });
 
-var _FilterConfigModel = __webpack_require__(124);
+var _FilterConfigModel = __webpack_require__(127);
 
 Object.defineProperty(exports, 'FilterConfigModel', {
   enumerable: true,
@@ -2813,7 +2943,7 @@ Object.defineProperty(exports, 'FilterConfigModel', {
   }
 });
 
-var _LegendConfigModel = __webpack_require__(130);
+var _LegendConfigModel = __webpack_require__(131);
 
 Object.defineProperty(exports, 'LegendConfigModel', {
   enumerable: true,
@@ -2822,7 +2952,7 @@ Object.defineProperty(exports, 'LegendConfigModel', {
   }
 });
 
-var _LegendView = __webpack_require__(131);
+var _LegendView = __webpack_require__(132);
 
 Object.defineProperty(exports, 'LegendView', {
   enumerable: true,
@@ -2831,25 +2961,7 @@ Object.defineProperty(exports, 'LegendView', {
   }
 });
 
-var _LegendConfigModel2 = __webpack_require__(128);
-
-Object.defineProperty(exports, 'LegendUniversalConfigModel', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_LegendConfigModel2).default;
-  }
-});
-
-var _LegendView2 = __webpack_require__(129);
-
-Object.defineProperty(exports, 'LegendUniversalView', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_LegendView2).default;
-  }
-});
-
-var _LegendPanelConfigModel = __webpack_require__(126);
+var _LegendPanelConfigModel = __webpack_require__(129);
 
 Object.defineProperty(exports, 'LegendPanelConfigModel', {
   enumerable: true,
@@ -2858,7 +2970,7 @@ Object.defineProperty(exports, 'LegendPanelConfigModel', {
   }
 });
 
-var _LegendPanelView = __webpack_require__(127);
+var _LegendPanelView = __webpack_require__(130);
 
 Object.defineProperty(exports, 'LegendPanelView', {
   enumerable: true,
@@ -2867,7 +2979,7 @@ Object.defineProperty(exports, 'LegendPanelView', {
   }
 });
 
-var _MessageConfigModel = __webpack_require__(132);
+var _MessageConfigModel = __webpack_require__(135);
 
 Object.defineProperty(exports, 'MessageConfigModel', {
   enumerable: true,
@@ -2876,7 +2988,7 @@ Object.defineProperty(exports, 'MessageConfigModel', {
   }
 });
 
-var _MessageView = __webpack_require__(133);
+var _MessageView = __webpack_require__(136);
 
 Object.defineProperty(exports, 'MessageView', {
   enumerable: true,
@@ -2885,7 +2997,7 @@ Object.defineProperty(exports, 'MessageView', {
   }
 });
 
-var _NavigationConfigModel = __webpack_require__(136);
+var _NavigationConfigModel = __webpack_require__(139);
 
 Object.defineProperty(exports, 'NavigationConfigModel', {
   enumerable: true,
@@ -2894,7 +3006,7 @@ Object.defineProperty(exports, 'NavigationConfigModel', {
   }
 });
 
-var _NavigationView = __webpack_require__(137);
+var _NavigationView = __webpack_require__(140);
 
 Object.defineProperty(exports, 'NavigationView', {
   enumerable: true,
@@ -2903,7 +3015,7 @@ Object.defineProperty(exports, 'NavigationView', {
   }
 });
 
-var _PieChartConfigModel = __webpack_require__(138);
+var _PieChartConfigModel = __webpack_require__(141);
 
 Object.defineProperty(exports, 'PieChartConfigModel', {
   enumerable: true,
@@ -2912,7 +3024,7 @@ Object.defineProperty(exports, 'PieChartConfigModel', {
   }
 });
 
-var _PieChartView = __webpack_require__(139);
+var _PieChartView = __webpack_require__(142);
 
 Object.defineProperty(exports, 'PieChartView', {
   enumerable: true,
@@ -2921,7 +3033,7 @@ Object.defineProperty(exports, 'PieChartView', {
   }
 });
 
-var _RadialDendrogramConfigModel = __webpack_require__(140);
+var _RadialDendrogramConfigModel = __webpack_require__(143);
 
 Object.defineProperty(exports, 'RadialDendrogramConfigModel', {
   enumerable: true,
@@ -2930,7 +3042,7 @@ Object.defineProperty(exports, 'RadialDendrogramConfigModel', {
   }
 });
 
-var _RadialDendrogramView = __webpack_require__(141);
+var _RadialDendrogramView = __webpack_require__(144);
 
 Object.defineProperty(exports, 'RadialDendrogramView', {
   enumerable: true,
@@ -2939,7 +3051,7 @@ Object.defineProperty(exports, 'RadialDendrogramView', {
   }
 });
 
-var _SankeyConfigModel = __webpack_require__(142);
+var _SankeyConfigModel = __webpack_require__(145);
 
 Object.defineProperty(exports, 'SankeyConfigModel', {
   enumerable: true,
@@ -2948,7 +3060,7 @@ Object.defineProperty(exports, 'SankeyConfigModel', {
   }
 });
 
-var _SankeyView = __webpack_require__(143);
+var _SankeyView = __webpack_require__(146);
 
 Object.defineProperty(exports, 'SankeyView', {
   enumerable: true,
@@ -2957,7 +3069,7 @@ Object.defineProperty(exports, 'SankeyView', {
   }
 });
 
-var _StandaloneConfigModel = __webpack_require__(144);
+var _StandaloneConfigModel = __webpack_require__(147);
 
 Object.defineProperty(exports, 'StandaloneConfigModel', {
   enumerable: true,
@@ -2966,7 +3078,7 @@ Object.defineProperty(exports, 'StandaloneConfigModel', {
   }
 });
 
-var _StandaloneView = __webpack_require__(145);
+var _StandaloneView = __webpack_require__(148);
 
 Object.defineProperty(exports, 'StandaloneView', {
   enumerable: true,
@@ -2975,7 +3087,7 @@ Object.defineProperty(exports, 'StandaloneView', {
   }
 });
 
-var _TimelineConfigModel = __webpack_require__(146);
+var _TimelineConfigModel = __webpack_require__(149);
 
 Object.defineProperty(exports, 'TimelineConfigModel', {
   enumerable: true,
@@ -2984,7 +3096,7 @@ Object.defineProperty(exports, 'TimelineConfigModel', {
   }
 });
 
-var _TimelineView = __webpack_require__(147);
+var _TimelineView = __webpack_require__(150);
 
 Object.defineProperty(exports, 'TimelineView', {
   enumerable: true,
@@ -2993,7 +3105,7 @@ Object.defineProperty(exports, 'TimelineView', {
   }
 });
 
-var _TooltipConfigModel = __webpack_require__(148);
+var _TooltipConfigModel = __webpack_require__(151);
 
 Object.defineProperty(exports, 'TooltipConfigModel', {
   enumerable: true,
@@ -3002,7 +3114,7 @@ Object.defineProperty(exports, 'TooltipConfigModel', {
   }
 });
 
-var _TooltipView = __webpack_require__(149);
+var _TooltipView = __webpack_require__(152);
 
 Object.defineProperty(exports, 'TooltipView', {
   enumerable: true,
@@ -3011,10 +3123,28 @@ Object.defineProperty(exports, 'TooltipView', {
   }
 });
 
+var _MapView = __webpack_require__(134);
+
+Object.defineProperty(exports, 'MapView', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_MapView).default;
+  }
+});
+
+var _MapConfigModel = __webpack_require__(133);
+
+Object.defineProperty(exports, 'MapConfigModel', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_MapConfigModel).default;
+  }
+});
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 29 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3072,7 +3202,7 @@ exports.hashCode = hashCode;
 exports.bubbleShapes = bubbleShapes;
 
 /***/ }),
-/* 30 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3082,7 +3212,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _SerieProvider = __webpack_require__(159);
+var _SerieProvider = __webpack_require__(160);
 
 Object.defineProperty(exports, 'SerieProvider', {
   enumerable: true,
@@ -3091,7 +3221,7 @@ Object.defineProperty(exports, 'SerieProvider', {
   }
 });
 
-var _DataFrameProvider = __webpack_require__(158);
+var _DataFrameProvider = __webpack_require__(159);
 
 Object.defineProperty(exports, 'DataFrameProvider', {
   enumerable: true,
@@ -3103,7 +3233,7 @@ Object.defineProperty(exports, 'DataFrameProvider', {
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 31 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3116,7 +3246,7 @@ var deg2rad = exports.deg2rad = Math.PI / 180;
 var rad2deg = exports.rad2deg = 180 / Math.PI;
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3144,14 +3274,14 @@ exports.default = function (a, b) {
   };
 };
 
-var _value = __webpack_require__(22);
+var _value = __webpack_require__(23);
 
 var _value2 = _interopRequireDefault(_value);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 33 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3173,10 +3303,10 @@ exports.default = function (values) {
   };
 };
 
-var _basis = __webpack_require__(21);
+var _basis = __webpack_require__(22);
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3193,7 +3323,7 @@ exports.default = function (x) {
 };
 
 /***/ }),
-/* 35 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3211,7 +3341,7 @@ exports.default = function (a, b) {
 };
 
 /***/ }),
-/* 36 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3246,14 +3376,14 @@ exports.default = function (a, b) {
   };
 };
 
-var _value = __webpack_require__(22);
+var _value = __webpack_require__(23);
 
 var _value2 = _interopRequireDefault(_value);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3264,17 +3394,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.rgbBasisClosed = exports.rgbBasis = undefined;
 
-var _d3Color = __webpack_require__(10);
+var _d3Color = __webpack_require__(11);
 
-var _basis = __webpack_require__(21);
+var _basis = __webpack_require__(22);
 
 var _basis2 = _interopRequireDefault(_basis);
 
-var _basisClosed = __webpack_require__(33);
+var _basisClosed = __webpack_require__(35);
 
 var _basisClosed2 = _interopRequireDefault(_basisClosed);
 
-var _color = __webpack_require__(11);
+var _color = __webpack_require__(12);
 
 var _color2 = _interopRequireDefault(_color);
 
@@ -3333,7 +3463,7 @@ var rgbBasis = exports.rgbBasis = rgbSpline(_basis2.default);
 var rgbBasisClosed = exports.rgbBasisClosed = rgbSpline(_basisClosed2.default);
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3397,7 +3527,7 @@ exports.default = function (a, b) {
   });
 };
 
-var _number = __webpack_require__(15);
+var _number = __webpack_require__(16);
 
 var _number2 = _interopRequireDefault(_number);
 
@@ -3419,7 +3549,7 @@ function one(b) {
 }
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3457,7 +3587,7 @@ exports.default = function (node, name) {
 var _schedule = __webpack_require__(5);
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3472,12 +3602,12 @@ exports.default = function (a, b) {
     return (typeof b === "number" ? _d3Interpolate.interpolateNumber : b instanceof _d3Color.color ? _d3Interpolate.interpolateRgb : (c = (0, _d3Color.color)(b)) ? (b = c, _d3Interpolate.interpolateRgb) : _d3Interpolate.interpolateString)(a, b);
 };
 
-var _d3Color = __webpack_require__(10);
+var _d3Color = __webpack_require__(11);
 
-var _d3Interpolate = __webpack_require__(13);
+var _d3Interpolate = __webpack_require__(14);
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3491,7 +3621,7 @@ var _get = function get(object, property, receiver) { if (object === null) objec
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(167);
+__webpack_require__(168);
 
 var _lodash = __webpack_require__(1);
 
@@ -3521,31 +3651,31 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
-var _LineChartView = __webpack_require__(117);
+var _LineChartView = __webpack_require__(120);
 
 var _LineChartView2 = _interopRequireDefault(_LineChartView);
 
-var _AreaChartView = __webpack_require__(115);
+var _AreaChartView = __webpack_require__(118);
 
 var _AreaChartView2 = _interopRequireDefault(_AreaChartView);
 
-var _GroupedBarChartView = __webpack_require__(116);
+var _GroupedBarChartView = __webpack_require__(119);
 
 var _GroupedBarChartView2 = _interopRequireDefault(_GroupedBarChartView);
 
-var _StackedBarChartView = __webpack_require__(119);
+var _StackedBarChartView = __webpack_require__(122);
 
 var _StackedBarChartView2 = _interopRequireDefault(_StackedBarChartView);
 
-var _ScatterPlotView = __webpack_require__(118);
+var _ScatterPlotView = __webpack_require__(121);
 
 var _ScatterPlotView2 = _interopRequireDefault(_ScatterPlotView);
 
-var _CompositeYChartConfigModel = __webpack_require__(25);
+var _CompositeYChartConfigModel = __webpack_require__(26);
 
 var _CompositeYChartConfigModel2 = _interopRequireDefault(_CompositeYChartConfigModel);
 
-var _TitleView = __webpack_require__(26);
+var _TitleView = __webpack_require__(27);
 
 var _TitleView2 = _interopRequireDefault(_TitleView);
 
@@ -3591,11 +3721,6 @@ var CompositeYChartView = function (_ContrailChartsView) {
   }
 
   _createClass(CompositeYChartView, [{
-    key: 'refresh',
-    value: function refresh() {
-      this.config.trigger('change', this.config);
-    }
-  }, {
     key: 'render',
     value: function render() {
       if (!this.config || !this._container) return;
@@ -3604,12 +3729,13 @@ var CompositeYChartView = function (_ContrailChartsView) {
       this._updateChildDrawings();
       this._calculateActiveAccessorData();
       this._calculateDimensions();
-      this.calculateScales();
+      this._calculateRanges();
+      this._calculateScales();
 
       _get(CompositeYChartView.prototype.__proto__ || Object.getPrototypeOf(CompositeYChartView.prototype), 'render', this).call(this);
-      this.renderSVG();
-      this.renderXAxis();
-      this.renderYAxes();
+      this._renderSVG();
+      this._renderXAxis();
+      this._renderYAxes();
       _lodash2.default.each(this._drawings, function (drawing) {
         return drawing.render();
       });
@@ -3633,9 +3759,9 @@ var CompositeYChartView = function (_ContrailChartsView) {
     key: 'showCrosshair',
     value: function showCrosshair(point) {
       var crosshairId = this.config.get('crosshair');
-      var xScale = this.params.axis[this.params.plot.x.axis].scale;
+      var xScale = this.params.axis[this.config.get('plot.x.axis')].scale;
       var mouseX = xScale.invert(point[0]);
-      var data = this.model.getNearest(this.params.plot.x.accessor, mouseX);
+      var data = this.model.getNearest(this.config.get('plot.x.accessor'), mouseX);
       var config = this.getCrosshairConfig();
       _Actionman2.default.fire('ShowComponent', crosshairId, data, point, config);
 
@@ -3646,8 +3772,8 @@ var CompositeYChartView = function (_ContrailChartsView) {
     key: '_calculateDimensions',
     value: function _calculateDimensions() {
       if (this._drawings[0]) {
-        this.params.chartWidth = this._drawings[0].width;
-        this.params.chartHeight = this._drawings[0].height;
+        this.params.width = this._drawings[0].width;
+        this.params.height = this._drawings[0].height;
       }
     }
     /**
@@ -3668,7 +3794,7 @@ var CompositeYChartView = function (_ContrailChartsView) {
         drawing.params.enabled = false;
       });
       // Fill the activeAccessorData structure.
-      _lodash2.default.each(this.config.get('plot').y, function (accessor) {
+      _lodash2.default.each(this.config.get('plot.y'), function (accessor) {
         var drawing = _this2.getDrawing(accessor);
         if (drawing) {
           if (accessor.enabled) {
@@ -3705,13 +3831,12 @@ var CompositeYChartView = function (_ContrailChartsView) {
      */
 
   }, {
-    key: 'calculateScales',
-    value: function calculateScales() {
+    key: '_calculateRanges',
+    value: function _calculateRanges() {
       var p = this.params;
       p.xMarginInner = _lodash2.default.max(_lodash2.default.map(this._drawings, 'xMarginInner'));
-      p.xRange = [p.marginLeft + p.marginInner + p.xMarginInner, p.chartWidth - p.marginRight - p.marginInner - p.xMarginInner];
-      p.yRange = [p.chartHeight - p.marginInner - p.marginBottom, p.marginInner + p.marginTop];
-      this.saveScales();
+      p.xRange = [p.marginLeft + p.marginInner + p.xMarginInner, p.width - p.marginRight - p.marginInner - p.xMarginInner];
+      p.yRange = [p.height - p.marginInner - p.marginBottom, p.marginInner + p.marginTop];
     }
   }, {
     key: 'getDrawing',
@@ -3740,8 +3865,8 @@ var CompositeYChartView = function (_ContrailChartsView) {
     */
 
   }, {
-    key: 'saveScales',
-    value: function saveScales() {
+    key: '_calculateScales',
+    value: function _calculateScales() {
       var _this3 = this;
 
       var domains = this.combineDomains();
@@ -3812,8 +3937,8 @@ var CompositeYChartView = function (_ContrailChartsView) {
      */
 
   }, {
-    key: 'renderSVG',
-    value: function renderSVG() {
+    key: '_renderSVG',
+    value: function _renderSVG() {
       var translate = this.params.xRange[0] - this.xMarginInner;
       if (this.d3.select('clipPath').empty()) {
         this.d3.append('clipPath').attr('id', this.clip).append('rect').attr('x', this.params.xRange[0] - this.xMarginInner).attr('y', this.params.yRange[1] - this.params.marginInner).attr('width', this.params.xRange[1] - this.params.xRange[0] + 2 * this.xMarginInner).attr('height', this.params.yRange[0] - this.params.yRange[1] + 2 * this.params.marginInner);
@@ -3840,7 +3965,7 @@ var CompositeYChartView = function (_ContrailChartsView) {
         return 'axis y-axis ' + d.name + '-axis';
       }).merge(svgYAxis).attr('transform', 'translate(' + translate + ',0)');
 
-      if (this.config.get('crosshairEnabled')) {
+      if (this.config.has('crosshair')) {
         this.svg.delegate('mousemove', 'svg', this._onMousemove.bind(this));
       }
     }
@@ -3860,9 +3985,9 @@ var CompositeYChartView = function (_ContrailChartsView) {
      */
 
   }, {
-    key: 'renderXAxis',
-    value: function renderXAxis() {
-      var name = this.params.plot.x.axis;
+    key: '_renderXAxis',
+    value: function _renderXAxis() {
+      var name = this.config.get('plot.x.axis');
       var axis = this.params.axis[name];
       if (!axis.scale) return;
 
@@ -3888,14 +4013,14 @@ var CompositeYChartView = function (_ContrailChartsView) {
       if (label) labelData.push(label);
 
       var axisLabelElements = this.d3.select('.axis.x-axis').selectAll('.axis-label').data(labelData);
-      axisLabelElements.enter().append('text').attr('class', 'axis-label').merge(axisLabelElements).attr('x', this.params.xRange[0] + (this.params.xRange[1] - this.params.xRange[0]) / 2).attr('y', this.params.chartHeight - this.params.marginTop - labelMargin).text(function (d) {
+      axisLabelElements.enter().append('text').attr('class', 'axis-label').merge(axisLabelElements).attr('x', this.params.xRange[0] + (this.params.xRange[1] - this.params.xRange[0]) / 2).attr('y', this.params.height - this.params.marginTop - labelMargin).text(function (d) {
         return d;
       });
       axisLabelElements.exit().remove();
     }
   }, {
-    key: 'renderYAxes',
-    value: function renderYAxes() {
+    key: '_renderYAxes',
+    value: function _renderYAxes() {
       var _this4 = this;
 
       // We render the yAxis here because there may be multiple drawings for one axis.
@@ -3911,7 +4036,7 @@ var CompositeYChartView = function (_ContrailChartsView) {
         yLabelX = 0 - _this4.params.marginLeft + yLabelMargin;
         yLabelTransform = 'rotate(-90)';
         if (axisInfo.position === 'right') {
-          yLabelX = _this4.params.chartWidth - _this4.params.marginLeft - yLabelMargin;
+          yLabelX = _this4.params.width - _this4.params.marginLeft - yLabelMargin;
           yLabelTransform = 'rotate(90)';
           axisInfo.yAxis = d3Axis.axisRight(_this4.params.axis[axisInfo.name].scale).tickSize(_this4.params.xRange[1] - _this4.params.xRange[0] + 2 * _this4.xMarginInner).tickPadding(5);
         } else {
@@ -3996,13 +4121,13 @@ var CompositeYChartView = function (_ContrailChartsView) {
       // Prepare line coordinates
       data.line = {
         x: function x(d) {
-          return globalXScale(d[_x.accessor]);
+          return globalXScale(_lodash2.default.get(d, _x.accessor));
         },
         y1: this.params.yRange[0],
         y2: this.params.yRange[1],
         // Prepare x label text
         text: function text(d) {
-          return data.xFormat(d[_x.accessor]);
+          return data.xFormat(_lodash2.default.get(d, _x.accessor));
         }
       };
       // Prepare circle data
@@ -4023,20 +4148,23 @@ var CompositeYChartView = function (_ContrailChartsView) {
       return data;
     }
     /**
-     * Zooming by x scale
-     * Works only with components which triggers Zoom action which have the same x accessor
      * Works only with incremental values at x scale, as range is set as min / max values for x scale
      * There is no option to set zoomed range by exact position at x scale (start / end)
      */
 
   }, {
     key: 'zoom',
-    value: function zoom(_ref) {
-      var accessor = _ref.accessor,
-          range = _ref.range;
+    value: function zoom(ranges) {
+      var _this6 = this;
 
-      if (this.config.attributes.plot.x.accessor !== accessor) return;
-      _lodash2.default.set(this.config, 'attributes.axis.x.domain', range);
+      var accessorsByAxis = _lodash2.default.groupBy(this.params.activeAccessorData, 'axis');
+      accessorsByAxis.x = [{ accessor: this.config.get('plot.x.accessor') }];
+      _lodash2.default.each(accessorsByAxis, function (accessors, axisName) {
+        var range = d3Array.extent((0, _lodash2.default)(accessors).map(function (accessor) {
+          return ranges[accessor.accessor];
+        }).flatten().value());
+        if (range[0] !== range[1] || _lodash2.default.isNil(range[0])) _lodash2.default.set(_this6.config, 'attributes.axis.' + axisName + '.domain', range);
+      });
       this.config.trigger('change', this.config);
     }
     /**
@@ -4046,7 +4174,7 @@ var CompositeYChartView = function (_ContrailChartsView) {
   }, {
     key: '_updateChildDrawings',
     value: function _updateChildDrawings() {
-      var _this6 = this;
+      var _this7 = this;
 
       var plot = this.config.get('plot');
       if (!plot.x.axis) {
@@ -4063,23 +4191,23 @@ var CompositeYChartView = function (_ContrailChartsView) {
           accessor.enabled = true;
         }
         if (accessor.chart && accessor.enabled) {
-          var foundDrawing = _this6.getDrawing(accessor);
+          var foundDrawing = _this7.getDrawing(accessor);
           if (!foundDrawing) {
             // The child drawing with this name does not exist yet. Instantiate the child drawing.
-            _lodash2.default.each(_this6.possibleChildViews, function (ChildView, chartType) {
+            _lodash2.default.each(_this7.possibleChildViews, function (ChildView, chartType) {
               if (chartType === accessor.chart) {
-                var params = _lodash2.default.extend({}, _this6.config.attributes, {
+                var params = _lodash2.default.extend({}, _this7.config.attributes, {
                   isPrimary: false,
                   axisName: accessor.axis
                 });
                 var compositeYConfig = new _CompositeYChartConfigModel2.default(params);
                 foundDrawing = new ChildView({
-                  model: _this6.model,
+                  model: _this7.model,
                   config: compositeYConfig,
-                  container: _this6._container,
-                  parent: _this6
+                  container: _this7._container,
+                  parent: _this7
                 });
-                _this6._drawings.push(foundDrawing);
+                _this7._drawings.push(foundDrawing);
               }
             });
           }
@@ -4099,10 +4227,10 @@ var CompositeYChartView = function (_ContrailChartsView) {
   }, {
     key: '_onConfigModelChange',
     value: function _onConfigModelChange() {
-      var _this7 = this;
+      var _this8 = this;
 
       _lodash2.default.each(this._drawings, function (drawing) {
-        drawing.config.set(_this7.config.attributes);
+        drawing.config.set(_this8.config.attributes);
       });
       this.render();
     }
@@ -4153,20 +4281,255 @@ var CompositeYChartView = function (_ContrailChartsView) {
 exports.default = CompositeYChartView;
 
 /***/ }),
-/* 42 */
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _contrailChartsConfigModel = __webpack_require__(4);
+
+var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright (c) Juniper Networks, Inc. All rights reserved.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+var BrushConfigModel = function (_ContrailChartsConfig) {
+  _inherits(BrushConfigModel, _ContrailChartsConfig);
+
+  function BrushConfigModel() {
+    _classCallCheck(this, BrushConfigModel);
+
+    return _possibleConstructorReturn(this, (BrushConfigModel.__proto__ || Object.getPrototypeOf(BrushConfigModel)).apply(this, arguments));
+  }
+
+  _createClass(BrushConfigModel, [{
+    key: 'selection',
+
+    /**
+     * Brush selection in percentage [xMin%, xMax%]
+     */
+    get: function get() {
+      return this.attributes.selection || [];
+    }
+  }, {
+    key: 'duration',
+    get: function get() {
+      return this.attributes.duration;
+    }
+  }, {
+    key: 'handleHeight',
+    get: function get() {
+      return this.has('handleHeight') ? this.attributes.handleHeight : 16;
+    }
+  }, {
+    key: 'handleCenter',
+    get: function get() {
+      return this.attributes.yRange[1] / 2 + this.attributes.yRange[0] / 2;
+    }
+  }, {
+    key: 'extent',
+    get: function get() {
+      return [[this.attributes.xRange[0], this.attributes.yRange[1]], [this.attributes.xRange[1], this.attributes.yRange[0]]];
+    }
+  }]);
+
+  return BrushConfigModel;
+}(_contrailChartsConfigModel2.default);
+
+exports.default = BrushConfigModel;
+
+/***/ }),
+/* 45 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _lodash = __webpack_require__(1);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _d3Selection = __webpack_require__(0);
+
+var d3Selection = _interopRequireWildcard(_d3Selection);
+
+var _d3Shape = __webpack_require__(0);
+
+var d3Shape = _interopRequireWildcard(_d3Shape);
+
+var _d3Brush = __webpack_require__(0);
+
+var d3Brush = _interopRequireWildcard(_d3Brush);
+
+var _d3Ease = __webpack_require__(0);
+
+var d3Ease = _interopRequireWildcard(_d3Ease);
+
+var _contrailChartsView = __webpack_require__(3);
+
+var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
+
+__webpack_require__(183);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright (c) Juniper Networks, Inc. All rights reserved.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+var BrushView = function (_ContrailChartsView) {
+  _inherits(BrushView, _ContrailChartsView);
+
+  function BrushView(p) {
+    _classCallCheck(this, BrushView);
+
+    var _this = _possibleConstructorReturn(this, (BrushView.__proto__ || Object.getPrototypeOf(BrushView)).call(this, p));
+
+    _this._brush = d3Brush.brushX().on('start brush end', _this._onSelection.bind(_this));
+    _this.listenTo(_this.config, 'change', _this.render);
+    return _this;
+  }
+
+  _createClass(BrushView, [{
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      _get(BrushView.prototype.__proto__ || Object.getPrototypeOf(BrushView.prototype), 'render', this).call(this);
+      this._brush.extent(this.config.extent).handleSize(10);
+
+      var yRange = this.config.get('yRange');
+      this.d3.selectAll(this.selectors.unselected).data([{ type: 'w' }, { type: 'e' }]).enter().append('rect').attr('class', function (d) {
+        return _this2.selectorClass('unselected') + '-' + d.type;
+      }).classed('hide', true).classed(this.selectorClass('unselected'), true).attr('y', yRange[1]).attr('height', yRange[0] - yRange[1]);
+
+      this.d3.selectAll(this.selectors.handle).data([{ type: 'w' }, { type: 'e' }]).enter().append('path').classed('hide', true).classed(this.selectorClass('handle'), true).attr('d', d3Shape.arc().innerRadius(0).outerRadius(this.config.handleHeight / 2).startAngle(0).endAngle(function (d, i) {
+        return i ? Math.PI : -Math.PI;
+      }));
+      this.d3.call(this._brush);
+
+      var brushGroup = this.d3.transition().ease(d3Ease.easeLinear).duration(this.config.duration);
+      this._brush.move(brushGroup, this.config.selection);
+    }
+  }, {
+    key: 'show',
+    value: function show(selection) {
+      var _this3 = this;
+
+      var xRange = this.config.get('xRange');
+      this.d3.selectAll(this.selectors.unselected).classed('hide', false).attr('x', function (d) {
+        return d.type === 'w' ? xRange[0] : selection[1];
+      }).attr('width', function (d) {
+        return d.type === 'w' ? selection[0] - xRange[0] : xRange[1] - selection[1];
+      });
+
+      this.d3.selectAll(this.selectors.handle).classed('hide', false).attr('transform', function (d, i) {
+        return 'translate(' + selection[i] + ',' + _this3.config.handleCenter + ') scale(1,2)';
+      });
+    }
+  }, {
+    key: 'hide',
+    value: function hide() {
+      this.d3.selectAll(this.selectors.handle).classed('hide', true);
+      this.d3.selectAll(this.selectors.unselected).classed('hide', true);
+    }
+
+    // Event handlers
+
+  }, {
+    key: '_onSelection',
+    value: function _onSelection() {
+      var _this4 = this;
+
+      var selection = d3Selection.event.selection;
+      var xRange = this.config.get('xRange');
+
+      if (!selection) return this.hide();else this.show(selection);
+
+      this.config.set('selection', selection, { silent: true });
+      // selection is removed when clicking outside a brush
+      if (selection[0] === selection[1]) {
+        var _xRange = this.config.get('xRange');
+        selection = [_xRange[0], _xRange[1]];
+      }
+      if (_lodash2.default.isEqual(selection, xRange)) {
+        setTimeout(function () {
+          return _this4._brush.move(_this4.d3);
+        });
+      }
+
+      this.trigger('selection', selection);
+    }
+  }, {
+    key: 'tagName',
+    get: function get() {
+      return 'g';
+    }
+  }, {
+    key: 'zIndex',
+    get: function get() {
+      return 9;
+    }
+  }, {
+    key: 'selectors',
+    get: function get() {
+      return _lodash2.default.extend(_get(BrushView.prototype.__proto__ || Object.getPrototypeOf(BrushView.prototype), 'selectors', this), {
+        handle: '.handle--custom',
+        unselected: '.unselected'
+      });
+    }
+  }]);
+
+  return BrushView;
+}(_contrailChartsView2.default);
+
+exports.default = BrushView;
+
+/***/ }),
+/* 46 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_timer__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_timer__ = __webpack_require__(25);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_timer___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__src_timer__);
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__src_timer__, "now")) __webpack_require__.d(__webpack_exports__, "now", function() { return __WEBPACK_IMPORTED_MODULE_0__src_timer__["now"]; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__src_timer__, "timer")) __webpack_require__.d(__webpack_exports__, "timer", function() { return __WEBPACK_IMPORTED_MODULE_0__src_timer__["timer"]; });
 /* harmony reexport (binding) */ if(__webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__src_timer__, "timerFlush")) __webpack_require__.d(__webpack_exports__, "timerFlush", function() { return __WEBPACK_IMPORTED_MODULE_0__src_timer__["timerFlush"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_timeout__ = __webpack_require__(83);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_timeout__ = __webpack_require__(86);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_timeout___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__src_timeout__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "timeout", function() { return __WEBPACK_IMPORTED_MODULE_1__src_timeout___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_interval__ = __webpack_require__(82);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_interval__ = __webpack_require__(85);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_interval___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__src_interval__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interval", function() { return __WEBPACK_IMPORTED_MODULE_2__src_interval___default.a; });
 
@@ -4177,20 +4540,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 43 */
+/* 47 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_selection_index__ = __webpack_require__(85);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_selection_index__ = __webpack_require__(88);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_selection_index___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__src_selection_index__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_transition_index__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_transition_index___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__src_transition_index__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "transition", function() { return __WEBPACK_IMPORTED_MODULE_1__src_transition_index___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_active__ = __webpack_require__(84);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_active__ = __webpack_require__(87);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_active___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__src_active__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "active", function() { return __WEBPACK_IMPORTED_MODULE_2__src_active___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_interrupt__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_interrupt__ = __webpack_require__(41);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_interrupt___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__src_interrupt__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "interrupt", function() { return __WEBPACK_IMPORTED_MODULE_3__src_interrupt___default.a; });
 
@@ -4200,19 +4563,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 44 */
+/* 48 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 
 /***/ }),
-/* 45 */
-/***/ (function(module, exports) {
-
-// removed by extract-text-webpack-plugin
-
-/***/ }),
-/* 46 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4224,17 +4581,17 @@ exports.HandlebarsEnvironment = HandlebarsEnvironment;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var _utils = __webpack_require__(8);
+var _utils = __webpack_require__(7);
 
-var _exception = __webpack_require__(14);
+var _exception = __webpack_require__(15);
 
 var _exception2 = _interopRequireDefault(_exception);
 
-var _helpers = __webpack_require__(196);
+var _helpers = __webpack_require__(198);
 
-var _decorators = __webpack_require__(194);
+var _decorators = __webpack_require__(196);
 
-var _logger = __webpack_require__(204);
+var _logger = __webpack_require__(206);
 
 var _logger2 = _interopRequireDefault(_logger);
 
@@ -4323,13 +4680,13 @@ exports.logger = _logger2['default'];
 
 
 /***/ }),
-/* 47 */
+/* 50 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_47__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_50__;
 
 /***/ }),
-/* 48 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4350,15 +4707,19 @@ var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _index = __webpack_require__(28);
+var _index = __webpack_require__(30);
 
 var Components = _interopRequireWildcard(_index);
 
-var _index2 = __webpack_require__(30);
+var _index2 = __webpack_require__(32);
 
 var Providers = _interopRequireWildcard(_index2);
 
-var _TitleView = __webpack_require__(26);
+var _index3 = __webpack_require__(29);
+
+var Actions = _interopRequireWildcard(_index3);
+
+var _TitleView = __webpack_require__(27);
 
 var _TitleView2 = _interopRequireDefault(_TitleView);
 
@@ -4366,52 +4727,14 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
-var _ShowComponent = __webpack_require__(110);
-
-var _ShowComponent2 = _interopRequireDefault(_ShowComponent);
-
-var _HideComponent = __webpack_require__(105);
-
-var _HideComponent2 = _interopRequireDefault(_HideComponent);
-
-var _SelectSerie = __webpack_require__(109);
-
-var _SelectSerie2 = _interopRequireDefault(_SelectSerie);
-
-var _SelectColor = __webpack_require__(108);
-
-var _SelectColor2 = _interopRequireDefault(_SelectColor);
-
-var _SelectChartType = __webpack_require__(107);
-
-var _SelectChartType2 = _interopRequireDefault(_SelectChartType);
-
-var _Zoom = __webpack_require__(112);
-
-var _Zoom2 = _interopRequireDefault(_Zoom);
-
-var _Refresh = __webpack_require__(106);
-
-var _Refresh2 = _interopRequireDefault(_Refresh);
-
-var _Freeze = __webpack_require__(104);
-
-var _Freeze2 = _interopRequireDefault(_Freeze);
-
-var _Unfreeze = __webpack_require__(111);
-
-var _Unfreeze2 = _interopRequireDefault(_Unfreeze);
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Actions = { ShowComponent: _ShowComponent2.default, HideComponent: _HideComponent2.default, SelectSerie: _SelectSerie2.default, SelectColor: _SelectColor2.default, SelectChartType: _SelectChartType2.default, Zoom: _Zoom2.default, Refresh: _Refresh2.default, Freeze: _Freeze2.default, Unfreeze: _Unfreeze2.default };
 /**
 */
-
 var ChartView = function () {
   function ChartView(p) {
     _classCallCheck(this, ChartView);
@@ -4427,7 +4750,8 @@ var ChartView = function () {
     key: 'setData',
     value: function setData(data) {
       if (this.frozen) return;
-      if (_lodash2.default.isArray(data)) (0, _lodash2.default)(this._components).map(function (c) {
+      if (!_lodash2.default.isArray(data)) return;
+      (0, _lodash2.default)(this._components).map(function (c) {
         return c.model;
       }).uniq().compact().each(function (m) {
         m.data = data;
@@ -4566,16 +4890,6 @@ var ChartView = function () {
         var componentView = _this3._registerComponent(component, sourceComponent.model);
         componentView.config.parent = sourceComponent.config;
       });
-
-      // Post init configuration of components dependant on others
-      _lodash2.default.each(this._components, function (component) {
-        if (_this3._isEnabledComponent('Tooltip')) {
-          component.config.toggleComponent('Tooltip', true);
-        }
-        if (_this3._isEnabledComponent('Crosshair')) {
-          component.config.toggleComponent('Crosshair', true);
-        }
-      });
     }
     /**
      * Initialize individual component
@@ -4642,13 +4956,13 @@ var ChartView = function () {
 exports.default = ChartView;
 
 /***/ }),
-/* 49 */
+/* 52 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 
 /***/ }),
-/* 50 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4666,7 +4980,7 @@ exports.default = function (map) {
 };
 
 /***/ }),
-/* 51 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4684,7 +4998,7 @@ exports.default = function (map) {
 };
 
 /***/ }),
-/* 52 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4765,7 +5079,7 @@ exports.default = function () {
   };
 };
 
-var _map = __webpack_require__(18);
+var _map = __webpack_require__(19);
 
 var _map2 = _interopRequireDefault(_map);
 
@@ -4788,7 +5102,7 @@ function setMap(map, key, value) {
 }
 
 /***/ }),
-/* 53 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4798,7 +5112,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _map = __webpack_require__(18);
+var _map = __webpack_require__(19);
 
 var _map2 = _interopRequireDefault(_map);
 
@@ -4849,7 +5163,7 @@ function set(object, f) {
 exports.default = set;
 
 /***/ }),
-/* 54 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4867,7 +5181,7 @@ exports.default = function (map) {
 };
 
 /***/ }),
-/* 55 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4879,13 +5193,13 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = cubehelix;
 exports.Cubehelix = Cubehelix;
 
-var _define = __webpack_require__(20);
+var _define = __webpack_require__(21);
 
 var _define2 = _interopRequireDefault(_define);
 
-var _color = __webpack_require__(19);
+var _color = __webpack_require__(20);
 
-var _math = __webpack_require__(31);
+var _math = __webpack_require__(33);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -4944,7 +5258,7 @@ function Cubehelix(h, s, l, opacity) {
 }));
 
 /***/ }),
-/* 56 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4958,13 +5272,13 @@ exports.Lab = Lab;
 exports.hcl = hcl;
 exports.Hcl = Hcl;
 
-var _define = __webpack_require__(20);
+var _define = __webpack_require__(21);
 
 var _define2 = _interopRequireDefault(_define);
 
-var _color = __webpack_require__(19);
+var _color = __webpack_require__(20);
 
-var _math = __webpack_require__(31);
+var _math = __webpack_require__(33);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -5071,7 +5385,7 @@ function Hcl(h, c, l, opacity) {
 }));
 
 /***/ }),
-/* 57 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5176,7 +5490,7 @@ function set(type, name, callback) {
 exports.default = dispatch;
 
 /***/ }),
-/* 58 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5187,9 +5501,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.cubehelixLong = undefined;
 
-var _d3Color = __webpack_require__(10);
+var _d3Color = __webpack_require__(11);
 
-var _color = __webpack_require__(11);
+var _color = __webpack_require__(12);
 
 var _color2 = _interopRequireDefault(_color);
 
@@ -5223,7 +5537,7 @@ exports.default = cubehelix(_color.hue);
 var cubehelixLong = exports.cubehelixLong = cubehelix(_color2.default);
 
 /***/ }),
-/* 59 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5234,9 +5548,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.hclLong = undefined;
 
-var _d3Color = __webpack_require__(10);
+var _d3Color = __webpack_require__(11);
 
-var _color = __webpack_require__(11);
+var _color = __webpack_require__(12);
 
 var _color2 = _interopRequireDefault(_color);
 
@@ -5262,7 +5576,7 @@ exports.default = hcl(_color.hue);
 var hclLong = exports.hclLong = hcl(_color2.default);
 
 /***/ }),
-/* 60 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5273,9 +5587,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.hslLong = undefined;
 
-var _d3Color = __webpack_require__(10);
+var _d3Color = __webpack_require__(11);
 
-var _color = __webpack_require__(11);
+var _color = __webpack_require__(12);
 
 var _color2 = _interopRequireDefault(_color);
 
@@ -5301,7 +5615,7 @@ exports.default = hsl(_color.hue);
 var hslLong = exports.hslLong = hsl(_color2.default);
 
 /***/ }),
-/* 61 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5312,9 +5626,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = lab;
 
-var _d3Color = __webpack_require__(10);
+var _d3Color = __webpack_require__(11);
 
-var _color = __webpack_require__(11);
+var _color = __webpack_require__(12);
 
 var _color2 = _interopRequireDefault(_color);
 
@@ -5335,7 +5649,7 @@ function lab(start, end) {
 }
 
 /***/ }),
-/* 62 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5353,7 +5667,7 @@ exports.default = function (interpolator, n) {
 };
 
 /***/ }),
-/* 63 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5370,7 +5684,7 @@ exports.default = function (a, b) {
 };
 
 /***/ }),
-/* 64 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5408,7 +5722,7 @@ var identity = exports.identity = {
 };
 
 /***/ }),
-/* 65 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5419,11 +5733,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.interpolateTransformSvg = exports.interpolateTransformCss = undefined;
 
-var _number = __webpack_require__(15);
+var _number = __webpack_require__(16);
 
 var _number2 = _interopRequireDefault(_number);
 
-var _parse = __webpack_require__(66);
+var _parse = __webpack_require__(69);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -5493,7 +5807,7 @@ var interpolateTransformCss = exports.interpolateTransformCss = interpolateTrans
 var interpolateTransformSvg = exports.interpolateTransformSvg = interpolateTransform(_parse.parseSvg, ", ", ")", ")");
 
 /***/ }),
-/* 66 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5505,7 +5819,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.parseCss = parseCss;
 exports.parseSvg = parseSvg;
 
-var _decompose = __webpack_require__(64);
+var _decompose = __webpack_require__(67);
 
 var _decompose2 = _interopRequireDefault(_decompose);
 
@@ -5533,7 +5847,7 @@ function parseSvg(value) {
 }
 
 /***/ }),
-/* 67 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5606,7 +5920,7 @@ function tanh(x) {
 // p1 = [ux1, uy1, w1]
 
 /***/ }),
-/* 68 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5708,7 +6022,7 @@ function addAll(data) {
 }
 
 /***/ }),
-/* 69 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5786,7 +6100,7 @@ exports.default = function (x, y) {
 };
 
 /***/ }),
-/* 70 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5807,7 +6121,7 @@ exports.default = function () {
 };
 
 /***/ }),
-/* 71 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5822,7 +6136,7 @@ exports.default = function (_) {
 };
 
 /***/ }),
-/* 72 */
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5891,14 +6205,14 @@ exports.default = function (x, y, radius) {
   return data;
 };
 
-var _quad = __webpack_require__(23);
+var _quad = __webpack_require__(24);
 
 var _quad2 = _interopRequireDefault(_quad);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 73 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5909,51 +6223,51 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = quadtree;
 
-var _add = __webpack_require__(68);
+var _add = __webpack_require__(71);
 
 var _add2 = _interopRequireDefault(_add);
 
-var _cover = __webpack_require__(69);
+var _cover = __webpack_require__(72);
 
 var _cover2 = _interopRequireDefault(_cover);
 
-var _data = __webpack_require__(70);
+var _data = __webpack_require__(73);
 
 var _data2 = _interopRequireDefault(_data);
 
-var _extent = __webpack_require__(71);
+var _extent = __webpack_require__(74);
 
 var _extent2 = _interopRequireDefault(_extent);
 
-var _find = __webpack_require__(72);
+var _find = __webpack_require__(75);
 
 var _find2 = _interopRequireDefault(_find);
 
-var _remove = __webpack_require__(74);
+var _remove = __webpack_require__(77);
 
 var _remove2 = _interopRequireDefault(_remove);
 
-var _root = __webpack_require__(75);
+var _root = __webpack_require__(78);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _size = __webpack_require__(76);
+var _size = __webpack_require__(79);
 
 var _size2 = _interopRequireDefault(_size);
 
-var _visit = __webpack_require__(77);
+var _visit = __webpack_require__(80);
 
 var _visit2 = _interopRequireDefault(_visit);
 
-var _visitAfter = __webpack_require__(78);
+var _visitAfter = __webpack_require__(81);
 
 var _visitAfter2 = _interopRequireDefault(_visitAfter);
 
-var _x = __webpack_require__(79);
+var _x = __webpack_require__(82);
 
 var _x2 = _interopRequireDefault(_x);
 
-var _y = __webpack_require__(80);
+var _y = __webpack_require__(83);
 
 var _y2 = _interopRequireDefault(_y);
 
@@ -6022,7 +6336,7 @@ treeProto.x = _x2.default;
 treeProto.y = _y2.default;
 
 /***/ }),
-/* 74 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6096,7 +6410,7 @@ function removeAll(data) {
 }
 
 /***/ }),
-/* 75 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6111,7 +6425,7 @@ exports.default = function () {
 };
 
 /***/ }),
-/* 76 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6132,7 +6446,7 @@ exports.default = function () {
 };
 
 /***/ }),
-/* 77 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6165,14 +6479,14 @@ exports.default = function (callback) {
   return this;
 };
 
-var _quad = __webpack_require__(23);
+var _quad = __webpack_require__(24);
 
 var _quad2 = _interopRequireDefault(_quad);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 78 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6210,14 +6524,14 @@ exports.default = function (callback) {
   return this;
 };
 
-var _quad = __webpack_require__(23);
+var _quad = __webpack_require__(24);
 
 var _quad2 = _interopRequireDefault(_quad);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 79 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6237,7 +6551,7 @@ function defaultX(d) {
 }
 
 /***/ }),
-/* 80 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6257,7 +6571,7 @@ function defaultY(d) {
 }
 
 /***/ }),
-/* 81 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6559,12 +6873,12 @@ exports.default = function () {
 
 var _d3Array = __webpack_require__(0);
 
-var _d3Collection = __webpack_require__(160);
+var _d3Collection = __webpack_require__(161);
 
-var _d3Interpolate = __webpack_require__(13);
+var _d3Interpolate = __webpack_require__(14);
 
 /***/ }),
-/* 82 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6587,10 +6901,10 @@ exports.default = function (callback, delay, time) {
   return t;
 };
 
-var _timer = __webpack_require__(24);
+var _timer = __webpack_require__(25);
 
 /***/ }),
-/* 83 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6610,10 +6924,10 @@ exports.default = function (callback, delay, time) {
   return t;
 };
 
-var _timer = __webpack_require__(24);
+var _timer = __webpack_require__(25);
 
 /***/ }),
-/* 84 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6647,7 +6961,7 @@ var _schedule = __webpack_require__(5);
 var root = [null];
 
 /***/ }),
-/* 85 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6655,11 +6969,11 @@ var root = [null];
 
 var _d3Selection = __webpack_require__(0);
 
-var _interrupt = __webpack_require__(86);
+var _interrupt = __webpack_require__(89);
 
 var _interrupt2 = _interopRequireDefault(_interrupt);
 
-var _transition = __webpack_require__(87);
+var _transition = __webpack_require__(90);
 
 var _transition2 = _interopRequireDefault(_transition);
 
@@ -6669,7 +6983,7 @@ _d3Selection.selection.prototype.interrupt = _interrupt2.default;
 _d3Selection.selection.prototype.transition = _transition2.default;
 
 /***/ }),
-/* 86 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6685,14 +6999,14 @@ exports.default = function (name) {
   });
 };
 
-var _interrupt = __webpack_require__(39);
+var _interrupt = __webpack_require__(41);
 
 var _interrupt2 = _interopRequireDefault(_interrupt);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 87 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6730,7 +7044,7 @@ var _schedule2 = _interopRequireDefault(_schedule);
 
 var _d3Ease = __webpack_require__(0);
 
-var _d3Timer = __webpack_require__(42);
+var _d3Timer = __webpack_require__(46);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -6752,7 +7066,7 @@ function inherit(node, id) {
 }
 
 /***/ }),
-/* 88 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6768,13 +7082,13 @@ exports.default = function (name, value) {
   return this.attrTween(name, typeof value === "function" ? (fullname.local ? attrFunctionNS : attrFunction)(fullname, i, (0, _tween.tweenValue)(this, "attr." + name, value)) : value == null ? (fullname.local ? attrRemoveNS : attrRemove)(fullname) : (fullname.local ? attrConstantNS : attrConstant)(fullname, i, value));
 };
 
-var _d3Interpolate = __webpack_require__(13);
+var _d3Interpolate = __webpack_require__(14);
 
 var _d3Selection = __webpack_require__(0);
 
-var _tween = __webpack_require__(16);
+var _tween = __webpack_require__(17);
 
-var _interpolate = __webpack_require__(40);
+var _interpolate = __webpack_require__(42);
 
 var _interpolate2 = _interopRequireDefault(_interpolate);
 
@@ -6831,7 +7145,7 @@ function attrFunctionNS(fullname, interpolate, value) {
 }
 
 /***/ }),
-/* 89 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6877,7 +7191,7 @@ function attrTween(name, value) {
 }
 
 /***/ }),
-/* 90 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6908,7 +7222,7 @@ function delayConstant(id, value) {
 }
 
 /***/ }),
-/* 91 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6939,7 +7253,7 @@ function durationConstant(id, value) {
 }
 
 /***/ }),
-/* 92 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6965,7 +7279,7 @@ function easeConstant(id, value) {
 }
 
 /***/ }),
-/* 93 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6994,7 +7308,7 @@ var _d3Selection = __webpack_require__(0);
 var _index = __webpack_require__(9);
 
 /***/ }),
-/* 94 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7025,7 +7339,7 @@ exports.default = function (transition) {
 var _index = __webpack_require__(9);
 
 /***/ }),
-/* 95 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7069,7 +7383,7 @@ function onFunction(id, name, listener) {
 }
 
 /***/ }),
-/* 96 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7093,7 +7407,7 @@ function removeFunction(id) {
 }
 
 /***/ }),
-/* 97 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7133,7 +7447,7 @@ var _schedule2 = _interopRequireDefault(_schedule);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 98 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7177,7 +7491,7 @@ var _schedule2 = _interopRequireDefault(_schedule);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 99 */
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7196,7 +7510,7 @@ var _d3Selection = __webpack_require__(0);
 var Selection = _d3Selection.selection.prototype.constructor;
 
 /***/ }),
-/* 100 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7211,13 +7525,13 @@ exports.default = function (name, value, priority) {
     return value == null ? this.styleTween(name, styleRemove(name, i)).on("end.style." + name, styleRemoveEnd(name)) : this.styleTween(name, typeof value === "function" ? styleFunction(name, i, (0, _tween.tweenValue)(this, "style." + name, value)) : styleConstant(name, i, value), priority);
 };
 
-var _d3Interpolate = __webpack_require__(13);
+var _d3Interpolate = __webpack_require__(14);
 
 var _d3Selection = __webpack_require__(0);
 
-var _tween = __webpack_require__(16);
+var _tween = __webpack_require__(17);
 
-var _interpolate = __webpack_require__(40);
+var _interpolate = __webpack_require__(42);
 
 var _interpolate2 = _interopRequireDefault(_interpolate);
 
@@ -7259,7 +7573,7 @@ function styleFunction(name, interpolate, value) {
 }
 
 /***/ }),
-/* 101 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7290,7 +7604,7 @@ function styleTween(name, value, priority) {
 }
 
 /***/ }),
-/* 102 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7304,7 +7618,7 @@ exports.default = function (value) {
   return this.tween("text", typeof value === "function" ? textFunction((0, _tween.tweenValue)(this, "text", value)) : textConstant(value == null ? "" : value + ""));
 };
 
-var _tween = __webpack_require__(16);
+var _tween = __webpack_require__(17);
 
 function textConstant(value) {
   return function () {
@@ -7320,7 +7634,7 @@ function textFunction(value) {
 }
 
 /***/ }),
-/* 103 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7361,7 +7675,7 @@ var _schedule2 = _interopRequireDefault(_schedule);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 104 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7428,7 +7742,7 @@ var Freeze = function (_Action) {
 exports.default = Freeze;
 
 /***/ }),
-/* 105 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7494,7 +7808,7 @@ var HideComponent = function (_Action) {
 exports.default = HideComponent;
 
 /***/ }),
-/* 106 */
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7562,7 +7876,7 @@ var Refresh = function (_Action) {
 exports.default = Refresh;
 
 /***/ }),
-/* 107 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7668,7 +7982,7 @@ var SelectChartType = function (_Action) {
 exports.default = SelectChartType;
 
 /***/ }),
-/* 108 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7760,7 +8074,7 @@ var SelectColor = function (_Action) {
 exports.default = SelectColor;
 
 /***/ }),
-/* 109 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7855,7 +8169,7 @@ var SelectSerie = function (_Action) {
 exports.default = SelectSerie;
 
 /***/ }),
-/* 110 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7913,7 +8227,7 @@ var ShowComponent = function (_Action) {
 exports.default = ShowComponent;
 
 /***/ }),
-/* 111 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7980,7 +8294,7 @@ var Unfreeze = function (_Action) {
 exports.default = Unfreeze;
 
 /***/ }),
-/* 112 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8002,6 +8316,8 @@ var _Action3 = _interopRequireDefault(_Action2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -8022,21 +8338,29 @@ var Zoom = function (_Action) {
     _this._deny = false;
     return _this;
   }
+  /**
+   * Zoom is performed by accessor ranges for any updated component be able to respond
+   * while zooming by axes will require components to have the same corresponding axes names
+   * @param ranges Hash of ranges by accessor
+   */
+
 
   _createClass(Zoom, [{
     key: '_execute',
-    value: function _execute(componentIds) {
-      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        args[_key - 1] = arguments[_key];
-      }
-
+    value: function _execute(componentIds, ranges) {
       var chart = this._registrar;
-      var components = void 0;
+      var components = [];
       if (componentIds) components = _lodash2.default.map(componentIds, function (id) {
         return chart.getComponent(id);
-      });else components = chart.getComponentsByType('CompositeYChart');
+      });else {
+        var _components, _components2;
+
+        (_components = components).push.apply(_components, _toConsumableArray(chart.getComponentsByType('CompositeYChart')));
+        (_components2 = components).push.apply(_components2, _toConsumableArray(chart.getComponentsByType('Navigation')));
+      }
+
       _lodash2.default.each(components, function (component) {
-        if (component) component.zoom.apply(component, args);
+        if (component) component.zoom(ranges);
       });
     }
   }]);
@@ -8047,7 +8371,7 @@ var Zoom = function (_Action) {
 exports.default = Zoom;
 
 /***/ }),
-/* 113 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8059,19 +8383,19 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
-
-var _d3Scale = __webpack_require__(0);
-
-var d3Scale = _interopRequireWildcard(_d3Scale);
 
 var _contrailChartsConfigModel = __webpack_require__(4);
 
 var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _ColoredChart = __webpack_require__(10);
+
+var _ColoredChart2 = _interopRequireDefault(_ColoredChart);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -8096,9 +8420,7 @@ var ColorPickerConfigModel = function (_ContrailChartsConfig) {
   _createClass(ColorPickerConfigModel, [{
     key: 'defaults',
     get: function get() {
-      return {
-        colorScheme: d3Scale.schemeCategory20
-      };
+      return Object.assign(_get(ColorPickerConfigModel.prototype.__proto__ || Object.getPrototypeOf(ColorPickerConfigModel.prototype), 'defaults', this), _ColoredChart2.default.defaults);
     }
     /**
      * Ask parent component for serie accessors
@@ -8128,7 +8450,7 @@ var ColorPickerConfigModel = function (_ContrailChartsConfig) {
 exports.default = ColorPickerConfigModel;
 
 /***/ }),
-/* 114 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8142,7 +8464,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-__webpack_require__(165);
+var _lodash = __webpack_require__(1);
+
+var _lodash2 = _interopRequireDefault(_lodash);
 
 var _contrailChartsView = __webpack_require__(3);
 
@@ -8152,9 +8476,11 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
-var _colorPicker = __webpack_require__(183);
+var _colorPicker = __webpack_require__(186);
 
 var _colorPicker2 = _interopRequireDefault(_colorPicker);
+
+__webpack_require__(166);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -8186,7 +8512,7 @@ var ColorPickerView = function (_ContrailChartsView) {
       var content = template(this.config.data);
 
       _get(ColorPickerView.prototype.__proto__ || Object.getPrototypeOf(ColorPickerView.prototype), 'render', this).call(this, content);
-      this.d3.classed('hide', this.config.get('embedded'));
+      this.d3.classed('hide', this.config.get('embedded') && !this._visible);
     }
   }, {
     key: 'open',
@@ -8194,17 +8520,17 @@ var ColorPickerView = function (_ContrailChartsView) {
       var $elem = this.$(el);
       var label = $elem.find('.label').html();
       this._accessor = $elem.data('accessor');
-      var paletteElement = this.$('.color-picker-palette');
+      var paletteElement = this.$(this.selectors.palette);
       var elemOffset = $elem.position();
       elemOffset.left += $elem.outerWidth(true);
       paletteElement.css(elemOffset);
-      paletteElement.find('.color-picker-palette-title').html(label);
+      paletteElement.find(this.selectors.title).html(label);
       paletteElement.removeClass('hide');
     }
   }, {
     key: 'close',
     value: function close() {
-      this.d3.select('.color-picker-palette').classed('hide', true);
+      this.d3.select(this.selectors.palette).classed('hide', true);
     }
 
     // Event handlers
@@ -8216,12 +8542,23 @@ var ColorPickerView = function (_ContrailChartsView) {
       _Actionman2.default.fire('SelectColor', this._accessor, color);
     }
   }, {
+    key: 'selectors',
+    get: function get() {
+      return _lodash2.default.extend(_get(ColorPickerView.prototype.__proto__ || Object.getPrototypeOf(ColorPickerView.prototype), 'selectors', this), {
+        open: '.color-select',
+        close: '.color-picker-palette-close',
+        title: '.color-picker-palette-title',
+        palette: '.color-picker-palette',
+        colorSelector: '.color-picker-palette-color'
+      });
+    }
+  }, {
     key: 'events',
     get: function get() {
       return {
-        'click .color-select': 'open',
-        'click .color-picker-palette-close': 'close',
-        'click .color-picker-palette-color': '_onSelectColor'
+        'click open': 'open',
+        'click close': 'close',
+        'click colorSelector': '_onSelectColor'
       };
     }
   }]);
@@ -8232,7 +8569,7 @@ var ColorPickerView = function (_ContrailChartsView) {
 exports.default = ColorPickerView;
 
 /***/ }),
-/* 115 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8247,8 +8584,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-__webpack_require__(166);
 
 var _lodash = __webpack_require__(1);
 
@@ -8270,7 +8605,7 @@ var _d3Array = __webpack_require__(0);
 
 var d3Array = _interopRequireWildcard(_d3Array);
 
-var _XYChartSubView2 = __webpack_require__(12);
+var _XYChartSubView2 = __webpack_require__(13);
 
 var _XYChartSubView3 = _interopRequireDefault(_XYChartSubView2);
 
@@ -8278,11 +8613,11 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
+__webpack_require__(167);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -8330,14 +8665,14 @@ var AreaChartView = function (_XYChartSubView) {
 
   }, {
     key: 'getScreenY',
-    value: function getScreenY(dataElem, yAccessor) {
+    value: function getScreenY(datum, yAccessor) {
       var stackGroups = _lodash2.default.groupBy(this.params.activeAccessorData, 'stack');
       var stackName = _lodash2.default.find(this.params.activeAccessorData, function (config) {
         return config.accessor === yAccessor;
       }).stack;
       var stackedValue = 0;
       _lodash2.default.takeWhile(stackGroups[stackName], function (accessorConfig) {
-        stackedValue += dataElem[accessorConfig.accessor] || 0;
+        stackedValue += _lodash2.default.get(datum, accessorConfig.accessor) || 0;
         return accessorConfig.accessor !== yAccessor;
       });
       return this.yScale(stackedValue);
@@ -8353,8 +8688,9 @@ var AreaChartView = function (_XYChartSubView) {
 
       _get(AreaChartView.prototype.__proto__ || Object.getPrototypeOf(AreaChartView.prototype), 'render', this).call(this);
       var data = this.model.data;
+      var xAccessor = this.config.get('plot.x.accessor');
       var area = d3Shape.area().x(function (d) {
-        return _this3.xScale(d.data[_this3.params.plot.x.accessor]);
+        return _this3.xScale(_lodash2.default.get(d.data, xAccessor));
       }).y0(function (d) {
         return _this3.yScale(d[1]);
       }).y1(function (d) {
@@ -8363,7 +8699,9 @@ var AreaChartView = function (_XYChartSubView) {
 
       var stackGroups = _lodash2.default.groupBy(this.params.activeAccessorData, 'stack');
       _lodash2.default.each(stackGroups, function (accessorsByStack, stackName) {
-        var stack = d3Shape.stack().offset(d3Shape.stackOffsetNone).keys(_lodash2.default.map(accessorsByStack, 'accessor'));
+        var stack = d3Shape.stack().offset(d3Shape.stackOffsetNone).keys(_lodash2.default.map(accessorsByStack, 'accessor')).value(function (d, key) {
+          return _lodash2.default.get(d, key);
+        });
 
         var areas = _this3.d3.selectAll(_this3.selectors.node + '-' + stackName).data(stack(data));
         areas.exit().remove();
@@ -8390,15 +8728,14 @@ var AreaChartView = function (_XYChartSubView) {
   }, {
     key: '_onMousemove',
     value: function _onMousemove(d, el) {
-      if (this.config.get('tooltipEnabled')) {
-        var tooltipId = this.params.activeAccessorData[d.index].tooltip;
-
+      var tooltipId = this.params.activeAccessorData[d.index].tooltip;
+      if (tooltipId) {
         var _d3Selection$mouse = d3Selection.mouse(this._container),
             _d3Selection$mouse2 = _slicedToArray(_d3Selection$mouse, 2),
             left = _d3Selection$mouse2[0],
             top = _d3Selection$mouse2[1];
 
-        var xAccessor = this.params.plot.x.accessor;
+        var xAccessor = this.config.get('plot.x.accessor');
         var xVal = this.xScale.invert(left);
         var dataItem = this.model.getNearest(xAccessor, xVal);
         _Actionman2.default.fire('ShowComponent', tooltipId, { left: left, top: top }, dataItem);
@@ -8424,9 +8761,10 @@ var AreaChartView = function (_XYChartSubView) {
   }, {
     key: 'events',
     get: function get() {
-      var _ref;
-
-      return _ref = {}, _defineProperty(_ref, 'mousemove ' + this.selectors.node, '_onMousemove'), _defineProperty(_ref, 'mouseout ' + this.selectors.node, '_onMouseout'), _ref;
+      return {
+        'mousemove node': '_onMousemove',
+        'mouseout node': '_onMouseout'
+      };
     }
   }]);
 
@@ -8436,7 +8774,7 @@ var AreaChartView = function (_XYChartSubView) {
 exports.default = AreaChartView;
 
 /***/ }),
-/* 116 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8451,8 +8789,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-__webpack_require__(44);
 
 var _lodash = __webpack_require__(1);
 
@@ -8474,7 +8810,7 @@ var _d3Ease = __webpack_require__(0);
 
 var d3Ease = _interopRequireWildcard(_d3Ease);
 
-var _XYChartSubView2 = __webpack_require__(12);
+var _XYChartSubView2 = __webpack_require__(13);
 
 var _XYChartSubView3 = _interopRequireDefault(_XYChartSubView2);
 
@@ -8482,11 +8818,11 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
+__webpack_require__(48);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -8514,16 +8850,16 @@ var BarChartView = function (_XYChartSubView) {
       var delta = 0;
       _lodash2.default.each(this.params.activeAccessorData, function (accessor, j) {
         if (accessor.accessor === yAccessor) {
-          var innerBandScale = _this2.params.axis[_this2.params.plot.x.axis].innerBandScale;
+          var innerBandScale = _this2.params.axis[_this2.config.get('plot.x.axis')].innerBandScale;
           delta = innerBandScale(j) + innerBandScale.bandwidth() / 2;
         }
       });
-      return this.xScale(datum[xAccessor]) + delta;
+      return this.xScale(_lodash2.default.get(datum, xAccessor)) + delta;
     }
   }, {
     key: 'getScreenY',
     value: function getScreenY(datum, yAccessor) {
-      return this.yScale(datum[yAccessor]);
+      return this.yScale(_lodash2.default.get(datum, yAccessor));
     }
   }, {
     key: 'render',
@@ -8565,17 +8901,17 @@ var BarChartView = function (_XYChartSubView) {
 
       var flatData = [];
       var start = this.yScale.domain()[0];
-      var innerBandScale = this.params.axis[this.params.plot.x.axis].innerBandScale;
+      var innerBandScale = this.params.axis[this.config.get('plot.x.axis')].innerBandScale;
       var innerBandWidth = innerBandScale.bandwidth();
       _lodash2.default.each(this.model.data, function (d) {
-        var x = d[_this3.params.plot.x.accessor];
+        var x = _lodash2.default.get(d, _this3.config.get('plot.x.accessor'));
         _lodash2.default.each(_this3.params.activeAccessorData, function (accessor, j) {
           var key = accessor.accessor;
           var obj = {
             id: x + '-' + key,
             x: _this3.xScale(x) + innerBandScale(j),
-            y: _this3.yScale(d[key]),
-            h: _this3.yScale(start) - _this3.yScale(d[key]),
+            y: _this3.yScale(_lodash2.default.get(d, key)),
+            h: _this3.yScale(start) - _this3.yScale(_lodash2.default.get(d, key)),
             w: innerBandWidth,
             color: _this3.config.getColor(d, accessor),
             accessor: accessor,
@@ -8592,7 +8928,7 @@ var BarChartView = function (_XYChartSubView) {
   }, {
     key: '_onMousemove',
     value: function _onMousemove(d, el, event) {
-      if (this.config.get('tooltipEnabled')) {
+      if (d.accessor.tooltip) {
         var _d3Selection$mouse = d3Selection.mouse(this._container),
             _d3Selection$mouse2 = _slicedToArray(_d3Selection$mouse, 2),
             left = _d3Selection$mouse2[0],
@@ -8621,9 +8957,10 @@ var BarChartView = function (_XYChartSubView) {
   }, {
     key: 'events',
     get: function get() {
-      var _ref;
-
-      return _ref = {}, _defineProperty(_ref, 'mousemove ' + this.selectors.node, '_onMousemove'), _defineProperty(_ref, 'mouseout ' + this.selectors.node, '_onMouseout'), _ref;
+      return {
+        'mousemove node': '_onMousemove',
+        'mouseout node': '_onMouseout'
+      };
     }
     /**
      * @override
@@ -8652,7 +8989,7 @@ var BarChartView = function (_XYChartSubView) {
 exports.default = BarChartView;
 
 /***/ }),
-/* 117 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8668,8 +9005,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-__webpack_require__(168);
-
 var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -8682,9 +9017,9 @@ var _d3Selection = __webpack_require__(0);
 
 var d3Selection = _interopRequireWildcard(_d3Selection);
 
-var _d3InterpolatePath = __webpack_require__(162);
+var _d3InterpolatePath = __webpack_require__(163);
 
-__webpack_require__(43);
+__webpack_require__(47);
 
 var _d3Shape = __webpack_require__(0);
 
@@ -8698,7 +9033,7 @@ var _d3Scale = __webpack_require__(0);
 
 var d3Scale = _interopRequireWildcard(_d3Scale);
 
-var _XYChartSubView2 = __webpack_require__(12);
+var _XYChartSubView2 = __webpack_require__(13);
 
 var _XYChartSubView3 = _interopRequireDefault(_XYChartSubView2);
 
@@ -8706,11 +9041,11 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
+__webpack_require__(169);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -8742,6 +9077,7 @@ var LineChartView = function (_XYChartSubView) {
 
       _get(LineChartView.prototype.__proto__ || Object.getPrototypeOf(LineChartView.prototype), 'render', this).call(this);
       var data = this.model.data;
+      var xAccessor = this.config.get('plot.x.accessor');
 
       // Collect linePathData - one line per Y accessor.
       var linePathData = [];
@@ -8750,9 +9086,9 @@ var LineChartView = function (_XYChartSubView) {
       _lodash2.default.each(this.params.activeAccessorData, function (accessor) {
         var key = accessor.accessor;
         _this2._lines[key] = d3Shape.line().x(function (d) {
-          return _this2.xScale(d[_this2.params.plot.x.accessor]);
+          return _this2.xScale(_lodash2.default.get(d, xAccessor));
         }).y(function (d) {
-          return _this2.yScale(d[key]);
+          return _this2.yScale(_lodash2.default.get(d, key));
         }).curve(_this2.config.get('curve'));
         linePathData.push({ key: key, accessor: accessor, data: data });
       });
@@ -8799,13 +9135,13 @@ var LineChartView = function (_XYChartSubView) {
   }, {
     key: '_onMouseover',
     value: function _onMouseover(d, el) {
-      if (this.config.get('tooltipEnabled')) {
+      if (d.accessor.tooltip) {
         var _d3Selection$mouse = d3Selection.mouse(this._container),
             _d3Selection$mouse2 = _slicedToArray(_d3Selection$mouse, 2),
             left = _d3Selection$mouse2[0],
             top = _d3Selection$mouse2[1];
 
-        var xAccessor = this.params.plot.x.accessor;
+        var xAccessor = this.config.get('plot.x.accessor');
         var xVal = this.xScale.invert(left);
         var dataItem = this.model.getNearest(xAccessor, xVal);
         _Actionman2.default.fire('ShowComponent', d.accessor.tooltip, { left: left, top: top }, dataItem);
@@ -8831,9 +9167,10 @@ var LineChartView = function (_XYChartSubView) {
   }, {
     key: 'events',
     get: function get() {
-      var _ref;
-
-      return _ref = {}, _defineProperty(_ref, 'mouseover ' + this.selectors.node, '_onMouseover'), _defineProperty(_ref, 'mouseout ' + this.selectors.node, '_onMouseout'), _ref;
+      return {
+        'mouseover node': '_onMouseover',
+        'mouseout node': '_onMouseout'
+      };
     }
   }]);
 
@@ -8843,7 +9180,7 @@ var LineChartView = function (_XYChartSubView) {
 exports.default = LineChartView;
 
 /***/ }),
-/* 118 */
+/* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8859,13 +9196,11 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-__webpack_require__(169);
-
 var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-__webpack_require__(43);
+__webpack_require__(47);
 
 var _d3Selection = __webpack_require__(0);
 
@@ -8875,21 +9210,23 @@ var _d3Ease = __webpack_require__(0);
 
 var d3Ease = _interopRequireWildcard(_d3Ease);
 
-var _XYChartSubView2 = __webpack_require__(12);
+var _XYChartSubView2 = __webpack_require__(13);
 
 var _XYChartSubView3 = _interopRequireDefault(_XYChartSubView2);
 
-var _BucketConfigModel = __webpack_require__(153);
+var _BucketConfigModel = __webpack_require__(154);
 
 var _BucketConfigModel2 = _interopRequireDefault(_BucketConfigModel);
 
-var _BucketView = __webpack_require__(154);
+var _BucketView = __webpack_require__(155);
 
 var _BucketView2 = _interopRequireDefault(_BucketView);
 
 var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
+
+__webpack_require__(170);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -8923,8 +9260,6 @@ var ScatterPlotView = function (_XYChartSubView) {
         config: _this._bucketConfigModel,
         actionman: _this._actionman
       });
-      var updateComponents = _lodash2.default.concat([_this._parent.id], _this.config.get('updateComponents'));
-      _this.config.set('updateComponents', updateComponents, { silent: true });
     }
     return _this;
   }
@@ -8967,7 +9302,7 @@ var ScatterPlotView = function (_XYChartSubView) {
       points.enter().append('text').classed('point', true).attr('transform', function (d) {
         return 'translate(' + d.x + ',' + d.y + ')';
       }).merge(points).html(function (d) {
-        return d.shape;
+        return d.accessor.shape;
       })
       // overlap attribute is set in Bucket View
       .attr('fill', function (d) {
@@ -8982,6 +9317,7 @@ var ScatterPlotView = function (_XYChartSubView) {
       });
 
       points.exit().remove();
+      if (this._bucketView) this.svg.delegate('click', 'svg', this._onBackgroundClick.bind(this));
     }
     /**
      * Create a flat data structure
@@ -8992,26 +9328,25 @@ var ScatterPlotView = function (_XYChartSubView) {
     value: function _prepareData() {
       var _this3 = this;
 
+      var xAccessor = this.config.get('plot.x.accessor');
       var points = [];
       _lodash2.default.map(this.model.data, function (d) {
-        var x = d[_this3.params.plot.x.accessor];
+        var x = _lodash2.default.get(d, xAccessor);
         _lodash2.default.each(_this3.params.activeAccessorData, function (accessor) {
           var key = accessor.accessor;
-          if (_lodash2.default.has(d, key)) {
+          if (!_lodash2.default.isNil(_lodash2.default.get(d, key))) {
             // key may not exist in all the data set.
-            var y = d[key];
             var sizeScale = _this3.params.axis[accessor.sizeAxis].scale;
             var obj = {
               id: x + '-' + key,
               x: _this3.xScale(x),
-              y: _this3.yScale(y),
-              shape: accessor.shape,
-              area: sizeScale(d[accessor.sizeAccessor]),
+              y: _this3.yScale(_lodash2.default.get(d, key)),
+              area: sizeScale(_lodash2.default.get(d, accessor.sizeAccessor)),
               color: _this3.config.getColor(d, accessor),
               accessor: accessor,
               data: d,
-              halfWidth: Math.sqrt(sizeScale(d[accessor.sizeAccessor])) / 2,
-              halfHeight: Math.sqrt(sizeScale(d[accessor.sizeAccessor])) / 2
+              halfWidth: Math.sqrt(sizeScale(_lodash2.default.get(d, accessor.sizeAccessor))) / 2,
+              halfHeight: Math.sqrt(sizeScale(_lodash2.default.get(d, accessor.sizeAccessor))) / 2
             };
             points.push(obj);
           }
@@ -9025,7 +9360,7 @@ var ScatterPlotView = function (_XYChartSubView) {
   }, {
     key: '_onMouseover',
     value: function _onMouseover(d, el, event) {
-      if (this.config.get('tooltipEnabled')) {
+      if (d.accessor.tooltip) {
         var _d3Selection$mouse = d3Selection.mouse(this._container),
             _d3Selection$mouse2 = _slicedToArray(_d3Selection$mouse, 2),
             left = _d3Selection$mouse2[0],
@@ -9034,6 +9369,12 @@ var ScatterPlotView = function (_XYChartSubView) {
         _Actionman2.default.fire('ShowComponent', d.accessor.tooltip, { left: left, top: top }, d.data);
       }
       el.classList.add(this.selectorClass('active'));
+    }
+  }, {
+    key: '_onBackgroundClick',
+    value: function _onBackgroundClick() {
+      var accessor = this.config.get('plot.x.accessor');
+      this.actionman.fire('Zoom', null, _defineProperty({}, accessor, this.model.getRangeFor(accessor, true)));
     }
   }, {
     key: 'zIndex',
@@ -9054,9 +9395,10 @@ var ScatterPlotView = function (_XYChartSubView) {
   }, {
     key: 'events',
     get: function get() {
-      var _ref;
-
-      return _ref = {}, _defineProperty(_ref, 'mouseover ' + this.selectors.node, '_onMouseover'), _defineProperty(_ref, 'mouseout ' + this.selectors.node, '_onMouseout'), _ref;
+      return {
+        'mouseover node': '_onMouseover',
+        'mouseout node': '_onMouseout'
+      };
     }
   }]);
 
@@ -9066,7 +9408,7 @@ var ScatterPlotView = function (_XYChartSubView) {
 exports.default = ScatterPlotView;
 
 /***/ }),
-/* 119 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9082,8 +9424,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-__webpack_require__(44);
-
 var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -9096,7 +9436,7 @@ var _d3Ease = __webpack_require__(0);
 
 var d3Ease = _interopRequireWildcard(_d3Ease);
 
-var _XYChartSubView2 = __webpack_require__(12);
+var _XYChartSubView2 = __webpack_require__(13);
 
 var _XYChartSubView3 = _interopRequireDefault(_XYChartSubView2);
 
@@ -9104,11 +9444,11 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
+__webpack_require__(48);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -9147,11 +9487,11 @@ var StackedBarChartView = function (_XYChartSubView) {
 
   }, {
     key: 'getScreenY',
-    value: function getScreenY(dataElem, yAccessor) {
-      if (_lodash2.default.isNil(dataElem[yAccessor])) return undefined;
+    value: function getScreenY(datum, yAccessor) {
+      if (_lodash2.default.isNil(_lodash2.default.get(datum, yAccessor))) return undefined;
       var stackedValue = 0;
       _lodash2.default.takeWhile(this.params.activeAccessorData, function (accessorConfig) {
-        stackedValue += dataElem[accessorConfig.accessor] || 0;
+        stackedValue += _lodash2.default.get(datum, accessorConfig.accessor) || 0;
         return accessorConfig.accessor !== yAccessor;
       });
       return this.yScale(stackedValue);
@@ -9194,12 +9534,12 @@ var StackedBarChartView = function (_XYChartSubView) {
       var flatData = [];
       var bandWidthHalf = this.bandWidth / 2;
       _lodash2.default.each(data, function (d) {
-        var x = d[_this3.params.plot.x.accessor];
+        var x = _lodash2.default.get(d, _this3.config.get('plot.x.accessor'));
         var stackedValue = start;
         // y coordinate to stack next bar to
         _lodash2.default.each(_this3.params.activeAccessorData, function (accessor) {
           var key = accessor.accessor;
-          var value = d[key] || 0;
+          var value = _lodash2.default.get(d, key) || 0;
           var obj = {
             id: x + '-' + key,
             x: _this3.xScale(x) - bandWidthHalf,
@@ -9222,7 +9562,7 @@ var StackedBarChartView = function (_XYChartSubView) {
   }, {
     key: '_onMousemove',
     value: function _onMousemove(d, el, event) {
-      if (this.config.get('tooltipEnabled')) {
+      if (d.accessor.tooltip) {
         var _d3Selection$mouse = d3Selection.mouse(this._container),
             _d3Selection$mouse2 = _slicedToArray(_d3Selection$mouse, 2),
             left = _d3Selection$mouse2[0],
@@ -9251,9 +9591,10 @@ var StackedBarChartView = function (_XYChartSubView) {
   }, {
     key: 'events',
     get: function get() {
-      var _ref;
-
-      return _ref = {}, _defineProperty(_ref, 'mousemove ' + this.selectors.node, '_onMousemove'), _defineProperty(_ref, 'mouseout ' + this.selectors.node, '_onMouseout'), _ref;
+      return {
+        'mousemove node': '_onMousemove',
+        'mouseout node': '_onMouseout'
+      };
     }
     /**
      * @override
@@ -9284,7 +9625,7 @@ var StackedBarChartView = function (_XYChartSubView) {
 exports.default = StackedBarChartView;
 
 /***/ }),
-/* 120 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9354,7 +9695,7 @@ var ControlPanelConfigModel = function (_ContrailChartsConfig) {
 exports.default = ControlPanelConfigModel;
 
 /***/ }),
-/* 121 */
+/* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9370,8 +9711,6 @@ var _get = function get(object, property, receiver) { if (object === null) objec
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              * Copyright (c) Juniper Networks, Inc. All rights reserved.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              */
 
-
-__webpack_require__(170);
 
 var _lodash = __webpack_require__(1);
 
@@ -9389,23 +9728,23 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
-var _controlPanel = __webpack_require__(185);
+var _controlPanel = __webpack_require__(188);
 
 var _controlPanel2 = _interopRequireDefault(_controlPanel);
 
-var _panel = __webpack_require__(186);
+var _panel = __webpack_require__(189);
 
 var _panel2 = _interopRequireDefault(_panel);
 
-var _action = __webpack_require__(184);
+var _action = __webpack_require__(187);
 
 var _action2 = _interopRequireDefault(_action);
+
+__webpack_require__(171);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -9417,11 +9756,15 @@ var ControlPanelView = function (_ContrailChartsView) {
   _inherits(ControlPanelView, _ContrailChartsView);
 
   function ControlPanelView() {
-    var p = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var _ref;
 
     _classCallCheck(this, ControlPanelView);
 
-    var _this = _possibleConstructorReturn(this, (ControlPanelView.__proto__ || Object.getPrototypeOf(ControlPanelView)).call(this, p));
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    var _this = _possibleConstructorReturn(this, (_ref = ControlPanelView.__proto__ || Object.getPrototypeOf(ControlPanelView)).call.apply(_ref, [this].concat(args)));
 
     _get(ControlPanelView.prototype.__proto__ || Object.getPrototypeOf(ControlPanelView.prototype), 'render', _this).call(_this, (0, _controlPanel2.default)());
     _this._opened = false;
@@ -9438,16 +9781,20 @@ var ControlPanelView = function (_ContrailChartsView) {
       var configs = _lodash2.default.map(this.config.get('menu'), function (config) {
         return _lodash2.default.extend({}, config, _this2.config.menuItems[config.id]);
       });
-      var menuItems = this.d3.select(this.selectors.menuItems).selectAll(this.selectors.menuItem).data(configs, function (config) {
+      var menuItemsDiv = this.d3.select(this.selectors.menuItems);
+
+      var menuItems = menuItemsDiv.selectAll(this.selectors.menuItem).data(configs, function (config) {
         return config.id;
       }).classed('disabled', function (d) {
         return d.disabled;
       });
+
       menuItems.enter().append('div').classed(this.selectorClass('menuItem'), true).classed('disabled', function (d) {
         return d.disabled;
       }).html(function (d) {
         return (0, _action2.default)(d);
       });
+
       menuItems.exit().remove();
     }
   }, {
@@ -9499,7 +9846,9 @@ var ControlPanelView = function (_ContrailChartsView) {
   }, {
     key: 'events',
     get: function get() {
-      return _defineProperty({}, 'click ' + this.selectors.menuItem, '_onMenuItemClick');
+      return {
+        'click menuItem': '_onMenuItemClick'
+      };
     }
   }]);
 
@@ -9509,7 +9858,7 @@ var ControlPanelView = function (_ContrailChartsView) {
 exports.default = ControlPanelView;
 
 /***/ }),
-/* 122 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9520,6 +9869,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _contrailChartsConfigModel = __webpack_require__(4);
 
@@ -9551,12 +9902,12 @@ var CrosshairConfigModel = function (_ContrailChartsConfig) {
   _createClass(CrosshairConfigModel, [{
     key: 'defaults',
     get: function get() {
-      return {
+      return Object.assign(_get(CrosshairConfigModel.prototype.__proto__ || Object.getPrototypeOf(CrosshairConfigModel.prototype), 'defaults', this), {
         // by default will use common shared container under the parent
         isSharedContainer: true,
         duration: 100,
         bubbleR: 5
-      };
+      });
     }
   }]);
 
@@ -9566,7 +9917,7 @@ var CrosshairConfigModel = function (_ContrailChartsConfig) {
 exports.default = CrosshairConfigModel;
 
 /***/ }),
-/* 123 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9579,8 +9930,6 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-__webpack_require__(171);
 
 var _lodash = __webpack_require__(1);
 
@@ -9601,6 +9950,8 @@ var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
 var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
+
+__webpack_require__(172);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -9677,7 +10028,7 @@ var CrosshairView = function (_ContrailChartsView) {
       // Draw bubbles for all enabled y accessors.
       update.each(function (d, i, els) {
         var bubbleData = _lodash2.default.filter(config.bubbles, function (bubble) {
-          return !!data[bubble.id];
+          return !!_lodash2.default.get(data, bubble.id);
         });
         var bubbles = d3Selection.select(els[i]).selectAll(_this2.selectors.bubble).data(bubbleData, function (d) {
           return d.id;
@@ -9741,7 +10092,7 @@ var CrosshairView = function (_ContrailChartsView) {
 exports.default = CrosshairView;
 
 /***/ }),
-/* 124 */
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9804,7 +10155,7 @@ var FilterConfigModel = function (_ContrailChartsConfig) {
 exports.default = FilterConfigModel;
 
 /***/ }),
-/* 125 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9818,7 +10169,9 @@ var _get = function get(object, property, receiver) { if (object === null) objec
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(172);
+var _lodash = __webpack_require__(1);
+
+var _lodash2 = _interopRequireDefault(_lodash);
 
 var _d3Selection = __webpack_require__(0);
 
@@ -9832,13 +10185,15 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
-var _filter = __webpack_require__(187);
+var _filter = __webpack_require__(190);
 
 var _filter2 = _interopRequireDefault(_filter);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+__webpack_require__(173);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -9876,7 +10231,7 @@ var FilterView = function (_ContrailChartsView) {
       var content = template(this.config.data);
 
       _get(FilterView.prototype.__proto__ || Object.getPrototypeOf(FilterView.prototype), 'render', this).call(this, content);
-      this.d3.classed('hide', this.config.get('embedded'));
+      this.d3.classed('hide', this.config.get('embedded') && !this._visible);
     }
   }, {
     key: '_onItemClick',
@@ -9887,10 +10242,17 @@ var FilterView = function (_ContrailChartsView) {
       _Actionman2.default.fire('SelectSerie', accessorName, isChecked);
     }
   }, {
+    key: 'selectors',
+    get: function get() {
+      return _lodash2.default.extend({}, _get(FilterView.prototype.__proto__ || Object.getPrototypeOf(FilterView.prototype), 'selectors', this), {
+        item: '.filter-item-input'
+      });
+    }
+  }, {
     key: 'events',
     get: function get() {
       return {
-        'change .filter-item-input': '_onItemClick'
+        'change item': '_onItemClick'
       };
     }
   }]);
@@ -9901,7 +10263,7 @@ var FilterView = function (_ContrailChartsView) {
 exports.default = FilterView;
 
 /***/ }),
-/* 126 */
+/* 129 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9913,19 +10275,19 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
-
-var _d3Scale = __webpack_require__(0);
-
-var d3Scale = _interopRequireWildcard(_d3Scale);
 
 var _contrailChartsConfigModel = __webpack_require__(4);
 
 var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _ColoredChart = __webpack_require__(10);
+
+var _ColoredChart2 = _interopRequireDefault(_ColoredChart);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -9958,15 +10320,14 @@ var LegendPanelConfigModel = function (_ContrailChartsConfig) {
   _createClass(LegendPanelConfigModel, [{
     key: 'defaults',
     get: function get() {
-      return {
-        colorScheme: d3Scale.schemeCategory20,
+      return Object.assign(_get(LegendPanelConfigModel.prototype.__proto__ || Object.getPrototypeOf(LegendPanelConfigModel.prototype), 'defaults', this), _ColoredChart2.default.defaults, {
         editable: {
           colorSelector: true,
           chartSelector: true
         },
         filter: true,
         placement: 'horizontal'
-      };
+      });
     }
   }, {
     key: 'data',
@@ -10017,7 +10378,7 @@ var LegendPanelConfigModel = function (_ContrailChartsConfig) {
 exports.default = LegendPanelConfigModel;
 
 /***/ }),
-/* 127 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10031,9 +10392,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-__webpack_require__(173);
-
-var _jquery = __webpack_require__(47);
+var _jquery = __webpack_require__(50);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -10045,7 +10404,7 @@ var _contrailChartsView = __webpack_require__(3);
 
 var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
 
-var _d3Color = __webpack_require__(10);
+var _d3Color = __webpack_require__(11);
 
 var d3Color = _interopRequireWildcard(_d3Color);
 
@@ -10053,9 +10412,11 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
-var _legend = __webpack_require__(188);
+var _legend = __webpack_require__(191);
 
 var _legend2 = _interopRequireDefault(_legend);
+
+__webpack_require__(174);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -10096,7 +10457,7 @@ var LegendPanelView = function (_ContrailChartsView) {
       _get(LegendPanelView.prototype.__proto__ || Object.getPrototypeOf(LegendPanelView.prototype), 'render', this).call(this, content);
 
       if (!this.config.attributes.filter || this.config.data.attributes.length === 1) {
-        this.d3.selectAll('.legend-attribute').classed('disabled', true).select('input').property('disabled', true);
+        this.d3.selectAll(this.selectors.attribute).classed('disabled', true).select('input').property('disabled', true);
       }
 
       this.d3.classed('vertical', this.config.attributes.placement === 'vertical');
@@ -10118,10 +10479,10 @@ var LegendPanelView = function (_ContrailChartsView) {
       this.$('.attribute').toggleClass('edit');
       this.d3.selectAll('.selector').classed('active', false);
 
-      this.d3.selectAll('.select--color').classed('hide', !this.config.attributes.editable.colorSelector);
-      this.d3.selectAll('.select--chart').classed('hide', !this.config.attributes.editable.chartSelector);
+      this.d3.selectAll(this.selectors.color).classed('hide', !this.config.attributes.editable.colorSelector);
+      this.d3.selectAll(this.selectors.chartType).classed('hide', !this.config.attributes.editable.chartSelector);
 
-      _lodash2.default.each(this.el.querySelectorAll('.legend-attribute > input'), function (el) {
+      _lodash2.default.each(this.el.querySelectorAll(this.selectors.attribute + ' > input'), function (el) {
         el.disabled = _this2._state !== _states.DEFAULT;
       });
     }
@@ -10135,7 +10496,7 @@ var LegendPanelView = function (_ContrailChartsView) {
   }, {
     key: '_addChartTypes',
     value: function _addChartTypes(attributeAxis) {
-      this.d3.selectAll('.swatch--chart').classed('show', false).filter(function (d, i, n) {
+      this.d3.selectAll(this.selectors.chartType).classed('show', false).filter(function (d, i, n) {
         return n[i].dataset.axis === attributeAxis;
       }).classed('show', true);
     }
@@ -10146,14 +10507,14 @@ var LegendPanelView = function (_ContrailChartsView) {
 
       var selectorElement = this.d3.select('.selector');
       selectorElement.classed('select--color', false).classed('select--chart', false);
-      selectorElement.selectAll('.swatch').classed('selected', false);
+      selectorElement.selectAll('.switch').classed('selected', false);
 
       if (this.el.querySelector('.selector').classList.contains('active')) {
         selectorElement.classed('active', false);
       } else if (el.classList.contains('select--color')) {
         selectorElement.classed('active', true).classed('select--color', true);
         var currentColor = d3Color.color(el.dataset.color);
-        selectorElement.selectAll('.swatch--color').filter(function (d, i, n) {
+        selectorElement.selectAll(this.selectors.color).filter(function (d, i, n) {
           return d3Color.color(n[i].dataset.color).toString() === currentColor.toString();
         }).classed('selected', true);
       } else if (el.classList.contains('select--chart')) {
@@ -10161,7 +10522,7 @@ var LegendPanelView = function (_ContrailChartsView) {
         this._addChartTypes(currentAttribute.axis);
         selectorElement.classed('active', true).classed('select--chart', true);
         var currentChart = el.dataset.chartType;
-        selectorElement.selectAll('.swatch--chart').filter(function (d, i, n) {
+        selectorElement.selectAll(this.selectors.chartType).filter(function (d, i, n) {
           return n[i].dataset.chartType === currentChart;
         }).classed('selected', true);
       }
@@ -10183,14 +10544,25 @@ var LegendPanelView = function (_ContrailChartsView) {
       _Actionman2.default.fire('SelectChartType', this._accessor, chartType);
     }
   }, {
+    key: 'selectors',
+    get: function get() {
+      return _lodash2.default.extend({}, _get(LegendPanelView.prototype.__proto__ || Object.getPrototypeOf(LegendPanelView.prototype), 'selectors', this), {
+        attribute: '.legend-attribute',
+        mode: '.edit-legend',
+        select: '.select',
+        color: '.switch--color',
+        chartType: '.switch--chart'
+      });
+    }
+  }, {
     key: 'events',
     get: function get() {
       return {
-        'change .legend-attribute': '_toggleAttribute',
-        'click .edit-legend': '_toggleEditMode',
-        'click .select': '_toggleSelector',
-        'click .swatch--color': '_selectColor',
-        'click .swatch--chart': '_selectChartType'
+        'change attribute': '_toggleAttribute',
+        'click mode': '_toggleEditMode',
+        'click select': '_toggleSelector',
+        'click color': '_selectColor',
+        'click chartType': '_selectChartType'
       };
     }
   }]);
@@ -10201,7 +10573,7 @@ var LegendPanelView = function (_ContrailChartsView) {
 exports.default = LegendPanelView;
 
 /***/ }),
-/* 128 */
+/* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10243,18 +10615,14 @@ var LegendConfigModel = function (_ContrailChartsConfig) {
 
   _createClass(LegendConfigModel, [{
     key: 'getData',
-
-    /**
-     * Ask parent component for labels and not dataProvider directly as some data series may be filtered out
-     */
     value: function getData(dataProvider) {
       var _this2 = this;
 
-      var labels = this._parent.getLabels(dataProvider);
-      return _lodash2.default.map(labels, function (label) {
+      var accessors = this._parent.getAccessors(dataProvider);
+      return _lodash2.default.map(accessors, function (accessor) {
         return {
-          label: label,
-          color: _this2._parent.getColor([], label)
+          label: _this2.getLabel(undefined, accessor),
+          color: _this2._parent.getColor([], accessor)
         };
       });
     }
@@ -10266,7 +10634,7 @@ var LegendConfigModel = function (_ContrailChartsConfig) {
 exports.default = LegendConfigModel;
 
 /***/ }),
-/* 129 */
+/* 132 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10276,19 +10644,19 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(45);
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _contrailChartsView = __webpack_require__(3);
 
 var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
 
-var _legend = __webpack_require__(189);
+var _legend = __webpack_require__(192);
 
 var _legend2 = _interopRequireDefault(_legend);
+
+__webpack_require__(175);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -10303,13 +10671,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var LegendView = function (_ContrailChartsView) {
   _inherits(LegendView, _ContrailChartsView);
-
-  _createClass(LegendView, null, [{
-    key: 'dataType',
-    get: function get() {
-      return 'Serie';
-    }
-  }]);
 
   function LegendView(p) {
     _classCallCheck(this, LegendView);
@@ -10326,7 +10687,6 @@ var LegendView = function (_ContrailChartsView) {
     value: function render() {
       var template = this.config.get('template') || _legend2.default;
       var content = template(this.config.getData(this.model));
-
       _get(LegendView.prototype.__proto__ || Object.getPrototypeOf(LegendView.prototype), 'render', this).call(this, content);
     }
   }]);
@@ -10337,7 +10697,7 @@ var LegendView = function (_ContrailChartsView) {
 exports.default = LegendView;
 
 /***/ }),
-/* 130 */
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10346,6 +10706,93 @@ exports.default = LegendView;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _d3Geo = __webpack_require__(0);
+
+var d3Geo = _interopRequireWildcard(_d3Geo);
+
+var _contrailChartsConfigModel = __webpack_require__(4);
+
+var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
+
+var _ColoredChart = __webpack_require__(10);
+
+var _ColoredChart2 = _interopRequireDefault(_ColoredChart);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright (c) Juniper Networks, Inc. All rights reserved.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+var MapConfigModel = function (_ContrailChartsConfig) {
+  _inherits(MapConfigModel, _ContrailChartsConfig);
+
+  function MapConfigModel() {
+    _classCallCheck(this, MapConfigModel);
+
+    return _possibleConstructorReturn(this, (MapConfigModel.__proto__ || Object.getPrototypeOf(MapConfigModel)).apply(this, arguments));
+  }
+
+  _createClass(MapConfigModel, [{
+    key: 'project',
+    value: function project(serie) {
+      var lon = this.getValue(serie, { accessor: this.get('accessors.longitude') });
+      var lat = this.getValue(serie, { accessor: this.get('accessors.latitude') });
+      return this.attributes.projection([lon, lat]);
+    }
+  }, {
+    key: 'defaults',
+    get: function get() {
+      return Object.assign(_get(MapConfigModel.prototype.__proto__ || Object.getPrototypeOf(MapConfigModel.prototype), 'defaults', this), _ColoredChart2.default.defaults, {
+        isSharedContainer: true,
+
+        projection: d3Geo.geoMercator(),
+        // scale factor to show map at
+        // 170 - is the world view for mercator projection
+        zoom: 170,
+
+        // grid of meridians and parallels for showing projection distortion
+        graticule: false,
+
+        accessors: {
+          longitude: 'longitude',
+          latitude: 'latitude'
+        }
+      });
+    }
+  }]);
+
+  return MapConfigModel;
+}(_contrailChartsConfigModel2.default);
+
+exports.default = MapConfigModel;
+
+/***/ }),
+/* 134 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -10353,78 +10800,33 @@ var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _contrailChartsConfigModel = __webpack_require__(4);
+var _d3Selection = __webpack_require__(0);
 
-var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
+var d3Selection = _interopRequireWildcard(_d3Selection);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _d3Zoom = __webpack_require__(0);
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var d3Zoom = _interopRequireWildcard(_d3Zoom);
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+var _d3Geo = __webpack_require__(0);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright (c) Juniper Networks, Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+var d3Geo = _interopRequireWildcard(_d3Geo);
 
+var _topojson = __webpack_require__(210);
 
-var LegendConfigModel = function (_ContrailChartsConfig) {
-  _inherits(LegendConfigModel, _ContrailChartsConfig);
-
-  function LegendConfigModel() {
-    _classCallCheck(this, LegendConfigModel);
-
-    return _possibleConstructorReturn(this, (LegendConfigModel.__proto__ || Object.getPrototypeOf(LegendConfigModel)).apply(this, arguments));
-  }
-
-  _createClass(LegendConfigModel, [{
-    key: 'data',
-
-    /**
-     * Ask parent component for serie accessors
-     */
-    get: function get() {
-      var _this2 = this;
-
-      var accessors = this._parent.getAccessors();
-      return _lodash2.default.map(accessors, function (accessor) {
-        return {
-          label: _this2.getLabel(undefined, accessor),
-          color: _this2._parent.getColor([], accessor)
-        };
-      });
-    }
-  }]);
-
-  return LegendConfigModel;
-}(_contrailChartsConfigModel2.default);
-
-exports.default = LegendConfigModel;
-
-/***/ }),
-/* 131 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-__webpack_require__(45);
+var topojson = _interopRequireWildcard(_topojson);
 
 var _contrailChartsView = __webpack_require__(3);
 
 var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
 
-var _legend = __webpack_require__(190);
+var _Actionman = __webpack_require__(2);
 
-var _legend2 = _interopRequireDefault(_legend);
+var _Actionman2 = _interopRequireDefault(_Actionman);
+
+__webpack_require__(176);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -10437,42 +10839,171 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 */
 
 
-var LegendView = function (_ContrailChartsView) {
-  _inherits(LegendView, _ContrailChartsView);
+var MapView = function (_ContrailChartsView) {
+  _inherits(MapView, _ContrailChartsView);
 
-  _createClass(LegendView, null, [{
+  _createClass(MapView, null, [{
     key: 'dataType',
     get: function get() {
       return 'DataFrame';
     }
   }]);
 
-  function LegendView(p) {
-    _classCallCheck(this, LegendView);
+  function MapView() {
+    var _ref;
 
-    var _this = _possibleConstructorReturn(this, (LegendView.__proto__ || Object.getPrototypeOf(LegendView)).call(this, p));
+    _classCallCheck(this, MapView);
 
-    _this.listenTo(_this.config, 'change', _this.render);
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    var _this = _possibleConstructorReturn(this, (_ref = MapView.__proto__ || Object.getPrototypeOf(MapView)).call.apply(_ref, [this].concat(args)));
+
     _this.listenTo(_this.model, 'change', _this.render);
+    _this.listenTo(_this.config, 'change', _this.render);
+    _this._onResize = _this._onResize.bind(_this);
+    window.addEventListener('resize', _this._onResize);
     return _this;
   }
 
-  _createClass(LegendView, [{
+  _createClass(MapView, [{
     key: 'render',
+
+    /**
+     * Draw a world map
+     */
     value: function render() {
-      var template = this.config.get('template') || _legend2.default;
-      var content = template(this.config.data);
-      _get(LegendView.prototype.__proto__ || Object.getPrototypeOf(LegendView.prototype), 'render', this).call(this, content);
+      this.params = { width: this.width, height: this.height };
+      _get(MapView.prototype.__proto__ || Object.getPrototypeOf(MapView.prototype), 'render', this).call(this);
+      this._renderLayout();
+      this._renderData();
+      this._ticking = false;
+    }
+  }, {
+    key: '_renderLayout',
+    value: function _renderLayout() {
+      var world = this.config.get('map');
+      var projection = this.config.get('projection').scale(this.config.get('zoom')).translate([this.params.width / 2, this.params.height / 2]).precision(0.1);
+      var zoom = d3Zoom.zoom().scaleExtent([1, 8]).on('zoom', this._onZoom.bind(this));
+
+      this.svg.call(zoom);
+
+      var path = d3Geo.geoPath().projection(projection);
+
+      // TODO
+      if (this.config.get('graticule')) {
+        var graticule = d3Geo.geoGraticule();
+
+        this.d3.append('path').datum(graticule).attr('class', 'graticule').attr('d', path);
+
+        this.d3.append('defs').append('path').datum({ type: 'Sphere' }).attr('id', 'sphere').attr('d', path);
+
+        this.d3.append('use').attr('class', 'stroke').attr('xlink:href', '#sphere');
+
+        this.d3.append('use').attr('class', 'fill').attr('xlink:href', '#sphere');
+      }
+
+      // TODO it may have sense to parametrize this variable to deal with other maps (not world)
+      var countries = topojson.feature(world, world.objects.countries).features;
+      var boundaries = [topojson.mesh(world, world.objects.countries, function (a, b) {
+        return a !== b;
+      })];
+
+      this.d3.selectAll(this.selectors.feature).data(countries).enter().insert('path', this.selectors.graticule).attr('class', this.selectorClass('feature')).attr('d', path);
+
+      this.d3.selectAll(this.selectors.boundary).data(boundaries).enter().insert('path', this.selectors.graticule).attr('class', this.selectorClass('boundary')).attr('d', path);
+    }
+    // TODO temporary method to plot data before integrating with any chart component like scatter plot
+
+  }, {
+    key: '_renderData',
+    value: function _renderData() {
+      var _this2 = this;
+
+      var data = this.model.data;
+      this.d3.selectAll('circle').data(data).enter().append('circle').attr('class', this.selectorClass('node')).attr('cx', function (d) {
+        return _this2.config.project(d)[0];
+      }).attr('cy', function (d) {
+        return _this2.config.project(d)[1];
+      }).attr('r', 5);
+    }
+  }, {
+    key: 'zoom',
+    value: function zoom(transform) {
+      this.d3.selectAll(this.selectors.boundary).style('stroke-width', 0.5 / transform.k + 'px');
+      this.d3.selectAll('circle').attr('r', 5 / transform.k);
+      this.d3.attr('transform', transform);
+      this._ticking = false;
+    }
+
+    // Event handlers
+
+  }, {
+    key: '_onZoom',
+    value: function _onZoom() {
+      if (!this._ticking) {
+        window.requestAnimationFrame(this.zoom.bind(this, d3Selection.event.transform));
+        this._ticking = true;
+      }
+    }
+  }, {
+    key: '_onMousemove',
+    value: function _onMousemove(d, el) {
+      var _d3Selection$mouse = d3Selection.mouse(this._container),
+          _d3Selection$mouse2 = _slicedToArray(_d3Selection$mouse, 2),
+          left = _d3Selection$mouse2[0],
+          top = _d3Selection$mouse2[1];
+
+      _Actionman2.default.fire('ShowComponent', this.config.get('tooltip'), { left: left, top: top }, d);
+    }
+  }, {
+    key: '_onMouseout',
+    value: function _onMouseout(d, el) {
+      _Actionman2.default.fire('HideComponent', this.config.get('tooltip'));
+    }
+  }, {
+    key: 'tagName',
+    get: function get() {
+      return 'g';
+    }
+  }, {
+    key: 'selectors',
+    get: function get() {
+      return _lodash2.default.extend(_get(MapView.prototype.__proto__ || Object.getPrototypeOf(MapView.prototype), 'selectors', this), {
+        graticule: '.graticule',
+        feature: '.feature',
+        boundary: '.boundary',
+        node: '.point'
+      });
+    }
+  }, {
+    key: 'events',
+    get: function get() {
+      return _lodash2.default.extend(_get(MapView.prototype.__proto__ || Object.getPrototypeOf(MapView.prototype), 'events', this), {
+        'mousemove node': '_onMousemove',
+        'mouseout node': '_onMouseout'
+      });
+    }
+  }, {
+    key: 'width',
+    get: function get() {
+      return this.config.get('width') || this._container.getBoundingClientRect().width;
+    }
+  }, {
+    key: 'height',
+    get: function get() {
+      return this.config.get('height') || Math.round(this.width / 2);
     }
   }]);
 
-  return LegendView;
+  return MapView;
 }(_contrailChartsView2.default);
 
-exports.default = LegendView;
+exports.default = MapView;
 
 /***/ }),
-/* 132 */
+/* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10512,7 +11043,7 @@ var MessageConfigModel = function (_ContrailChartsConfig) {
 exports.default = MessageConfigModel;
 
 /***/ }),
-/* 133 */
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10525,8 +11056,6 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-__webpack_require__(174);
 
 var _lodash = __webpack_require__(1);
 
@@ -10544,17 +11073,19 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
-var _message = __webpack_require__(191);
+var _message = __webpack_require__(193);
 
 var _message2 = _interopRequireDefault(_message);
 
-var _SendMessage = __webpack_require__(135);
+var _SendMessage = __webpack_require__(138);
 
 var _SendMessage2 = _interopRequireDefault(_SendMessage);
 
-var _ClearMessage = __webpack_require__(134);
+var _ClearMessage = __webpack_require__(137);
 
 var _ClearMessage2 = _interopRequireDefault(_ClearMessage);
+
+__webpack_require__(177);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -10686,7 +11217,7 @@ var MessageView = function (_ContrailChartsView) {
 exports.default = MessageView;
 
 /***/ }),
-/* 134 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10735,7 +11266,7 @@ var ClearMessage = function (_Action) {
 exports.default = ClearMessage;
 
 /***/ }),
-/* 135 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10784,7 +11315,7 @@ var SendMessage = function (_Action) {
 exports.default = SendMessage;
 
 /***/ }),
-/* 136 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10814,6 +11345,10 @@ var _contrailChartsConfigModel = __webpack_require__(4);
 
 var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
 
+var _ColoredChart = __webpack_require__(10);
+
+var _ColoredChart2 = _interopRequireDefault(_ColoredChart);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -10839,28 +11374,24 @@ var NavigationConfigModel = function (_ContrailChartsConfig) {
   _createClass(NavigationConfigModel, [{
     key: 'getColor',
     value: function getColor(data, accessor) {
-      var configuredColor = _get(NavigationConfigModel.prototype.__proto__ || Object.getPrototypeOf(NavigationConfigModel.prototype), 'getColor', this).call(this, data, accessor);
+      var configuredColor = _ColoredChart2.default.getColor(data, accessor);
       return configuredColor || this.attributes.colorScale(accessor.accessor);
     }
   }, {
     key: 'defaults',
     get: function get() {
-      return {
-        // The chart width. If not provided will be caculated by View.
-        chartWidth: undefined,
+      return Object.assign(_get(NavigationConfigModel.prototype.__proto__ || Object.getPrototypeOf(NavigationConfigModel.prototype), 'defaults', this), _ColoredChart2.default.defaults, {
+        // The component width. If not provided will be caculated by View.
+        width: undefined,
 
         // The difference by how much we want to modify the computed width.
-        chartWidthDelta: undefined,
+        widthDelta: undefined,
 
-        // The chart height. If not provided will be caculated by View.
-        chartHeight: undefined,
+        // The component height. If not provided will be caculated by View.
+        height: undefined,
 
         // Scale to transform values from percentage based selection to visual coordinates
         selectionScale: d3Scale.scaleLinear().domain([0, 100]),
-
-        colorScale: d3Scale.scaleOrdinal(d3Scale.schemeCategory20),
-        // Duration of chart transitions.
-        duration: 300,
 
         // Default axis ticks if not specified per axis.
         _xTicks: 10,
@@ -10879,7 +11410,7 @@ var NavigationConfigModel = function (_ContrailChartsConfig) {
 
         // The selection to use when first rendered [xMin%, xMax%].
         selection: []
-      };
+      });
     }
   }, {
     key: 'selectionRange',
@@ -10896,7 +11427,7 @@ var NavigationConfigModel = function (_ContrailChartsConfig) {
 exports.default = NavigationConfigModel;
 
 /***/ }),
-/* 137 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10918,7 +11449,7 @@ var _contrailChartsView = __webpack_require__(3);
 
 var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
 
-var _CompositeYChartView = __webpack_require__(41);
+var _CompositeYChartView = __webpack_require__(43);
 
 var _CompositeYChartView2 = _interopRequireDefault(_CompositeYChartView);
 
@@ -10926,15 +11457,15 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
-var _BrushView = __webpack_require__(152);
+var _BrushView = __webpack_require__(45);
 
 var _BrushView2 = _interopRequireDefault(_BrushView);
 
-var _BrushConfigModel = __webpack_require__(151);
+var _BrushConfigModel = __webpack_require__(44);
 
 var _BrushConfigModel2 = _interopRequireDefault(_BrushConfigModel);
 
-var _CompositeYChartConfigModel = __webpack_require__(25);
+var _CompositeYChartConfigModel = __webpack_require__(26);
 
 var _CompositeYChartConfigModel2 = _interopRequireDefault(_CompositeYChartConfigModel);
 
@@ -10986,9 +11517,10 @@ var NavigationView = function (_ContrailChartsView) {
      */
     _this._onResize = _this._onResize.bind(_this);
     window.addEventListener('resize', _this._onResize);
+    // needs more time to not encounter onSelection event after zoom
     _this._debouncedEnable = _lodash2.default.debounce(function () {
       _this._disabled = false;
-    }, _this.config.get('duration'));
+    }, _this.config.get('duration') * 2);
     return _this;
   }
 
@@ -11016,33 +11548,21 @@ var NavigationView = function (_ContrailChartsView) {
     }
   }, {
     key: 'zoom',
-    value: function zoom(_ref) {
-      var accessor = _ref.accessor,
-          range = _ref.range;
-
+    value: function zoom(ranges) {
+      var range = ranges[this.config.get('plot.x.accessor')];
+      if (!range || range[0] === range[1]) return;
       var sScale = this.config.get('selectionScale');
       var visualMin = this.params.xScale(range[0]);
       var visualMax = this.params.xScale(range[1]);
-      this.config.set('selection', [sScale.invert(visualMin), sScale.invert(visualMax)], { silent: true });
+
+      // round zoom range to integers in percents including the original exact float values
+      var selection = [_lodash2.default.floor(sScale.invert(visualMin)), _lodash2.default.ceil(sScale.invert(visualMax))];
+
+      if (_lodash2.default.isEqual(this.config.get('selection'), selection)) return;
+      this.config.set('selection', selection, { silent: true });
+      this._disabled = true;
       this._update();
-    }
-  }, {
-    key: 'prevChunkSelected',
-    value: function prevChunkSelected() {
-      var range = this.model.getRange();
-      var x = this.params.xAccessor;
-      var rangeDiff = range[x][1] - range[x][0];
-      this.model.queryLimit = _defineProperty({}, x, [range[x][0] - rangeDiff * 0.5, range[x][1] - rangeDiff * 0.5]);
-      // TODO: show some waiting screen?
-    }
-  }, {
-    key: 'nextChunkSelected',
-    value: function nextChunkSelected() {
-      var range = this.model.getRange();
-      var x = this.params.xAccessor;
-      var rangeDiff = range[x][1] - range[x][0];
-      this.model.queryLimit = _defineProperty({}, x, [range[x][0] + rangeDiff * 0.5, range[x][1] + rangeDiff * 0.5]);
-      // TODO: show some waiting screen?
+      this._debouncedEnable();
     }
 
     // Event handlers
@@ -11056,17 +11576,18 @@ var NavigationView = function (_ContrailChartsView) {
     key: '_onSelection',
     value: function _onSelection(range) {
       if (this._disabled) return;
-      var xAccessor = this.params.plot.x.accessor;
+      var xAccessor = this.config.get('plot.x.accessor');
       var xMin = this.params.xScale.invert(range[0]);
       var xMax = this.params.xScale.invert(range[1]);
       var sScale = this.config.get('selectionScale');
-      this.config.set('selection', [sScale.invert(range[0]), sScale.invert(range[1])], { silent: true });
+      var selection = [_lodash2.default.floor(sScale.invert(range[0])), _lodash2.default.ceil(sScale.invert(range[1]))];
+      this.config.set('selection', selection, { silent: true });
 
       // TODO navigation should not know anything about the data it operates
       if (_lodash2.default.isDate(xMin)) xMin = xMin.getTime();
       if (_lodash2.default.isDate(xMax)) xMax = xMax.getTime();
 
-      var data = { accessor: xAccessor, range: [xMin, xMax] };
+      var data = _defineProperty({}, xAccessor, [xMin, xMax]);
       _Actionman2.default.fire('Zoom', this.config.get('updateComponents'), data);
     }
     /**
@@ -11103,14 +11624,6 @@ var NavigationView = function (_ContrailChartsView) {
       this._brush.render();
       this._ticking = false;
     }
-  }, {
-    key: 'events',
-    get: function get() {
-      return {
-        'click .prev>a': 'prevChunkSelected',
-        'click .next>a': 'nextChunkSelected'
-      };
-    }
   }]);
 
   return NavigationView;
@@ -11119,7 +11632,7 @@ var NavigationView = function (_ContrailChartsView) {
 exports.default = NavigationView;
 
 /***/ }),
-/* 138 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11133,17 +11646,19 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _d3Scale = __webpack_require__(0);
+var _lodash = __webpack_require__(1);
 
-var d3Scale = _interopRequireWildcard(_d3Scale);
+var _lodash2 = _interopRequireDefault(_lodash);
 
 var _contrailChartsConfigModel = __webpack_require__(4);
 
 var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _ColoredChart = __webpack_require__(10);
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _ColoredChart2 = _interopRequireDefault(_ColoredChart);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -11164,40 +11679,51 @@ var PieChartConfigModel = function (_ContrailChartsConfig) {
   }
 
   _createClass(PieChartConfigModel, [{
-    key: 'initialize',
-    value: function initialize(p) {
-      // User should provide colorScheme instead of colorScale. it can be always overridden. if colorScale is not provided, lets use the colorScheme to create one.
-      if (!this.attributes.colorScale && p.colorScheme) this.attributes.colorScale = d3Scale.scaleOrdinal(p.colorScheme);
+    key: 'set',
+    value: function set() {
+      _get(PieChartConfigModel.prototype.__proto__ || Object.getPrototypeOf(PieChartConfigModel.prototype), 'set', this).call(this, _ColoredChart2.default.set.apply(_ColoredChart2.default, arguments));
     }
+    /**
+     * retrieves color by label in accessor OR by getLabel function from the data
+     */
+
   }, {
     key: 'getColor',
-    value: function getColor(data, accessor) {
-      var configuredColor = _get(PieChartConfigModel.prototype.__proto__ || Object.getPrototypeOf(PieChartConfigModel.prototype), 'getColor', this).call(this, data, accessor);
-      return configuredColor || this.attributes.colorScale(accessor);
+    value: function getColor(data) {
+      var _this2 = this;
+
+      var accessor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+      accessor.color = function (datum) {
+        return _this2.attributes.colorScale(accessor.label || _this2.getLabel(datum, _this2.attributes.serie));
+      };
+      return _ColoredChart2.default.getColor(data, accessor);
     }
+    /**
+     * @return Array of Objects with labels which serve as accessors for values
+     */
+
   }, {
-    key: 'getLabels',
-    value: function getLabels(dataProvider) {
+    key: 'getAccessors',
+    value: function getAccessors(dataProvider) {
       var labelFormatter = this.get('serie').getLabel;
-      return dataProvider.getLabels(labelFormatter);
+      return _lodash2.default.map(dataProvider.getLabels(labelFormatter), function (label) {
+        return { label: label };
+      });
     }
   }, {
     key: 'defaults',
     get: function get() {
-      return {
+      return Object.assign(_get(PieChartConfigModel.prototype.__proto__ || Object.getPrototypeOf(PieChartConfigModel.prototype), 'defaults', this), _ColoredChart2.default.defaults, {
         // sets the position for shared svg container
         isPrimary: true,
 
-        // The chart width. If not provided will be caculated by View.
-        chartWidth: undefined,
+        // The component width. If not provided will be caculated by View.
+        width: undefined,
 
-        // The chart height. If not provided will be caculated by View.
-        chartHeight: undefined,
-
-        colorScheme: d3Scale.schemeCategory20,
-        // default we're keeping colorScale as undefined. during init, we will set it to ordinal scale of colorScheme. If set, this has precedence over scheme.
-        colorScale: undefined
-      };
+        // The component height. If not provided will be caculated by View.
+        height: undefined
+      });
     }
   }, {
     key: 'innerRadius',
@@ -11214,7 +11740,7 @@ var PieChartConfigModel = function (_ContrailChartsConfig) {
 exports.default = PieChartConfigModel;
 
 /***/ }),
-/* 139 */
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11230,8 +11756,6 @@ var _get = function get(object, property, receiver) { if (object === null) objec
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(175);
-
 var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -11244,6 +11768,10 @@ var _d3Shape = __webpack_require__(0);
 
 var d3Shape = _interopRequireWildcard(_d3Shape);
 
+var _d3Ease = __webpack_require__(0);
+
+var d3Ease = _interopRequireWildcard(_d3Ease);
+
 var _contrailChartsView = __webpack_require__(3);
 
 var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
@@ -11252,11 +11780,11 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
+__webpack_require__(178);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -11281,9 +11809,8 @@ var PieChartView = function (_ContrailChartsView) {
 
     var _this = _possibleConstructorReturn(this, (PieChartView.__proto__ || Object.getPrototypeOf(PieChartView)).call(this, p));
 
-    _this._highlightRadius = 10;
     _this.listenTo(_this.model, 'change', _this.render);
-    _this.listenTo(_this.config, 'change', _this._onConfigModelChange);
+    _this.listenTo(_this.config, 'change', _this.render);
     /**
      * Let's bind super _onResize to this. Also .bind returns new function ref.
      * we need to store this for successful removal from window event
@@ -11312,15 +11839,18 @@ var PieChartView = function (_ContrailChartsView) {
         return serieConfig.getValue(d);
       })(data);
 
-      this.d3.attr('transform', 'translate(' + this.params.chartWidth / 2 + ', ' + this.params.chartHeight / 2 + ')');
+      this.d3.attr('transform', 'translate(' + this.params.width / 2 + ', ' + this.params.height / 2 + ')');
 
       var sectors = this.d3.selectAll(this.selectors.node).data(stakes, function (d) {
         return d.value;
       });
 
-      sectors.enter().append('path').classed('arc', true).attr('d', arc).style('fill', function (d) {
-        return _this2.config.getColor([], serieConfig.getLabel(d.data));
+      sectors.enter().append('path').classed(this.selectorClass('node'), true).style('fill', function (d) {
+        return _this2.config.getColor(d.data);
+      }).merge(sectors).classed(this.selectorClass('interactive'), this.config.hasAction('node')).attr('d', arc).transition().ease(d3Ease.easeLinear).duration(this.params.duration).style('fill', function (d) {
+        return _this2.config.getColor(d.data);
       });
+
       sectors.exit().remove();
 
       this._ticking = false;
@@ -11334,16 +11864,19 @@ var PieChartView = function (_ContrailChartsView) {
   }, {
     key: '_calculateDimensions',
     value: function _calculateDimensions() {
-      if (!this.params.chartWidth) {
-        this.params.chartWidth = this._container.getBoundingClientRect().width;
-      }
-      if (this.params.chartWidthDelta) {
-        this.params.chartWidth += this.params.chartWidthDelta;
-      }
-      if (!this.params.chartHeight) {
-        this.params.chartHeight = Math.round(this.params.chartWidth / 2);
-      }
-      // TODO: use the 'axis' param to compute additional margins for the axis
+      this.params.width = this.config.get('width') || this._container.getBoundingClientRect().width;
+      if (this.params.widthDelta) this.params.width += this.params.widthDelta;
+      this.params.height = this.config.get('height') || Math.round(this.params.width / 2);
+    }
+
+    // Event handlers
+
+  }, {
+    key: '_onMouseover',
+    value: function _onMouseover(d, el, event) {
+      var radius = this.config.get('radius');
+      var highlightArc = d3Shape.arc(d).innerRadius(radius).outerRadius(radius * 1.06).startAngle(d.startAngle).endAngle(d.endAngle);
+      this.d3.append('path').classed('arc', true).classed(this.selectorClass('highlight'), true).attr('d', highlightArc).style('fill', this.config.getColor(d.data));
     }
   }, {
     key: '_onMousemove',
@@ -11353,23 +11886,19 @@ var PieChartView = function (_ContrailChartsView) {
           left = _d3Selection$mouse2[0],
           top = _d3Selection$mouse2[1];
 
-      el.classList.add(this.selectorClass('active'));
       _Actionman2.default.fire('ShowComponent', this.config.get('tooltip'), { left: left, top: top }, d.data);
     }
   }, {
     key: '_onMouseout',
     value: function _onMouseout(d, el) {
+      this.d3.selectAll(this.selectors.highlight).remove();
       _Actionman2.default.fire('HideComponent', this.config.get('tooltip'));
-      var els = el ? this.d3.select(function () {
-        return el;
-      }) : this.d3.selectAll(this.selectors.node);
-      els.classed('active', false);
     }
   }, {
     key: '_onClickNode',
-    value: function _onClickNode(d, el) {
-      el.classList.remove(this.selectorClass('active'));
-      this.config.get('onClickNode')(d.data);
+    value: function _onClickNode(d, el, e) {
+      this._onMouseout(d, el);
+      _get(PieChartView.prototype.__proto__ || Object.getPrototypeOf(PieChartView.prototype), '_onEvent', this).call(this, d, el, e);
     }
   }, {
     key: 'tagName',
@@ -11385,15 +11914,18 @@ var PieChartView = function (_ContrailChartsView) {
     get: function get() {
       return _lodash2.default.extend(_get(PieChartView.prototype.__proto__ || Object.getPrototypeOf(PieChartView.prototype), 'selectors', this), {
         node: '.arc',
-        active: '.active'
+        highlight: '.highlight'
       });
     }
   }, {
     key: 'events',
     get: function get() {
-      var _$extend;
-
-      return _lodash2.default.extend(_get(PieChartView.prototype.__proto__ || Object.getPrototypeOf(PieChartView.prototype), 'events', this), (_$extend = {}, _defineProperty(_$extend, 'mousemove ' + this.selectors.node, '_onMousemove'), _defineProperty(_$extend, 'mouseout ' + this.selectors.node, '_onMouseout'), _$extend));
+      return _lodash2.default.extend(_get(PieChartView.prototype.__proto__ || Object.getPrototypeOf(PieChartView.prototype), 'events', this), {
+        'click node': '_onClickNode',
+        'mouseover node': '_onMouseover',
+        'mousemove node': '_onMousemove',
+        'mouseout node': '_onMouseout'
+      });
     }
   }]);
 
@@ -11403,7 +11935,7 @@ var PieChartView = function (_ContrailChartsView) {
 exports.default = PieChartView;
 
 /***/ }),
-/* 140 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11414,6 +11946,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _d3Scale = __webpack_require__(0);
 
@@ -11434,6 +11968,10 @@ var _lodash2 = _interopRequireDefault(_lodash);
 var _contrailChartsConfigModel = __webpack_require__(4);
 
 var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
+
+var _ColoredChart = __webpack_require__(10);
+
+var _ColoredChart2 = _interopRequireDefault(_ColoredChart);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -11458,10 +11996,9 @@ var RadialDendrogramConfigModel = function (_ContrailChartsConfig) {
   }
 
   _createClass(RadialDendrogramConfigModel, [{
-    key: 'initialize',
-    value: function initialize(p) {
-      // User should provide colorScheme instead of colorScale. it can be always overridden. if colorScale is not provided, lets use the colorScheme to create one.
-      if (!this.attributes.colorScale && p.colorScheme) this.attributes.colorScale = d3Scale.scaleOrdinal(p.colorScheme);
+    key: 'set',
+    value: function set() {
+      _get(RadialDendrogramConfigModel.prototype.__proto__ || Object.getPrototypeOf(RadialDendrogramConfigModel.prototype), 'set', this).call(this, _ColoredChart2.default.set.apply(_ColoredChart2.default, arguments));
     }
   }, {
     key: 'getColor',
@@ -11486,16 +12023,12 @@ var RadialDendrogramConfigModel = function (_ContrailChartsConfig) {
   }, {
     key: 'defaults',
     get: function get() {
-      return {
-        // The chart width. If not provided will be caculated by View.
-        chartWidth: undefined,
+      return Object.assign(_get(RadialDendrogramConfigModel.prototype.__proto__ || Object.getPrototypeOf(RadialDendrogramConfigModel.prototype), 'defaults', this), _ColoredChart2.default.defaults, {
+        // The component width. If not provided will be caculated by View.
+        width: undefined,
 
-        // The chart height. If not provided will be caculated by View.
-        chartHeight: undefined,
-
-        colorScheme: d3Scale.schemeCategory20,
-        // default we're keeping colorScale as undefined. during init, we will set it to ordinal scale of colorScheme. If set, this has precedence over scheme.
-        colorScale: undefined,
+        // The component height. If not provided will be caculated by View.
+        height: undefined,
 
         // The labels of the levels.
         levels: [],
@@ -11536,10 +12069,7 @@ var RadialDendrogramConfigModel = function (_ContrailChartsConfig) {
         // curve: d3Shape.curveBundle.beta(0.95)
         // curve: d3Shape.curveBundle.beta(1)
         curve: d3Shape.curveCatmullRom.alpha(0.5)
-        // curve: d3Shape.curveCatmullRom.alpha(0.75)
-        // curve: d3Shape.curveCatmullRom.alpha(1)
-        // curve: d3Shape.curveLinear
-      };
+      });
     }
   }]);
 
@@ -11549,7 +12079,7 @@ var RadialDendrogramConfigModel = function (_ContrailChartsConfig) {
 exports.default = RadialDendrogramConfigModel;
 
 /***/ }),
-/* 141 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11564,8 +12094,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-__webpack_require__(176);
 
 var _lodash = __webpack_require__(1);
 
@@ -11594,6 +12122,8 @@ var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
 var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
+
+__webpack_require__(179);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -11653,17 +12183,17 @@ var RadialDendrogramView = function (_ContrailChartsView) {
   }, {
     key: '_calculateDimensions',
     value: function _calculateDimensions() {
-      if (!this.params.chartWidth) {
-        this.params.chartWidth = this._container.getBoundingClientRect().width;
+      if (!this.params.width) {
+        this.params.width = this._container.getBoundingClientRect().width;
       }
-      if (this.params.chartWidthDelta) {
-        this.params.chartWidth += this.params.chartWidthDelta;
+      if (this.params.widthDelta) {
+        this.params.width += this.params.widthDelta;
       }
-      if (!this.params.chartHeight) {
-        this.params.chartHeight = this.params.chartWidth;
+      if (!this.params.height) {
+        this.params.height = this.params.width;
       }
       if (!this.params.radius) {
-        this.params.radius = this.params.chartWidth / 2;
+        this.params.radius = this.params.width / 2;
       }
       if (!this.params.labelMargin) {
         this.params.labelMargin = 50;
@@ -12041,7 +12571,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
     value: function _render() {
       var _this9 = this;
 
-      this.d3.attr('transform', 'translate(' + this.params.chartWidth / 2 + ', ' + this.params.chartHeight / 2 + ')');
+      this.d3.attr('transform', 'translate(' + this.params.width / 2 + ', ' + this.params.height / 2 + ')');
       // Circles
       var svgCircles = this.d3.selectAll('.circle').data(this.circles);
       svgCircles.enter().append('circle').attr('class', 'circle').attr('r', 0).merge(svgCircles).attr('r', function (d) {
@@ -12059,7 +12589,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         var svgLinks = this.d3.selectAll('.link').data(this.links);
         svgLinks.enter().append('path').attr('class', function (d) {
           return 'link ' + d[0].data.id;
-        }).style('stroke-width', 0).attr('d', function (d) {
+        }).classed(this.selectorClass('interactive'), this.config.hasAction('node')).style('stroke-width', 0).attr('d', function (d) {
           return radialLine(d[0]);
         }).merge(svgLinks).style('stroke-width', function (d) {
           return d[0].y * Math.sin((d[0].angleRange[1] - d[0].angleRange[0]) * Math.PI / 180) + 'px';
@@ -12080,7 +12610,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         }).merge(_svgLinks) // .transition().ease(this.config.get('ease')).duration(this.params.duration)
         .attr('class', function (d) {
           return 'ribbon' + (d.active ? ' active' : '');
-        }).attr('d', function (d) {
+        }).classed(this.selectorClass('interactive'), this.config.hasAction('link')).attr('d', function (d) {
           var outerPath = _radialLine(d.outerPoints);
           var innerPath = _radialLine(d.innerPoints);
           var innerStitch = 'A' + d.outerPoints[0][1] + ' ' + d.outerPoints[0][1] + ' 0 0 0 ';
@@ -12166,8 +12696,8 @@ var RadialDendrogramView = function (_ContrailChartsView) {
       this.render();
     }
   }, {
-    key: '_onMouseover',
-    value: function _onMouseover(d, el) {
+    key: '_onMousemove',
+    value: function _onMousemove(d, el) {
       var leaves = d.leaves();
       _lodash2.default.each(this.ribbons, function (ribbon) {
         ribbon.active = Boolean(_lodash2.default.find(leaves, function (leaf) {
@@ -12193,8 +12723,8 @@ var RadialDendrogramView = function (_ContrailChartsView) {
       _Actionman2.default.fire('HideComponent', this.config.get('tooltip'));
     }
   }, {
-    key: '_arcClick',
-    value: function _arcClick(d, el) {
+    key: '_onClickNode',
+    value: function _onClickNode(d, el, e) {
       if (d.depth < this.maxDepth && d.depth === this.params.drillDownLevel) {
         // Expand
         this.config.set('drillDownLevel', this.params.drillDownLevel + 1);
@@ -12202,6 +12732,8 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         // Collapse
         this.config.set('drillDownLevel', this.params.drillDownLevel - 1);
       }
+      el.classList.remove(this.selectorClass('active'));
+      _get(RadialDendrogramView.prototype.__proto__ || Object.getPrototypeOf(RadialDendrogramView.prototype), '_onEvent', this).call(this, d, el, e);
     }
   }, {
     key: 'tagName',
@@ -12209,13 +12741,25 @@ var RadialDendrogramView = function (_ContrailChartsView) {
       return 'g';
     }
   }, {
+    key: 'selectors',
+    get: function get() {
+      return _lodash2.default.extend(_get(RadialDendrogramView.prototype.__proto__ || Object.getPrototypeOf(RadialDendrogramView.prototype), 'selectors', this), {
+        node: '.arc',
+        link: '.ribbon',
+        active: '.active'
+      });
+    }
+  }, {
     key: 'events',
     get: function get() {
-      return {
-        'mouseover .arc': '_onMouseover',
-        'mouseout .arc': '_onMouseout',
-        'click .arc': '_arcClick'
-      };
+      return _lodash2.default.extend(_get(RadialDendrogramView.prototype.__proto__ || Object.getPrototypeOf(RadialDendrogramView.prototype), 'events', this), {
+        'click node': '_onClickNode',
+        'click link': '_onEvent',
+        'dblclick node': '_onEvent',
+        'dblclick link': '_onEvent',
+        'mousemove node': '_onMousemove',
+        'mouseout node': '_onMouseout'
+      });
     }
   }]);
 
@@ -12225,7 +12769,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
 exports.default = RadialDendrogramView;
 
 /***/ }),
-/* 142 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12236,6 +12780,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _d3Scale = __webpack_require__(0);
 
@@ -12257,11 +12803,13 @@ var _contrailChartsConfigModel = __webpack_require__(4);
 
 var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
 
+var _ColoredChart = __webpack_require__(10);
+
+var _ColoredChart2 = _interopRequireDefault(_ColoredChart);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -12282,10 +12830,9 @@ var SankeyConfigModel = function (_ContrailChartsConfig) {
   }
 
   _createClass(SankeyConfigModel, [{
-    key: 'initialize',
-    value: function initialize(p) {
-      // User should provide colorScheme instead of colorScale. it can be always overridden. if colorScale is not provided, lets use the colorScheme to create one.
-      if (!this.attributes.colorScale && p.colorScheme) this.attributes.colorScale = d3Scale.scaleOrdinal(p.colorScheme);
+    key: 'set',
+    value: function set() {
+      _get(SankeyConfigModel.prototype.__proto__ || Object.getPrototypeOf(SankeyConfigModel.prototype), 'set', this).call(this, _ColoredChart2.default.set.apply(_ColoredChart2.default, arguments));
     }
   }, {
     key: 'getColor',
@@ -12310,26 +12857,20 @@ var SankeyConfigModel = function (_ContrailChartsConfig) {
   }, {
     key: 'defaults',
     get: function get() {
-      var _ref;
-
-      return _ref = {
+      return Object.assign(_get(SankeyConfigModel.prototype.__proto__ || Object.getPrototypeOf(SankeyConfigModel.prototype), 'defaults', this), _ColoredChart2.default.defaults, {
         /*
         isPrimary: true,
         // by default will use common shared container under the parent
         isSharedContainer: true,
         */
 
-        // The chart width. If not provided will be caculated by View.
-        chartWidth: undefined,
+        // The component width. If not provided will be caculated by View.
+        width: undefined,
 
-        // The chart height. If not provided will be caculated by View.
-        chartHeight: undefined,
+        // The component height. If not provided will be caculated by View.
+        height: undefined,
 
         labelMargin: 50,
-
-        colorScheme: d3Scale.schemeCategory20,
-        // default we're keeping colorScale as undefined. during init, we will set it to ordinal scale of colorScheme. If set, this has precedence over scheme.
-        colorScale: undefined,
 
         // The scale to use that will represent the value of links.
         valueScale: d3Scale.scaleLog(),
@@ -12345,9 +12886,37 @@ var SankeyConfigModel = function (_ContrailChartsConfig) {
 
         // The duration of transitions.
         ease: d3Ease.easeCubic,
-        duration: 500
 
-      }, _defineProperty(_ref, 'valueScale', d3Scale.scaleLog()), _defineProperty(_ref, 'parentSeparation', 1), _defineProperty(_ref, 'parentSeparationThreshold', 0), _defineProperty(_ref, 'arcWidth', 10), _defineProperty(_ref, 'showArcLabels', true), _defineProperty(_ref, 'arcLabelLetterWidth', 5), _defineProperty(_ref, 'arcLabelXOffset', 2), _defineProperty(_ref, 'arcLabelYOffset', 18), _defineProperty(_ref, 'drillDownLevel', 1), _defineProperty(_ref, 'curve', d3Shape.curveCatmullRom.alpha(0.5)), _ref;
+        // The separation in degrees between nodes with different parents
+        parentSeparation: 1,
+        parentSeparationThreshold: 0,
+
+        // Arc width
+        arcWidth: 10,
+
+        // Show arc labels
+        showArcLabels: true,
+
+        // Estimated average letter width
+        arcLabelLetterWidth: 5,
+
+        // The X offset (in pixels) of the arc label counted from the beggining of the arc.
+        arcLabelXOffset: 2,
+
+        // The Y offset (in pixels) of the arc label counted from the outer edge of the arc (positive values offset the label into the center of the circle).
+        arcLabelYOffset: 18,
+
+        // Initial drill down level
+        drillDownLevel: 1,
+
+        // curve: d3Shape.curveBundle.beta(0.85)
+        // curve: d3Shape.curveBundle.beta(0.95)
+        // curve: d3Shape.curveBundle.beta(1)
+        curve: d3Shape.curveCatmullRom.alpha(0.5)
+        // curve: d3Shape.curveCatmullRom.alpha(0.75)
+        // curve: d3Shape.curveCatmullRom.alpha(1)
+        // curve: d3Shape.curveLinear
+      });
     }
   }]);
 
@@ -12357,7 +12926,7 @@ var SankeyConfigModel = function (_ContrailChartsConfig) {
 exports.default = SankeyConfigModel;
 
 /***/ }),
-/* 143 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12373,7 +12942,7 @@ var _get = function get(object, property, receiver) { if (object === null) objec
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(177);
+__webpack_require__(180);
 
 var _lodash = __webpack_require__(1);
 
@@ -12383,7 +12952,7 @@ var _d3Selection = __webpack_require__(0);
 
 var d3Selection = _interopRequireWildcard(_d3Selection);
 
-var _d3Sankey = __webpack_require__(164);
+var _d3Sankey = __webpack_require__(165);
 
 var d3Sankey = _interopRequireWildcard(_d3Sankey);
 
@@ -12466,11 +13035,6 @@ var SankeyView = function (_ContrailChartsView) {
       this._ticking = false;
     }
   }, {
-    key: 'refresh',
-    value: function refresh() {
-      this.config.trigger('change', this.config);
-    }
-  }, {
     key: 'remove',
     value: function remove() {
       _get(SankeyView.prototype.__proto__ || Object.getPrototypeOf(SankeyView.prototype), 'remove', this).call(this);
@@ -12479,14 +13043,14 @@ var SankeyView = function (_ContrailChartsView) {
   }, {
     key: '_calculateDimensions',
     value: function _calculateDimensions() {
-      if (!this.params.chartWidth) {
-        this.params.chartWidth = this._container.getBoundingClientRect().width;
+      if (!this.params.width) {
+        this.params.width = this._container.getBoundingClientRect().width;
       }
-      if (this.params.chartWidthDelta) {
-        this.params.chartWidth += this.params.chartWidthDelta;
+      if (this.params.widthDelta) {
+        this.params.width += this.params.widthDelta;
       }
-      if (!this.params.chartHeight) {
-        this.params.chartHeight = 3 * this.params.chartWidth / 5;
+      if (!this.params.height) {
+        this.params.height = 3 * this.params.width / 5;
       }
       if (!this.params.labelMargin) {
         this.params.labelMargin = 50;
@@ -12544,14 +13108,14 @@ var SankeyView = function (_ContrailChartsView) {
       // Does not look good - the sum of incoming values will not equal sum of outgoing values and the outgoing link will be thinner than the sum of incomming ones.
       // This needs to be handled during data parsing (ie. by the user) because only the user knows which data is input (in our example the input is from port to ip).
       /*
-      console.log('valueSum, chartHeight: ', valueSum, this.params.chartHeight)
-      const valueScale = this.config.get('valueScale').domain([1, valueSum]).range([1, this.params.chartHeight])
+      console.log('valueSum, height: ', valueSum, this.params.height)
+      const valueScale = this.config.get('valueScale').domain([1, valueSum]).range([1, this.params.height])
       _.each(this.links, (link) => {
         link.originalValue = link.value
         link.value = valueScale(link.originalValue)
       })
       */
-      this.sankey = d3Sankey.sankey().nodeWidth(this.params.nodeWidth).nodePadding(this.params.nodePadding).size([this.params.chartWidth - 2 * this.params.labelMargin, this.params.chartHeight - 2 * this.params.topMargin]);
+      this.sankey = d3Sankey.sankey().nodeWidth(this.params.nodeWidth).nodePadding(this.params.nodePadding).size([this.params.width - 2 * this.params.labelMargin, this.params.height - 2 * this.params.topMargin]);
       this.sankey.nodes(this.nodes).links(this.links).layout(32);
     }
   }, {
@@ -12582,7 +13146,7 @@ var SankeyView = function (_ContrailChartsView) {
       }).attr('text-anchor', 'end').text(function (d) {
         return d.dy > 10 ? d.label : '';
       }).filter(function (d) {
-        return d.x > _this3.params.chartWidth / 2;
+        return d.x > _this3.params.width / 2;
       }).attr('x', 5 + this.sankey.nodeWidth()).attr('text-anchor', 'start');
       var svgNodesEdit = svgNodesEnter.merge(svgNodes).transition().ease(this.config.get('ease')).duration(this.params.duration).attr('transform', function (d) {
         return 'translate(' + d.x + ',' + d.y + ')';
@@ -12597,7 +13161,7 @@ var SankeyView = function (_ContrailChartsView) {
       }).attr('text-anchor', 'end').text(function (d) {
         return d.dy > 10 ? d.label : '';
       }).filter(function (d) {
-        return d.x > _this3.params.chartWidth / 2;
+        return d.x > _this3.params.width / 2;
       }).attr('x', 5 + this.sankey.nodeWidth()).attr('text-anchor', 'start');
     }
 
@@ -12647,7 +13211,7 @@ var SankeyView = function (_ContrailChartsView) {
 exports.default = SankeyView;
 
 /***/ }),
-/* 144 */
+/* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12658,6 +13222,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _contrailChartsConfigModel = __webpack_require__(4);
 
@@ -12689,12 +13255,12 @@ var StandaloneModel = function (_ContrailChartsConfig) {
   _createClass(StandaloneModel, [{
     key: 'defaults',
     get: function get() {
-      return {
+      return Object.assign(_get(StandaloneModel.prototype.__proto__ || Object.getPrototypeOf(StandaloneModel.prototype), 'defaults', this), {
         // by default will use shared container under the parent
         isSharedContainer: true,
-        chartWidth: 300,
-        chartHeight: 100
-      };
+        width: 300,
+        height: 100
+      });
     }
   }]);
 
@@ -12704,7 +13270,7 @@ var StandaloneModel = function (_ContrailChartsConfig) {
 exports.default = StandaloneModel;
 
 /***/ }),
-/* 145 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12765,85 +13331,7 @@ var StandaloneView = function (_ContrailChartsView) {
 exports.default = StandaloneView;
 
 /***/ }),
-/* 146 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _contrailChartsConfigModel = __webpack_require__(4);
-
-var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright (c) Juniper Networks, Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var NavigationConfigModel = function (_ContrailChartsConfig) {
-  _inherits(NavigationConfigModel, _ContrailChartsConfig);
-
-  function NavigationConfigModel() {
-    _classCallCheck(this, NavigationConfigModel);
-
-    return _possibleConstructorReturn(this, (NavigationConfigModel.__proto__ || Object.getPrototypeOf(NavigationConfigModel)).apply(this, arguments));
-  }
-
-  _createClass(NavigationConfigModel, [{
-    key: 'defaults',
-    get: function get() {
-      return {
-        // The chart width. If not provided will be caculated by View.
-        chartWidth: undefined,
-
-        // The difference by how much we want to modify the computed width.
-        chartWidthDelta: undefined,
-
-        // The chart height. If not provided will be caculated by View.
-        chartHeight: undefined,
-
-        // Duration of chart transitions.
-        duration: 300,
-
-        // General margin used for computing the side margins.
-        margin: 30,
-
-        // Side margins. Will be computed if undefined.
-        marginTop: 30,
-        marginBottom: 30,
-        marginLeft: 30,
-        marginRight: 30,
-        marginInner: 30,
-
-        brushHandleHeight: 8,
-        brushHandleScaleX: 1,
-        brushHandleScaleY: 1.2,
-
-        // The selection to use when first rendered [xMin%, xMax%].
-        selection: [0, 100]
-      };
-    }
-  }]);
-
-  return NavigationConfigModel;
-}(_contrailChartsConfigModel2.default);
-
-exports.default = NavigationConfigModel;
-
-/***/ }),
-/* 147 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12857,39 +13345,17 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-__webpack_require__(178);
-
 var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
-
-var _d3Selection = __webpack_require__(0);
-
-var d3Selection = _interopRequireWildcard(_d3Selection);
-
-var _d3Brush = __webpack_require__(0);
-
-var d3Brush = _interopRequireWildcard(_d3Brush);
-
-var _d3Shape = __webpack_require__(0);
-
-var d3Shape = _interopRequireWildcard(_d3Shape);
 
 var _d3Scale = __webpack_require__(0);
 
 var d3Scale = _interopRequireWildcard(_d3Scale);
 
-var _d3Axis = __webpack_require__(0);
+var _contrailChartsConfigModel = __webpack_require__(4);
 
-var d3Axis = _interopRequireWildcard(_d3Axis);
-
-var _d3Ease = __webpack_require__(0);
-
-var d3Ease = _interopRequireWildcard(_d3Ease);
-
-var _contrailChartsView = __webpack_require__(3);
-
-var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
+var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -12904,251 +13370,230 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 */
 
 
+var TimelineConfigModel = function (_ContrailChartsConfig) {
+  _inherits(TimelineConfigModel, _ContrailChartsConfig);
+
+  function TimelineConfigModel() {
+    _classCallCheck(this, TimelineConfigModel);
+
+    return _possibleConstructorReturn(this, (TimelineConfigModel.__proto__ || Object.getPrototypeOf(TimelineConfigModel)).apply(this, arguments));
+  }
+
+  _createClass(TimelineConfigModel, [{
+    key: 'defaults',
+    get: function get() {
+      return Object.assign(_get(TimelineConfigModel.prototype.__proto__ || Object.getPrototypeOf(TimelineConfigModel.prototype), 'defaults', this), {
+        isSharedContainer: true,
+
+        // The component width
+        width: undefined,
+
+        // The component height
+        height: 100,
+
+        brushHandleHeight: 8,
+        brushHandleScaleX: 1,
+        brushHandleScaleY: 1.2,
+
+        // Scale to transform values from percentage based selection to visual coordinates
+        selectionScale: d3Scale.scaleLinear().domain([0, 100]),
+
+        // The selection to use when first rendered [xMin%, xMax%].
+        selection: []
+      });
+    }
+  }, {
+    key: 'selectionRange',
+    get: function get() {
+      this.attributes.selectionScale.range([this.attributes.xRange[0], this.attributes.xRange[1]]);
+      if (_lodash2.default.isEmpty(this.attributes.selection)) return [];
+      return [this.attributes.selectionScale(this.attributes.selection[0]), this.attributes.selectionScale(this.attributes.selection[1])];
+    }
+  }]);
+
+  return TimelineConfigModel;
+}(_contrailChartsConfigModel2.default);
+
+exports.default = TimelineConfigModel;
+
+/***/ }),
+/* 150 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _lodash = __webpack_require__(1);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _d3Ease = __webpack_require__(0);
+
+var d3Ease = _interopRequireWildcard(_d3Ease);
+
+var _d3Scale = __webpack_require__(0);
+
+var d3Scale = _interopRequireWildcard(_d3Scale);
+
+var _contrailChartsView = __webpack_require__(3);
+
+var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
+
+var _Actionman = __webpack_require__(2);
+
+var _Actionman2 = _interopRequireDefault(_Actionman);
+
+var _BrushView = __webpack_require__(45);
+
+var _BrushView2 = _interopRequireDefault(_BrushView);
+
+var _BrushConfigModel = __webpack_require__(44);
+
+var _BrushConfigModel2 = _interopRequireDefault(_BrushConfigModel);
+
+__webpack_require__(181);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright (c) Juniper Networks, Inc. All rights reserved.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
 var TimelineView = function (_ContrailChartsView) {
   _inherits(TimelineView, _ContrailChartsView);
 
-  function TimelineView(p) {
+  _createClass(TimelineView, null, [{
+    key: 'dataType',
+    get: function get() {
+      return 'DataFrame';
+    }
+  }]);
+
+  function TimelineView() {
+    var _ref;
+
     _classCallCheck(this, TimelineView);
 
-    var _this = _possibleConstructorReturn(this, (TimelineView.__proto__ || Object.getPrototypeOf(TimelineView)).call(this, p));
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
 
-    _this._focusDataProvider = new DataProvider({ parentDataModel: _this.model });
-    _this.brush = null;
-    _this._throttledTriggerWindowChangedEvent = _lodash2.default.throttle(_this._triggerWindowChangedEvent, 100).bind(_this);
-    _this.listenTo(_this.model, 'change', _this._onModelChange);
-    window.addEventListener('resize', _this._onModelChange.bind(_this));
+    var _this = _possibleConstructorReturn(this, (_ref = TimelineView.__proto__ || Object.getPrototypeOf(TimelineView)).call.apply(_ref, [this].concat(args)));
+
+    _this._brush = new _BrushView2.default({
+      config: new _BrushConfigModel2.default({
+        isSharedContainer: true
+      })
+    });
+
+    _this.listenTo(_this.model, 'change', _this.render);
+    _this.listenTo(_this.config, 'change', _this.render);
+    _this.listenTo(_this._brush, 'selection', _lodash2.default.throttle(_this._onSelection));
+    _this._onResize = _this._onResize.bind(_this);
+    window.addEventListener('resize', _this._onResize);
+    _this._debouncedEnable = _lodash2.default.debounce(function () {
+      _this._disabled = false;
+    }, _this.config.get('duration'));
     return _this;
   }
 
   _createClass(TimelineView, [{
-    key: 'changeModel',
-    value: function changeModel(model) {
-      this.stopListening(this.model);
-      this.model = model;
-      this._focusDataProvider = new DataProvider({ parentDataModel: this.model });
-      this.listenTo(this.model, 'change', this._onModelChange);
-    }
-  }, {
-    key: 'hasAxisConfig',
-    value: function hasAxisConfig(axisName, axisAttributeName) {
-      var axis = this.config.get('axis');
-      return _lodash2.default.isObject(axis) && _lodash2.default.isObject(axis[axisName]) && !_lodash2.default.isUndefined(axis[axisName][axisAttributeName]);
-    }
-  }, {
-    key: 'hasAxisParam',
-    value: function hasAxisParam(axisName, axisAttributeName) {
-      return _lodash2.default.isObject(this.params.axis) && _lodash2.default.isObject(this.params.axis[axisName]) && !_lodash2.default.isUndefined(this.params.axis[axisName][axisAttributeName]);
-    }
-  }, {
     key: 'render',
     value: function render() {
       this.resetParams();
-      this._calculateDimensions();
-      this._calculateScales();
+      var rect = this._container.getBoundingClientRect();
+      this.params.width = rect.width;
       _get(TimelineView.prototype.__proto__ || Object.getPrototypeOf(TimelineView.prototype), 'render', this).call(this);
-      this._renderAxis();
-      this._renderBar();
-      this._renderBrush();
-      return this;
-    }
-    /**
-    * This needs to be called after compositeYChartView is rendered because we need the params computed.
-    */
 
-  }, {
-    key: '_renderBrush',
-    value: function _renderBrush() {
-      var _this2 = this;
+      var xAccessor = this.config.get('accessor');
+      var xRange = [0, this.config.get('width') || rect.width];
+      var yRange = [this.config.get('height'), 0];
+      var xScale = d3Scale.scaleLinear().range(xRange).domain(this.model.getRangeFor(xAccessor));
+      this.config.set({ xRange: xRange, yRange: yRange, xScale: xScale }, { silent: true });
 
-      var xScale = this.params.axis[this.params.plot.x.axis].scale;
-      if (!this.brush) {
-        var brushHandleHeight = this.params.brushHandleHeight;
-        this.brush = d3Brush.brushX().extent([[this.params.xRange[0], this.params.yRange[1] + 10], [this.params.xRange[1], this.params.yRange[0] - 10]]).handleSize(10).on('brush', function () {
-          _this2._handleBrushSelection(d3Selection.event.selection);
-        }).on('end', function () {
-          var dataWindow = d3Selection.event.selection;
-          if (!dataWindow) {
-            _this2._removeBrush();
-            _this2._renderBrush();
-          } else {
-            _this2._handleBrushSelection(d3Selection.event.selection);
-          }
-        });
-        var gBrush = this.d3.append('g').classed('brush', true).call(this.brush);
-        gBrush.selectAll('.handle--custom').data([{ type: 'w' }, { type: 'e' }]).enter().append('path').classed('handle--custom', true).classed('hide', true).attr('d', d3Shape.arc().innerRadius(0).outerRadius(brushHandleHeight).startAngle(0).endAngle(function (d, i) {
-          return i ? Math.PI : -Math.PI;
-        }));
-        if (_lodash2.default.isArray(this.params.selection)) {
-          var brushGroup = this.d3.select('g.brush').transition().ease(d3Ease.easeLinear).duration(this.params.duration);
-          var xMin = (xScale.range()[1] - xScale.range()[0]) * (this.params.selection[0] / 100) + xScale.range()[0];
-          var xMax = (xScale.range()[1] - xScale.range()[0]) * (this.params.selection[1] / 100) + xScale.range()[0];
-          this.brush.move(brushGroup, [xMin, xMax]);
-        }
-      }
+      var barHeight = 10;
+      this._bar = this.d3.selectAll(this.selectors.bar).data([{ barHeight: barHeight }]);
+      this._bar.enter().append('rect').attr('class', this.selectorClass('bar')).attr('x', xRange[0]).attr('y', yRange[0] / 2 - barHeight / 2).attr('height', barHeight).attr('width', xRange[1] - xRange[0]).merge(this._bar).transition().ease(d3Ease.easeLinear).duration(this.config.get('duration')).attr('y', yRange[0] / 2 - barHeight / 2).attr('width', xRange[1] - xRange[0]);
+      this._bar.exit().remove();
+
+      this._brush.container = this._container;
+      this._brush.config.set({
+        selection: this.config.selectionRange,
+        xRange: xRange,
+        yRange: yRange
+      }, { silent: true });
+      this._brush.render();
+      this._ticking = false;
     }
   }, {
-    key: '_removeBrush',
-    value: function _removeBrush() {
-      this.d3.select('g.brush').remove();
-      this.brush = null;
-      this.config.unset('focusDomain', { silent: true });
-      var newFocusDomain = {};
-      this._focusDataProvider.setRangeAndFilterData(newFocusDomain);
-    }
-  }, {
-    key: '_calculateDimensions',
-    value: function _calculateDimensions() {
-      if (!this.params.chartWidth) {
-        this.params.chartWidth = this._container.getBoundingClientRect().width;
-      }
-      if (this.params.chartWidthDelta) {
-        this.params.chartWidth += this.params.chartWidthDelta;
-      }
-      if (!this.params.chartHeight) {
-        this.params.chartHeight = Math.round(this.params.chartWidth / 2);
-      }
-    }
-  }, {
-    key: '_calculateScales',
-    value: function _calculateScales() {
-      // Calculate the starting and ending positions in pixels of the chart data drawing area.
-      this.params.xRange = [this.params.marginLeft, this.params.chartWidth - this.params.marginRight];
-      this.params.yRange = [this.params.chartHeight - this.params.marginBottom, this.params.marginTop];
-      var domain = this.model.getRangeFor(this.params.plot.x.accessor);
-      var axisName = this.params.plot.x.axis || 'x';
-      if (this.hasAxisParam(axisName, 'domain')) {
-        if (!_lodash2.default.isUndefined(this.config.get('axis')[axisName].domain[0])) {
-          domain[0] = this.config.get('axis')[axisName].domain[0];
-        }
-        if (!_lodash2.default.isUndefined(this.config.get('axis')[axisName].domain[1])) {
-          domain[1] = this.config.get('axis')[axisName].domain[1];
-        }
-      }
-      this.params.axis[axisName].domain = domain;
-      if (!_lodash2.default.isFunction(this.params.axis[axisName].scale)) {
-        var baseScale = null;
-        if (this.hasAxisConfig(axisName, 'scale') && _lodash2.default.isFunction(d3[this.config.get('axis')[axisName]])) {
-          baseScale = d3[this.params.axis[axisName].scale]();
-        } else {
-          baseScale = d3Scale.scaleTime();
-        }
-        this.params.axis[axisName].scale = baseScale.domain(this.params.axis[axisName].domain).range(this.params.xRange);
-        if (this.hasAxisParam(axisName, 'nice') && this.params.axis[axisName].nice) {
-          if (this.hasAxisParam(axisName, 'ticks')) {
-            this.params.axis[axisName].scale = this.params.axis[axisName].scale.nice(this.params.axis[axisName].ticks);
-          } else {
-            this.params.axis[axisName].scale = this.params.axis[axisName].scale.nice();
-          }
-        }
-      }
-    }
-  }, {
-    key: '_renderAxis',
-    value: function _renderAxis() {
-      var xAxisName = this.params.plot.x.axis;
-      var xAxis = d3Axis.axisBottom(this.params.axis[xAxisName].scale).tickSize(this.params.yRange[0] - this.params.yRange[1]).tickPadding(10);
-      if (this.hasAxisParam('x', 'ticks')) {
-        xAxis = xAxis.ticks(this.params.axis[xAxisName].ticks);
-      }
-      if (this.hasAxisConfig('x', 'formatter')) {
-        xAxis = xAxis.tickFormat(this.config.get('axis').x.formatter);
-      }
-      this.d3.transition().ease(d3Ease.easeLinear).duration(this.params.duration);
-      this.d3.select('.axis.x-axis').call(xAxis);
-      // X axis label
-      var xLabelData = [];
-      var xLabelMargin = 5;
-      if (this.hasAxisParam(xAxisName, 'labelMargin')) {
-        xLabelMargin = this.params.axis[xAxisName].labelMargin;
-      }
-      var xLabel = this.params.plot.x.labelFormatter || this.params.plot.x.label;
-      if (this.hasAxisParam(xAxisName, 'label')) {
-        xLabel = this.params.axis[xAxisName].label;
-      }
-      if (xLabel) {
-        xLabelData.push(xLabel);
-      }
-      var xAxisLabelSvg = this.d3.select('.axis.x-axis').selectAll('.axis-label').data(xLabelData);
-      xAxisLabelSvg.enter().append('text').attr('class', 'axis-label').merge(xAxisLabelSvg).attr('x', this.params.xRange[0] + (this.params.xRange[1] - this.params.xRange[0]) / 2).attr('y', this.params.chartHeight - this.params.marginTop - xLabelMargin).text(function (d) {
-        return d;
-      });
-      xAxisLabelSvg.exit().remove();
-    }
-  }, {
-    key: '_renderBar',
-    value: function _renderBar() {
-      var axisName = this.params.plot.x.axis;
-      var xScale = this.params.axis[axisName].scale;
-      var barHeight = this.params.brushHandleHeight;
-      var barTop = this.params.yRange[1] - barHeight / 2 + (this.params.yRange[0] - this.params.yRange[1]) / 2;
-      var svgBars = this.d3.selectAll('.timeline-bar').data([{ c: barTop, h: barHeight }]);
-      svgBars.enter().append('rect').attr('class', 'timeline-bar').attr('x', xScale.range()[0]).attr('y', barTop + barHeight / 2).attr('width', xScale.range()[1] - xScale.range()[0]).attr('height', 1).merge(svgBars).transition().ease(d3Ease.easeLinear).duration(this.params.duration).attr('x', xScale.range()[0]).attr('y', function (d) {
-        return d.c;
-      }).attr('width', xScale.range()[1] - xScale.range()[0]).attr('height', function (d) {
-        return d.h;
-      });
-      svgBars.exit().remove();
-    }
-  }, {
-    key: '_triggerWindowChangedEvent',
-    value: function _triggerWindowChangedEvent(focusDomain) {
-      var x = this.params.plot.x.accessor;
-      this._focusDataProvider.setRangeAndFilterData(focusDomain);
-      this._eventObject.trigger('windowChanged', focusDomain[x][0], focusDomain[x][1]);
+    key: 'zoom',
+    value: function zoom(_ref2) {
+      var accessor = _ref2.accessor,
+          range = _ref2.range;
+
+      var sScale = this.config.get('selectionScale');
+      var xScale = this.config.get('xScale');
+      var visualMin = xScale(range[0]);
+      var visualMax = xScale(range[1]);
+
+      // round zoom range to integers in percents including the original exact float values
+      var selection = [_lodash2.default.floor(sScale.invert(visualMin)), _lodash2.default.ceil(sScale.invert(visualMax))];
+
+      if (_lodash2.default.isEqual(this.config.get('selection'), selection)) return;
+      this.config.set('selection', selection, { silent: true });
+      this._update();
     }
 
     // Event handlers
 
   }, {
-    key: '_handleBrushSelection',
-    value: function _handleBrushSelection(dataWindow) {
-      var x = this.params.plot.x.accessor;
-      var xScale = this.params.axis[this.params.plot.x.axis].scale;
-      var brushHandleScaleX = this.params.brushHandleScaleX;
-      var brushHandleScaleY = this.params.brushHandleScaleY;
-      var brushHandleCenter = this.params.yRange[1] + (this.params.yRange[0] - this.params.yRange[1]) / 2;
-      var xMin = xScale.invert(dataWindow[0]);
-      var xMax = xScale.invert(dataWindow[1]);
-      if (_lodash2.default.isDate(xMin)) {
-        xMin = xMin.getTime();
-      }
-      if (_lodash2.default.isDate(xMax)) {
-        xMax = xMax.getTime();
-      }
-      var focusDomain = {};
-      focusDomain[x] = [xMin, xMax];
-      this.config.set({ focusDomain: focusDomain }, { silent: true });
-      this._throttledTriggerWindowChangedEvent(focusDomain);
-      var gHandles = this.d3.select('g.brush').selectAll('.handle--custom');
-      gHandles.classed('hide', false).attr('transform', function (d, i) {
-        return 'translate(' + dataWindow[i] + ',' + brushHandleCenter + ') scale(' + brushHandleScaleX + ',' + brushHandleScaleY + ')';
-      });
+    key: '_onSelection',
+    value: function _onSelection(range) {
+      if (this._disabled) return;
+      var xAccessor = this.config.get('accessor');
+      var xScale = this.config.get('xScale');
+      var xMin = xScale.invert(range[0]);
+      var xMax = xScale.invert(range[1]);
+      var sScale = this.config.get('selectionScale');
+      var selection = [_lodash2.default.floor(sScale.invert(range[0])), _lodash2.default.ceil(sScale.invert(range[1]))];
+      this.config.set('selection', selection, { silent: true });
+
+      // TODO navigation should not know anything about the data it operates
+      if (_lodash2.default.isDate(xMin)) xMin = xMin.getTime();
+      if (_lodash2.default.isDate(xMax)) xMax = xMax.getTime();
+
+      var data = _defineProperty({}, xAccessor, [xMin, xMax]);
+      _Actionman2.default.fire('Zoom', this.config.get('updateComponents'), data);
     }
+    /**
+     * Turn off selection for the animation period on resize
+     */
+
   }, {
-    key: '_onModelChange',
-    value: function _onModelChange() {
-      this.render();
-      this._handleModelChange();
-    }
-  }, {
-    key: '_handleModelChange',
-    value: function _handleModelChange() {
-      var xScale = this.params.axis[this.params.plot.x.axis].scale;
-      if (this.brush) {
-        this.brush = this.brush.extent([[this.params.xRange[0], this.params.yRange[1] + 10], [this.params.xRange[1], this.params.yRange[0] - 10]]);
-        this.d3.select('g.brush').call(this.brush);
-      }
-      if (_lodash2.default.isArray(this.params.selection)) {
-        if (!this.params.selection[0]) {
-          this.params.selection[0] = 0;
-        }
-        if (!this.params.selection[1]) {
-          this.params.selection[1] = 100;
-        }
-        var brushGroup = this.d3.select('g.brush').transition().ease(d3Ease.easeLinear).duration(this.params.duration);
-        var xMin = (xScale.range()[1] - xScale.range()[0]) * (this.params.selection[0] / 100) + xScale.range()[0];
-        var xMax = (xScale.range()[1] - xScale.range()[0]) * (this.params.selection[1] / 100) + xScale.range()[0];
-        this.brush.move(brushGroup, [xMin, xMax]);
+    key: '_onResize',
+    value: function _onResize() {
+      this._disabled = true;
+      this._debouncedEnable();
+      if (!this._ticking) {
+        window.requestAnimationFrame(this.render.bind(this));
+        this._ticking = true;
       }
     }
   }, {
@@ -13157,9 +13602,16 @@ var TimelineView = function (_ContrailChartsView) {
       return 'g';
     }
   }, {
-    key: 'focusDataProvider',
+    key: 'selectors',
     get: function get() {
-      return this._focusDataProvider;
+      return _lodash2.default.extend(_get(TimelineView.prototype.__proto__ || Object.getPrototypeOf(TimelineView.prototype), 'selectors', this), {
+        bar: '.timeline-bar'
+      });
+    }
+  }, {
+    key: 'width',
+    get: function get() {
+      return this.config.get('width') || this._container.getBoundingClientRect().width;
     }
   }]);
 
@@ -13169,7 +13621,7 @@ var TimelineView = function (_ContrailChartsView) {
 exports.default = TimelineView;
 
 /***/ }),
-/* 148 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13180,6 +13632,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _lodash = __webpack_require__(1);
 
@@ -13214,7 +13668,7 @@ var TooltipConfigModel = function (_ContrailChartsConfig) {
     get: function get() {
       var _this2 = this;
 
-      return {
+      return Object.assign(_get(TooltipConfigModel.prototype.__proto__ || Object.getPrototypeOf(TooltipConfigModel.prototype), 'defaults', this), {
         // Which tooltip ids to accept. If empty accept all.
         acceptFilters: [],
 
@@ -13244,7 +13698,7 @@ var TooltipConfigModel = function (_ContrailChartsConfig) {
           });
           return tooltipContent;
         }
-      };
+      });
     }
   }, {
     key: 'sourceId',
@@ -13266,7 +13720,7 @@ var TooltipConfigModel = function (_ContrailChartsConfig) {
 exports.default = TooltipConfigModel;
 
 /***/ }),
-/* 149 */
+/* 152 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13280,19 +13734,19 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-__webpack_require__(179);
-
 var _contrailChartsView = __webpack_require__(3);
 
 var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
 
-var _TitleView = __webpack_require__(26);
+var _TitleView = __webpack_require__(27);
 
 var _TitleView2 = _interopRequireDefault(_TitleView);
 
-var _tooltip = __webpack_require__(192);
+var _tooltip = __webpack_require__(194);
 
 var _tooltip2 = _interopRequireDefault(_tooltip);
+
+__webpack_require__(182);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -13428,13 +13882,13 @@ var TooltipView = function (_ContrailChartsView) {
 exports.default = TooltipView;
 
 /***/ }),
-/* 150 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _contrailEvents = __webpack_require__(17);
+var _contrailEvents = __webpack_require__(18);
 
 var _contrailEvents2 = _interopRequireDefault(_contrailEvents);
 
@@ -13445,80 +13899,7 @@ module.exports = _contrailEvents2.default; /*
                                             */
 
 /***/ }),
-/* 151 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _contrailChartsConfigModel = __webpack_require__(4);
-
-var _contrailChartsConfigModel2 = _interopRequireDefault(_contrailChartsConfigModel);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright (c) Juniper Networks, Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var BrushConfigModel = function (_ContrailChartsConfig) {
-  _inherits(BrushConfigModel, _ContrailChartsConfig);
-
-  function BrushConfigModel() {
-    _classCallCheck(this, BrushConfigModel);
-
-    return _possibleConstructorReturn(this, (BrushConfigModel.__proto__ || Object.getPrototypeOf(BrushConfigModel)).apply(this, arguments));
-  }
-
-  _createClass(BrushConfigModel, [{
-    key: 'selection',
-
-    /**
-     * Brush selection in percentage [xMin%, xMax%]
-     */
-    get: function get() {
-      return this.attributes.selection || [];
-    }
-  }, {
-    key: 'duration',
-    get: function get() {
-      return this.attributes.duration;
-    }
-  }, {
-    key: 'handleHeight',
-    get: function get() {
-      return this.has('handleHeight') ? this.attributes.handleHeight : 16;
-    }
-  }, {
-    key: 'handleCenter',
-    get: function get() {
-      return this.attributes.yRange[0] - this.attributes.yRange[1];
-    }
-  }, {
-    key: 'extent',
-    get: function get() {
-      return [[this.attributes.xRange[0], this.attributes.yRange[1]], [this.attributes.xRange[1], this.attributes.yRange[0]]];
-    }
-  }]);
-
-  return BrushConfigModel;
-}(_contrailChartsConfigModel2.default);
-
-exports.default = BrushConfigModel;
-
-/***/ }),
-/* 152 */
+/* 154 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13531,124 +13912,6 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-__webpack_require__(180);
-
-var _d3Selection = __webpack_require__(0);
-
-var d3Selection = _interopRequireWildcard(_d3Selection);
-
-var _d3Shape = __webpack_require__(0);
-
-var d3Shape = _interopRequireWildcard(_d3Shape);
-
-var _d3Brush = __webpack_require__(0);
-
-var d3Brush = _interopRequireWildcard(_d3Brush);
-
-var _d3Ease = __webpack_require__(0);
-
-var d3Ease = _interopRequireWildcard(_d3Ease);
-
-var _contrailChartsView = __webpack_require__(3);
-
-var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright (c) Juniper Networks, Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var BrushView = function (_ContrailChartsView) {
-  _inherits(BrushView, _ContrailChartsView);
-
-  function BrushView(p) {
-    _classCallCheck(this, BrushView);
-
-    var _this = _possibleConstructorReturn(this, (BrushView.__proto__ || Object.getPrototypeOf(BrushView)).call(this, p));
-
-    _this._brush = d3Brush.brushX();
-    _this.listenTo(_this.config, 'change', _this.render);
-    return _this;
-  }
-
-  _createClass(BrushView, [{
-    key: 'render',
-    value: function render() {
-      _get(BrushView.prototype.__proto__ || Object.getPrototypeOf(BrushView.prototype), 'render', this).call(this);
-      this._brush.extent(this.config.extent).handleSize(10).on('start brush end', this._onSelection.bind(this));
-      this.d3.selectAll('.handle--custom').data([{ type: 'w' }, { type: 'e' }]).enter().append('path').classed('hide', true).classed('handle--custom', true).attr('d', d3Shape.arc().innerRadius(0).outerRadius(this.config.handleHeight / 2).startAngle(0).endAngle(function (d, i) {
-        return i ? Math.PI : -Math.PI;
-      }));
-      this.d3.call(this._brush);
-      var brushGroup = this.d3.transition().ease(d3Ease.easeLinear).duration(this.config.duration);
-      this._brush.move(brushGroup, this.config.selection);
-    }
-  }, {
-    key: 'remove',
-    value: function remove() {
-      this.d3.selectAll('.handle--custom').classed('hide', true);
-    }
-
-    // Event handlers
-
-  }, {
-    key: '_onSelection',
-    value: function _onSelection() {
-      var _this2 = this;
-
-      var selection = d3Selection.event.selection;
-      if (!selection) {
-        return this.remove();
-      }
-      this.config.set('selection', selection, { silent: true });
-      this.d3.selectAll('.handle--custom').classed('hide', false).attr('transform', function (d, i) {
-        return 'translate(' + selection[i] + ',' + _this2.config.handleCenter + ') scale(1,2)';
-      });
-      // selection is removed when clicking outside a brush
-      if (selection[0] === selection[1]) {
-        var xRange = this.config.get('xRange');
-        selection = [xRange[0], xRange[1]];
-      }
-      this.trigger('selection', selection);
-    }
-  }, {
-    key: 'tagName',
-    get: function get() {
-      return 'g';
-    }
-  }, {
-    key: 'zIndex',
-    get: function get() {
-      return 9;
-    }
-  }]);
-
-  return BrushView;
-}(_contrailChartsView2.default);
-
-exports.default = BrushView;
-
-/***/ }),
-/* 153 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _lodash = __webpack_require__(1);
 
@@ -13687,7 +13950,7 @@ var BucketConfigModel = function (_ContrailChartsConfig) {
   _createClass(BucketConfigModel, [{
     key: 'defaults',
     get: function get() {
-      return {
+      return Object.assign(_get(BucketConfigModel.prototype.__proto__ || Object.getPrototypeOf(BucketConfigModel.prototype), 'defaults', this), {
         isSharedContainer: true,
         // range start 256 - is an area of 16x16 square considering the default font for number of buckets as 14px
         range: [256, 512],
@@ -13695,9 +13958,8 @@ var BucketConfigModel = function (_ContrailChartsConfig) {
         shape: '&#xf111;',
 
         // default value is set in css
-        color: undefined,
-        duration: 300
-      };
+        color: undefined
+      });
     }
   }, {
     key: 'scale',
@@ -13711,12 +13973,12 @@ var BucketConfigModel = function (_ContrailChartsConfig) {
   }, {
     key: 'duration',
     get: function get() {
-      return this._parent.get('duration') || this.this.attributes.duration;
+      return this._parent.get('duration') || this.attributes.duration;
     }
   }, {
     key: 'xAccessor',
     get: function get() {
-      return _lodash2.default.get(this._parent.attributes, 'plot.x.accessor');
+      return this._parent.get('plot.x.accessor');
     }
   }, {
     key: 'updateComponents',
@@ -13731,7 +13993,7 @@ var BucketConfigModel = function (_ContrailChartsConfig) {
 exports.default = BucketConfigModel;
 
 /***/ }),
-/* 154 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13746,8 +14008,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-__webpack_require__(181);
 
 var _lodash = __webpack_require__(1);
 
@@ -13769,9 +14029,9 @@ var _Actionman = __webpack_require__(2);
 
 var _Actionman2 = _interopRequireDefault(_Actionman);
 
-var _Util = __webpack_require__(29);
+var _Util = __webpack_require__(31);
 
-var _Cluster = __webpack_require__(155);
+var _Cluster = __webpack_require__(156);
 
 var _Cluster2 = _interopRequireDefault(_Cluster);
 
@@ -13779,11 +14039,11 @@ var _contrailChartsView = __webpack_require__(3);
 
 var _contrailChartsView2 = _interopRequireDefault(_contrailChartsView);
 
+__webpack_require__(184);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -13817,14 +14077,14 @@ var BucketView = function (_ContrailChartsView) {
       var shape = this.config.get('shape');
       var color = this.config.get('color');
       var scale = this.config.scale;
-      var groups = buckets.enter().append('g').classed(this.selectorClass('node'), true).attr('transform', function (d) {
+      var groups = buckets.enter().append('g').classed(this.selectorClass('node'), true).classed(this.selectorClass('interactive'), true).attr('transform', function (d) {
         return 'translate(' + d.x + ',' + d.y + ')';
       });
       groups.append('text').html(shape).attr('fill', color).style('font-size', function (d) {
         return Math.sqrt(scale(d.area));
       });
 
-      groups.append('text').attr('class', 'label').text(function (d) {
+      groups.append('text').attr('class', this.selectorClass('label')).text(function (d) {
         return d.bucket.length;
       });
       // Update
@@ -13905,10 +14165,14 @@ var BucketView = function (_ContrailChartsView) {
     }
   }, {
     key: '_onClickNode',
-    value: function _onClickNode(d, el) {
+    value: function _onClickNode(d, el, e) {
+      e.stopPropagation();
       this._onMouseout(d, el);
-      var range = d3Array.extent(_lodash2.default.map(d.bucket, 'data.x'));
-      _Actionman2.default.fire('Zoom', this.config.updateComponents, { accessor: this.config.xAccessor, range: range });
+      var ranges = {};
+      (0, _lodash2.default)(d.bucket).map('accessor.accessor').uniq().push(this.config.xAccessor).each(function (accessor) {
+        ranges[accessor] = d3Array.extent(_lodash2.default.map(d.bucket, 'data.' + accessor));
+      });
+      _Actionman2.default.fire('Zoom', this.config.updateComponents, ranges);
     }
   }, {
     key: 'tagName',
@@ -13925,15 +14189,18 @@ var BucketView = function (_ContrailChartsView) {
     get: function get() {
       return _lodash2.default.extend(_get(BucketView.prototype.__proto__ || Object.getPrototypeOf(BucketView.prototype), 'selectors', this), {
         node: '.bucket',
-        active: '.active'
+        active: '.active',
+        label: '.bucket-label'
       });
     }
   }, {
     key: 'events',
     get: function get() {
-      var _$extend;
-
-      return _lodash2.default.extend(_get(BucketView.prototype.__proto__ || Object.getPrototypeOf(BucketView.prototype), 'events', this), (_$extend = {}, _defineProperty(_$extend, 'mouseover ' + this.selectors.node, '_onMouseover'), _defineProperty(_$extend, 'mouseout ' + this.selectors.node, '_onMouseout'), _$extend));
+      return _lodash2.default.extend(_get(BucketView.prototype.__proto__ || Object.getPrototypeOf(BucketView.prototype), 'events', this), {
+        'click node': '_onClickNode',
+        'mouseover node': '_onMouseover',
+        'mouseout node': '_onMouseout'
+      });
     }
   }]);
 
@@ -13943,7 +14210,7 @@ var BucketView = function (_ContrailChartsView) {
 exports.default = BucketView;
 
 /***/ }),
-/* 155 */
+/* 156 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13959,7 +14226,7 @@ var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _d3Quadtree = __webpack_require__(163);
+var _d3Quadtree = __webpack_require__(164);
 
 var _d3Array = __webpack_require__(0);
 
@@ -14035,6 +14302,7 @@ var Cluster = function () {
       return this._overlapping;
     }
     /** Aggregates points into bucket points
+     * Minimize amount of bucketized nodes
      * @return {Array} bucket points
      */
 
@@ -14044,16 +14312,22 @@ var Cluster = function () {
       if (this._buckets) return this._buckets;else this._buckets = [];
       if (_lodash2.default.isEmpty(this.overlapping())) return [];
 
+      // Maximize the number of points in the bucket
+      // this will make some points overlapping with multiple other nodes alone
+      // as they will not be included to bigger buckets starting with the root node with which there is no overlap
       var toBuckets = _lodash2.default.sortBy(this.overlapping(), function (d) {
         return d.overlap.length;
       });
       do {
         var root = toBuckets.pop();
+
+        // add to current bucket points which are not added to other buckets
         var bucket = _lodash2.default.filter(root.overlap, function (d) {
           var index = toBuckets.indexOf(d);
           if (index < 0) return;
           return toBuckets.splice(index, 1)[0];
         });
+        if (!bucket.length) continue;
         this._buckets.push({
           // TODO position bucket point at the center of aggregated points
           x: root.x,
@@ -14101,7 +14375,7 @@ var Cluster = function () {
 exports.default = Cluster;
 
 /***/ }),
-/* 156 */
+/* 157 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14111,7 +14385,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _backbone = __webpack_require__(27);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _lodash = __webpack_require__(1);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _backbone = __webpack_require__(28);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
@@ -14135,13 +14415,20 @@ var ContrailModel = function (_Backbone$Model) {
     return _possibleConstructorReturn(this, (ContrailModel.__proto__ || Object.getPrototypeOf(ContrailModel)).apply(this, arguments));
   }
 
+  _createClass(ContrailModel, [{
+    key: 'get',
+    value: function get(attr) {
+      return _lodash2.default.get(this.attributes, attr);
+    }
+  }]);
+
   return ContrailModel;
 }(_backbone2.default.Model);
 
 exports.default = ContrailModel;
 
 /***/ }),
-/* 157 */
+/* 158 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14159,11 +14446,11 @@ var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _backbone = __webpack_require__(27);
+var _backbone = __webpack_require__(28);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
-var _jquery = __webpack_require__(47);
+var _jquery = __webpack_require__(50);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -14218,11 +14505,21 @@ var ContrailView = function (_Backbone$View) {
 
 
   _createClass(ContrailView, [{
-    key: 'isTagNameSvg',
+    key: 'selectorClass',
 
+    /**
+     * Convenience method to get class name of selector
+     * Just remove leading dot
+     */
+    value: function selectorClass(selectorName) {
+      return this.selectors[selectorName].substr(1);
+    }
 
     // TODO move this function to Utils?
     // instanceof SVGElement works for existing element
+
+  }, {
+    key: 'isTagNameSvg',
     value: function isTagNameSvg(tagName) {
       return _lodash2.default.includes(['g'], tagName);
     }
@@ -14249,10 +14546,11 @@ var ContrailView = function (_Backbone$View) {
 
   }, {
     key: 'delegate',
-    value: function delegate(eventName, selector, listener, listenerName) {
+    value: function delegate(eventName, selectorName, listener, listenerName) {
       // code minification drops original listener name
       // const listenerName = listener.name.split(' ')[1]
-      this.d3.delegate(eventName + '.' + listenerName + '.delegateEvents' + this.cid, selector, listener);
+      var uniqEventName = eventName + '.' + selectorName + '.' + listenerName + '.delegateEvents' + this.cid;
+      this.d3.delegate(uniqEventName, this.selectors[selectorName], listener);
       return this;
     }
     // d3 doesn't support two levels of event namespace
@@ -14266,9 +14564,9 @@ var ContrailView = function (_Backbone$View) {
     }
   }, {
     key: 'undelegate',
-    value: function undelegate(eventName, selector, listener) {
+    value: function undelegate(eventName, selectorName, listener) {
       var listenerName = listener.name.split(' ')[1];
-      this.d3.on(eventName + '.' + listenerName + '.delegateEvents' + this.cid, null);
+      this.d3.on(eventName + '.' + selectorName + '.' + listenerName + '.delegateEvents' + this.cid, null);
       return this;
     }
     /**
@@ -14320,7 +14618,7 @@ var ContrailView = function (_Backbone$View) {
 exports.default = ContrailView;
 
 /***/ }),
-/* 158 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14343,7 +14641,7 @@ var _d3Array = __webpack_require__(0);
 
 var d3Array = _interopRequireWildcard(_d3Array);
 
-var _contrailEvents = __webpack_require__(17);
+var _contrailEvents = __webpack_require__(18);
 
 var _contrailEvents2 = _interopRequireDefault(_contrailEvents);
 
@@ -14374,24 +14672,24 @@ var DataFrameProvider = function () {
     }
     /**
      * Calculate and cache range of a serie
-     * @param {String} key - serie accessor
+     * @param {String} accessor - serie accessor
      * @param {Boolean} isFull if true get range of the whole data, not just selection
      * @return {Array} [min, max] extent of values of the serie
      */
 
   }, {
     key: 'getRangeFor',
-    value: function getRangeFor(key, isFull) {
+    value: function getRangeFor(accessor, isFull) {
       if (isFull) return d3Array.extent(this._data, function (d) {
-        return d[key];
+        return _lodash2.default.get(d, accessor);
       });
 
-      if (!_lodash2.default.has(this._ranges, key)) {
-        this._ranges[key] = d3Array.extent(this._data, function (d) {
-          return d[key];
+      if (!_lodash2.default.has(this._ranges, accessor)) {
+        this._ranges[accessor] = d3Array.extent(this._data, function (d) {
+          return _lodash2.default.get(d, accessor);
         });
       }
-      return _lodash2.default.clone(this._ranges[key]);
+      return _lodash2.default.clone(this._ranges[accessor]);
     }
     /**
      * @return {Array} [min, max] values of provided series values combined
@@ -14416,10 +14714,10 @@ var DataFrameProvider = function () {
     value: function getNearest(accessor, value) {
       var data = this._data;
       var xBisector = d3Array.bisector(function (d) {
-        return d[accessor];
+        return _lodash2.default.get(d, accessor);
       }).left;
       var index = xBisector(data, value, 1, data.length - 1);
-      return value - data[index - 1][accessor] > data[index][accessor] - value ? data[index] : data[index - 1];
+      return value - _lodash2.default.get(data[index - 1], accessor) > _lodash2.default.get(data[index], accessor) - value ? data[index] : data[index - 1];
     }
     /**
      * Filter out dataframes which have no provided key or its value is not within provided range
@@ -14486,7 +14784,7 @@ exports.default = DataFrameProvider;
 _lodash2.default.extend(DataFrameProvider.prototype, _contrailEvents2.default);
 
 /***/ }),
-/* 159 */
+/* 160 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14505,7 +14803,7 @@ var _lodash = __webpack_require__(1);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _contrailEvents = __webpack_require__(17);
+var _contrailEvents = __webpack_require__(18);
 
 var _contrailEvents2 = _interopRequireDefault(_contrailEvents);
 
@@ -14563,27 +14861,27 @@ exports.default = SerieProvider;
 _lodash2.default.extend(SerieProvider.prototype, _contrailEvents2.default);
 
 /***/ }),
-/* 160 */
+/* 161 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_nest__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_nest__ = __webpack_require__(55);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_nest___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__src_nest__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "nest", function() { return __WEBPACK_IMPORTED_MODULE_0__src_nest___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_set__ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_set__ = __webpack_require__(56);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_set___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__src_set__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "set", function() { return __WEBPACK_IMPORTED_MODULE_1__src_set___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_map__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_map__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__src_map__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "map", function() { return __WEBPACK_IMPORTED_MODULE_2__src_map___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_keys__ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_keys__ = __webpack_require__(54);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_keys___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__src_keys__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "keys", function() { return __WEBPACK_IMPORTED_MODULE_3__src_keys___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_values__ = __webpack_require__(54);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_values__ = __webpack_require__(57);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_values___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__src_values__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "values", function() { return __WEBPACK_IMPORTED_MODULE_4__src_values___default.a; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_entries__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_entries__ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_entries___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__src_entries__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "entries", function() { return __WEBPACK_IMPORTED_MODULE_5__src_entries___default.a; });
 
@@ -14595,23 +14893,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 161 */
+/* 162 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_dispatch__ = __webpack_require__(57);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_dispatch__ = __webpack_require__(60);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_dispatch___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__src_dispatch__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "dispatch", function() { return __WEBPACK_IMPORTED_MODULE_0__src_dispatch___default.a; });
 
 
 
 /***/ }),
-/* 162 */
+/* 163 */
 /***/ (function(module, exports, __webpack_require__) {
 
 (function (global, factory) {
-   true ? factory(exports, __webpack_require__(13)) :
+   true ? factory(exports, __webpack_require__(14)) :
   typeof define === 'function' && define.amd ? define(['exports', 'd3-interpolate'], factory) :
   (factory((global.d3 = global.d3 || {}),global.d3));
 }(this, (function (exports,d3Interpolate) { 'use strict';
@@ -14897,34 +15195,28 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })));
 
 /***/ }),
-/* 163 */
+/* 164 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_quadtree__ = __webpack_require__(73);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_quadtree__ = __webpack_require__(76);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_quadtree___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__src_quadtree__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "quadtree", function() { return __WEBPACK_IMPORTED_MODULE_0__src_quadtree___default.a; });
 
 
 
 /***/ }),
-/* 164 */
+/* 165 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_sankey__ = __webpack_require__(81);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_sankey__ = __webpack_require__(84);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_sankey___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__src_sankey__);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "sankey", function() { return __WEBPACK_IMPORTED_MODULE_0__src_sankey___default.a; });
 
 
-
-/***/ }),
-/* 165 */
-/***/ (function(module, exports) {
-
-// removed by extract-text-webpack-plugin
 
 /***/ }),
 /* 166 */
@@ -15030,9 +15322,27 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 /***/ }),
 /* 183 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 184 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 185 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Handlebars = __webpack_require__(7);
+var Handlebars = __webpack_require__(8);
 function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 module.exports = (Handlebars["default"] || Handlebars).template({"1":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
@@ -15058,10 +15368,10 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
 },"useData":true});
 
 /***/ }),
-/* 184 */
+/* 187 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Handlebars = __webpack_require__(7);
+var Handlebars = __webpack_require__(8);
 function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 module.exports = (Handlebars["default"] || Handlebars).template({"1":function(container,depth0,helpers,partials,data) {
     return "<div class=\"opener\"></div>\n";
@@ -15077,20 +15387,20 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
 },"useData":true});
 
 /***/ }),
-/* 185 */
+/* 188 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Handlebars = __webpack_require__(7);
+var Handlebars = __webpack_require__(8);
 function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     return "<div class=\"control-panel-items\"></div> \n<div class=\"panel hide\"></div>\n";
 },"useData":true});
 
 /***/ }),
-/* 186 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Handlebars = __webpack_require__(7);
+var Handlebars = __webpack_require__(8);
 function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
@@ -15103,10 +15413,10 @@ module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[7,"
 },"useData":true});
 
 /***/ }),
-/* 187 */
+/* 190 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Handlebars = __webpack_require__(7);
+var Handlebars = __webpack_require__(8);
 function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 module.exports = (Handlebars["default"] || Handlebars).template({"1":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
@@ -15133,10 +15443,10 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
 },"useData":true});
 
 /***/ }),
-/* 188 */
+/* 191 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Handlebars = __webpack_require__(7);
+var Handlebars = __webpack_require__(8);
 function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 module.exports = (Handlebars["default"] || Handlebars).template({"1":function(container,depth0,helpers,partials,data) {
     return "<div class=\"edit-legend\"><i class=\"fa fa-pencil-square fs\" aria-hidden=\"true\"></i></div>";
@@ -15197,7 +15507,7 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
 },"12":function(container,depth0,helpers,partials,data) {
     var alias1=container.lambda, alias2=container.escapeExpression;
 
-  return "      <div class=\"swatch swatch--color\" style=\"background-color: "
+  return "      <div class=\"switch switch--color\" style=\"background-color: "
     + alias2(alias1(depth0, depth0))
     + "; border-color: "
     + alias2(alias1(depth0, depth0))
@@ -15207,7 +15517,7 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
 },"14":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
 
-  return "      <div class=\"swatch swatch--chart fa "
+  return "      <div class=\"switch switch--chart fa "
     + alias4(((helper = (helper = helpers.chartIcon || (depth0 != null ? depth0.chartIcon : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"chartIcon","hash":{},"data":data}) : helper)))
     + "\" data-chart-type=\""
     + alias4(((helper = (helper = helpers.chartType || (depth0 != null ? depth0.chartType : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"chartType","hash":{},"data":data}) : helper)))
@@ -15221,40 +15531,18 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.editable : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + "\n  <div class=\"attributes\">\n"
     + ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.attributes : depth0),{"name":"each","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "  </div>\n\n  <div class=\"selector\">\n    <div class=\"swatches swatches--colors\">\n"
+    + "  </div>\n\n  <div class=\"selector\">\n    <div class=\"switches switches--colors\">\n"
     + ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.colors : depth0),{"name":"each","hash":{},"fn":container.program(12, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "    </div>\n\n    <div class=\"swatches swatches--charts\">\n"
+    + "    </div>\n\n    <div class=\"switches switches--charts\">\n"
     + ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.possibleChartTypes : depth0),{"name":"each","hash":{},"fn":container.program(14, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + "    </div>\n  </div>\n</div>\n";
 },"useData":true});
 
 /***/ }),
-/* 189 */
+/* 192 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Handlebars = __webpack_require__(7);
-function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-module.exports = (Handlebars["default"] || Handlebars).template({"1":function(container,depth0,helpers,partials,data) {
-    var helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
-
-  return "  <div class=\"legend-group\">\n    <span class=\"color-indicator\" style=\"background-color: "
-    + alias4(((helper = (helper = helpers.color || (depth0 != null ? depth0.color : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"color","hash":{},"data":data}) : helper)))
-    + "\">&nbsp;</span>\n    <span class=\"label\">"
-    + alias4(((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"label","hash":{},"data":data}) : helper)))
-    + "</span>\n  </div>\n";
-},"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    var stack1;
-
-  return "<div>\n"
-    + ((stack1 = helpers.each.call(depth0 != null ? depth0 : {},depth0,{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "</div>\n";
-},"useData":true});
-
-/***/ }),
-/* 190 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var Handlebars = __webpack_require__(7);
+var Handlebars = __webpack_require__(8);
 function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 module.exports = (Handlebars["default"] || Handlebars).template({"1":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
@@ -15271,10 +15559,10 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
 },"useData":true});
 
 /***/ }),
-/* 191 */
+/* 193 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Handlebars = __webpack_require__(7);
+var Handlebars = __webpack_require__(8);
 function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 module.exports = (Handlebars["default"] || Handlebars).template({"1":function(container,depth0,helpers,partials,data,blockParams,depths) {
     var stack1, helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression, alias5=container.lambda;
@@ -15307,10 +15595,10 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
 },"useData":true,"useDepths":true});
 
 /***/ }),
-/* 192 */
+/* 194 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Handlebars = __webpack_require__(7);
+var Handlebars = __webpack_require__(8);
 function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 module.exports = (Handlebars["default"] || Handlebars).template({"1":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
@@ -15341,7 +15629,7 @@ module.exports = (Handlebars["default"] || Handlebars).template({"1":function(co
 },"useData":true});
 
 /***/ }),
-/* 193 */
+/* 195 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15356,30 +15644,30 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
 
-var _handlebarsBase = __webpack_require__(46);
+var _handlebarsBase = __webpack_require__(49);
 
 var base = _interopRequireWildcard(_handlebarsBase);
 
 // Each of these augment the Handlebars object. No need to setup here.
 // (This is done to easily share code between commonjs and browse envs)
 
-var _handlebarsSafeString = __webpack_require__(207);
+var _handlebarsSafeString = __webpack_require__(209);
 
 var _handlebarsSafeString2 = _interopRequireDefault(_handlebarsSafeString);
 
-var _handlebarsException = __webpack_require__(14);
+var _handlebarsException = __webpack_require__(15);
 
 var _handlebarsException2 = _interopRequireDefault(_handlebarsException);
 
-var _handlebarsUtils = __webpack_require__(8);
+var _handlebarsUtils = __webpack_require__(7);
 
 var Utils = _interopRequireWildcard(_handlebarsUtils);
 
-var _handlebarsRuntime = __webpack_require__(206);
+var _handlebarsRuntime = __webpack_require__(208);
 
 var runtime = _interopRequireWildcard(_handlebarsRuntime);
 
-var _handlebarsNoConflict = __webpack_require__(205);
+var _handlebarsNoConflict = __webpack_require__(207);
 
 var _handlebarsNoConflict2 = _interopRequireDefault(_handlebarsNoConflict);
 
@@ -15414,7 +15702,7 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 194 */
+/* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15426,7 +15714,7 @@ exports.registerDefaultDecorators = registerDefaultDecorators;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var _decoratorsInline = __webpack_require__(195);
+var _decoratorsInline = __webpack_require__(197);
 
 var _decoratorsInline2 = _interopRequireDefault(_decoratorsInline);
 
@@ -15437,7 +15725,7 @@ function registerDefaultDecorators(instance) {
 
 
 /***/ }),
-/* 195 */
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15445,7 +15733,7 @@ function registerDefaultDecorators(instance) {
 
 exports.__esModule = true;
 
-var _utils = __webpack_require__(8);
+var _utils = __webpack_require__(7);
 
 exports['default'] = function (instance) {
   instance.registerDecorator('inline', function (fn, props, container, options) {
@@ -15473,7 +15761,7 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 196 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15485,31 +15773,31 @@ exports.registerDefaultHelpers = registerDefaultHelpers;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var _helpersBlockHelperMissing = __webpack_require__(197);
+var _helpersBlockHelperMissing = __webpack_require__(199);
 
 var _helpersBlockHelperMissing2 = _interopRequireDefault(_helpersBlockHelperMissing);
 
-var _helpersEach = __webpack_require__(198);
+var _helpersEach = __webpack_require__(200);
 
 var _helpersEach2 = _interopRequireDefault(_helpersEach);
 
-var _helpersHelperMissing = __webpack_require__(199);
+var _helpersHelperMissing = __webpack_require__(201);
 
 var _helpersHelperMissing2 = _interopRequireDefault(_helpersHelperMissing);
 
-var _helpersIf = __webpack_require__(200);
+var _helpersIf = __webpack_require__(202);
 
 var _helpersIf2 = _interopRequireDefault(_helpersIf);
 
-var _helpersLog = __webpack_require__(201);
+var _helpersLog = __webpack_require__(203);
 
 var _helpersLog2 = _interopRequireDefault(_helpersLog);
 
-var _helpersLookup = __webpack_require__(202);
+var _helpersLookup = __webpack_require__(204);
 
 var _helpersLookup2 = _interopRequireDefault(_helpersLookup);
 
-var _helpersWith = __webpack_require__(203);
+var _helpersWith = __webpack_require__(205);
 
 var _helpersWith2 = _interopRequireDefault(_helpersWith);
 
@@ -15526,7 +15814,7 @@ function registerDefaultHelpers(instance) {
 
 
 /***/ }),
-/* 197 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15534,7 +15822,7 @@ function registerDefaultHelpers(instance) {
 
 exports.__esModule = true;
 
-var _utils = __webpack_require__(8);
+var _utils = __webpack_require__(7);
 
 exports['default'] = function (instance) {
   instance.registerHelper('blockHelperMissing', function (context, options) {
@@ -15572,7 +15860,7 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 198 */
+/* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15583,9 +15871,9 @@ exports.__esModule = true;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var _utils = __webpack_require__(8);
+var _utils = __webpack_require__(7);
 
-var _exception = __webpack_require__(14);
+var _exception = __webpack_require__(15);
 
 var _exception2 = _interopRequireDefault(_exception);
 
@@ -15673,7 +15961,7 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 199 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15684,7 +15972,7 @@ exports.__esModule = true;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var _exception = __webpack_require__(14);
+var _exception = __webpack_require__(15);
 
 var _exception2 = _interopRequireDefault(_exception);
 
@@ -15705,7 +15993,7 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 200 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15713,7 +16001,7 @@ module.exports = exports['default'];
 
 exports.__esModule = true;
 
-var _utils = __webpack_require__(8);
+var _utils = __webpack_require__(7);
 
 exports['default'] = function (instance) {
   instance.registerHelper('if', function (conditional, options) {
@@ -15741,7 +16029,7 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 201 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15774,7 +16062,7 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 202 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15793,7 +16081,7 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 203 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15801,7 +16089,7 @@ module.exports = exports['default'];
 
 exports.__esModule = true;
 
-var _utils = __webpack_require__(8);
+var _utils = __webpack_require__(7);
 
 exports['default'] = function (instance) {
   instance.registerHelper('with', function (context, options) {
@@ -15833,7 +16121,7 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 204 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15841,7 +16129,7 @@ module.exports = exports['default'];
 
 exports.__esModule = true;
 
-var _utils = __webpack_require__(8);
+var _utils = __webpack_require__(7);
 
 var logger = {
   methodMap: ['debug', 'info', 'warn', 'error'],
@@ -15887,7 +16175,7 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 205 */
+/* 207 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15912,10 +16200,10 @@ exports['default'] = function (Handlebars) {
 module.exports = exports['default'];
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2xpYi9oYW5kbGViYXJzL25vLWNvbmZsaWN0LmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7O3FCQUNlLFVBQVMsVUFBVSxFQUFFOztBQUVsQyxNQUFJLElBQUksR0FBRyxPQUFPLE1BQU0sS0FBSyxXQUFXLEdBQUcsTUFBTSxHQUFHLE1BQU07TUFDdEQsV0FBVyxHQUFHLElBQUksQ0FBQyxVQUFVLENBQUM7O0FBRWxDLFlBQVUsQ0FBQyxVQUFVLEdBQUcsWUFBVztBQUNqQyxRQUFJLElBQUksQ0FBQyxVQUFVLEtBQUssVUFBVSxFQUFFO0FBQ2xDLFVBQUksQ0FBQyxVQUFVLEdBQUcsV0FBVyxDQUFDO0tBQy9CO0FBQ0QsV0FBTyxVQUFVLENBQUM7R0FDbkIsQ0FBQztDQUNIIiwiZmlsZSI6Im5vLWNvbmZsaWN0LmpzIiwic291cmNlc0NvbnRlbnQiOlsiLyogZ2xvYmFsIHdpbmRvdyAqL1xuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24oSGFuZGxlYmFycykge1xuICAvKiBpc3RhbmJ1bCBpZ25vcmUgbmV4dCAqL1xuICBsZXQgcm9vdCA9IHR5cGVvZiBnbG9iYWwgIT09ICd1bmRlZmluZWQnID8gZ2xvYmFsIDogd2luZG93LFxuICAgICAgJEhhbmRsZWJhcnMgPSByb290LkhhbmRsZWJhcnM7XG4gIC8qIGlzdGFuYnVsIGlnbm9yZSBuZXh0ICovXG4gIEhhbmRsZWJhcnMubm9Db25mbGljdCA9IGZ1bmN0aW9uKCkge1xuICAgIGlmIChyb290LkhhbmRsZWJhcnMgPT09IEhhbmRsZWJhcnMpIHtcbiAgICAgIHJvb3QuSGFuZGxlYmFycyA9ICRIYW5kbGViYXJzO1xuICAgIH1cbiAgICByZXR1cm4gSGFuZGxlYmFycztcbiAgfTtcbn1cbiJdfQ==
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(208)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(211)))
 
 /***/ }),
-/* 206 */
+/* 208 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15936,15 +16224,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
 
-var _utils = __webpack_require__(8);
+var _utils = __webpack_require__(7);
 
 var Utils = _interopRequireWildcard(_utils);
 
-var _exception = __webpack_require__(14);
+var _exception = __webpack_require__(15);
 
 var _exception2 = _interopRequireDefault(_exception);
 
-var _base = __webpack_require__(46);
+var _base = __webpack_require__(49);
 
 function checkRevision(compilerInfo) {
   var compilerRevision = compilerInfo && compilerInfo[0] || 1,
@@ -16219,7 +16507,7 @@ function executeDecorators(fn, prog, container, depths, data, blockParams) {
 
 
 /***/ }),
-/* 207 */
+/* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16241,7 +16529,1923 @@ module.exports = exports['default'];
 
 
 /***/ }),
-/* 208 */
+/* 210 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// https://github.com/topojson/topojson Version 2.2.0. Copyright 2016 Mike Bostock.
+(function (global, factory) {
+   true ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (factory((global.topojson = global.topojson || {})));
+}(this, (function (exports) { 'use strict';
+
+// Computes the bounding box of the specified hash of GeoJSON objects.
+var bounds = function(objects) {
+  var x0 = Infinity,
+      y0 = Infinity,
+      x1 = -Infinity,
+      y1 = -Infinity;
+
+  function boundGeometry(geometry) {
+    if (geometry && boundGeometryType.hasOwnProperty(geometry.type)) boundGeometryType[geometry.type](geometry);
+  }
+
+  var boundGeometryType = {
+    GeometryCollection: function(o) { o.geometries.forEach(boundGeometry); },
+    Point: function(o) { boundPoint(o.coordinates); },
+    MultiPoint: function(o) { o.coordinates.forEach(boundPoint); },
+    LineString: function(o) { boundLine(o.coordinates); },
+    MultiLineString: function(o) { o.coordinates.forEach(boundLine); },
+    Polygon: function(o) { o.coordinates.forEach(boundLine); },
+    MultiPolygon: function(o) { o.coordinates.forEach(boundMultiLine); }
+  };
+
+  function boundPoint(coordinates) {
+    var x = coordinates[0],
+        y = coordinates[1];
+    if (x < x0) x0 = x;
+    if (x > x1) x1 = x;
+    if (y < y0) y0 = y;
+    if (y > y1) y1 = y;
+  }
+
+  function boundLine(coordinates) {
+    coordinates.forEach(boundPoint);
+  }
+
+  function boundMultiLine(coordinates) {
+    coordinates.forEach(boundLine);
+  }
+
+  for (var key in objects) {
+    boundGeometry(objects[key]);
+  }
+
+  return x1 >= x0 && y1 >= y0 ? [x0, y0, x1, y1] : undefined;
+};
+
+var hashset = function(size, hash, equal, type, empty) {
+  if (arguments.length === 3) {
+    type = Array;
+    empty = null;
+  }
+
+  var store = new type(size = 1 << Math.max(4, Math.ceil(Math.log(size) / Math.LN2))),
+      mask = size - 1;
+
+  for (var i = 0; i < size; ++i) {
+    store[i] = empty;
+  }
+
+  function add(value) {
+    var index = hash(value) & mask,
+        match = store[index],
+        collisions = 0;
+    while (match != empty) {
+      if (equal(match, value)) return true;
+      if (++collisions >= size) throw new Error("full hashset");
+      match = store[index = (index + 1) & mask];
+    }
+    store[index] = value;
+    return true;
+  }
+
+  function has(value) {
+    var index = hash(value) & mask,
+        match = store[index],
+        collisions = 0;
+    while (match != empty) {
+      if (equal(match, value)) return true;
+      if (++collisions >= size) break;
+      match = store[index = (index + 1) & mask];
+    }
+    return false;
+  }
+
+  function values() {
+    var values = [];
+    for (var i = 0, n = store.length; i < n; ++i) {
+      var match = store[i];
+      if (match != empty) values.push(match);
+    }
+    return values;
+  }
+
+  return {
+    add: add,
+    has: has,
+    values: values
+  };
+};
+
+var hashmap = function(size, hash, equal, keyType, keyEmpty, valueType) {
+  if (arguments.length === 3) {
+    keyType = valueType = Array;
+    keyEmpty = null;
+  }
+
+  var keystore = new keyType(size = 1 << Math.max(4, Math.ceil(Math.log(size) / Math.LN2))),
+      valstore = new valueType(size),
+      mask = size - 1;
+
+  for (var i = 0; i < size; ++i) {
+    keystore[i] = keyEmpty;
+  }
+
+  function set(key, value) {
+    var index = hash(key) & mask,
+        matchKey = keystore[index],
+        collisions = 0;
+    while (matchKey != keyEmpty) {
+      if (equal(matchKey, key)) return valstore[index] = value;
+      if (++collisions >= size) throw new Error("full hashmap");
+      matchKey = keystore[index = (index + 1) & mask];
+    }
+    keystore[index] = key;
+    valstore[index] = value;
+    return value;
+  }
+
+  function maybeSet(key, value) {
+    var index = hash(key) & mask,
+        matchKey = keystore[index],
+        collisions = 0;
+    while (matchKey != keyEmpty) {
+      if (equal(matchKey, key)) return valstore[index];
+      if (++collisions >= size) throw new Error("full hashmap");
+      matchKey = keystore[index = (index + 1) & mask];
+    }
+    keystore[index] = key;
+    valstore[index] = value;
+    return value;
+  }
+
+  function get(key, missingValue) {
+    var index = hash(key) & mask,
+        matchKey = keystore[index],
+        collisions = 0;
+    while (matchKey != keyEmpty) {
+      if (equal(matchKey, key)) return valstore[index];
+      if (++collisions >= size) break;
+      matchKey = keystore[index = (index + 1) & mask];
+    }
+    return missingValue;
+  }
+
+  function keys() {
+    var keys = [];
+    for (var i = 0, n = keystore.length; i < n; ++i) {
+      var matchKey = keystore[i];
+      if (matchKey != keyEmpty) keys.push(matchKey);
+    }
+    return keys;
+  }
+
+  return {
+    set: set,
+    maybeSet: maybeSet, // set if unset
+    get: get,
+    keys: keys
+  };
+};
+
+var equalPoint = function(pointA, pointB) {
+  return pointA[0] === pointB[0] && pointA[1] === pointB[1];
+};
+
+// TODO if quantized, use simpler Int32 hashing?
+
+var buffer = new ArrayBuffer(16);
+var floats = new Float64Array(buffer);
+var uints = new Uint32Array(buffer);
+
+var hashPoint = function(point) {
+  floats[0] = point[0];
+  floats[1] = point[1];
+  var hash = uints[0] ^ uints[1];
+  hash = hash << 5 ^ hash >> 7 ^ uints[2] ^ uints[3];
+  return hash & 0x7fffffff;
+};
+
+// Given an extracted (pre-)topology, identifies all of the junctions. These are
+// the points at which arcs (lines or rings) will need to be cut so that each
+// arc is represented uniquely.
+//
+// A junction is a point where at least one arc deviates from another arc going
+// through the same point. For example, consider the point B. If there is a arc
+// through ABC and another arc through CBA, then B is not a junction because in
+// both cases the adjacent point pairs are {A,C}. However, if there is an
+// additional arc ABD, then {A,D} != {A,C}, and thus B becomes a junction.
+//
+// For a closed ring ABCA, the first point A’s adjacent points are the second
+// and last point {B,C}. For a line, the first and last point are always
+// considered junctions, even if the line is closed; this ensures that a closed
+// line is never rotated.
+var join = function(topology) {
+  var coordinates = topology.coordinates,
+      lines = topology.lines,
+      rings = topology.rings,
+      indexes = index(),
+      visitedByIndex = new Int32Array(coordinates.length),
+      leftByIndex = new Int32Array(coordinates.length),
+      rightByIndex = new Int32Array(coordinates.length),
+      junctionByIndex = new Int8Array(coordinates.length),
+      junctionCount = 0, // upper bound on number of junctions
+      i, n,
+      previousIndex,
+      currentIndex,
+      nextIndex;
+
+  for (i = 0, n = coordinates.length; i < n; ++i) {
+    visitedByIndex[i] = leftByIndex[i] = rightByIndex[i] = -1;
+  }
+
+  for (i = 0, n = lines.length; i < n; ++i) {
+    var line = lines[i],
+        lineStart = line[0],
+        lineEnd = line[1];
+    currentIndex = indexes[lineStart];
+    nextIndex = indexes[++lineStart];
+    ++junctionCount, junctionByIndex[currentIndex] = 1; // start
+    while (++lineStart <= lineEnd) {
+      sequence(i, previousIndex = currentIndex, currentIndex = nextIndex, nextIndex = indexes[lineStart]);
+    }
+    ++junctionCount, junctionByIndex[nextIndex] = 1; // end
+  }
+
+  for (i = 0, n = coordinates.length; i < n; ++i) {
+    visitedByIndex[i] = -1;
+  }
+
+  for (i = 0, n = rings.length; i < n; ++i) {
+    var ring = rings[i],
+        ringStart = ring[0] + 1,
+        ringEnd = ring[1];
+    previousIndex = indexes[ringEnd - 1];
+    currentIndex = indexes[ringStart - 1];
+    nextIndex = indexes[ringStart];
+    sequence(i, previousIndex, currentIndex, nextIndex);
+    while (++ringStart <= ringEnd) {
+      sequence(i, previousIndex = currentIndex, currentIndex = nextIndex, nextIndex = indexes[ringStart]);
+    }
+  }
+
+  function sequence(i, previousIndex, currentIndex, nextIndex) {
+    if (visitedByIndex[currentIndex] === i) return; // ignore self-intersection
+    visitedByIndex[currentIndex] = i;
+    var leftIndex = leftByIndex[currentIndex];
+    if (leftIndex >= 0) {
+      var rightIndex = rightByIndex[currentIndex];
+      if ((leftIndex !== previousIndex || rightIndex !== nextIndex)
+        && (leftIndex !== nextIndex || rightIndex !== previousIndex)) {
+        ++junctionCount, junctionByIndex[currentIndex] = 1;
+      }
+    } else {
+      leftByIndex[currentIndex] = previousIndex;
+      rightByIndex[currentIndex] = nextIndex;
+    }
+  }
+
+  function index() {
+    var indexByPoint = hashmap(coordinates.length * 1.4, hashIndex, equalIndex, Int32Array, -1, Int32Array),
+        indexes = new Int32Array(coordinates.length);
+
+    for (var i = 0, n = coordinates.length; i < n; ++i) {
+      indexes[i] = indexByPoint.maybeSet(i, i);
+    }
+
+    return indexes;
+  }
+
+  function hashIndex(i) {
+    return hashPoint(coordinates[i]);
+  }
+
+  function equalIndex(i, j) {
+    return equalPoint(coordinates[i], coordinates[j]);
+  }
+
+  visitedByIndex = leftByIndex = rightByIndex = null;
+
+  var junctionByPoint = hashset(junctionCount * 1.4, hashPoint, equalPoint), j;
+
+  // Convert back to a standard hashset by point for caller convenience.
+  for (i = 0, n = coordinates.length; i < n; ++i) {
+    if (junctionByIndex[j = indexes[i]]) {
+      junctionByPoint.add(coordinates[j]);
+    }
+  }
+
+  return junctionByPoint;
+};
+
+// Given an extracted (pre-)topology, cuts (or rotates) arcs so that all shared
+// point sequences are identified. The topology can then be subsequently deduped
+// to remove exact duplicate arcs.
+var cut = function(topology) {
+  var junctions = join(topology),
+      coordinates = topology.coordinates,
+      lines = topology.lines,
+      rings = topology.rings,
+      next,
+      i, n;
+
+  for (i = 0, n = lines.length; i < n; ++i) {
+    var line = lines[i],
+        lineMid = line[0],
+        lineEnd = line[1];
+    while (++lineMid < lineEnd) {
+      if (junctions.has(coordinates[lineMid])) {
+        next = {0: lineMid, 1: line[1]};
+        line[1] = lineMid;
+        line = line.next = next;
+      }
+    }
+  }
+
+  for (i = 0, n = rings.length; i < n; ++i) {
+    var ring = rings[i],
+        ringStart = ring[0],
+        ringMid = ringStart,
+        ringEnd = ring[1],
+        ringFixed = junctions.has(coordinates[ringStart]);
+    while (++ringMid < ringEnd) {
+      if (junctions.has(coordinates[ringMid])) {
+        if (ringFixed) {
+          next = {0: ringMid, 1: ring[1]};
+          ring[1] = ringMid;
+          ring = ring.next = next;
+        } else { // For the first junction, we can rotate rather than cut.
+          rotateArray(coordinates, ringStart, ringEnd, ringEnd - ringMid);
+          coordinates[ringEnd] = coordinates[ringStart];
+          ringFixed = true;
+          ringMid = ringStart; // restart; we may have skipped junctions
+        }
+      }
+    }
+  }
+
+  return topology;
+};
+
+function rotateArray(array, start, end, offset) {
+  reverse(array, start, end);
+  reverse(array, start, start + offset);
+  reverse(array, start + offset, end);
+}
+
+function reverse(array, start, end) {
+  for (var mid = start + ((end-- - start) >> 1), t; start < mid; ++start, --end) {
+    t = array[start], array[start] = array[end], array[end] = t;
+  }
+}
+
+// Given a cut topology, combines duplicate arcs.
+var dedup = function(topology) {
+  var coordinates = topology.coordinates,
+      lines = topology.lines, line,
+      rings = topology.rings, ring,
+      arcCount = lines.length + rings.length,
+      i, n;
+
+  delete topology.lines;
+  delete topology.rings;
+
+  // Count the number of (non-unique) arcs to initialize the hashmap safely.
+  for (i = 0, n = lines.length; i < n; ++i) {
+    line = lines[i]; while (line = line.next) ++arcCount;
+  }
+  for (i = 0, n = rings.length; i < n; ++i) {
+    ring = rings[i]; while (ring = ring.next) ++arcCount;
+  }
+
+  var arcsByEnd = hashmap(arcCount * 2 * 1.4, hashPoint, equalPoint),
+      arcs = topology.arcs = [];
+
+  for (i = 0, n = lines.length; i < n; ++i) {
+    line = lines[i];
+    do {
+      dedupLine(line);
+    } while (line = line.next);
+  }
+
+  for (i = 0, n = rings.length; i < n; ++i) {
+    ring = rings[i];
+    if (ring.next) { // arc is no longer closed
+      do {
+        dedupLine(ring);
+      } while (ring = ring.next);
+    } else {
+      dedupRing(ring);
+    }
+  }
+
+  function dedupLine(arc) {
+    var startPoint,
+        endPoint,
+        startArcs, startArc,
+        endArcs, endArc,
+        i, n;
+
+    // Does this arc match an existing arc in order?
+    if (startArcs = arcsByEnd.get(startPoint = coordinates[arc[0]])) {
+      for (i = 0, n = startArcs.length; i < n; ++i) {
+        startArc = startArcs[i];
+        if (equalLine(startArc, arc)) {
+          arc[0] = startArc[0];
+          arc[1] = startArc[1];
+          return;
+        }
+      }
+    }
+
+    // Does this arc match an existing arc in reverse order?
+    if (endArcs = arcsByEnd.get(endPoint = coordinates[arc[1]])) {
+      for (i = 0, n = endArcs.length; i < n; ++i) {
+        endArc = endArcs[i];
+        if (reverseEqualLine(endArc, arc)) {
+          arc[1] = endArc[0];
+          arc[0] = endArc[1];
+          return;
+        }
+      }
+    }
+
+    if (startArcs) startArcs.push(arc); else arcsByEnd.set(startPoint, [arc]);
+    if (endArcs) endArcs.push(arc); else arcsByEnd.set(endPoint, [arc]);
+    arcs.push(arc);
+  }
+
+  function dedupRing(arc) {
+    var endPoint,
+        endArcs,
+        endArc,
+        i, n;
+
+    // Does this arc match an existing line in order, or reverse order?
+    // Rings are closed, so their start point and end point is the same.
+    if (endArcs = arcsByEnd.get(endPoint = coordinates[arc[0]])) {
+      for (i = 0, n = endArcs.length; i < n; ++i) {
+        endArc = endArcs[i];
+        if (equalRing(endArc, arc)) {
+          arc[0] = endArc[0];
+          arc[1] = endArc[1];
+          return;
+        }
+        if (reverseEqualRing(endArc, arc)) {
+          arc[0] = endArc[1];
+          arc[1] = endArc[0];
+          return;
+        }
+      }
+    }
+
+    // Otherwise, does this arc match an existing ring in order, or reverse order?
+    if (endArcs = arcsByEnd.get(endPoint = coordinates[arc[0] + findMinimumOffset(arc)])) {
+      for (i = 0, n = endArcs.length; i < n; ++i) {
+        endArc = endArcs[i];
+        if (equalRing(endArc, arc)) {
+          arc[0] = endArc[0];
+          arc[1] = endArc[1];
+          return;
+        }
+        if (reverseEqualRing(endArc, arc)) {
+          arc[0] = endArc[1];
+          arc[1] = endArc[0];
+          return;
+        }
+      }
+    }
+
+    if (endArcs) endArcs.push(arc); else arcsByEnd.set(endPoint, [arc]);
+    arcs.push(arc);
+  }
+
+  function equalLine(arcA, arcB) {
+    var ia = arcA[0], ib = arcB[0],
+        ja = arcA[1], jb = arcB[1];
+    if (ia - ja !== ib - jb) return false;
+    for (; ia <= ja; ++ia, ++ib) if (!equalPoint(coordinates[ia], coordinates[ib])) return false;
+    return true;
+  }
+
+  function reverseEqualLine(arcA, arcB) {
+    var ia = arcA[0], ib = arcB[0],
+        ja = arcA[1], jb = arcB[1];
+    if (ia - ja !== ib - jb) return false;
+    for (; ia <= ja; ++ia, --jb) if (!equalPoint(coordinates[ia], coordinates[jb])) return false;
+    return true;
+  }
+
+  function equalRing(arcA, arcB) {
+    var ia = arcA[0], ib = arcB[0],
+        ja = arcA[1], jb = arcB[1],
+        n = ja - ia;
+    if (n !== jb - ib) return false;
+    var ka = findMinimumOffset(arcA),
+        kb = findMinimumOffset(arcB);
+    for (var i = 0; i < n; ++i) {
+      if (!equalPoint(coordinates[ia + (i + ka) % n], coordinates[ib + (i + kb) % n])) return false;
+    }
+    return true;
+  }
+
+  function reverseEqualRing(arcA, arcB) {
+    var ia = arcA[0], ib = arcB[0],
+        ja = arcA[1], jb = arcB[1],
+        n = ja - ia;
+    if (n !== jb - ib) return false;
+    var ka = findMinimumOffset(arcA),
+        kb = n - findMinimumOffset(arcB);
+    for (var i = 0; i < n; ++i) {
+      if (!equalPoint(coordinates[ia + (i + ka) % n], coordinates[jb - (i + kb) % n])) return false;
+    }
+    return true;
+  }
+
+  // Rings are rotated to a consistent, but arbitrary, start point.
+  // This is necessary to detect when a ring and a rotated copy are dupes.
+  function findMinimumOffset(arc) {
+    var start = arc[0],
+        end = arc[1],
+        mid = start,
+        minimum = mid,
+        minimumPoint = coordinates[mid];
+    while (++mid < end) {
+      var point = coordinates[mid];
+      if (point[0] < minimumPoint[0] || point[0] === minimumPoint[0] && point[1] < minimumPoint[1]) {
+        minimum = mid;
+        minimumPoint = point;
+      }
+    }
+    return minimum - start;
+  }
+
+  return topology;
+};
+
+// Given a TopoJSON topology in absolute (quantized) coordinates,
+// converts to fixed-point delta encoding.
+// This is a destructive operation that modifies the given topology!
+var delta = function(topology) {
+  var arcs = topology.arcs,
+      i = -1,
+      n = arcs.length;
+
+  while (++i < n) {
+    var arc = arcs[i],
+        j = 0,
+        m = arc.length,
+        point = arc[0],
+        x0 = point[0],
+        y0 = point[1],
+        x1,
+        y1;
+    while (++j < m) {
+      point = arc[j];
+      x1 = point[0];
+      y1 = point[1];
+      arc[j] = [x1 - x0, y1 - y0];
+      x0 = x1;
+      y0 = y1;
+    }
+  }
+
+  return topology;
+};
+
+// Extracts the lines and rings from the specified hash of geometry objects.
+//
+// Returns an object with three properties:
+//
+// * coordinates - shared buffer of [x, y] coordinates
+// * lines - lines extracted from the hash, of the form [start, end]
+// * rings - rings extracted from the hash, of the form [start, end]
+//
+// For each ring or line, start and end represent inclusive indexes into the
+// coordinates buffer. For rings (and closed lines), coordinates[start] equals
+// coordinates[end].
+//
+// For each line or polygon geometry in the input hash, including nested
+// geometries as in geometry collections, the `coordinates` array is replaced
+// with an equivalent `arcs` array that, for each line (for line string
+// geometries) or ring (for polygon geometries), points to one of the above
+// lines or rings.
+var extract = function(objects) {
+  var index = -1,
+      lines = [],
+      rings = [],
+      coordinates = [];
+
+  function extractGeometry(geometry) {
+    if (geometry && extractGeometryType.hasOwnProperty(geometry.type)) extractGeometryType[geometry.type](geometry);
+  }
+
+  var extractGeometryType = {
+    GeometryCollection: function(o) { o.geometries.forEach(extractGeometry); },
+    LineString: function(o) { o.arcs = extractLine(o.coordinates); delete o.coordinates; },
+    MultiLineString: function(o) { o.arcs = o.coordinates.map(extractLine); delete o.coordinates; },
+    Polygon: function(o) { o.arcs = o.coordinates.map(extractRing); delete o.coordinates; },
+    MultiPolygon: function(o) { o.arcs = o.coordinates.map(extractMultiRing); delete o.coordinates; }
+  };
+
+  function extractLine(line) {
+    for (var i = 0, n = line.length; i < n; ++i) coordinates[++index] = line[i];
+    var arc = {0: index - n + 1, 1: index};
+    lines.push(arc);
+    return arc;
+  }
+
+  function extractRing(ring) {
+    for (var i = 0, n = ring.length; i < n; ++i) coordinates[++index] = ring[i];
+    var arc = {0: index - n + 1, 1: index};
+    rings.push(arc);
+    return arc;
+  }
+
+  function extractMultiRing(rings) {
+    return rings.map(extractRing);
+  }
+
+  for (var key in objects) {
+    extractGeometry(objects[key]);
+  }
+
+  return {
+    type: "Topology",
+    coordinates: coordinates,
+    lines: lines,
+    rings: rings,
+    objects: objects
+  };
+};
+
+// Given a hash of GeoJSON objects, replaces Features with geometry objects.
+// This is a destructive operation that modifies the input objects!
+var geometry = function(objects) {
+  var key;
+  for (key in objects) objects[key] = geomifyObject(objects[key]);
+  return objects;
+};
+
+function geomifyObject(object) {
+  return (object && geomifyObjectType.hasOwnProperty(object.type)
+      ? geomifyObjectType[object.type]
+      : geomifyGeometry)(object);
+}
+
+function geomifyFeature(feature) {
+  var geometry = feature.geometry;
+  if (geometry == null) {
+    feature.type = null;
+  } else {
+    geomifyGeometry(geometry);
+    feature.type = geometry.type;
+    if (geometry.geometries) feature.geometries = geometry.geometries;
+    else if (geometry.coordinates) feature.coordinates = geometry.coordinates;
+    if (geometry.bbox) feature.bbox = geometry.bbox;
+  }
+  delete feature.geometry;
+  return feature;
+}
+
+function geomifyGeometry(geometry) {
+  if (!geometry) return {type: null};
+  if (geomifyGeometryType.hasOwnProperty(geometry.type)) geomifyGeometryType[geometry.type](geometry);
+  return geometry;
+}
+
+var geomifyObjectType = {
+  Feature: geomifyFeature,
+  FeatureCollection: function(collection) {
+    collection.type = "GeometryCollection";
+    collection.geometries = collection.features;
+    collection.features.forEach(geomifyFeature);
+    delete collection.features;
+    return collection;
+  }
+};
+
+var geomifyGeometryType = {
+  GeometryCollection: function(o) {
+    var geometries = o.geometries, i = -1, n = geometries.length;
+    while (++i < n) geometries[i] = geomifyGeometry(geometries[i]);
+  },
+  MultiPoint: function(o) {
+    if (!o.coordinates.length) {
+      o.type = null;
+      delete o.coordinates;
+    } else if (o.coordinates.length < 2) {
+      o.type = "Point";
+      o.coordinates = o.coordinates[0];
+    }
+  },
+  LineString: function(o) {
+    if (!o.coordinates.length) {
+      o.type = null;
+      delete o.coordinates;
+    }
+  },
+  MultiLineString: function(o) {
+    for (var lines = o.coordinates, i = 0, N = 0, n = lines.length; i < n; ++i) {
+      var line = lines[i];
+      if (line.length) lines[N++] = line;
+    }
+    if (!N) {
+      o.type = null;
+      delete o.coordinates;
+    } else if (N < 2) {
+      o.type = "LineString";
+      o.coordinates = lines[0];
+    } else {
+      o.coordinates.length = N;
+    }
+  },
+  Polygon: function(o) {
+    for (var rings = o.coordinates, i = 0, N = 0, n = rings.length; i < n; ++i) {
+      var ring = rings[i];
+      if (ring.length) rings[N++] = ring;
+    }
+    if (!N) {
+      o.type = null;
+      delete o.coordinates;
+    } else {
+      o.coordinates.length = N;
+    }
+  },
+  MultiPolygon: function(o) {
+    for (var polygons = o.coordinates, j = 0, M = 0, m = polygons.length; j < m; ++j) {
+      for (var rings = polygons[j], i = 0, N = 0, n = rings.length; i < n; ++i) {
+        var ring = rings[i];
+        if (ring.length) rings[N++] = ring;
+      }
+      if (N) {
+        rings.length = N;
+        polygons[M++] = rings;
+      }
+    }
+    if (!M) {
+      o.type = null;
+      delete o.coordinates;
+    } else if (M < 2) {
+      o.type = "Polygon";
+      o.coordinates = polygons[0];
+    } else {
+      polygons.length = M;
+    }
+  }
+};
+
+var prequantize = function(objects, bbox, n) {
+  var x0 = bbox[0],
+      y0 = bbox[1],
+      x1 = bbox[2],
+      y1 = bbox[3],
+      kx = x1 - x0 ? (n - 1) / (x1 - x0) : 1,
+      ky = y1 - y0 ? (n - 1) / (y1 - y0) : 1;
+
+  function quantizePoint(coordinates) {
+    coordinates[0] = Math.round((coordinates[0] - x0) * kx);
+    coordinates[1] = Math.round((coordinates[1] - y0) * ky);
+    return coordinates;
+  }
+
+  function quantizeLine(coordinates) {
+    var i = 0,
+        j = 1,
+        n = coordinates.length,
+        pi = quantizePoint(coordinates[0]),
+        pj,
+        px = pi[0],
+        py = pi[1],
+        x,
+        y;
+
+    while (++i < n) {
+      pi = quantizePoint(coordinates[i]);
+      x = pi[0];
+      y = pi[1];
+      if (x !== px || y !== py) { // skip coincident points
+        pj = coordinates[j++];
+        pj[0] = px = x;
+        pj[1] = py = y;
+      }
+    }
+
+    coordinates.length = j;
+  }
+
+  function quantizeGeometry(o) {
+    if (o && quantizeGeometryType.hasOwnProperty(o.type)) quantizeGeometryType[o.type](o);
+  }
+
+  var quantizeGeometryType = {
+    GeometryCollection: function(o) {
+      o.geometries.forEach(quantizeGeometry);
+    },
+    Point: function(o) {
+      quantizePoint(o.coordinates);
+    },
+    MultiPoint: function(o) {
+      o.coordinates.forEach(quantizePoint);
+    },
+    LineString: function(o) {
+      var line = o.coordinates;
+      quantizeLine(line);
+      if (line.length < 2) line[1] = line[0]; // must have 2+
+    },
+    MultiLineString: function(o) {
+      for (var lines = o.coordinates, i = 0, n = lines.length; i < n; ++i) {
+        var line = lines[i];
+        quantizeLine(line);
+        if (line.length < 2) line[1] = line[0]; // must have 2+
+      }
+    },
+    Polygon: function(o) {
+      for (var rings = o.coordinates, i = 0, n = rings.length; i < n; ++i) {
+        var ring = rings[i];
+        quantizeLine(ring);
+        while (ring.length < 4) ring.push(ring[0]); // must have 4+
+      }
+    },
+    MultiPolygon: function(o) {
+      for (var polygons = o.coordinates, i = 0, n = polygons.length; i < n; ++i) {
+        for (var rings = polygons[i], j = 0, m = rings.length; j < m; ++j) {
+          var ring = rings[j];
+          quantizeLine(ring);
+          while (ring.length < 4) ring.push(ring[0]); // must have 4+
+        }
+      }
+    }
+  };
+
+  for (var key in objects) {
+    quantizeGeometry(objects[key]);
+  }
+
+  return {
+    scale: [1 / kx, 1 / ky],
+    translate: [x0, y0]
+  };
+};
+
+// Constructs the TopoJSON Topology for the specified hash of features.
+// Each object in the specified hash must be a GeoJSON object,
+// meaning FeatureCollection, a Feature or a geometry object.
+var topology = function(objects, quantization) {
+  var bbox = bounds(geometry(objects)),
+      transform = quantization > 0 && bbox && prequantize(objects, bbox, quantization),
+      topology = dedup(cut(extract(objects))),
+      coordinates = topology.coordinates,
+      indexByArc = hashmap(topology.arcs.length * 1.4, hashArc, equalArc);
+
+  objects = topology.objects; // for garbage collection
+  topology.bbox = bbox;
+  topology.arcs = topology.arcs.map(function(arc, i) {
+    indexByArc.set(arc, i);
+    return coordinates.slice(arc[0], arc[1] + 1);
+  });
+
+  delete topology.coordinates;
+  coordinates = null;
+
+  function indexGeometry(geometry$$1) {
+    if (geometry$$1 && indexGeometryType.hasOwnProperty(geometry$$1.type)) indexGeometryType[geometry$$1.type](geometry$$1);
+  }
+
+  var indexGeometryType = {
+    GeometryCollection: function(o) { o.geometries.forEach(indexGeometry); },
+    LineString: function(o) { o.arcs = indexArcs(o.arcs); },
+    MultiLineString: function(o) { o.arcs = o.arcs.map(indexArcs); },
+    Polygon: function(o) { o.arcs = o.arcs.map(indexArcs); },
+    MultiPolygon: function(o) { o.arcs = o.arcs.map(indexMultiArcs); }
+  };
+
+  function indexArcs(arc) {
+    var indexes = [];
+    do {
+      var index = indexByArc.get(arc);
+      indexes.push(arc[0] < arc[1] ? index : ~index);
+    } while (arc = arc.next);
+    return indexes;
+  }
+
+  function indexMultiArcs(arcs) {
+    return arcs.map(indexArcs);
+  }
+
+  for (var key in objects) {
+    indexGeometry(objects[key]);
+  }
+
+  if (transform) {
+    topology.transform = transform;
+    delta(topology);
+  }
+
+  return topology;
+};
+
+function hashArc(arc) {
+  var i = arc[0], j = arc[1], t;
+  if (j < i) t = i, i = j, j = t;
+  return i + 31 * j;
+}
+
+function equalArc(arcA, arcB) {
+  var ia = arcA[0], ja = arcA[1],
+      ib = arcB[0], jb = arcB[1], t;
+  if (ja < ia) t = ia, ia = ja, ja = t;
+  if (jb < ib) t = ib, ib = jb, jb = t;
+  return ia === ib && ja === jb;
+}
+
+var prune = function(topology) {
+  var oldArcs = topology.arcs,
+      newArcs = topology.arcs = [],
+      newArcIndex = -1,
+      newIndexByOldIndex = new Array(oldArcs.length),
+      name;
+
+  function pruneGeometry(o) {
+    switch (o.type) {
+      case "GeometryCollection": o.geometries.forEach(pruneGeometry); break;
+      case "LineString": pruneArcs(o.arcs); break;
+      case "MultiLineString": o.arcs.forEach(pruneArcs); break;
+      case "Polygon": o.arcs.forEach(pruneArcs); break;
+      case "MultiPolygon": o.arcs.forEach(pruneMultiArcs); break;
+    }
+  }
+
+  function pruneArcs(arcs) {
+    for (var i = 0, n = arcs.length; i < n; ++i) {
+      var oldIndex = arcs[i],
+          oldReverse = oldIndex < 0 && (oldIndex = ~oldIndex, true),
+          newIndex;
+
+      // If this is the first instance of this arc,
+      // record it under its new index.
+      if ((newIndex = newIndexByOldIndex[oldIndex]) == null) {
+        newIndexByOldIndex[oldIndex] = newIndex = ++newArcIndex;
+        newArcs[newIndex] = oldArcs[oldIndex];
+      }
+
+      arcs[i] = oldReverse ? ~newIndex : newIndex;
+    }
+  }
+
+  function pruneMultiArcs(arcs) {
+    arcs.forEach(pruneArcs);
+  }
+
+  for (name in topology.objects) {
+    pruneGeometry(topology.objects[name]);
+  }
+
+  return topology;
+};
+
+var filter = function(topology, filter) {
+  var name;
+
+  if (filter == null) filter = filterTrue;
+
+  function filterGeometry(o) {
+    switch (o.type) {
+      case "Polygon": {
+        o.arcs = filterRings(o.arcs);
+        if (!o.arcs) o.type = null, delete o.arcs;
+        break;
+      }
+      case "MultiPolygon": {
+        o.arcs = o.arcs.map(filterRings).filter(filterIdentity);
+        if (!o.arcs.length) o.type = null, delete o.arcs;
+        break;
+      }
+      case "GeometryCollection": {
+        o.geometries.forEach(filterGeometry);
+        o.geometries = o.geometries.filter(filterNotNull);
+        if (!o.geometries.length) o.type = null, delete o.geometries;
+        break;
+      }
+    }
+  }
+
+  function filterRings(arcs) {
+    return arcs.length && filterExteriorRing(arcs[0]) // if the exterior is small, ignore any holes
+        ? [arcs.shift()].concat(arcs.filter(filterInteriorRing))
+        : null;
+  }
+
+  function filterExteriorRing(ring) {
+    return filter(ring, false);
+  }
+
+  function filterInteriorRing(ring) {
+    return filter(ring, true);
+  }
+
+  for (name in topology.objects) {
+    filterGeometry(topology.objects[name]);
+  }
+
+  return prune(topology);
+};
+
+function filterTrue() {
+  return true;
+}
+
+function filterIdentity(x) {
+  return x;
+}
+
+function filterNotNull(geometry) {
+  return geometry.type != null;
+}
+
+var filterAttached = function(topology) {
+  var uniqueRingByArc = {}, // arc index -> index of unique associated ring, or -1 if used by multiple rings
+      ringIndex = 0,
+      name;
+
+  function testGeometry(o) {
+    switch (o.type) {
+      case "GeometryCollection": o.geometries.forEach(testGeometry); break;
+      case "Polygon": testArcs(o.arcs); break;
+      case "MultiPolygon": o.arcs.forEach(testArcs); break;
+    }
+  }
+
+  function testArcs(arcs) {
+    for (var i = 0, n = arcs.length; i < n; ++i, ++ringIndex) {
+      for (var ring = arcs[i], j = 0, m = ring.length; j < m; ++j) {
+        var arc = ring[j];
+        if (arc < 0) arc = ~arc;
+        var uniqueRing = uniqueRingByArc[arc];
+        if (uniqueRing >= 0 && uniqueRing !== ringIndex) uniqueRingByArc[arc] = -1;
+        else uniqueRingByArc[arc] = ringIndex;
+      }
+    }
+  }
+
+  for (name in topology.objects) {
+    testGeometry(topology.objects[name]);
+  }
+
+  return function(ring) {
+    for (var j = 0, m = ring.length, arc; j < m; ++j) {
+      if (arc = ring[j], uniqueRingByArc[arc < 0 ? ~arc : arc] < 0) {
+        return true;
+      }
+    }
+    return false;
+  };
+};
+
+var identity = function(x) {
+  return x;
+};
+
+var transform = function(topology) {
+  if ((transform = topology.transform) == null) return identity;
+  var transform,
+      x0,
+      y0,
+      kx = transform.scale[0],
+      ky = transform.scale[1],
+      dx = transform.translate[0],
+      dy = transform.translate[1];
+  return function(point, i) {
+    if (!i) x0 = y0 = 0;
+    point[0] = (x0 += point[0]) * kx + dx;
+    point[1] = (y0 += point[1]) * ky + dy;
+    return point;
+  };
+};
+
+var bbox = function(topology) {
+  var bbox = topology.bbox;
+
+  function bboxPoint(p0) {
+    p1[0] = p0[0], p1[1] = p0[1], t(p1);
+    if (p1[0] < x0) x0 = p1[0];
+    if (p1[0] > x1) x1 = p1[0];
+    if (p1[1] < y0) y0 = p1[1];
+    if (p1[1] > y1) y1 = p1[1];
+  }
+
+  function bboxGeometry(o) {
+    switch (o.type) {
+      case "GeometryCollection": o.geometries.forEach(bboxGeometry); break;
+      case "Point": bboxPoint(o.coordinates); break;
+      case "MultiPoint": o.coordinates.forEach(bboxPoint); break;
+    }
+  }
+
+  if (!bbox) {
+    var t = transform(topology), p0, p1 = new Array(2), name,
+        x0 = Infinity, y0 = x0, x1 = -x0, y1 = -x0;
+
+    topology.arcs.forEach(function(arc) {
+      var i = -1, n = arc.length;
+      while (++i < n) {
+        p0 = arc[i], p1[0] = p0[0], p1[1] = p0[1], t(p1, i);
+        if (p1[0] < x0) x0 = p1[0];
+        if (p1[0] > x1) x1 = p1[0];
+        if (p1[1] < y0) y0 = p1[1];
+        if (p1[1] > y1) y1 = p1[1];
+      }
+    });
+
+    for (name in topology.objects) {
+      bboxGeometry(topology.objects[name]);
+    }
+
+    bbox = topology.bbox = [x0, y0, x1, y1];
+  }
+
+  return bbox;
+};
+
+var reverse$1 = function(array, n) {
+  var t, j = array.length, i = j - n;
+  while (i < --j) t = array[i], array[i++] = array[j], array[j] = t;
+};
+
+var feature = function(topology, o) {
+  return o.type === "GeometryCollection"
+      ? {type: "FeatureCollection", features: o.geometries.map(function(o) { return feature$1(topology, o); })}
+      : feature$1(topology, o);
+};
+
+function feature$1(topology, o) {
+  var id = o.id,
+      bbox = o.bbox,
+      properties = o.properties == null ? {} : o.properties,
+      geometry = object(topology, o);
+  return id == null && bbox == null ? {type: "Feature", properties: properties, geometry: geometry}
+      : bbox == null ? {type: "Feature", id: id, properties: properties, geometry: geometry}
+      : {type: "Feature", id: id, bbox: bbox, properties: properties, geometry: geometry};
+}
+
+function object(topology, o) {
+  var transformPoint = transform(topology),
+      arcs = topology.arcs;
+
+  function arc(i, points) {
+    if (points.length) points.pop();
+    for (var a = arcs[i < 0 ? ~i : i], k = 0, n = a.length; k < n; ++k) {
+      points.push(transformPoint(a[k].slice(), k));
+    }
+    if (i < 0) reverse$1(points, n);
+  }
+
+  function point(p) {
+    return transformPoint(p.slice());
+  }
+
+  function line(arcs) {
+    var points = [];
+    for (var i = 0, n = arcs.length; i < n; ++i) arc(arcs[i], points);
+    if (points.length < 2) points.push(points[0].slice());
+    return points;
+  }
+
+  function ring(arcs) {
+    var points = line(arcs);
+    while (points.length < 4) points.push(points[0].slice());
+    return points;
+  }
+
+  function polygon(arcs) {
+    return arcs.map(ring);
+  }
+
+  function geometry(o) {
+    var type = o.type, coordinates;
+    switch (type) {
+      case "GeometryCollection": return {type: type, geometries: o.geometries.map(geometry)};
+      case "Point": coordinates = point(o.coordinates); break;
+      case "MultiPoint": coordinates = o.coordinates.map(point); break;
+      case "LineString": coordinates = line(o.arcs); break;
+      case "MultiLineString": coordinates = o.arcs.map(line); break;
+      case "Polygon": coordinates = polygon(o.arcs); break;
+      case "MultiPolygon": coordinates = o.arcs.map(polygon); break;
+      default: return null;
+    }
+    return {type: type, coordinates: coordinates};
+  }
+
+  return geometry(o);
+}
+
+var stitch = function(topology, arcs) {
+  var stitchedArcs = {},
+      fragmentByStart = {},
+      fragmentByEnd = {},
+      fragments = [],
+      emptyIndex = -1;
+
+  // Stitch empty arcs first, since they may be subsumed by other arcs.
+  arcs.forEach(function(i, j) {
+    var arc = topology.arcs[i < 0 ? ~i : i], t;
+    if (arc.length < 3 && !arc[1][0] && !arc[1][1]) {
+      t = arcs[++emptyIndex], arcs[emptyIndex] = i, arcs[j] = t;
+    }
+  });
+
+  arcs.forEach(function(i) {
+    var e = ends(i),
+        start = e[0],
+        end = e[1],
+        f, g;
+
+    if (f = fragmentByEnd[start]) {
+      delete fragmentByEnd[f.end];
+      f.push(i);
+      f.end = end;
+      if (g = fragmentByStart[end]) {
+        delete fragmentByStart[g.start];
+        var fg = g === f ? f : f.concat(g);
+        fragmentByStart[fg.start = f.start] = fragmentByEnd[fg.end = g.end] = fg;
+      } else {
+        fragmentByStart[f.start] = fragmentByEnd[f.end] = f;
+      }
+    } else if (f = fragmentByStart[end]) {
+      delete fragmentByStart[f.start];
+      f.unshift(i);
+      f.start = start;
+      if (g = fragmentByEnd[start]) {
+        delete fragmentByEnd[g.end];
+        var gf = g === f ? f : g.concat(f);
+        fragmentByStart[gf.start = g.start] = fragmentByEnd[gf.end = f.end] = gf;
+      } else {
+        fragmentByStart[f.start] = fragmentByEnd[f.end] = f;
+      }
+    } else {
+      f = [i];
+      fragmentByStart[f.start = start] = fragmentByEnd[f.end = end] = f;
+    }
+  });
+
+  function ends(i) {
+    var arc = topology.arcs[i < 0 ? ~i : i], p0 = arc[0], p1;
+    if (topology.transform) p1 = [0, 0], arc.forEach(function(dp) { p1[0] += dp[0], p1[1] += dp[1]; });
+    else p1 = arc[arc.length - 1];
+    return i < 0 ? [p1, p0] : [p0, p1];
+  }
+
+  function flush(fragmentByEnd, fragmentByStart) {
+    for (var k in fragmentByEnd) {
+      var f = fragmentByEnd[k];
+      delete fragmentByStart[f.start];
+      delete f.start;
+      delete f.end;
+      f.forEach(function(i) { stitchedArcs[i < 0 ? ~i : i] = 1; });
+      fragments.push(f);
+    }
+  }
+
+  flush(fragmentByEnd, fragmentByStart);
+  flush(fragmentByStart, fragmentByEnd);
+  arcs.forEach(function(i) { if (!stitchedArcs[i < 0 ? ~i : i]) fragments.push([i]); });
+
+  return fragments;
+};
+
+var mesh = function(topology) {
+  return object(topology, meshArcs.apply(this, arguments));
+};
+
+function meshArcs(topology, object$$1, filter) {
+  var arcs, i, n;
+  if (arguments.length > 1) arcs = extractArcs(topology, object$$1, filter);
+  else for (i = 0, arcs = new Array(n = topology.arcs.length); i < n; ++i) arcs[i] = i;
+  return {type: "MultiLineString", arcs: stitch(topology, arcs)};
+}
+
+function extractArcs(topology, object$$1, filter) {
+  var arcs = [],
+      geomsByArc = [],
+      geom;
+
+  function extract0(i) {
+    var j = i < 0 ? ~i : i;
+    (geomsByArc[j] || (geomsByArc[j] = [])).push({i: i, g: geom});
+  }
+
+  function extract1(arcs) {
+    arcs.forEach(extract0);
+  }
+
+  function extract2(arcs) {
+    arcs.forEach(extract1);
+  }
+
+  function extract3(arcs) {
+    arcs.forEach(extract2);
+  }
+
+  function geometry(o) {
+    switch (geom = o, o.type) {
+      case "GeometryCollection": o.geometries.forEach(geometry); break;
+      case "LineString": extract1(o.arcs); break;
+      case "MultiLineString": case "Polygon": extract2(o.arcs); break;
+      case "MultiPolygon": extract3(o.arcs); break;
+    }
+  }
+
+  geometry(object$$1);
+
+  geomsByArc.forEach(filter == null
+      ? function(geoms) { arcs.push(geoms[0].i); }
+      : function(geoms) { if (filter(geoms[0].g, geoms[geoms.length - 1].g)) arcs.push(geoms[0].i); });
+
+  return arcs;
+}
+
+function planarRingArea(ring) {
+  var i = -1, n = ring.length, a, b = ring[n - 1], area = 0;
+  while (++i < n) a = b, b = ring[i], area += a[0] * b[1] - a[1] * b[0];
+  return Math.abs(area); // Note: doubled area!
+}
+
+var merge = function(topology) {
+  return object(topology, mergeArcs.apply(this, arguments));
+};
+
+function mergeArcs(topology, objects) {
+  var polygonsByArc = {},
+      polygons = [],
+      groups = [];
+
+  objects.forEach(geometry);
+
+  function geometry(o) {
+    switch (o.type) {
+      case "GeometryCollection": o.geometries.forEach(geometry); break;
+      case "Polygon": extract(o.arcs); break;
+      case "MultiPolygon": o.arcs.forEach(extract); break;
+    }
+  }
+
+  function extract(polygon) {
+    polygon.forEach(function(ring) {
+      ring.forEach(function(arc) {
+        (polygonsByArc[arc = arc < 0 ? ~arc : arc] || (polygonsByArc[arc] = [])).push(polygon);
+      });
+    });
+    polygons.push(polygon);
+  }
+
+  function area(ring) {
+    return planarRingArea(object(topology, {type: "Polygon", arcs: [ring]}).coordinates[0]);
+  }
+
+  polygons.forEach(function(polygon) {
+    if (!polygon._) {
+      var group = [],
+          neighbors = [polygon];
+      polygon._ = 1;
+      groups.push(group);
+      while (polygon = neighbors.pop()) {
+        group.push(polygon);
+        polygon.forEach(function(ring) {
+          ring.forEach(function(arc) {
+            polygonsByArc[arc < 0 ? ~arc : arc].forEach(function(polygon) {
+              if (!polygon._) {
+                polygon._ = 1;
+                neighbors.push(polygon);
+              }
+            });
+          });
+        });
+      }
+    }
+  });
+
+  polygons.forEach(function(polygon) {
+    delete polygon._;
+  });
+
+  return {
+    type: "MultiPolygon",
+    arcs: groups.map(function(polygons) {
+      var arcs = [], n;
+
+      // Extract the exterior (unique) arcs.
+      polygons.forEach(function(polygon) {
+        polygon.forEach(function(ring) {
+          ring.forEach(function(arc) {
+            if (polygonsByArc[arc < 0 ? ~arc : arc].length < 2) {
+              arcs.push(arc);
+            }
+          });
+        });
+      });
+
+      // Stitch the arcs into one or more rings.
+      arcs = stitch(topology, arcs);
+
+      // If more than one ring is returned,
+      // at most one of these rings can be the exterior;
+      // choose the one with the greatest absolute area.
+      if ((n = arcs.length) > 1) {
+        for (var i = 1, k = area(arcs[0]), ki, t; i < n; ++i) {
+          if ((ki = area(arcs[i])) > k) {
+            t = arcs[0], arcs[0] = arcs[i], arcs[i] = t, k = ki;
+          }
+        }
+      }
+
+      return arcs;
+    })
+  };
+}
+
+var bisect = function(a, x) {
+  var lo = 0, hi = a.length;
+  while (lo < hi) {
+    var mid = lo + hi >>> 1;
+    if (a[mid] < x) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+};
+
+var neighbors = function(objects) {
+  var indexesByArc = {}, // arc index -> array of object indexes
+      neighbors = objects.map(function() { return []; });
+
+  function line(arcs, i) {
+    arcs.forEach(function(a) {
+      if (a < 0) a = ~a;
+      var o = indexesByArc[a];
+      if (o) o.push(i);
+      else indexesByArc[a] = [i];
+    });
+  }
+
+  function polygon(arcs, i) {
+    arcs.forEach(function(arc) { line(arc, i); });
+  }
+
+  function geometry(o, i) {
+    if (o.type === "GeometryCollection") o.geometries.forEach(function(o) { geometry(o, i); });
+    else if (o.type in geometryType) geometryType[o.type](o.arcs, i);
+  }
+
+  var geometryType = {
+    LineString: line,
+    MultiLineString: polygon,
+    Polygon: polygon,
+    MultiPolygon: function(arcs, i) { arcs.forEach(function(arc) { polygon(arc, i); }); }
+  };
+
+  objects.forEach(geometry);
+
+  for (var i in indexesByArc) {
+    for (var indexes = indexesByArc[i], m = indexes.length, j = 0; j < m; ++j) {
+      for (var k = j + 1; k < m; ++k) {
+        var ij = indexes[j], ik = indexes[k], n;
+        if ((n = neighbors[ij])[i = bisect(n, ik)] !== ik) n.splice(i, 0, ik);
+        if ((n = neighbors[ik])[i = bisect(n, ij)] !== ij) n.splice(i, 0, ij);
+      }
+    }
+  }
+
+  return neighbors;
+};
+
+var quantize = function(topology, n) {
+  if (!((n = Math.floor(n)) >= 2)) throw new Error("n must be \u22652");
+  if (topology.transform) throw new Error("already quantized");
+  var bb = bbox(topology), name,
+      dx = bb[0], kx = (bb[2] - dx) / (n - 1) || 1,
+      dy = bb[1], ky = (bb[3] - dy) / (n - 1) || 1;
+
+  function quantizePoint(p) {
+    p[0] = Math.round((p[0] - dx) / kx);
+    p[1] = Math.round((p[1] - dy) / ky);
+  }
+
+  function quantizeGeometry(o) {
+    switch (o.type) {
+      case "GeometryCollection": o.geometries.forEach(quantizeGeometry); break;
+      case "Point": quantizePoint(o.coordinates); break;
+      case "MultiPoint": o.coordinates.forEach(quantizePoint); break;
+    }
+  }
+
+  topology.arcs.forEach(function(arc) {
+    var i = 1,
+        j = 1,
+        n = arc.length,
+        pi = arc[0],
+        x0 = pi[0] = Math.round((pi[0] - dx) / kx),
+        y0 = pi[1] = Math.round((pi[1] - dy) / ky),
+        pj,
+        x1,
+        y1;
+
+    for (; i < n; ++i) {
+      pi = arc[i];
+      x1 = Math.round((pi[0] - dx) / kx);
+      y1 = Math.round((pi[1] - dy) / ky);
+      if (x1 !== x0 || y1 !== y0) {
+        pj = arc[j++];
+        pj[0] = x1 - x0, x0 = x1;
+        pj[1] = y1 - y0, y0 = y1;
+      }
+    }
+
+    if (j < 2) {
+      pj = arc[j++];
+      pj[0] = 0;
+      pj[1] = 0;
+    }
+
+    arc.length = j;
+  });
+
+  for (name in topology.objects) {
+    quantizeGeometry(topology.objects[name]);
+  }
+
+  topology.transform = {
+    scale: [kx, ky],
+    translate: [dx, dy]
+  };
+
+  return topology;
+};
+
+var untransform = function(topology) {
+  if ((transform = topology.transform) == null) return identity;
+  var transform,
+      x0,
+      y0,
+      kx = transform.scale[0],
+      ky = transform.scale[1],
+      dx = transform.translate[0],
+      dy = transform.translate[1];
+  return function(point, i) {
+    if (!i) x0 = y0 = 0;
+    var x1 = Math.round((point[0] - dx) / kx),
+        y1 = Math.round((point[1] - dy) / ky);
+    point[0] = x1 - x0, x0 = x1;
+    point[1] = y1 - y0, y0 = y1;
+    return point;
+  };
+};
+
+function planarTriangleArea(triangle) {
+  var a = triangle[0], b = triangle[1], c = triangle[2];
+  return Math.abs((a[0] - c[0]) * (b[1] - a[1]) - (a[0] - b[0]) * (c[1] - a[1]));
+}
+
+function planarRingArea$1(ring) {
+  var i = -1, n = ring.length, a, b = ring[n - 1], area = 0;
+  while (++i < n) a = b, b = ring[i], area += a[0] * b[1] - a[1] * b[0];
+  return Math.abs(area) / 2;
+}
+
+var filterWeight = function(topology, minWeight, weight) {
+  minWeight = minWeight == null ? Number.MIN_VALUE : +minWeight;
+
+  if (weight == null) weight = planarRingArea$1;
+
+  return function(ring, interior) {
+    return weight(feature(topology, {type: "Polygon", arcs: [ring]}).geometry.coordinates[0], interior) >= minWeight;
+  };
+};
+
+function compare(a, b) {
+  return a[1][2] - b[1][2];
+}
+
+var newHeap = function() {
+  var heap = {},
+      array = [],
+      size = 0;
+
+  heap.push = function(object) {
+    up(array[object._ = size] = object, size++);
+    return size;
+  };
+
+  heap.pop = function() {
+    if (size <= 0) return;
+    var removed = array[0], object;
+    if (--size > 0) object = array[size], down(array[object._ = 0] = object, 0);
+    return removed;
+  };
+
+  heap.remove = function(removed) {
+    var i = removed._, object;
+    if (array[i] !== removed) return; // invalid request
+    if (i !== --size) object = array[size], (compare(object, removed) < 0 ? up : down)(array[object._ = i] = object, i);
+    return i;
+  };
+
+  function up(object, i) {
+    while (i > 0) {
+      var j = ((i + 1) >> 1) - 1,
+          parent = array[j];
+      if (compare(object, parent) >= 0) break;
+      array[parent._ = i] = parent;
+      array[object._ = i = j] = object;
+    }
+  }
+
+  function down(object, i) {
+    while (true) {
+      var r = (i + 1) << 1,
+          l = r - 1,
+          j = i,
+          child = array[j];
+      if (l < size && compare(array[l], child) < 0) child = array[j = l];
+      if (r < size && compare(array[r], child) < 0) child = array[j = r];
+      if (j === i) break;
+      array[child._ = i] = child;
+      array[object._ = i = j] = object;
+    }
+  }
+
+  return heap;
+};
+
+var presimplify = function(topology, weight) {
+  var absolute = transform(topology),
+      relative = untransform(topology),
+      heap = newHeap();
+
+  if (weight == null) weight = planarTriangleArea;
+
+  topology.arcs.forEach(function(arc) {
+    var triangles = [],
+        maxWeight = 0,
+        triangle,
+        i,
+        n;
+
+    arc.forEach(absolute);
+
+    for (i = 1, n = arc.length - 1; i < n; ++i) {
+      triangle = arc.slice(i - 1, i + 2);
+      triangle[1][2] = weight(triangle);
+      triangles.push(triangle);
+      heap.push(triangle);
+    }
+
+    // Always keep the arc endpoints!
+    arc[0][2] = arc[n][2] = Infinity;
+
+    for (i = 0, n = triangles.length; i < n; ++i) {
+      triangle = triangles[i];
+      triangle.previous = triangles[i - 1];
+      triangle.next = triangles[i + 1];
+    }
+
+    while (triangle = heap.pop()) {
+      var previous = triangle.previous,
+          next = triangle.next;
+
+      // If the weight of the current point is less than that of the previous
+      // point to be eliminated, use the latter’s weight instead. This ensures
+      // that the current point cannot be eliminated without eliminating
+      // previously- eliminated points.
+      if (triangle[1][2] < maxWeight) triangle[1][2] = maxWeight;
+      else maxWeight = triangle[1][2];
+
+      if (previous) {
+        previous.next = next;
+        previous[2] = triangle[2];
+        update(previous);
+      }
+
+      if (next) {
+        next.previous = previous;
+        next[0] = triangle[0];
+        update(next);
+      }
+    }
+
+    arc.forEach(relative);
+  });
+
+  function update(triangle) {
+    heap.remove(triangle);
+    triangle[1][2] = weight(triangle);
+    heap.push(triangle);
+  }
+
+  return topology;
+};
+
+var quantile = function(topology, p) {
+  var array = [];
+
+  topology.arcs.forEach(function(arc) {
+    arc.forEach(function(point) {
+      if (isFinite(point[2])) { // Ignore endpoints, whose weight is Infinity.
+        array.push(point[2]);
+      }
+    });
+  });
+
+  return array.length && quantile$1(array.sort(descending), p);
+};
+
+function quantile$1(array, p) {
+  if (!(n = array.length)) return;
+  if ((p = +p) <= 0 || n < 2) return array[0];
+  if (p >= 1) return array[n - 1];
+  var n,
+      h = (n - 1) * p,
+      i = Math.floor(h),
+      a = array[i],
+      b = array[i + 1];
+  return a + (b - a) * (h - i);
+}
+
+function descending(a, b) {
+  return b - a;
+}
+
+var simplify = function(topology, minWeight) {
+  minWeight = minWeight == null ? Number.MIN_VALUE : +minWeight;
+
+  // Remove points whose weight is less than the minimum weight.
+  topology.arcs.forEach(topology.transform ? function(arc) {
+    var dx = 0,
+        dy = 0, // accumulate removed points
+        i = -1,
+        j = -1,
+        n = arc.length,
+        source,
+        target;
+
+    while (++i < n) {
+      source = arc[i];
+      if (source[2] >= minWeight) {
+        target = arc[++j];
+        target[0] = source[0] + dx;
+        target[1] = source[1] + dy;
+        dx = dy = 0;
+      } else {
+        dx += source[0];
+        dy += source[1];
+      }
+    }
+
+    arc.length = ++j;
+  } : function(arc) {
+    var i = -1,
+        j = -1,
+        n = arc.length,
+        point;
+
+    while (++i < n) {
+      point = arc[i];
+      if (point[2] >= minWeight) {
+        arc[++j] = point;
+      }
+    }
+
+    arc.length = ++j;
+  });
+
+  // Remove the computed weight for each point, and remove coincident points.
+  // This is done as a separate pass because some coordinates may be shared
+  // between arcs (such as the last point and first point of a cut line).
+  // If the entire arc is empty, retain at least two points (per spec).
+  topology.arcs.forEach(topology.transform ? function(arc) {
+    var i = 0,
+        j = 0,
+        n = arc.length,
+        p = arc[0];
+    p.length = 2;
+    while (++i < n) {
+      p = arc[i];
+      p.length = 2;
+      if (p[0] || p[1]) arc[++j] = p;
+    }
+    arc.length = (j || 1) + 1;
+  } : function(arc) {
+    var i = 0,
+        j = 0,
+        n = arc.length,
+        p = arc[0],
+        x0 = p[0],
+        y0 = p[1],
+        x1,
+        y1;
+    p.length = 2;
+    while (++i < n) {
+      p = arc[i], x1 = p[0], y1 = p[1];
+      p.length = 2;
+      if (x0 !== x1 || y0 !== y1) arc[++j] = p, x0 = x1, y0 = y1;
+    }
+    arc.length = (j || 1) + 1;
+  });
+
+  return topology;
+};
+
+var pi = Math.PI;
+var tau = 2 * pi;
+var fourPi = 4 * pi;
+var radians = pi / 180;
+var abs = Math.abs;
+var atan = Math.atan;
+var atan2 = Math.atan2;
+var cos = Math.cos;
+var max = Math.max;
+var sin = Math.sin;
+var sqrt = Math.sqrt;
+var tan = Math.tan;
+
+function sphericalRingArea(ring, interior) {
+  if (!ring.length) return 0;
+  var sum = 0,
+      point = ring[0],
+      lambda0, lambda1 = point[0] * radians, delta,
+      phi1 = (point[1] * radians + tau) / 2,
+      cosPhi0, cosPhi1 = cos(phi1),
+      sinPhi0, sinPhi1 = sin(phi1),
+      i, n, k;
+
+  for (i = 1, n = ring.length; i < n; ++i) {
+    point = ring[i];
+    lambda0 = lambda1, lambda1 = point[0] * radians, delta = lambda1 - lambda0;
+    phi1 = (point[1] * radians + tau) / 2;
+    cosPhi0 = cosPhi1, cosPhi1 = cos(phi1);
+    sinPhi0 = sinPhi1, sinPhi1 = sin(phi1);
+
+    // Spherical excess E for a spherical triangle with vertices: south pole,
+    // previous point, current point. Uses a formula derived from Cagnoli’s
+    // theorem. See Todhunter, Spherical Trig. (1871), Sec. 103, Eq. (2).
+    k = sinPhi0 * sinPhi1;
+    sum += atan2(k * sin(delta), cosPhi0 * cosPhi1 + k * cos(delta));
+  }
+
+  sum = 2 * (sum > pi ? sum - tau : sum < -pi ? sum + tau : sum);
+  if (interior) sum *= -1;
+  return sum < 0 ? sum + fourPi : sum;
+}
+
+function sphericalTriangleArea(t) {
+  var lambda0 = t[0][0] * radians, phi0 = t[0][1] * radians, cosPhi0 = cos(phi0), sinPhi0 = sin(phi0),
+      lambda1 = t[1][0] * radians, phi1 = t[1][1] * radians, cosPhi1 = cos(phi1), sinPhi1 = sin(phi1),
+      lambda2 = t[2][0] * radians, phi2 = t[2][1] * radians, cosPhi2 = cos(phi2), sinPhi2 = sin(phi2),
+      a = distance(lambda0, cosPhi0, sinPhi0, lambda1, cosPhi1, sinPhi1),
+      b = distance(lambda1, cosPhi1, sinPhi1, lambda2, cosPhi2, sinPhi2),
+      c = distance(lambda2, cosPhi2, sinPhi2, lambda0, cosPhi0, sinPhi0),
+      s = (a + b + c) / 2;
+  return 4 * atan(sqrt(max(0, tan(s / 2) * tan((s - a) / 2) * tan((s - b) / 2) * tan((s - c) / 2))));
+}
+
+function distance(lambda0, sinPhi0, cosPhi0, lambda1, sinPhi1, cosPhi1) {
+  var delta = abs(lambda1 - lambda0),
+      cosDelta = cos(delta),
+      sinDelta = sin(delta),
+      x = cosPhi1 * sinDelta,
+      y = cosPhi0 * sinPhi1 - sinPhi0 * cosPhi1 * cosDelta,
+      z = sinPhi0 * sinPhi1 + cosPhi0 * cosPhi1 * cosDelta;
+  return atan2(sqrt(x * x + y * y), z);
+}
+
+exports.topology = topology;
+exports.filter = filter;
+exports.filterAttached = filterAttached;
+exports.filterWeight = filterWeight;
+exports.planarRingArea = planarRingArea$1;
+exports.planarTriangleArea = planarTriangleArea;
+exports.presimplify = presimplify;
+exports.quantile = quantile;
+exports.simplify = simplify;
+exports.sphericalRingArea = sphericalRingArea;
+exports.sphericalTriangleArea = sphericalTriangleArea;
+exports.bbox = bbox;
+exports.feature = feature;
+exports.merge = merge;
+exports.mergeArcs = mergeArcs;
+exports.mesh = mesh;
+exports.meshArcs = meshArcs;
+exports.neighbors = neighbors;
+exports.quantize = quantize;
+exports.transform = transform;
+exports.untransform = untransform;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
+
+
+/***/ }),
+/* 211 */
 /***/ (function(module, exports) {
 
 var g;
@@ -16268,7 +18472,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 209 */
+/* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16277,37 +18481,41 @@ module.exports = g;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Util = exports.providers = exports.components = exports.ChartView = undefined;
+exports.Util = exports.actions = exports.providers = exports.components = exports.ChartView = undefined;
 
-var _index = __webpack_require__(30);
+var _index = __webpack_require__(32);
 
 var providers = _interopRequireWildcard(_index);
 
-var _index2 = __webpack_require__(28);
+var _index2 = __webpack_require__(30);
 
 var components = _interopRequireWildcard(_index2);
 
-var _Util = __webpack_require__(29);
+var _index3 = __webpack_require__(29);
+
+var actions = _interopRequireWildcard(_index3);
+
+var _Util = __webpack_require__(31);
 
 var Util = _interopRequireWildcard(_Util);
 
-var _ChartView = __webpack_require__(48);
+var _ChartView = __webpack_require__(51);
 
 var _ChartView2 = _interopRequireDefault(_ChartView);
 
-__webpack_require__(49);
+__webpack_require__(52);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-/*
- * Copyright (c) Juniper Networks, Inc. All rights reserved.
- */
 exports.ChartView = _ChartView2.default;
 exports.components = components;
 exports.providers = providers;
-exports.Util = Util;
+exports.actions = actions;
+exports.Util = Util; /*
+                      * Copyright (c) Juniper Networks, Inc. All rights reserved.
+                      */
 
 /***/ })
 /******/ ]);

@@ -1580,6 +1580,11 @@ color settings styles - end
 /*
 Stack area chart opacity
 */
+.custom-grid-stack-item {
+    .contrail-grid {
+        overflow: hidden;
+    } 
+}
 .custom-grid-stack-item .nvd3.nv-stackedarea path.nv-area {
     fill-opacity: 1 !important;
 }
@@ -2305,7 +2310,8 @@ $label_color: #3182bd;
         margin-top: 8px;
     }
     label {
-        display: block;
+        //display: block;
+        margin-right: 20px;
     }
 }
 
@@ -2332,10 +2338,37 @@ $label_color: #3182bd;
     transform: translate(400px, 300px);
 }
 
-.cc-svg .radial-dendrogram .arc-label {
-    text-anchor: start;
-    alignment-baseline: middle;
-    font-size: 10px;
-    fill: #000000;
-
+#traffic-groups-radial-chart #chartBox{
+    position:relative;
+}
+    
+//colors
+$black: #000000;
+$color_wedgewood_approx: #5282a7;
+$color_granny_smith_apple_approx: #91cd99;
+$color_malibu_approx: #80d4f9;
+$color_light_wisteria_approx: #d0abd6;
+.cc-svg .radial-dendrogram {
+    .arc-label {
+        text-anchor: start;
+        alignment-baseline: middle;
+        font-size: 13px;
+        fill: $black;
+    }
+    .arc {
+        stroke: none!important;
+        fill-opacity:1!important;
+        &:nth-child(4n+0) {
+            fill: $color_wedgewood_approx!important;
+        }
+        &:nth-child(4n+1) {
+            fill: $color_granny_smith_apple_approx!important;
+        }
+        &:nth-child(4n+2) {
+            fill: $color_malibu_approx!important;
+        }
+        &:nth-child(4n+3) {
+            fill: $color_light_wisteria_approx!important;
+        }
+    }
 }
