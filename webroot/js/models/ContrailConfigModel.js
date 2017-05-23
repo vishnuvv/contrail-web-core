@@ -15,7 +15,8 @@ define([
                 "owner_access": "",
                 "global_access": "",
                 "share": []
-            }
+            },
+            "tag_refs":[]
         },
 
         formatRBACPermsModelConfig: function(modelData) {
@@ -46,7 +47,24 @@ define([
             });
             modelData["share_list"] =
                 new Backbone.Collection(shareModelCol);
-            return modelData
+            var editagRefs = [];
+            var tagrefs = getValueByJsonPath(modelData,
+                    "tag_refs", []);
+            if(tagrefs.length > 0) {
+                _.each(tagrefs, function(refs){
+                    var fqName = refs.to;
+                    if(fqName.length === 1){
+                        editagRefs.push(fqName[0]);
+                    }
+                    else if(fqName.length === 3){
+                        editagRefs.push(fqName[0] +
+                                ":" + fqName[1] +
+                                ":" + fqName[2]);
+                    }
+                });
+            }
+            modelData["tag_refs"] = editagRefs;
+            return modelData;
         },
 
         formatAccessList: function(access) {
@@ -110,6 +128,14 @@ define([
                 delete cfgObj.share_list;
                 delete cfgObj.owner_visible;
             }
+            //tags
+            var tagRefs = cfgObj.tag_refs.split(','), tagList = [];
+            _.each(tagRefs, function(refs){
+                var actRef = refs.split(':');
+               // actRef = actRef.reverse();
+                tagList.push({to: actRef});
+            });
+            cfgObj.tag_refs = tagList;
         },
 
         getConsolidatedNumber: function(access) {
