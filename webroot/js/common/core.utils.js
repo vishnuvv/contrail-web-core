@@ -778,7 +778,6 @@ define([
 
         /* Detail Template Generator*/
         this.generateBlockListTemplate = function (config, app, parentConfig) {
-            config = config.concat(ctwu.getTagsExpandDetails());
             var template = '' +
                 '{{#IfCompare requestState "' + cowc.DATA_REQUEST_STATE_SUCCESS_NOT_EMPTY + '" operator="!==" }}' +
                     '{{#IfCompare requestState "' + cowc.DATA_REQUEST_STATE_FETCHING + '" operator="===" }}' +
