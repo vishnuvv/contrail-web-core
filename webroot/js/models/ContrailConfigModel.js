@@ -131,9 +131,13 @@ define([
             //tags
             var tagRefs = cfgObj.tag_refs.split(','), tagList = [];
             _.each(tagRefs, function(refs){
-                var actRef = refs.split(':');
-               // actRef = actRef.reverse();
-                tagList.push({to: actRef});
+                if(refs === ""){
+                    tagList = [];
+                }
+                else{
+                    var actRef = refs.split(':');
+                     tagList.push({to: actRef});
+                }
             });
             cfgObj.tag_refs = tagList;
         },
