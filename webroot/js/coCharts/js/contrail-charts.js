@@ -12739,6 +12739,32 @@ var RadialDendrogramView = function (_ContrailChartsView) {
       el.classList.remove(this.selectorClass('active'));
       _get(RadialDendrogramView.prototype.__proto__ || Object.getPrototypeOf(RadialDendrogramView.prototype), '_onEvent', this).call(this, d, el, e);
     }
+  },{
+    key: '_onClickLink',
+    value: function _onClickLink(d, el, e) {
+      if(this.config.attributes.showLinkInfo && typeof this.config.attributes.showLinkInfo == 'function'){
+        this.config.attributes.showLinkInfo(d, el, e)
+      }
+    }
+  },
+  {
+    key: '_onMousemoveLink',
+    value: function _onMousemoveLink(d, el, e) {
+      if(this.config.attributes.showLinkTooltip){
+        var _d3Selection$mouse = d3Selection.mouse(this._container),
+            _d3Selection$mouse2 = _slicedToArray(_d3Selection$mouse, 2),
+            left = _d3Selection$mouse2[0],
+            top = _d3Selection$mouse2[1];
+
+        _Actionman2.default.fire('ShowComponent', this.config.get('tooltip'), { left: left, top: top }, d);
+      }
+    }
+  },
+  {
+    key: '_onMouseoutLink',
+    value: function _onMouseoutLink(d, el, e) {
+      _Actionman2.default.fire('HideComponent', this.config.get('tooltip'));
+    }
   }, {
     key: 'tagName',
     get: function get() {
@@ -12762,7 +12788,10 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         'dblclick node': '_onEvent',
         'dblclick link': '_onEvent',
         'mousemove node': '_onMousemove',
-        'mouseout node': '_onMouseout'
+        'mouseout node': '_onMouseout',
+        'click link': '_onClickLink',
+        'mousemove link': '_onMousemoveLink',
+        'mouseout link': '_onMouseoutLink'
       });
     }
   }]);

@@ -355,12 +355,21 @@ input.ace-input[type=radio] + .ace-lbl.inactive::before {
     fill: #777;
     font-weight: normal;
 }
-
-#dendrogram-chart-id-svg-wrapper .cc-svg .radial-dendrogram{
-    .arc-label {
-       text-anchor: middle;
-       alignment-baseline: middle;
-       font-size: 9px;
-       fill: #000000;
-    }
+.cc-svg .radial-dendrogram .ribbon {
+    fill: #80d4f9;
+    fill-opacity: .3;
+}
+#traffic-groups-radial-chart #chartBox {
+    width:80vh;
+    margin: 0 auto;
+    .cc-svg .radial-dendrogram {
+		.arc-label {
+	        text-anchor: middle;
+		    font-size: 12px;
+		    fill: rgba(0,0,0,0.6);
+		}
+		.ribbon.selected{
+			fill: #ff6f00;;
+		}
+	}
 }

@@ -39,86 +39,52 @@ define([
                     id: 'dendrogram-chart-id',
                     type: 'RadialDendrogram',
                     config: {
-                        parentSeparation: 1.0,
-                        parentSeparationShrinkFactor: 0.05,
-                        parentSeparationDepthThreshold: 4,
-                        colorScale: d3v4.scaleOrdinal().range(radialColorScheme10), // eslint-disable-line no-undef
-                        drawLinks: false,
-                        drawRibbons: true,
-                        arcWidth: 14,
-                        arcLabelLetterWidth: 5,
-                        showArcLabels: true,
-                       // labelFlow: 'perpendicular',
-                        labelFlow: 'along-arc',
-                        arcLabelXOffset: 0,
-                        arcLabelYOffset: -5,
-                        chartHeight: 500,   //drill-down level 1
-                        chartHeight: 600,  //drill-down level 2
-                        // chartHeight: 700,   //drill-down level 3
-                        levels: [{ level: 0, label: 'Virtual Network' }, { level: 1, label: 'IP' }, { level: 2, label: 'Port' }],
-                        levels: [{ level: 0, label: 'Virtual Network' }, { level: 1, label: 'IP' }],
-                        /*hierarchyConfig: {
-                            parse: function parse(d) {
-                                var srcHierarchy = [d.sourcevn, d.sourceip, d.sport];
-                                srcHierarchy = [d.src_application, d.src_deployment];
-                                var src = {
-                                    names: srcHierarchy,
-                                    id: srcHierarchy.join('-'),
-                                    value: d['agg-bytes']
-                                };
-                                var dstHierarchy = [d.destvn, d.destip, d.dport];
-                                dstHierarchy = [d.dst_application, d.dst_deployment];
-                                var dst = {
-                                    names: dstHierarchy,
-                                    id: dstHierarchy.join('-'),
-                                    value: d['agg-bytes']
-                                };
-                                return [src, dst];
-                            }
-                        },*/
-                        // drillDownLevel: 3,
-                        drillDownLevel: 1,
-                        tooltip: 'tooltip-id'
-                    }
-                }, {
+	                    parentSeparation: 1.0,
+	                    parentSeparationShrinkFactor: 0.05,
+	                    parentSeparationDepthThreshold: 4,
+	                    colorScale: d3v4.scaleOrdinal().range(radialColorScheme10), // eslint-disable-line no-undef
+	                    drawLinks: false,
+	                    drawRibbons: true,
+	                    arcWidth: 15,
+	                    arcLabelLetterWidth: 5,
+	                    showArcLabels: true,
+	                    labelFlow: 'perpendicular',
+	                    arcLabelXOffset: 0,
+	                    arcLabelYOffset: 20,
+                        levels: [ { level: 0, label: 'Virtual Network' }, { level: 1, label: 'IP' }, { level: 2, label: 'Port' } ],
+	                    drillDownLevel: 1,
+	                    tooltip: 'tooltip-id'
+	                }
+                },{
                     id: 'tooltip-id',
                     type: 'Tooltip',
                     config: {
-                    formatter: function formatter(data) {
-                        var type = ['Virtual Network', 'IP', 'Port'];
-                        type = ['Application','Deployment'];
-                        type = self.levels;
-                        var content = { title: _.startCase(type[data.level - 1]['label']), items: [] };
-                        content.items.push({
-                            label: 'Value',
-                            value: data.name
-                        }, {
-                            label: 'Flows',
-                            value: data.children.length
-                        });
-                        return content;
-                    }
+	                    formatter: function formatter(data) {
+	                        var type = ['Virtual Network', 'IP', 'Port'];
+	                        type = ['Application','Deployment'];
+	                        if(data.level){
+		                        type = self.levels;
+		                        var content = { title: _.startCase(type[data.level - 1]['label']), items: [] };
+		                        content.items.push({
+		                            label: 'Value',
+		                            value: data.name
+		                        }, {
+		                            label: 'Flows',
+		                            value: data.children.length
+		                        });
+	                        } else {
+                                var content = { title: data.id, items: [] };
+	                        }
+	                        return content;
+	                    }
                     }
                 }]
             };
         },
         updateConfig: function(config) {
             var self = this;
-            if(typeof(config.hierarchyConfig.parse) == 'function') {
-                self['chartConfig']['components']['0']['config']['hierarchyConfig'] = {
-                    parse : config.hierarchyConfig.parse
-                };
-            }
-            if (typeof(config.colorScale) == 'function') {
-                _.set(self,'chartConfig.components.0.config.colorScale', config.colorScale);
-            }
-            if(typeof(config.levels) != 'undefined') {
-                _.set(self,'chartConfig.components.0.config.levels', config.levels);
-                self.levels = config.levels;
-                // self['chartConfig']['components']['0']['config']['levels'] = config.levels;
-            }
-            // $.extend(true,self.chartConfig,config);
-
+            self.levels = config.levels;
+            $.extend(true,self.chartConfig,config);
         },
         render: function() {
             var self = this;

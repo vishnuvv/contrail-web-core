@@ -2485,6 +2485,41 @@
     </div>
 
     <div id="traffic-groups-radial-chart"></div>
+    <div id="traffic-groups-link-info"></div>
+</script>
+
+<script type="text/x-handlebars-template" id="traffic-link-widget-template">
+   <div class="trafficGroups_content">
+        <div class="trafficGroups_main">
+        </div>
+        <section class="trafficGroups_sidePanel">
+            <header>
+                <span> {{this.src}} </span>
+                <i class="menu-icon fa fa-arrows-h"></i>
+            <span> {{this.dest}} </span>
+            </header>
+            <h1> Matched Rules:</h1>
+            <ul class="policyRules">
+               {{#each this.policyRules}}
+                <li>
+                    <h2>{{this.rule_name}}</h2>
+                    <h3>{{this.pol_name}}</h3>
+                    <div class="row">
+	                    <dl class="col-xs-4">
+	                        <dt>{{this.src.name}}</dt><dd>{{this.src.value}}</dd>
+	                    </dl>
+	                    <div class="rulesBiArrow col-xs-2">
+	                      <i class="fa fa-arrows-h"></i>
+	                    </div>
+	                    <dl class="col-xs-4">
+	                        <dt>{{this.dest.name}}</dt><dd>{{this.dest.value}}</dd>
+	                    </dl>
+                    </div>
+                </li>
+                {{/each}}
+            </ul>
+        </section>
+    </div>
 </script>
 
 <script type="text/x-handlebars-template" id="gridstack-widget-template">

@@ -2341,15 +2341,86 @@ $label_color: #3182bd;
         //display: block;
         margin-right: 20px;
     }
-}
-
-#traffic-groups-radial-chart {
-   width: 50%;
-    margin: auto;
-    .cc-svg {
-        // height: 600px;
-        // margin-top: -90px;
+    .showLinkInfo{
+         margin-right:312px
     }
+	.trafficGroups_content {
+	     position: absolute;
+	     margin: 0px;
+	     height: calc(100vh - 128px);
+	     top: 43px;
+	     right: 0px;
+		.trafficGroups_sidePanel {
+			height:100%;
+		    background-color:#fdfdfd;
+		    padding:10px 20px;
+		    -webkit-box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
+		    -moz-box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
+		    box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
+			header{
+			    margin:0px; padding:3px 10px;
+			    background:#f9f3d3;
+			    border-radius:2px;
+			    display:inline-block;
+			    color:#787878;
+			    margin-left:-10px;
+			}
+			h1{
+			    font-size:14px;
+			    margin:0px;
+			    padding:20px 0px 10px 0px ;
+			    color:#58a8db;
+			}
+			h2{
+			    font-size:14px;
+			    font-weight:600;
+			    padding:0px;
+			    margin:0px;
+			    line-height:1;
+			}
+			h3{
+			    font-size:13px;
+			    font-weight:600;
+			    padding:0px 0px 15px 0px;
+			    color: rgba(0, 0, 0, 0.6);
+			    margin-top:2px;
+			    line-height:1;
+			}
+		    ul.policyRules{
+                padding:10px 0px;
+			    margin:0px;
+			    border-top:#e5e5e5 solid 1px;
+                li{
+				    list-style: none;
+				    border-bottom: #e5e5e5 solid 1px;
+				    padding-bottom: 10px;
+				    margin-bottom: 15px;
+				}
+				dl{
+					display:inline-block;
+					margin:0px;
+					color: rgba(0, 0, 0, 0.6);
+					font-size:12px;
+				}
+				dt{
+					font-weight:normal;
+				}
+				dd{
+				    margin:0px;
+				    -webkit-margin-start: 0px;
+				    line-height:1;
+				}
+			}
+			.fa.fa-arrows-h{
+				font-size: 16px;
+			    font-weight: bold;
+			    padding: 5px 10px;
+			}
+			.rulesBiArrow{
+				padding:5px;
+			}
+		}
+	}
 }
 .btn-bar {
     margin-top: 10px;
