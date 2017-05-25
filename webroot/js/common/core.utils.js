@@ -2609,10 +2609,29 @@ define([
 
         }
 
+        this.populateTrafficGroupsData = function(data) {
+            var applicationArr = ['HR','Finance','Oracle','SAP'],
+                siteArr = ['Bangalore','Sunnyvale'],
+                tierArr = ['FrontEnd','Web','Database'],
+                deploymentArr = ['Production','Development'];
+            $.each(data,function(idx,value) {
+                value['eps.traffic.remote_app_id'] = _.sample(applicationArr); 
+                value['eps.traffic.remote_deployment_id'] = _.sample(deploymentArr);
+                value['eps.traffic.remote_site_id'] = _.sample(siteArr);
+                value['eps.traffic.remote_tier_id'] = _.sample(tierArr);
+
+                value['app'] = _.sample(applicationArr); 
+                value['deployment'] = _.sample(deploymentArr);
+                value['site'] = _.sample(siteArr);
+                value['tier'] = _.sample(tierArr);
+            });
+            return data;
+        }
+
         this.getTrafficGroupsData = function() {
             var applicationArr = ['HR','Finance','Oracle','SAP'],
                 siteArr = ['Bangalore','Sunnyvale'],
-                tierArr = ['Web','Database'],
+                tierArr = ['FrontEnd','Web','Database'],
                 deploymentArr = ['Production','Development'];
             var flowCount = 100,data = [];    
             for (let i = 0; i < flowCount; i++) {
