@@ -53,7 +53,7 @@ define([
                         arcLabelXOffset: 0,
                         arcLabelYOffset: -5,
                         chartHeight: 500,   //drill-down level 1
-                        chartHeight: 600,   //drill-down level 2
+                        chartHeight: 600,  //drill-down level 2
                         // chartHeight: 700,   //drill-down level 3
                         levels: [{ level: 0, label: 'Virtual Network' }, { level: 1, label: 'IP' }, { level: 2, label: 'Port' }],
                         levels: [{ level: 0, label: 'Virtual Network' }, { level: 1, label: 'IP' }],
@@ -122,20 +122,34 @@ define([
         },
         render: function() {
             var self = this;
-
-            var dendrogamData = {
-                data: cowu.getRadialChartData()
-            };
-
             this.$el.empty();
             this.$el.append($('<div>',{id:'chartBox'}));
 
             var chartView = new coCharts.ChartView();
             chartView.setConfig(self.chartConfig);
-            // chartView.setData(dendrogamData.data);
-            // chartView.setData(this.model.get('data'));
-            chartView.setData(this.model.get('data').toJSON());
-            chartView.render();
+            chartView.setData(this.model.getItems());
+            if (self.model === null && viewConfig['modelConfig'] !== null) {
+                self.model = new ContrailListModel(viewConfig['modelConfig']);
+            }
+            if (self.model !== null) {
+                if(self.model.loadedFromCache || !(self.model.isRequestInProgress())) {
+                    chartView.render();
+                }
+
+                self.model.onAllRequestsComplete.subscribe(function() {
+                    chartView.setData(self.model.getItems());
+                    chartView.render();
+                });
+                var prevDimensions = chUtils.getDimensionsObj(self.$el);
+                self.resizeFunction = _.debounce(function (e) {
+                    if(!chUtils.isReRenderRequired({
+                        prevDimensions:prevDimensions,
+                        elem:self.$el})) {
+                        return;
+                    }
+                     chartView.render();
+                 },cowc.THROTTLE_RESIZE_EVENT_TIME);
+            }
         }
     });
 
