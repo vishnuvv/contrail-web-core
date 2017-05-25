@@ -58,6 +58,8 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
         //'jquery'                      : coreWebDir + '/assets/jquery/js/jquery-1.8.3.min',
         //'jquery'                      : coreWebDir + '/assets/jquery/js/jquery-1.9.1.min',
         'jquery'                      : coreWebDir + '/assets/jquery/js/jquery.min',
+        'lodashv4'                      : coreWebDir + '/js/coCharts/js/lodash',
+        'd3v4'                        : coreWebDir + '/js/coCharts/js/d3',
         'contrail-load'               : coreWebDir + '/js/contrail-load',
         'vis'                         : coreWebDir + '/assets/vis-v4.9.0/js/vis.min',
         'vis-node-model'              : coreWebDir + '/js/models/VisNodeModel',
@@ -106,7 +108,8 @@ function getCoreAppPaths(coreBaseDir, coreBuildDir, env) {
         'chart-config'                : coreWebDir + '/js/chartconfig',
         'legend-view'                 : coreWebDir + '/js/views/LegendView',
         'alarms-viewconfig'           : coreWebDir + '/js/views/alarms/alarms.viewconfig',
-        'contrail-charts-view'        : coreWebDir + '/js/views/ContrailChartsView'
+        'contrail-charts-view'        : coreWebDir + '/js/views/ContrailChartsView',
+        'contrail-charts'             :  coreWebDir + '/js/coCharts/js/contrail-charts'
     };
 
     //Separate out aliases that need to be there for both prod & dev environments
