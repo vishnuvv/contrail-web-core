@@ -12253,6 +12253,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
             var children = _this2.rootNode.children;
             var node = null;
             var namePath = [];
+            var currLeaf = leaf;
             _lodash2.default.each(leaf.names, function (name, depth) {
               _this2.maxDepth = Math.max(_this2.maxDepth, depth + 1);
               if (depth >= _this2.params.drillDownLevel) {
@@ -12265,6 +12266,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
               if (!node) {
                 node = {
                   name: name,
+                  labelAppend:currLeaf.labelAppend,
                   namePath: namePath.slice(0),
                   children: [],
                   level: depth + 1
@@ -12547,6 +12549,9 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         // Estimate arc length and wheather the label will fit (default letter width is assumed to be 5px).
         n.arcLength = 6 * (n.y - _this8.params.arcLabelYOffset) * (n.angleRange[1] - n.angleRange[0]) / 360;
         n.label = '' + n.data.namePath[n.data.namePath.length - 1];
+        if(n.depth == 1 && n.data.labelAppend){
+		  n.label += '-'+n.data.labelAppend;
+	    }
         var widthDiff ;
         n.labelFits = (widthDiff = (_this8.params.arcLabelLetterWidth * n.label.length - n.arcLength)) < 0;
         if(!n.labelFits){
