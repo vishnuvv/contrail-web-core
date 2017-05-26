@@ -5,9 +5,8 @@
 define([
     'underscore',
     'contrail-view',
-    'contrail-list-model',
     'knockback'
-], function (_, ContrailView, ContrailListModel, Knockback) {
+], function (_, ContrailView, Knockback) {
     var tagsView = ContrailView.extend({
         render: function(options) {
             var self = this;

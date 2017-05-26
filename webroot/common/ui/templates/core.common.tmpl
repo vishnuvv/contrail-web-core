@@ -1278,7 +1278,7 @@
         {{> coreFormLabel}}
         <div class="textarea-input-group input-group inset theme-addon">
             <textarea
-                name="{{id}}" value="" placeholder="{{placeHolder}}" rows="1" class="form-control"
+                name="{{id}}" value="" placeholder="{{placeHolder}}" rows={{rows}} cols={{cols}} class="form-control"
                 data-bind="{{#if viewConfig.disabled}}disable: {{viewConfig.disabled}}, {{/if}}{{#if lockAttr}}disable: locks().{{name}}_locked, {{/if}} value: {{dataBindValue}}, event: { focusout: function() { validateAttr('{{path}}', '{{validation}}') } }">
             </textarea>
             <span class="input-group-addon theme-addon" data-bind="visible:{{showEditIcon}}, css: { {{#if viewConfig.disabled}}disabled: {{viewConfig.disabled}} == true {{/if}} }"><i class="fa fa-pencil"></i></span>

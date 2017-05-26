@@ -92,10 +92,11 @@ define([
                                  activate: function(event, ui) {
                                  }
                              }
-                         },{
-                             elementId: cowc.PERMISSIONS_TAB_ID,
-                             title: cowc.PERMISSIONS_TITLE,
-                             view: "RBACPermissionsView",
+                         },
+                         {
+                             elementId: "tags_tab",
+                             title: "Tags",
+                             view: "tagsView",
                              viewConfig: {},
                              tabConfig: {
                                  activate: function(event, ui) {
@@ -103,9 +104,9 @@ define([
                              }
                          },
                          {
-                             elementId: "tags_tab",
-                             title: "Tags",
-                             view: "tagsView",
+                             elementId: cowc.PERMISSIONS_TAB_ID,
+                             title: cowc.PERMISSIONS_TITLE,
+                             view: "RBACPermissionsView",
                              viewConfig: {},
                              tabConfig: {
                                  activate: function(event, ui) {
