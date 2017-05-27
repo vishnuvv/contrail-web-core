@@ -12426,8 +12426,8 @@ var RadialDendrogramView = function (_ContrailChartsView) {
   }, {
     key: '_prepareRibbons',
     value: function _prepareRibbons() {
-      var _this7 = this;
-
+      var _this7 = this,
+          ribbons =  this.ribbons;
       this.ribbons = [];
       _lodash2.default.each(this.links, function (link) {
         var src = link[0];
@@ -12534,6 +12534,19 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           id: src.data.linkId
         });
       });
+      if(ribbons) {
+          var selectedRibbon = _.filter(ribbons, function(ribbon) {
+              return ribbon.selected;
+          });
+          if(selectedRibbon && selectedRibbon.length > 0) {
+              _.filter(_this7.ribbons, function(ribbon) {
+                  if(ribbon.id == selectedRibbon[0].id) {
+                      ribbon.selected = true;
+                      ribbon.active = true;
+                  }
+              });
+           }
+      }
       // console.log('ribbons: ', this.ribbons)
     }
   }, {
@@ -12709,9 +12722,9 @@ var RadialDendrogramView = function (_ContrailChartsView) {
     value: function _onMousemove(d, el) {
       var leaves = d.leaves();
       _lodash2.default.each(this.ribbons, function (ribbon) {
-        ribbon.active = Boolean(_lodash2.default.find(leaves, function (leaf) {
+        ribbon.active = (Boolean(_lodash2.default.find(leaves, function (leaf) {
           return leaf.data.linkId === ribbon.id;
-        }));
+        }))) ? true : ribbon.selected;
       });
       this._render();
 
@@ -12726,7 +12739,9 @@ var RadialDendrogramView = function (_ContrailChartsView) {
     key: '_onMouseout',
     value: function _onMouseout(d, el) {
       _lodash2.default.each(this.ribbons, function (ribbon) {
-        ribbon.active = false;
+        if(!ribbon.selected){
+            ribbon.active = false;
+        }
       });
       this._render();
       _Actionman2.default.fire('HideComponent', this.config.get('tooltip'));
@@ -12747,15 +12762,16 @@ var RadialDendrogramView = function (_ContrailChartsView) {
   },{
     key: '_onClickLink',
     value: function _onClickLink(d, el, e) {
-      if(this.config.attributes.showLinkInfo && typeof this.config.attributes.showLinkInfo == 'function'){
-        this.config.attributes.showLinkInfo(d, el, e)
+      if(this.config.attributes && this.config.attributes.showLinkInfo
+         && typeof this.config.attributes.showLinkInfo == 'function') {
+          this.config.attributes.showLinkInfo(d, el, e,this);
       }
     }
   },
   {
     key: '_onMousemoveLink',
     value: function _onMousemoveLink(d, el, e) {
-      if(this.config.attributes.showLinkTooltip){
+      if(this.config.attributes && this.config.attributes.showLinkTooltip){
         var _d3Selection$mouse = d3Selection.mouse(this._container),
             _d3Selection$mouse2 = _slicedToArray(_d3Selection$mouse, 2),
             left = _d3Selection$mouse2[0],
