@@ -2487,6 +2487,7 @@ $color_light_wisteria_approx: #d0abd6;
         fill-opacity:1!important;
     }
 }
+
 /* Firewall policy info tab css*/
 #fwPolicyContainer {
     margin-left:10px;
@@ -2530,4 +2531,9 @@ font-style:normal;}
 }
 #firewall_rules th {
     line-height: 1.5;
+}
+
+.cc-svg .radial-dendrogram .ribbon {
+    // stroke-width: 1;
+    // stroke: red;
 }
