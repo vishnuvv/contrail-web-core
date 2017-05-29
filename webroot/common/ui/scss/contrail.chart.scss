@@ -368,8 +368,11 @@ input.ace-input[type=radio] + .ace-lbl.inactive::before {
 		    font-size: 12px;
 		    fill: rgba(0,0,0,0.6);
 		}
-		.ribbon.selected{
-			fill: #ff6f00;;
+		.ribbon.selected {
+			fill: #ff6f00;
+		}
+		.external {
+			fill: #000;
 		}
 	}
 }

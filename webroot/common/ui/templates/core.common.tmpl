@@ -2522,6 +2522,33 @@
     </div>
 </script>
 
+<script type="text/x-handlebars-template" id="traffic-link-info-template">
+   <div class="trafficGroups_content">
+        <div class="trafficGroups_main">
+        </div>
+        <section class="trafficGroups_sidePanel">
+            <header>
+                <span> {{this.src}} </span>
+                <img src="/img/double_arrow.svg"/>
+            <span> {{this.dest}} </span>
+            </header>
+            <ul class="linkInfo">
+               {{#each this.linkData}}
+                <li>
+                    <div>{{this.app_name}}</div>
+                    <div class="trafficInfo">
+	                    Traffic In: {{this.trafficIn}}
+                    </div>
+                    <div class="trafficInfo">
+	                    Traffic Out: {{this.trafficOut}}
+                    </div>
+                </li>
+               {{/each}}
+            </ul>
+        </section>
+    </div>
+</script>
+
 <script type="text/x-handlebars-template" id="gridstack-widget-template">
     <div class='custom-grid-stack-item'>
         <div class='grid-stack-item-content'>

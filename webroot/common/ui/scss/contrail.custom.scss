@@ -2388,11 +2388,13 @@ $label_color: #3182bd;
             animation-fill-mode: both;
             header{
                 margin:0px; padding:3px 10px;
-                background:#f9f3d3;
+                background:#ff6f00;
                 border-radius:2px;
                 display:inline-block;
-                color:#787878;
+                color:#000;
                 margin-left:-10px;
+                opacity: .7;
+                width: 280px;
             }
             h1{
                 font-size:14px;
@@ -2415,7 +2417,7 @@ $label_color: #3182bd;
                 margin-top:2px;
                 line-height:1;
             }
-            ul.policyRules{
+            ul.policyRules, ul.linkInfo{
                 padding:10px 0px;
                 margin:0px;
                 border-top:#e5e5e5 solid 1px;
@@ -2425,11 +2427,14 @@ $label_color: #3182bd;
                     padding-bottom: 10px;
                     margin-bottom: 15px;
                 }
-                dl{
+                dl, .trafficInfo{
                     display:inline-block;
                     margin:0px;
                     color: rgba(0, 0, 0, 0.6);
                     font-size:12px;
+                }
+                .trafficInfo{
+                    display:block;
                 }
                 dt{
                     font-weight:normal;
@@ -2447,6 +2452,7 @@ $label_color: #3182bd;
             }
             .rulesBiArrow{
                 padding:5px;
+                text-align:center;
             }
         }
     }
