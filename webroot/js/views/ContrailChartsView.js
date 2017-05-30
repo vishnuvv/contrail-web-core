@@ -62,29 +62,21 @@ define([
                                 }
                                 var content = { title: arcTitle.join('-'), items: [] };
 
-                                var children = data.children;
-                                //If name is not matching with the leaf node
-                                // if(data.level == 1 && data.namePath.length > 1) {
-                                if(_.result(children,'0.children') != null) {
-                                    children = _.map(data.children,function(val,idx) {
-                                        return val['children'];
-                                    });
-                                    children = _.flatten(children);
-                                }
+                                var dataChildren = _.result(data,'children.0.dataChildren',[]);;
 
                                 content.items.push({
                                     label: 'Traffic In',
-                                    value:  formatBytes(_.sumBy(children,function(currSession) {
-                                        if(currSession.type == 'src')
-                                            return _.result(currSession,'otherNode.inBytes',0);
+                                    value:  formatBytes(_.sumBy(dataChildren,function(currSession) {
+                                        if(currSession.app == data.name)
+                                            return _.result(currSession,'SUM(eps.traffic.in_bytes)',0);
                                         else
                                             return 0;
                                     }))
                                 }, {
                                     label: 'Traffic Out',
-                                    value: formatBytes(_.sumBy(children,function(currSession) {
-                                        if(currSession.type == 'src')
-                                            return _.result(currSession,'otherNode.outBytes');
+                                    value: formatBytes(_.sumBy(dataChildren,function(currSession) {
+                                        if(currSession.type == data.name)
+                                            return _.result(currSession,'SUM(eps.traffic.out_bytes)',0);
                                         else
                                             return 0;
                                     }))
