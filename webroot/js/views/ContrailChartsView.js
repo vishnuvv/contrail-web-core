@@ -25,8 +25,6 @@ define([
             self.chartConfig = {
                 id: 'chartBox',
                 components: [{
-                    id: 'dendrogram-chart-id',
-                    type: 'RadialDendrogram',
                     config: {
                         parentSeparation: 1.0,
                         parentSeparationShrinkFactor: 0.05,
@@ -44,55 +42,11 @@ define([
                         drillDownLevel: 1,
                         tooltip: 'tooltip-id'
                     }
-                },{
-                    id: 'tooltip-id',
-                    type: 'Tooltip',
-                    config: {
-                        formatter: function formatter(data) {
-                            var type = ['Virtual Network', 'IP', 'Port'];
-                            type = ['Application','Deployment'];
-                            if(data.level) {
-                                type = self.levels;
-                                var arcTitle = data.namePath.slice(0);
-                                if(data.type) {
-	                                $.each(arcTitle, function(i) {
-                                        arcTitle[i] = data.namePath[i].
-                                            replace(new RegExp('_' + data.type + '$'), '')
-	                                });
-                                }
-                                var content = { title: arcTitle.join('-'), items: [] };
-
-                                var dataChildren = _.result(data,'children.0.dataChildren',[]);;
-
-                                content.items.push({
-                                    label: 'Traffic In',
-                                    value:  formatBytes(_.sumBy(dataChildren,function(currSession) {
-                                        if(currSession.app == data.name)
-                                            return _.result(currSession,'SUM(eps.traffic.in_bytes)',0);
-                                        else
-                                            return 0;
-                                    }))
-                                }, {
-                                    label: 'Traffic Out',
-                                    value: formatBytes(_.sumBy(dataChildren,function(currSession) {
-                                        if(currSession.type == data.name)
-                                            return _.result(currSession,'SUM(eps.traffic.out_bytes)',0);
-                                        else
-                                            return 0;
-                                    }))
-                                });
-                            } else {
-                                var content = { title: data.id, items: [] };
-                            }
-                            return content;
-                        }
-                    }
                 }]
             };
         },
         updateConfig: function(config) {
             var self = this;
-            self.levels = config.levels;
             $.extend(true,self.chartConfig,config);
         },
         render: function() {
