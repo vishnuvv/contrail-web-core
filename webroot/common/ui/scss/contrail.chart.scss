@@ -7,6 +7,9 @@
 /*
  * NVD3 Styles
  */
+
+$color_external_label: #000;
+$color_external_arc: #d0abd6;
 .nvd3 .nv-axis path {
     stroke: #ccc;
 }
@@ -371,8 +374,13 @@ input.ace-input[type=radio] + .ace-lbl.inactive::before {
 		.ribbon.selected {
 			fill: #ff6f00;
 		}
-		.external {
-			fill: #000;
+		.external.arc, .externalProject.arc {
+			fill: $color_external_arc !important;
+		}
+		.arc-label {
+			.external, .externalProject {
+				fill: $color_external_label !important;
+			}
 		}
 	}
 }

@@ -51,9 +51,16 @@ define([
                         formatter: function formatter(data) {
                             var type = ['Virtual Network', 'IP', 'Port'];
                             type = ['Application','Deployment'];
-                            if(data.level){
+                            if(data.level) {
                                 type = self.levels;
-                                var content = { title: data.namePath.join('-'), items: [] };
+                                var arcTitle = data.namePath.slice(0);
+                                if(data.type) {
+	                                $.each(arcTitle, function(i) {
+                                        arcTitle[i] = data.namePath[i].
+                                            replace(new RegExp('_' + data.type + '$'), '')
+	                                });
+                                }
+                                var content = { title: arcTitle.join('-'), items: [] };
 
                                 var children = data.children;
                                 //If name is not matching with the leaf node
@@ -113,7 +120,7 @@ define([
                 }
 
                 self.model.onAllRequestsComplete.subscribe(function() {
-                    chartView.setData(self.model.getItems().slice(0,50));
+                    chartView.setData(self.model.getItems());
                     chartView.render();
                 });
                 var prevDimensions = chUtils.getDimensionsObj(self.$el);

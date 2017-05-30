@@ -19,8 +19,8 @@ define([
         this.FORM_SUFFIX_ID = "_form";
         this.JSON_SUFFIX_ID = "_json";
 
-        this.TRAFFIC_GROUP_COLOR_LEVEL1 = ['#f8bbd0', '#9fa8da', '#e6ee9c', '#e7d397', '#80deea'];
-        this.TRAFFIC_GROUP_COLOR_LEVEL2 = ['#5282a7', '#91cd99', '#80d4f9', '#d0abd6'];
+        this.TRAFFIC_GROUP_COLOR_LEVEL1 = ['#74abd2', '#9fa8da', '#f8bbd0', '#c5e1a5'];
+        this.TRAFFIC_GROUP_COLOR_LEVEL2 = ['#5282a7', '#91cd99', '#80d4f9', '#80deea'];
 
         this.SEV_LEVELS = {
             ERROR   : 3, //Red
