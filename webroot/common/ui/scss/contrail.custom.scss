@@ -2366,14 +2366,33 @@ $label_color: #3182bd;
            transform: translateX(0);
         }
     }
-    .tooltip.cc-component.active {
-        max-width: 300px;
-    }
     #chartBox * {
         font-family: "Open Sans";
     }
-    .tooltip.cc-component .tooltip-item{
-        border:none;
+    .tooltip.cc-component .tooltip-content {
+        .tooltip-item {
+            border:none;
+        }
+        .item-head {
+            text-align: right;
+            padding: 5px 0;
+            color: #add0e8;
+        }
+        .linkItem {
+            font-size: 12px;
+            font-weight: normal;
+            margin: 0;
+        }
+        .cc-title {
+            border-bottom: 0;
+            margin-bottom: 0;
+        }
+        hr {
+            margin: 10px auto 5px;
+        }
+        .linkTitle {
+            padding: 0;
+        }
     }
     #traffic-groups-radial-chart{transition: all 700ms;}
     .trafficGroups_content {

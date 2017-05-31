@@ -2490,6 +2490,22 @@
 
 
 
+<script type="text/x-handlebars-template" id="traffic-link-tooltip-template">
+    <div class="cc-title linkTitle">{{this.src}} <img src="/img/double_arrow_white.svg"/> {{this.dst}}</div>
+    <hr/>
+    {{#each this.items}}
+    <div class="item-head">{{this.name}}</div>
+    <div class="tooltip-item linkItem">
+        <span class="tooltip-item-label">Traffic In</span>
+        <span class="tooltip-item-value">{{this.trafficIn}}</span>
+    </div>
+    <div class="tooltip-item linkItem">
+        <span class="tooltip-item-label">Traffic Out</span>
+        <span class="tooltip-item-value">{{this.trafficOut}}</span>
+    </div>
+    {{/each}}
+</script>
+
 <script type="text/x-handlebars-template" id="traffic-link-info-template">
    <div class="trafficGroups_content">
         <div class="trafficGroups_main">
