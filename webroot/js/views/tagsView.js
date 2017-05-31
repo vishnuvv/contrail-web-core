@@ -67,7 +67,7 @@ define([
                                                         var tagsFiiteredArray = [];
                                                         if ((hashString.indexOf('config_firewall_applicationpolicies') > -1)) {
                                                             for(var i=0; i<tagsArray.length; i++){
-                                                            if((tagsArray[i].text.indexOf('Application') > -1)){
+                                                            if((tagsArray[i].text.indexOf('application') > -1)){
                                                                 tagsFiiteredArray.push(tagsArray[i]);
                                                                 }
                                                               }
