@@ -4883,8 +4883,7 @@ var ChartView = function () {
         _lodash2.default.each(template.content.querySelectorAll('[component]'), function (el) {
           el.setAttribute('id', 'cc-' + el.getAttribute('component'));
         });
-        //Throws error on IE-Edge
-        this._container.appendChild(document.importNode(template.content, true));
+        this._container.append(document.importNode(template.content, true));
       }
       if (this._config.title) (0, _TitleView2.default)(this._container, this._config.title);
 
@@ -12657,19 +12656,20 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           return;
         }
         // Check if we havent already created a node pair (link) with the same id.
-        var foundLeafNode = _lodash2.default.find(leafNodes, function (leafNode) {
+        var foundSrcNode = _lodash2.default.find(leafNodes, function (leafNode) {
           var found = false;
           //If there already exists a leaf node matching the src & dst
+          // if (leafNode.type == 'src' && leafNode.id === leafs[0].id) {
           if (leafNode.type == 'src' && leafNode.id === leafs[0].id) {
             if (leafNode.otherNode.id === leafs[1].id) {
               found = true;
             }
           }
-          // if (leafNode.id === leafs[1].id) {
-          //   if (leafNode.otherNode.id === leafs[0].id) {
-          //     found = true
-          //   }
-          // }
+          if (leafNode.type == 'src' && leafNode.id === leafs[1].id) {
+            if (leafNode.otherNode.id === leafs[0].id) {
+              found = true;
+            }
+          }
           return found;
         });
         //How to ensure for intra traffic
@@ -12681,13 +12681,22 @@ var RadialDendrogramView = function (_ContrailChartsView) {
               found = true;
             }
           }
+          if (leafNode.type == 'dst' && leafNode.id === leafs[0].id) {
+            if (leafNode.otherNode.id === leafs[1].id) {
+              found = true;
+            }
+          }
           return found;
         });
+        var foundLeafNode = null;
+        if (foundSrcNode != null) foundLeafNode = foundSrcNode;else foundLeafNode = foundDstNode;
         if (foundLeafNode) {
-          foundLeafNode.dataChildren.push(d);
           foundLeafNode.value += foundLeafNode.id === leafs[0].id ? leafs[0].value : leafs[1].value;
           foundLeafNode.otherNode.value += foundLeafNode.otherNode.id === leafs[0].id ? leafs[0].value : leafs[1].value;
           _this2.valueSum += leafs[0].value + leafs[1].value;
+          if (foundSrcNode) {
+            foundSrcNode.dataChildren.push(d);
+          }
           if (foundDstNode) {
             foundDstNode.dataChildren.push(d);
           }
@@ -12724,6 +12733,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
             var leafNode = {
               id: leaf.id,
               otherNode: i === 0 ? leafs[1] : leafs[0],
+              currentNode: i === 0 ? leafs[0] : leafs[1],
               arcType: leaf.type,
               value: leaf.value,
               type: i === 0 ? 'src' : 'dst',
@@ -13308,7 +13318,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
   }, {
     key: '_onMouseoutLink',
     value: function _onMouseoutLink(d, el, e) {
-      _Actionman2.default.fire('ToggleVisibility', this.config.get('tooltip'), false);
+      _Actionman2.default.fire('HideComponent', this.config.get('tooltip'));
     }
   }, {
     key: 'tagName',
