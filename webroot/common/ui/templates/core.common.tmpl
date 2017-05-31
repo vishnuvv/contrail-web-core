@@ -2488,39 +2488,7 @@
     <div id="traffic-groups-link-info"></div>
 </script>
 
-<script type="text/x-handlebars-template" id="traffic-link-widget-template">
-   <div class="trafficGroups_content">
-        <div class="trafficGroups_main">
-        </div>
-        <section class="trafficGroups_sidePanel">
-            <header>
-                <span> {{this.src}} </span>
-                <i class="menu-icon fa fa-arrows-h"></i>
-            <span> {{this.dest}} </span>
-            </header>
-            <h1> Matched Rules:</h1>
-            <ul class="policyRules">
-               {{#each this.policyRules}}
-                <li>
-                    <h2>{{this.rule_name}}</h2>
-                    <h3>{{this.pol_name}}</h3>
-                    <div class="row">
-	                    <dl class="col-xs-4">
-	                        <dt>{{this.src.name}}</dt><dd>{{this.src.value}}</dd>
-	                    </dl>
-	                    <div class="rulesBiArrow col-xs-2">
-	                      <i class="fa fa-arrows-h"></i>
-	                    </div>
-	                    <dl class="col-xs-4">
-	                        <dt>{{this.dest.name}}</dt><dd>{{this.dest.value}}</dd>
-	                    </dl>
-                    </div>
-                </li>
-                {{/each}}
-            </ul>
-        </section>
-    </div>
-</script>
+
 
 <script type="text/x-handlebars-template" id="traffic-link-info-template">
    <div class="trafficGroups_content">
@@ -2529,10 +2497,11 @@
         <section class="trafficGroups_sidePanel">
             <header>
                 <span> {{this.src}} </span>
+                <!--<i class="fa fa-arrows-h"></i>-->
                 <img src="/img/double_arrow.svg"/>
             <span> {{this.dest}} </span>
             </header>
-            <ul class="linkInfo">
+            <!--<ul class="linkInfo">
                {{#each this.linkData}}
                 <li>
                     <div>Traffic statistics from "{{this.app_name}}"</div>
@@ -2544,9 +2513,39 @@
                     </div>
                 </li>
                {{/each}}
-            </ul>
+            </ul>-->
+            <div class="traffic-rules">
+
+            </div>
         </section>
     </div>
+</script>
+<script type="text/x-handlebars-template" id="traffic-rule-template">
+    <h1> Matched Rules:</h1>
+    <ul class="policyRules">
+       {{#each this.policyRules}}
+        <li>
+            <h2>Policy: {{this.policy_name}}</h2>
+            <div class="row col-xs-12 padding-bottom-15">
+                <dl>
+                    <dt>Rule: {{this.rule_name}}</dt>
+                </dl>
+            </div>
+            <h3>{{this.simple_action}}</h3>
+            <div class="row">
+                <dl class="col-xs-5">
+                    <dt>src {{this.srcType}}</dt><dd>{{this.src}}</dd>
+                </dl>
+                <div class="rulesBiArrow col-xs-2">
+                  <img src="/img/double_arrow.svg"/>
+                </div>
+                <dl class="col-xs-5">
+                    <dt>dst {{this.dstType}}</dt><dd>{{this.dst}}</dd>
+                </dl>
+            </div>
+        </li>
+        {{/each}}
+    </ul>
 </script>
 
 <script type="text/x-handlebars-template" id="gridstack-widget-template">
