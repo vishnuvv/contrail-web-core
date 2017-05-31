@@ -2366,6 +2366,15 @@ $label_color: #3182bd;
            transform: translateX(0);
         }
     }
+    .tooltip.cc-component.active {
+        max-width: 300px;
+    }
+    #chartBox * {
+        font-family: "Open Sans";
+    }
+    .tooltip.cc-component .tooltip-item{
+        border:none;
+    }
     #traffic-groups-radial-chart{transition: all 700ms;}
     .trafficGroups_content {
         position: absolute;
