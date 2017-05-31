@@ -2378,95 +2378,84 @@ $label_color: #3182bd;
     #traffic-groups-radial-chart{transition: all 700ms;}
     .trafficGroups_content {
         position: absolute;
-        margin: 0px;
         height: calc(100vh - 128px);
         top: 43px;
         right: 0px;
-        .trafficGroups_sidePanel {
-            height:100%;
-            background-color:#fdfdfd;
-            padding:10px 20px;
-            -webkit-box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
-            -moz-box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
-            box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
-            -webkit-animation-name: slideInRight;
-            animation-name: slideInRight;
-            -webkit-animation-duration: 1s;
-            animation-duration: 1s;
-            -webkit-animation-fill-mode: both;
-            animation-fill-mode: both;
-            header{
-                margin:0px; padding:3px 10px;
-                background:#f9f3d3;;
-                border-radius:2px;
-                display:inline-block;
-                color:#787878;
-                margin-left:-10px;
-                opacity: .7;
-                width: 280px;
-            }
-            h1{
-                font-size:14px;
-                margin:0px;
-                padding:20px 0px 10px 0px ;
-                color:#58a8db;
-            }
-            h2{
-                font-size:14px;
-                font-weight:600;
-                padding:0px;
-                margin:0px;
-                line-height:1;
-            }
-            h3{
-                font-size:13px;
-                font-weight:600;
-                padding:0px 0px 15px 0px;
-                color: rgba(0, 0, 0, 0.6);
-                margin-top:2px;
-                line-height:1;
-            }
-            ul.policyRules, ul.linkInfo{
-                padding:10px 0px;
-                margin:0px;
-                border-top:#e5e5e5 solid 1px;
-                li{
-                    list-style: none;
-                    border-bottom: #e5e5e5 solid 1px;
-                    padding-bottom: 10px;
-                    margin-bottom: 15px;
-                }
-                dl, .trafficInfo{
-                    display:inline-block;
-                    margin:0px;
-                    color: rgba(0, 0, 0, 0.6);
-                    font-size:12px;
-                }
-                .trafficApp{
-                    width: 280px;
-                }
-                .trafficInfo{
-                    display:block;
-                }
-                dt{
-                    font-weight:normal;
-                }
-                dd{
-                    margin:0px;
-                   -webkit-margin-start: 0px;
-                   line-height:1;
-                }
-            }
-            .fa.fa-arrows-h{
-                font-size: 16px;
-                font-weight: bold;
-                padding: 5px 10px;
-            }
-            .rulesBiArrow{
-                padding:5px;
-                text-align:center;
-            }
-        }
+        margin:0px;
+        height:100%;
+    }
+    .trafficGroups_sidePanel{
+        height:100%;
+        background-color:#fdfdfd;
+        width:330px;
+        padding:10px 20px;
+        -webkit-box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
+        -moz-box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
+        box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
+        -webkit-animation-name: slideInRight;
+        animation-name: slideInRight;
+        -webkit-animation-duration: 1s;
+        animation-duration: 1s;
+        -webkit-animation-fill-mode: both;
+        animation-fill-mode: both;
+    }
+    .trafficGroups_sidePanel header{
+        margin:0px; padding:3px 10px;
+        background:#f9f3d3;
+        border-radius:2px;
+        display:inline-block;
+        color:#787878;
+        margin-left:-10px;
+    }
+    .trafficGroups_sidePanel h1{
+        font-size:14px;
+        margin:0px;
+        padding:20px 0px 10px 0px ;
+        color:#58a8db;
+    }
+    .trafficGroups_sidePanel h2{
+        font-size:14px;
+        font-weight:600;
+        padding:0px;
+        margin:0px;
+        line-height:1;
+    }
+    .trafficGroups_sidePanel h3{
+        font-size:13px;
+        font-weight:600;
+        margin:0px;
+        line-height:1;
+    }
+    .trafficGroups_sidePanel ul{
+        padding:10px 0px;
+        margin:0px;
+        border-top:#e5e5e5 solid 1px;
+    }
+    .trafficGroups_sidePanel li{
+        list-style:none;
+            border-bottom:#e5e5e5 solid 1px;
+        padding:0px;
+        margin-bottom:15px;
+    }
+    .trafficGroups_sidePanel ul.policyRules dt {
+        font-weight: normal;
+    }
+    .trafficGroups_sidePanel ul.policyRules dd{
+        margin:0px;
+        -webkit-margin-start: 0px;
+        line-height:1;
+    }
+    .trafficGroups_sidePanel ul.policyRules dl{
+        display:inline-block;
+        margin:0px;
+        font-size:11px;
+        color: #787878;
+    }
+    .rulesBiArrow{
+        position:relative;
+        display:inline-block;
+        top:-10px;
+        padding:10px 20px;
     }
 }
 .btn-bar {
@@ -2554,4 +2543,7 @@ font-style:normal;}
 .cc-svg .radial-dendrogram .ribbon {
     // stroke-width: 1;
     // stroke: red;
+}
+.padding-bottom-15 {
+    padding-bottom: 15px;
 }
