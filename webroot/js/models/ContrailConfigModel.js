@@ -47,23 +47,75 @@ define([
             });
             modelData["share_list"] =
                 new Backbone.Collection(shareModelCol);
-            var editagRefs = [];
+            var editApplicationRefs = [] , editagSiteRefs = [], editagDeploymentRefs = [], editagTierRefs = [];
+            var editTagsRefsArray = [];
             var tagrefs = getValueByJsonPath(modelData,
                     "tag_refs", []);
             if(tagrefs.length > 0) {
                 _.each(tagrefs, function(refs){
                     var fqName = refs.to;
                     if(fqName.length === 1){
-                        editagRefs.push(fqName[0]);
+                        if((fqName[0].indexOf('application') > -1)) {
+                            editApplicationRefs.push(fqName[0]);
+                            editTagsRefsArray.push(fqName[0]);
+                        }
+                        else if((fqName[0].indexOf('site') > -1)) {
+                            editagSiteRefs.push(fqName[0]);
+                            editTagsRefsArray.push(fqName[0]);
+                        }
+                        else if((fqName[0].indexOf('deployment') > -1)) {
+                            editagDeploymentRefs.push(fqName[0]);
+                            editTagsRefsArray.push(fqName[0]);
+                        }
+                        else if((fqName[0].indexOf('tier') > -1)) {
+                            editagTierRefs.push(fqName[0]);
+                            editTagsRefsArray.push(fqName[0]);
+                        }
                     }
                     else if(fqName.length === 3){
-                        editagRefs.push(fqName[0] +
-                                ":" + fqName[1] +
-                                ":" + fqName[2]);
+                        if((fqName[2].indexOf('application') > -1)) {
+                            editApplicationRefs.push(fqName[0] +
+                            ":" + fqName[1] +
+                            ":" + fqName[2]);
+                            editTagsRefsArray.push(fqName[0] +
+                                    ":" + fqName[1] +
+                                    ":" + fqName[2]);
+                        }
+                        else if((fqName[2].indexOf('site') > -1)) {
+                            editagSiteRefs.push(fqName[0] +
+                            ":" + fqName[1] +
+                            ":" + fqName[2]);
+                            editTagsRefsArray.push(fqName[0] +
+                                    ":" + fqName[1] +
+                                    ":" + fqName[2]);
+                        }
+                        else if((fqName[2].indexOf('deployment') > -1)) {
+                            editagDeploymentRefs.push(fqName[0] +
+                            ":" + fqName[1] +
+                            ":" + fqName[2]);
+                            editTagsRefsArray.push(fqName[0] +
+                                    ":" + fqName[1] +
+                                    ":" + fqName[2]);
+                        }
+                        else if((fqName[2].indexOf('tier') > -1)) {
+                            editagTierRefs.push(fqName[0] +
+                            ":" + fqName[1] +
+                            ":" + fqName[2]);
+                            editTagsRefsArray.push(fqName[0] +
+                                    ":" + fqName[1] +
+                                    ":" + fqName[2]);
+                        }
                     }
                 });
             }
-            modelData["tag_refs"] = editagRefs;
+            console.log("editTagsRefsArray");
+            console.log(editTagsRefsArray);
+            modelData["tag_refs"] = editTagsRefsArray;
+            modelData["Application"] = editApplicationRefs;
+            modelData["Site"] = editagSiteRefs;
+            modelData["Deployment"] = editagDeploymentRefs;
+            modelData["Tier"] = editagTierRefs;
+            //editagApplicationRefs , editagSiteRefs, editagDeploymentRefs, editagTierRefs;
             return modelData;
         },
 
@@ -129,16 +181,19 @@ define([
                 delete cfgObj.owner_visible;
             }
             //tags
-            var tagRefs = cfgObj.tag_refs.split(','), tagList = [];
-            _.each(tagRefs, function(refs){
-                if(refs === ""){
-                    tagList = [];
-                }
-                else{
-                    var actRef = refs.split(':');
-                     tagList.push({to: actRef});
-                }
-            });
+            tagList = [];
+            if(cfgObj.Application && cfgObj.Application != "None"){
+                tagList.push({to: cfgObj.Application.split(':')});
+            }
+            if(cfgObj.Site && cfgObj.Site != "None"){
+                tagList.push({to: cfgObj.Site.split(':')});
+            }
+            if(cfgObj.Deployment && cfgObj.Deployment != "None"){
+                tagList.push({to: cfgObj.Deployment.split(':')});
+            }
+            if(cfgObj.Tier && cfgObj.Tier != "None"){
+                tagList.push({to: cfgObj.Tier.split(':')});
+            }            
             cfgObj.tag_refs = tagList;
         },
 
