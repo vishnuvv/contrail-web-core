@@ -13026,7 +13026,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           n.label += '-' + n.data.labelAppend;
         }
         if (n.label && n.data.arcType) {
-          n.label = n.label.replace(new RegExp('_' + n.data.arcType + '$'), '');
+          n.label = n.label.replace(new RegExp('_' + n.data.arcType, 'g'), '');
         }
         var labelArcLengthDiff = void 0;
         n.labelFits = (labelArcLengthDiff = _this8.config.get('arcLabelLetterWidth') * n.label.length - n.arcLength) < 0;
