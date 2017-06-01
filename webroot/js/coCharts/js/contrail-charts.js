@@ -13031,7 +13031,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         var labelArcLengthDiff = void 0;
         n.labelFits = (labelArcLengthDiff = _this8.config.get('arcLabelLetterWidth') * n.label.length - n.arcLength) < 0;
         if (!n.labelFits) {
-          n.labelLengthToTrim = labelArcLengthDiff / _this8.config.get('arcLabelLetterWidth');
+          n.labelLengthToTrim = (labelArcLengthDiff + 3 * _this8.config.get('arcLabelLetterWidth')) / _this8.config.get('arcLabelLetterWidth');
         }
         if (_this8.config.get('labelFlow') === 'perpendicular') {
           n.labelFits = n.arcLength > 9 && _this8.config.get('innerRadius') / _this8.config.get('drillDownLevel') - _this8.config.get('arcLabelYOffset') > _this8.config.get('arcLabelLetterWidth') * n.label.length;
@@ -13244,6 +13244,8 @@ var RadialDendrogramView = function (_ContrailChartsView) {
   }, {
     key: '_onMousemove',
     value: function _onMousemove(d, el) {
+      var _this10 = this;
+
       if (this.config.attributes && this.config.attributes.showArcInfo == 'disable') {
         return;
       }
@@ -13260,7 +13262,13 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           left = _d3Selection$mouse2[0],
           top = _d3Selection$mouse2[1];
 
-      _Actionman2.default.fire('ShowComponent', this.config.get('tooltip'), { left: left, top: top }, d.data);
+      if (this.clearArcTootltip) {
+        clearTimeout(this.clearArcTootltip);
+      }
+      this.clearArcTootltip = setTimeout(function () {
+        _Actionman2.default.fire('ShowComponent', _this10.config.get('tooltip'), { left: left, top: top }, d.data);
+        document.getElementById(_this10.config.get('tooltip')).style.right = 'auto';
+      }, 300);
     }
   }, {
     key: '_onMouseout',
@@ -13271,6 +13279,9 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         }
       });
       this._render();
+      if (this.clearArcTootltip) {
+        clearTimeout(this.clearArcTootltip);
+      }
       _Actionman2.default.fire('HideComponent', this.config.get('tooltip'));
     }
   }, {
@@ -13287,6 +13298,9 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         this.config.set('drillDownLevel', this.params.drillDownLevel - 1)
       }
       this.config.set('drillDownLevel', this.params.drillDownLevel - 1)*/
+      if (this.clearArcTootltip) {
+        clearTimeout(this.clearArcTootltip);
+      }
       var levels = 2;
       //If clicked on 2nd level arc,collapse to 1st level
       if (d.depth == 2 || d.height == 2) levels = 1;
@@ -13306,18 +13320,35 @@ var RadialDendrogramView = function (_ContrailChartsView) {
   }, {
     key: '_onMousemoveLink',
     value: function _onMousemoveLink(d, el, e) {
+      var _this11 = this;
+
       if (this.config.attributes && this.config.attributes.showLinkTooltip) {
         var _d3Selection$mouse3 = d3Selection.mouse(this._container),
             _d3Selection$mouse4 = _slicedToArray(_d3Selection$mouse3, 2),
             left = _d3Selection$mouse4[0],
             top = _d3Selection$mouse4[1];
 
-        _Actionman2.default.fire('ShowComponent', this.config.get('tooltip'), { left: left, top: top }, d);
+        if (this.clearLinkTooltip) {
+          clearTimeout(this.clearLinkTooltip);
+        }
+        this.clearLinkTooltip = setTimeout(function () {
+          _Actionman2.default.fire('ShowComponent', _this11.config.get('tooltip'), { left: left, top: top }, d);
+          var tooltipId = document.getElementById(_this11.config.get('tooltip'));
+          if (left > _this11._container.offsetWidth / 2) {
+            tooltipId.style.right = 0;
+            tooltipId.style.left = 'auto';
+          } else {
+            tooltipId.style.right = 'auto';
+          }
+        }, 300);
       }
     }
   }, {
     key: '_onMouseoutLink',
     value: function _onMouseoutLink(d, el, e) {
+      if (this.clearLinkTooltip) {
+        clearTimeout(this.clearLinkTooltip);
+      }
       _Actionman2.default.fire('HideComponent', this.config.get('tooltip'));
     }
   }, {
