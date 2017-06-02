@@ -13020,7 +13020,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           return;
         }
         // Estimate arc length and wheather the label will fit (default letter width is assumed to be 5px).
-        n.arcLength = 6 * (n.y - _this8.params.arcLabelYOffset) * (n.angleRange[1] - n.angleRange[0]) / 360;
+        n.arcLength = 6 * (n.y - _this8.params.arcLabelYOffset[n.height - 1]) * (n.angleRange[1] - n.angleRange[0]) / 360;
         n.label = '' + n.data.namePath[n.data.namePath.length - 1];
         if (n.depth == 1 && n.data.labelAppend) {
           n.label += '-' + n.data.labelAppend;
@@ -13034,7 +13034,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           n.labelLengthToTrim = (labelArcLengthDiff + 3 * _this8.config.get('arcLabelLetterWidth')) / _this8.config.get('arcLabelLetterWidth');
         }
         if (_this8.config.get('labelFlow') === 'perpendicular') {
-          n.labelFits = n.arcLength > 9 && _this8.config.get('innerRadius') / _this8.config.get('drillDownLevel') - _this8.config.get('arcLabelYOffset') > _this8.config.get('arcLabelLetterWidth') * n.label.length;
+          n.labelFits = n.arcLength > 9 && _this8.config.get('innerRadius') / _this8.config.get('drillDownLevel') - _this8.params.arcLabelYOffset[n.height - 1] > _this8.config.get('arcLabelLetterWidth') * n.label.length;
         }
         _this8.arcs.push(n);
       });
@@ -13127,8 +13127,8 @@ var RadialDendrogramView = function (_ContrailChartsView) {
             var radians = [out1.radians, in1.radians, out2.radians, in2.radians];
             radians.sort();
             //Adding 10% buffer
-            var startWidth = Math.abs(radians[0] - radians[1]) * .1,
-                endWidth = Math.abs(radians[2] - radians[3]) * .1;
+            var startWidth = Math.abs(radians[0] - radians[1]) * .35,
+                endWidth = Math.abs(radians[2] - radians[3]) * .35;
             return ribbon({
               source: { startAngle: radians[0] + startWidth, endAngle: radians[1] - startWidth },
               target: { startAngle: radians[2] + endWidth, endAngle: radians[3] - endWidth }
@@ -13168,26 +13168,34 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         var arcLabelsPerpendicularData = this.params.labelFlow === 'perpendicular' ? this.arcs : [];
         // Along Arc
         var svgArcLabels = this.d3.selectAll('.arc-label.along-arc').data(arcLabelsAlongArcData);
-        var svgArcLabelsEnter = svgArcLabels.enter().append('text').attr('class', 'arc-label along-arc').attr('x', this.params.arcLabelXOffset).attr('dy', this.params.arcLabelYOffset);
+        var svgArcLabelsEnter = svgArcLabels.enter().append('text').attr('class', function (d) {
+          return 'arc-label along-arc arc-label-' + d.height;
+        }).attr('x', this.params.arcLabelXOffset).attr('dy', function (d) {
+          return _this9.params.arcLabelYOffset[d.height - 1];
+        });
         svgArcLabelsEnter.append('textPath').attr('xlink:href', function (d) {
           return '#' + d.data.namePath.join('-');
         }).attr('class', function (d) {
           return d.data.arcType;
         });
-        var svgArcLabelsEdit = svgArcLabelsEnter.merge(svgArcLabels).transition().ease(this.config.get('ease')).duration(this.params.duration).attr('x', this.params.arcLabelXOffset).attr('dy', this.params.arcLabelYOffset);
+        var svgArcLabelsEdit = svgArcLabelsEnter.merge(svgArcLabels).transition().ease(this.config.get('ease')).duration(this.params.duration).attr('x', this.params.arcLabelXOffset).attr('dy', function (d) {
+          return _this9.params.arcLabelYOffset[d.height - 1];
+        });
         svgArcLabelsEdit.select('textPath').attr('startOffset', '24%').text(function (d) {
           return _this9.config.get('showArcLabels') && d.labelFits ? d.label : d.label.slice(0, -(d.labelLengthToTrim + 3)) + '...';
         });
         svgArcLabels.exit().remove();
         // Perpendicular
         svgArcLabels = this.d3.selectAll('.arc-label.perpendicular').data(arcLabelsPerpendicularData);
-        svgArcLabelsEnter = svgArcLabels.enter().append('text').attr('class', 'arc-label perpendicular').merge(svgArcLabels).attr('transform', function (d) {
+        svgArcLabelsEnter = svgArcLabels.enter().append('text').attr('class', function (d) {
+          return 'arc-label perpendicular arc-label-' + d.height;
+        }).merge(svgArcLabels).attr('transform', function (d) {
           var alpha = (d.angleRange[1] + d.angleRange[0]) / 2 + 90;
           if ((d.angleRange[1] + d.angleRange[0]) / 2 < 180) {
             alpha -= 180;
           }
-          var x = (d.y + _this9.params.arcLabelYOffset) * Math.cos((d.angleRange[1] + d.angleRange[0] - 180) * Math.PI / 360) + _this9.params.arcLabelXOffset;
-          var y = (d.y + _this9.params.arcLabelYOffset) * Math.sin((d.angleRange[1] + d.angleRange[0] - 180) * Math.PI / 360);
+          var x = (d.y + _this9.params.arcLabelYOffset[d.height - 1]) * Math.cos((d.angleRange[1] + d.angleRange[0] - 180) * Math.PI / 360) + _this9.params.arcLabelXOffset;
+          var y = (d.y + _this9.params.arcLabelYOffset[d.height - 1]) * Math.sin((d.angleRange[1] + d.angleRange[0] - 180) * Math.PI / 360);
           return 'translate(' + x + ', ' + y + ') rotate(' + alpha + ')';
         }).style('text-anchor', function (d) {
           return (d.angleRange[1] + d.angleRange[0]) / 2 < 180 ? 'start' : 'end';
@@ -13209,7 +13217,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         var arc = d3Shape.arc().innerRadius(function (n) {
           return n.y;
         }).outerRadius(function (n) {
-          return n.y + _this9.params.arcWidth;
+          return n.y + _this9.params.arcWidth[n.height - 1];
         }).startAngle(function (n) {
           return Math.PI * n.angleRange[0] / 180;
         }).endAngle(function (n) {
@@ -13220,9 +13228,9 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         });
         svgArcs.enter().append('path').attr('id', function (d) {
           return d.data.namePath.join('-');
-        }).attr('class', function (d) {
-          return 'arc arc-' + d.depth + (d.data.arcType ? ' ' + d.data.arcType : '');
-        }).attr('d', arcEnter).merge(svgArcs).transition().ease(this.config.get('ease')).duration(this.params.duration).style('fill', function (d) {
+        }).attr('d', arcEnter).merge(svgArcs).attr('class', function (d) {
+          return 'arc arc-' + d.depth + (d.data.arcType ? ' ' + d.data.arcType : '') + (d.active ? ' active' : '');
+        }).transition().ease(this.config.get('ease')).duration(this.params.duration).style('fill', function (d) {
           return _this9.config.getColor([], _this9.config.get('levels')[d.depth - 1], d.data);
         }).attr('d', arc);
         svgArcs.exit().transition().ease(this.config.get('ease')).duration(this.params.duration).attr('d', arcEnter).remove();
@@ -13243,7 +13251,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
     }
   }, {
     key: '_onMousemove',
-    value: function _onMousemove(d, el) {
+    value: function _onMousemove(d, el, e) {
       var _this10 = this;
 
       if (this.config.attributes && this.config.attributes.showArcInfo == 'disable') {
@@ -13254,6 +13262,9 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         ribbon.active = Boolean(_lodash2.default.find(leaves, function (leaf) {
           return leaf.data.linkId === ribbon.id;
         })) ? true : ribbon.selected;
+      });
+      _lodash2.default.each(this.arcs, function (arc) {
+        arc.active = Boolean(arc.data.namePath && arc.data.namePath.join('-') == e.target.id);
       });
       this._render();
 
@@ -13277,6 +13288,9 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         if (!ribbon.selected) {
           ribbon.active = false;
         }
+      });
+      _lodash2.default.each(this.arcs, function (arc) {
+        arc.active = false;
       });
       this._render();
       if (this.clearArcTootltip) {
