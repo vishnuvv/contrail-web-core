@@ -2326,6 +2326,9 @@ div#alarms-event-drops .grid-stack-item-content {
 }
 $label_color: #3182bd;
 .traffic-groups-view {
+    .widget-toolbar {
+        display: none;
+    }
     .select-dropdown,.where-dropdown {
         width: 400px;
         display: block;
