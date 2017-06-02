@@ -133,13 +133,34 @@ define([
         }
     });
     function tagsParser(result, tagName) {
- var textValue, actValue, tagsArray = [];
+        var textValue, actValue, tagsArray = [];
         if(tagName != "label"){
             tagsArray.push({'text':"None","value":"None"});
         }
+        var pHashParam = getValueByJsonPath(layoutHandler.getURLHashObj(),"p");
+        var isGlobal = false;
+        if (pHashParam != null) {
+            var parts = pHashParam.split('_');
+            if(parts[0] != null && parts[0] == 'config' &&
+                    parts[1] != null && parts[1] == 'infra'){
+                isGlobal = true;
+            }
+        }
         for(var i=0; i<result.length; i++){
           tagsDetails = result[i].tags;
-          for(var j= 0; j<tagsDetails.length; j++){
+          for(var j= 0; j < tagsDetails.length; j++){
+              //If its a global page and if the tags are from project then continue
+              //If not global and not from same project then continue
+              if (isGlobal && tagsDetails[j]['tag'].fq_name.length > 1) {
+                  continue;
+              } else if (!isGlobal && tagsDetails[j]['tag'].fq_name.length > 1) {
+                  var domain = contrail.getCookie(cowc.COOKIE_DOMAIN_DISPLAY_NAME);
+                  var project = contrail.getCookie(cowc.COOKIE_PROJECT_DISPLAY_NAME);
+                  if (domain != tagsDetails[j]['tag'].fq_name[0] ||
+                          project != tagsDetails[j]['tag'].fq_name[1]) {
+                      continue;
+                  }
+              }
               if(tagsDetails[j].tag.fq_name &&
                       tagsDetails[j].tag.fq_name.length === 1) {
                   actValue = tagsDetails[j].tag.fq_name[0];
@@ -150,20 +171,19 @@ define([
                   ":" + tagsDetails[j].tag.fq_name[2];
               }
               data = {
-                      "text":tagsDetails[j].tag.name,
+                      "text": (tagsDetails[j]['tag'].fq_name.length == 1)?
+                                  "global:" + tagsDetails[j].tag.name :
+                                   tagsDetails[j].tag.name,
                       "value":actValue
                  };
               if (tagsDetails[j].tag.tag_type === tagName) {
                   tagsArray.push(data);
               }
-             
           }
-      }
-        console.log(tagsArray);
+        }
         return tagsArray;
-    
     }
-    
+
     function getDataSourceForDropdown (tagName) {
         return {
             type: 'remote',
