@@ -47,7 +47,8 @@ define([
             });
             modelData["share_list"] =
                 new Backbone.Collection(shareModelCol);
-            var editApplicationRefs = "" , editagSiteRefs = "", editagDeploymentRefs = "", editagTierRefs = "";
+            var editApplicationRefs = "" , editagSiteRefs = "", 
+                editagDeploymentRefs = "", editagTierRefs = "", editagLabelsRef = '';
             var editTagsRefsArray = [];
             var tagrefs = getValueByJsonPath(modelData,
                     "tag_refs", []);
@@ -81,7 +82,14 @@ define([
                         } else {
                             editagTierRefs += ',' + fqName.join(":");
                         }
-                    }                    
+                    } 
+                    if((fqName[fqName.length -1].indexOf('label') > -1)) {
+                        if(editagLabelsRef === '') {
+                            editagLabelsRef = fqName.join(":");
+                        } else {
+                            editagLabelsRef += ',' + fqName.join(":");
+                        }
+                    }     
                 });
             }
             
@@ -90,6 +98,7 @@ define([
             modelData["Site"] = editagSiteRefs;
             modelData["Deployment"] = editagDeploymentRefs;
             modelData["Tier"] = editagTierRefs;
+            modelData["Labels"] = editagLabelsRef;
             //editagApplicationRefs , editagSiteRefs, editagDeploymentRefs, editagTierRefs;
             return modelData;
         },
@@ -157,7 +166,7 @@ define([
             }
             //tags
             tagList = [];
-            var appRefs, siteRefs, deploymentRefs, tierRefs;
+            var appRefs, siteRefs, deploymentRefs, tierRefs, labelRefs;
              if(cfgObj.Application && cfgObj.Application != "None"){
                  appRefs = cfgObj.Application.split(',');
                  _.each(appRefs, function(refs){
@@ -182,6 +191,13 @@ define([
              if(cfgObj.Tier && cfgObj.Tier != "None"){
                  tierRefs = cfgObj.Tier.split(',');
                  _.each(tierRefs, function(refs){
+                         var actRef = refs.split(':');
+                          tagList.push({to: actRef});
+                 });
+            } 
+             if(cfgObj.Labels && cfgObj.Labels != "None"){
+                 labelRefs = cfgObj.Labels.split(',');
+                 _.each(labelRefs, function(refs){
                          var actRef = refs.split(':');
                           tagList.push({to: actRef});
                  });

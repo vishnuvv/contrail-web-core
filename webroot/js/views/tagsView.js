@@ -105,36 +105,28 @@ define([
                                     }
                                 }
                             ]
-                        }
-                        /*{
-                            elementId: 'lables',
-                            view: "FormDropdownView",
-                            viewConfig: {
-                                label: 'Lables',
-                                path : 'lables',
-                                class: 'col-xs-6',
-                                dataBindValue : 'lables',
-                                elementConfig: {
-                                    placeholder: 'Select Tags',
-                                    dataTextField : "text",
-                                    dataValueField : "value",
-                                    dataSource : getDataSourceForDropdown('lables')
-//                                    dataSource: {
-//                                        type: 'local',
-//                                        data : [{
-//                                          "text":"hr",
-//                                          "value":"hr"
-//                                      }]
-//                                    }
-//                                    data:[{
-//                                        'text':"Site",
-//                                        'value':"1"
-//                                    }]
-                                    //data:tags_options_lables
+                        },
+                        {
+                            columns: [
+                                {
+                                    elementId: 'Labels',
+                                    view: 'FormMultiselectView',
+                                    viewConfig: {
+                                        label: "Labels",
+                                        path: 'Labels',
+                                        dataBindValue: 'Labels',
+                                        class: 'col-xs-6',
+                                        elementConfig: {
+                                            dataTextField: "text",
+                                            dataValueField: "value",
+                                            placeholder:
+                                                "Select Labels",
+                                                dataSource : getDataSourceForDropdown('label')
+                                        }
+                                    }
                                 }
-                            }
-                        
-                        }*/
+                            ]
+                        }
                     ]
                 }
             }
@@ -142,7 +134,9 @@ define([
     });
     function tagsParser(result, tagName) {
  var textValue, actValue, tagsArray = [];
-         tagsArray.push({'text':"None","value":"None"});
+        if(tagName != "label"){
+            tagsArray.push({'text':"None","value":"None"});
+        }
         for(var i=0; i<result.length; i++){
           tagsDetails = result[i].tags;
           for(var j= 0; j<tagsDetails.length; j++){
