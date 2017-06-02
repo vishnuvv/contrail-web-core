@@ -36,7 +36,7 @@ define([
                                             dataTextField: "text",
                                             dataValueField: "value",
                                             placeholder:
-                                                "Select Tags",
+                                                "Select Application Tag",
                                                 dataSource : getDataSourceForDropdown('application')
                                         }
                                     }
@@ -57,7 +57,7 @@ define([
                                             dataTextField: "text",
                                             dataValueField: "value",
                                             placeholder:
-                                                "Select Tags",
+                                                "Select Deployment Tag",
                                                 dataSource : getDataSourceForDropdown('deployment')
                                         }
                                     }
@@ -78,7 +78,7 @@ define([
                                             dataTextField: "text",
                                             dataValueField: "value",
                                             placeholder:
-                                                "Select Tags",
+                                                "Select Site Tag",
                                                 dataSource : getDataSourceForDropdown('site')
                                         }
                                     }
@@ -99,7 +99,7 @@ define([
                                             dataTextField: "text",
                                             dataValueField: "value",
                                             placeholder:
-                                                "Select Tags",
+                                                "Select Tier Tag",
                                                 dataSource : getDataSourceForDropdown('tier')
                                         }
                                     }
