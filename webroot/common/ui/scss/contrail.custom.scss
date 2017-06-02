@@ -2405,9 +2405,10 @@ $label_color: #3182bd;
     }
     .trafficGroups_sidePanel{
         height:100%;
-        background-color:#fdfdfd;
         width:330px;
         padding:10px 20px;
+        background-color: #fdfdfd;
+        overflow:auto;
         -webkit-box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
         -moz-box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
         box-shadow: -3px 0px 2px -2px rgba(0,0,0,0.1);
@@ -2425,6 +2426,7 @@ $label_color: #3182bd;
         display:inline-block;
         color:#787878;
         margin-left:-10px;
+        font-size: 14px;
     }
     .trafficGroups_sidePanel h1{
         font-size:14px;
@@ -2446,18 +2448,19 @@ $label_color: #3182bd;
         line-height:1;
     }
     .trafficGroups_sidePanel ul{
-        padding:10px 0px;
+        padding:15px 0px;
         margin:0px;
         border-top:#e5e5e5 solid 1px;
     }
     .trafficGroups_sidePanel li{
         list-style:none;
-            border-bottom:#e5e5e5 solid 1px;
-        padding:0px;
+        border-bottom:#e5e5e5 solid 1px;
+        padding-bottom: 15px;
         margin-bottom:15px;
     }
-    .trafficGroups_sidePanel ul.policyRules dt {
-        font-weight: normal;
+    .trafficGroups_sidePanel ul.policyRules
+     dt, dd {
+        font-weight: 600;
     }
     .trafficGroups_sidePanel ul.policyRules dd{
         margin:0px;
