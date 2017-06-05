@@ -13154,11 +13154,13 @@ var RadialDendrogramView = function (_ContrailChartsView) {
 
           var outerPath = _radialLine(d.outerPoints);
           var innerPath = _radialLine(d.innerPoints);
+          var endingStitchLargeArc = 0;
+          if (Math.abs(d.innerPoints.slice(-1)[0][0] - d.outerPoints.slice(0, 1)[0][0]) > 180) {
+            endingStitchLargeArc = 1;
+          }
           var innerStitch = 'A' + d.outerPoints[0][1] + ' ' + d.outerPoints[0][1] + ' 0 0 0 ';
-          var endingStitch = 'A' + d.outerPoints[0][1] + ' ' + d.outerPoints[0][1] + ' 0 0 0 ' + _radialLine([d.outerPoints[0]]).substr(1);
-          // return outerPath
+          var endingStitch = 'A' + d.outerPoints[0][1] + ' ' + d.outerPoints[0][1] + ' 0 ' + endingStitchLargeArc + ' 0 ' + _radialLine([d.outerPoints[0]]).substr(1);
 
-          // return innerPath + outerPath
           return outerPath + innerStitch + innerPath.substr(1) + endingStitch;
         });
         _svgLinks.exit().remove();
