@@ -2555,7 +2555,12 @@
                     <dt>src {{this.srcType}}</dt><dd>{{this.src}}</dd>
                 </dl>
                 <div class="rulesBiArrow col-xs-2">
-                  <img src="/img/double_arrow.svg"/>
+                  {{#IfCompare this.direction 'uni' operator='=='}}
+                    <img src="/img/single_arrow.svg"/>
+                  {{/IfCompare}}
+                  {{#IfCompare this.direction 'bi' operator='=='}}
+                    <img src="/img/double_arrow.svg"/>
+                  {{/IfCompare}}
                 </div>
                 <dl class="col-xs-4">
                     <dt>dst {{this.dstType}}</dt><dd>{{this.dst}}</dd>
