@@ -2566,6 +2566,14 @@
                     <dt>dst {{this.dstType}}</dt><dd>{{this.dst}}</dd>
                 </dl>
             </div>
+            {{#IfCompare this.service null operator='!='}}
+                <h3> Service </h3>
+                <div class="row">
+                    <dl class="col-xs-8">
+                        <dt>{{this.service}}</dt>
+                    </dl>
+                </div>
+            {{/IfCompare}}
         </li>
         {{/each}}
     </ul>
