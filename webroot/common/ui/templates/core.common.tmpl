@@ -2550,7 +2550,7 @@
                 </dl>
             </div>
             <h3>{{this.simple_action}}</h3>
-            <div class="row">
+            <div class="row padding-bottom-15">
                 <dl class="col-xs-4">
                     <dt>src {{this.srcType}}</dt><dd>{{this.src}}</dd>
                 </dl>
@@ -2568,9 +2568,30 @@
             </div>
             {{#IfCompare this.service null operator='!='}}
                 <h3> Service </h3>
-                <div class="row">
+                <div class="row padding-bottom-15">
                     <dl class="col-xs-8">
                         <dt>{{this.service}}</dt>
+                    </dl>
+                </div>
+            {{/IfCompare}}
+            <h3> Statistics </h3>
+            <h6 class="pull-right">{{this.srcId}}</h6>
+            <div class="row padding-bottom-15">
+                <dl class="col-xs-8">
+                    <dt class="pull-left"> Sessions Initiated: </dt>
+                    <dd class="pull-right"> {{this.src_session_initiated}}</dd>
+                    <dt class="pull-left"> Sessions Responded: </dt>
+                    <dd class="pull-right"> {{this.src_session_responded}}</dd>
+                </dl>
+            </div>
+            {{#IfCompare this.srcId this.dstId operator='!='}}
+                <h6 class="pull-right">{{this.dstId}}</h6>
+                <div class="row padding-bottom-15">
+                    <dl class="col-xs-8">
+                        <dt class="pull-left"> Sessions Initiated: </dt>
+                        <dd class="pull-right"> {{this.dst_session_initiated}}</dd>
+                        <dt class="pull-left"> Sessions Responded: </dt>
+                        <dd class="pull-right"> {{this.dst_session_responded}}</dd>
                     </dl>
                 </div>
             {{/IfCompare}}
