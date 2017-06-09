@@ -12652,9 +12652,9 @@ var RadialDendrogramView = function (_ContrailChartsView) {
       _lodash2.default.each(data, function (d, index) {
         // Parsing a data element should return a 2 element array: [source, destination]
         var leafs = hierarchyConfig.parse(d);
-        if (leafs[0].value <= 0 || leafs[1].value <= 0) {
-          return;
-        }
+        /*if (leafs[0].value <= 0 || leafs[1].value <= 0) {
+          return
+        }*/
         // Check if we havent already created a node pair (link) with the same id.
         var foundSrcNode = _lodash2.default.find(leafNodes, function (leafNode) {
           var found = false;
@@ -13178,7 +13178,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         svgArcLabelsEnter.append('textPath').attr('xlink:href', function (d) {
           return '#' + d.data.namePath.join('-');
         }).attr('class', function (d) {
-          return d.data.arcType ? d.data.arcType.split(' ')[0] : '' ;
+          return d.data.arcType;
         });
         var svgArcLabelsEdit = svgArcLabelsEnter.merge(svgArcLabels).transition().ease(this.config.get('ease')).duration(this.params.duration).attr('x', this.params.arcLabelXOffset).attr('dy', function (d) {
           return _this9.params.arcLabelYOffset[d.height - 1];
@@ -13231,7 +13231,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         svgArcs.enter().append('path').attr('id', function (d) {
           return d.data.namePath.join('-');
         }).attr('d', arcEnter).merge(svgArcs).attr('class', function (d) {
-          return 'arc arc-' + d.depth + (d.data.arcType ? ' ' + d.data.arcType.split(" ")[0] : '') + (d.active ? ' active' : '');
+          return 'arc arc-' + d.depth + (d.data.arcType ? ' ' + d.data.arcType : '') + (d.active ? ' active' : '');
         }).transition().ease(this.config.get('ease')).duration(this.params.duration).style('fill', function (d) {
           return _this9.config.getColor([], _this9.config.get('levels')[d.depth - 1], d.data);
         }).attr('d', arc);
