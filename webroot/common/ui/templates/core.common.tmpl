@@ -2519,19 +2519,6 @@
                 <img src="/img/double_arrow.svg"/>
             <span> {{this.dest}} </span>
             </header>
-            <!--<ul class="linkInfo">
-               {{#each this.linkData}}
-                <li>
-                    <div>Traffic statistics from "{{this.app_name}}"</div>
-                    <div class="trafficInfo">
-	                    Traffic In: {{this.trafficIn}}
-                    </div>
-                    <div class="trafficInfo">
-	                    Traffic Out: {{this.trafficOut}}
-                    </div>
-                </li>
-               {{/each}}
-            </ul>-->
             <div class="traffic-rules">
 
             </div>
@@ -2549,23 +2536,25 @@
                     <dt>Rule: {{this.rule_name}}</dt>
                 </dl>
             </div>
-            <h3>{{this.simple_action}}</h3>
-            <div class="row padding-bottom-15">
-                <dl class="col-xs-4">
-                    <dt>src {{this.srcType}}</dt><dd>{{this.src}}</dd>
-                </dl>
-                <div class="rulesBiArrow col-xs-2">
-                  {{#IfCompare this.direction 'uni' operator='=='}}
-                    <img src="/img/single_arrow.svg"/>
-                  {{/IfCompare}}
-                  {{#IfCompare this.direction 'bi' operator='=='}}
-                    <img src="/img/double_arrow.svg"/>
-                  {{/IfCompare}}
+            {{#IfCompare this.src null operator = '!='}}
+                <h3>{{this.simple_action}}</h3>
+                <div class="row padding-bottom-15">
+                    <dl class="col-xs-4">
+                        <dt>src {{this.srcType}}</dt><dd>{{this.src}}</dd>
+                    </dl>
+                    <div class="rulesBiArrow col-xs-2">
+                      {{#IfCompare this.direction 'uni' operator='=='}}
+                        <img src="/img/single_arrow.svg"/>
+                      {{/IfCompare}}
+                      {{#IfCompare this.direction 'bi' operator='=='}}
+                        <img src="/img/double_arrow.svg"/>
+                      {{/IfCompare}}
+                    </div>
+                    <dl class="col-xs-4">
+                        <dt>dst {{this.dstType}}</dt><dd>{{this.dst}}</dd>
+                    </dl>
                 </div>
-                <dl class="col-xs-4">
-                    <dt>dst {{this.dstType}}</dt><dd>{{this.dst}}</dd>
-                </dl>
-            </div>
+            {{/IfCompare}}
             {{#IfCompare this.service null operator='!='}}
                 <h3> Service </h3>
                 <div class="row padding-bottom-15">
