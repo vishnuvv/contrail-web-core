@@ -12652,9 +12652,9 @@ var RadialDendrogramView = function (_ContrailChartsView) {
       _lodash2.default.each(data, function (d, index) {
         // Parsing a data element should return a 2 element array: [source, destination]
         var leafs = hierarchyConfig.parse(d);
-        /*if (leafs[0].value <= 0 || leafs[1].value <= 0) {
-          return
-        }*/
+        if (leafs[0].value <= 0 || leafs[1].value <= 0) {
+          return;
+        }
         // Check if we havent already created a node pair (link) with the same id.
         var foundSrcNode = _lodash2.default.find(leafNodes, function (leafNode) {
           var found = false;
