@@ -2539,7 +2539,7 @@
             {{#IfCompare this.src null operator = '!='}}
                 <h3>{{this.simple_action}}</h3>
                 <div class="row padding-bottom-15">
-                    <dl class="col-xs-4">
+                    <dl class="col-xs-5">
                         <dt>src {{this.srcType}}</dt><dd>{{this.src}}</dd>
                     </dl>
                     <div class="rulesBiArrow col-xs-2">
@@ -2550,7 +2550,7 @@
                         <img src="/img/double_arrow.svg"/>
                       {{/IfCompare}}
                     </div>
-                    <dl class="col-xs-4">
+                    <dl class="col-xs-5">
                         <dt>dst {{this.dstType}}</dt><dd>{{this.dst}}</dd>
                     </dl>
                 </div>
@@ -2564,23 +2564,31 @@
                 </div>
             {{/IfCompare}}
             <h3> Statistics </h3>
-            <h6 class="pull-right">{{this.srcId}}</h6>
+            <h6 class="row text-right">{{this.srcId}}</h6>
             <div class="row padding-bottom-15">
-                <dl class="col-xs-8">
-                    <dt class="pull-left"> Sessions Initiated: </dt>
-                    <dd class="pull-right"> {{this.src_session_initiated}}</dd>
-                    <dt class="pull-left"> Sessions Responded: </dt>
-                    <dd class="pull-right"> {{this.src_session_responded}}</dd>
+                <dl class="col-xs-12">
+                    <div class="row">
+                        <dt class="col-xs-6"> Sessions Initiated: </dt>
+                        <dd class="col-xs-2"> {{this.src_session_initiated}}</dd>
+                    </div>
+                    <div class="row">
+                        <dt class="col-xs-6"> Sessions Responded: </dt>
+                        <dd class="col-xs-2"> {{this.src_session_responded}}</dd>
+                    </div>
                 </dl>
             </div>
             {{#IfCompare this.srcId this.dstId operator='!='}}
-                <h6 class="pull-right">{{this.dstId}}</h6>
+                <h6 class="row text-right">{{this.dstId}}</h6>
                 <div class="row padding-bottom-15">
-                    <dl class="col-xs-8">
-                        <dt class="pull-left"> Sessions Initiated: </dt>
-                        <dd class="pull-right"> {{this.dst_session_initiated}}</dd>
-                        <dt class="pull-left"> Sessions Responded: </dt>
-                        <dd class="pull-right"> {{this.dst_session_responded}}</dd>
+                    <dl class="col-xs-12">
+                        <div class="row">
+                            <dt class="col-xs-6"> Sessions Initiated: </dt>
+                            <dd class="col-xs-2"> {{this.dst_session_initiated}}</dd>
+                        </div>
+                        <div class="row">
+                            <dt class="col-xs-6"> Sessions Responded: </dt>
+                            <dd class="col-xs-2"> {{this.dst_session_responded}}</dd>
+                        </div>
                     </dl>
                 </div>
             {{/IfCompare}}
@@ -2746,21 +2754,21 @@
         <div class="col-md-4">
             <dl>
                 <dd style="text-align: center;">
-	            {{#IfCompare severity 1 operator='<='}}
-	                <div data-color=red class="circle red {{#IfCompare ack false}}filled{{/IfCompare}} alarms-circle-grid-style alarms-circle-display-flex" style="vertical-align: top;"></div>
-	                <i class="fa fa-clock-o" style="cursor:default"></i>
-	            {{/IfCompare}}
-	            {{#IfCompare severity 1 operator='>'}}
-	                <div data-color=orange class="circle orange {{#IfCompare ack false}}filled{{/IfCompare}} alarms-circle-grid-style alarms-circle-display-flex" style="vertical-align: top;"></div>
-	                <i class="fa fa-clock-o" style="cursor:default"></i>
-	            {{/IfCompare}}
-	            </dd>
-	            <dd style="text-align: center;">
-	            {{#IfCompare timeDiff null operator='!='}}
-		            <span class="notification-time-stamp"> {{timeDiff}} </span>
-		        {{/IfCompare}}
-		        </dd>
-	        </dl>
+                {{#IfCompare severity 1 operator='<='}}
+                    <div data-color=red class="circle red {{#IfCompare ack false}}filled{{/IfCompare}} alarms-circle-grid-style alarms-circle-display-flex" style="vertical-align: top;"></div>
+                    <i class="fa fa-clock-o" style="cursor:default"></i>
+                {{/IfCompare}}
+                {{#IfCompare severity 1 operator='>'}}
+                    <div data-color=orange class="circle orange {{#IfCompare ack false}}filled{{/IfCompare}} alarms-circle-grid-style alarms-circle-display-flex" style="vertical-align: top;"></div>
+                    <i class="fa fa-clock-o" style="cursor:default"></i>
+                {{/IfCompare}}
+                </dd>
+                <dd style="text-align: center;">
+                {{#IfCompare timeDiff null operator='!='}}
+                    <span class="notification-time-stamp"> {{timeDiff}} </span>
+                {{/IfCompare}}
+                </dd>
+            </dl>
         </div>
         <div class="col-md-8">
             {{#IfCompare display_name null operator='!='}}
@@ -3093,8 +3101,8 @@
     </div>
     <div class="alarms-event-log-container">
         <div class="row">
-	        <span>Event Log</span>
-	    </div>
+            <span>Event Log</span>
+        </div>
         <div class="alarms-event-log-content"/>
     </div>
 </script>
