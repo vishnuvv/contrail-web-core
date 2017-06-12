@@ -13180,7 +13180,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         }).attr('class', function (d) {
           return d.data.arcType;
         });
-        var svgArcLabelsEdit = svgArcLabelsEnter.merge(svgArcLabels).transition().ease(this.config.get('ease')).duration(this.params.duration).attr('x', this.params.arcLabelXOffset).attr('dy', function (d) {
+        var svgArcLabelsEdit = svgArcLabelsEnter.merge(svgArcLabels).transition().ease(this.config.get('ease')).duration(this.params.labelDuration != null ? this.params.labelDuration : this.params.duration).attr('x', this.params.arcLabelXOffset).attr('dy', function (d) {
           return _this9.params.arcLabelYOffset[d.height - 1];
         });
         svgArcLabelsEdit.select('textPath').attr('startOffset', function(d) {
