@@ -13183,8 +13183,10 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         var svgArcLabelsEdit = svgArcLabelsEnter.merge(svgArcLabels).transition().ease(this.config.get('ease')).duration(this.params.duration).attr('x', this.params.arcLabelXOffset).attr('dy', function (d) {
           return _this9.params.arcLabelYOffset[d.height - 1];
         });
-        svgArcLabelsEdit.select('textPath').attr('startOffset', '24%').text(function (d) {
-          return _this9.config.get('showArcLabels') && d.labelFits ? d.label : d.label.slice(0, -(d.labelLengthToTrim + 3)) + '...';
+        svgArcLabelsEdit.select('textPath').attr('startOffset', function(d) {
+          return d.arcLength / 2;
+        }).text(function (d) {
+          return _this9.config.get('showArcLabels') && d.labelFits ? d.label : d.label.slice(0, -(d.labelLengthToTrim)) + '...';
         });
         svgArcLabels.exit().remove();
         // Perpendicular
