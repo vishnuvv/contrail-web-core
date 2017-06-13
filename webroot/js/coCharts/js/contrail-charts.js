@@ -13178,15 +13178,15 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         svgArcLabelsEnter.append('textPath').attr('xlink:href', function (d) {
           return '#' + d.data.namePath.join('-');
         }).attr('class', function (d) {
-          return d.data.arcType;
+          return d.data.arcType ? d.data.arcType.split(' ')[0] : '';
         });
         var svgArcLabelsEdit = svgArcLabelsEnter.merge(svgArcLabels).transition().ease(this.config.get('ease')).duration(this.params.labelDuration != null ? this.params.labelDuration : this.params.duration).attr('x', this.params.arcLabelXOffset).attr('dy', function (d) {
           return _this9.params.arcLabelYOffset[d.height - 1];
         });
-        svgArcLabelsEdit.select('textPath').attr('startOffset', function(d) {
+        svgArcLabelsEdit.select('textPath').attr('startOffset', function (d) {
           return d.arcLength / 2;
         }).text(function (d) {
-          return _this9.config.get('showArcLabels') && d.labelFits ? d.label : d.label.slice(0, -(d.labelLengthToTrim)) + '...';
+          return _this9.config.get('showArcLabels') && d.labelFits ? d.label : d.label.slice(0, -d.labelLengthToTrim) + '...';
         });
         svgArcLabels.exit().remove();
         // Perpendicular
@@ -13233,7 +13233,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         svgArcs.enter().append('path').attr('id', function (d) {
           return d.data.namePath.join('-');
         }).attr('d', arcEnter).merge(svgArcs).attr('class', function (d) {
-          return 'arc arc-' + d.depth + (d.data.arcType ? ' ' + d.data.arcType : '') + (d.active ? ' active' : '');
+          return 'arc arc-' + d.depth + (d.data.arcType ? ' ' + d.data.arcType.split(' ')[0] : '') + (d.active ? ' active' : '');
         }).transition().ease(this.config.get('ease')).duration(this.params.duration).style('fill', function (d) {
           return _this9.config.getColor([], _this9.config.get('levels')[d.depth - 1], d.data);
         }).attr('d', arc);
