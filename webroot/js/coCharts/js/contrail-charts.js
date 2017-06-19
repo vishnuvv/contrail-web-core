@@ -12652,9 +12652,6 @@ var RadialDendrogramView = function (_ContrailChartsView) {
       _lodash2.default.each(data, function (d, index) {
         // Parsing a data element should return a 2 element array: [source, destination]
         var leafs = hierarchyConfig.parse(d);
-        if (leafs[0].value <= 0 || leafs[1].value <= 0) {
-          return;
-        }
         // Check if we havent already created a node pair (link) with the same id.
         var foundSrcNode = _lodash2.default.find(leafNodes, function (leafNode) {
           var found = false;
@@ -12691,13 +12688,15 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         var foundLeafNode = null;
         if (foundSrcNode != null) foundLeafNode = foundSrcNode;else foundLeafNode = foundDstNode;
         if (foundLeafNode) {
-          foundLeafNode.value += foundLeafNode.id === leafs[0].id ? leafs[0].value : leafs[1].value;
-          foundLeafNode.otherNode.value += foundLeafNode.otherNode.id === leafs[0].id ? leafs[0].value : leafs[1].value;
           _this2.valueSum += leafs[0].value + leafs[1].value;
           if (foundSrcNode) {
+            foundSrcNode.value += foundLeafNode.id === leafs[0].id ? leafs[0].value : leafs[1].value;
+            foundSrcNode.otherNode.value += foundLeafNode.otherNode.id === leafs[0].id ? leafs[0].value : leafs[1].value;
             foundSrcNode.dataChildren.push(d);
           }
           if (foundDstNode) {
+            foundDstNode.value += foundLeafNode.id === leafs[0].id ? leafs[0].value : leafs[1].value;
+            foundDstNode.otherNode.value += foundLeafNode.otherNode.id === leafs[0].id ? leafs[0].value : leafs[1].value;
             foundDstNode.dataChildren.push(d);
           }
         } else {
@@ -12754,8 +12753,17 @@ var RadialDendrogramView = function (_ContrailChartsView) {
   }, {
     key: '_prepareHierarchyRootNode',
     value: function _prepareHierarchyRootNode() {
+      var zeroDataLinks = 0;
+      this.hierarchyRootNode = d3Hierarchy.hierarchy(this.rootNode).each(function (d) {
+          if (d.data && d.data.linkId && d.data.value == 0) {
+              d.data.value = 1;
+              zeroDataLinks +=1;
+          }
+      });
+      this.valueSum += zeroDataLinks;
+
       var valueScale = this.config.get('valueScale').domain([0.01, this.valueSum]).range([0, 360]);
-      this.hierarchyRootNode = d3Hierarchy.hierarchy(this.rootNode).sum(function (d) {
+      this.hierarchyRootNode = this.hierarchyRootNode.sum(function (d) {
         return valueScale(d.value);
       }).sort(function (a, b) {
         return b.value - a.value;
