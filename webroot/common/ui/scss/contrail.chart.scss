@@ -9,7 +9,7 @@
  */
 
 $color_external_label: #000;
-$color_external_arc: #d0abd6;
+$color_external_arc: #a392a7;
 .nvd3 .nv-axis path {
     stroke: #ccc;
 }
@@ -359,7 +359,7 @@ input.ace-input[type=radio] + .ace-lbl.inactive::before {
     font-weight: normal;
 }
 #traffic-groups-radial-chart #chartBox {
-    width:80vh;
+    width:74vh;
     margin: 0 auto;
     .cc-svg .radial-dendrogram {
 		.arc-label {

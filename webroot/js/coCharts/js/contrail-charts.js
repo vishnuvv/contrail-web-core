@@ -12705,6 +12705,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
             var children = _this2.rootNode.children;
             var node = null;
             var namePath = [];
+            var displayLabels = [];
             var currLeaf = leaf;
             _lodash2.default.each(leaf.names, function (name, depth) {
               _this2.maxDepth = Math.max(_this2.maxDepth, depth + 1);
@@ -12712,6 +12713,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
                 return;
               }
               namePath.push(name);
+              displayLabels.push(currLeaf.displayLabels[depth]);
               node = _lodash2.default.find(children, function (child) {
                 return child.name === name;
               });
@@ -12721,6 +12723,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
                   labelAppend: currLeaf.labelAppend,
                   arcType: currLeaf.type,
                   namePath: namePath.slice(0),
+                  displayLabels: displayLabels.slice(0),
                   children: [],
                   level: depth + 1
                 };
@@ -13040,17 +13043,15 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         }
         // Estimate arc length and wheather the label will fit (default letter width is assumed to be 5px).
         n.arcLength = 6 * (n.y - _this8.params.arcLabelYOffset[n.height - 1]) * (n.angleRange[1] - n.angleRange[0]) / 360;
-        n.label = '' + n.data.namePath[n.data.namePath.length - 1];
+        var namePath = (n.data.displayLabels && n.data.displayLabels.length > 0) ? n.data.displayLabels : n.data.namePath;
+        n.label = '' + namePath[namePath.length - 1];
         if (n.depth == 1 && n.data.labelAppend) {
           n.label += '-' + n.data.labelAppend;
-        }
-        if (n.label && n.data.arcType) {
-          n.label = n.label.replace(new RegExp('_' + n.data.arcType, 'g'), '');
         }
         var labelArcLengthDiff = void 0;
         n.labelFits = (labelArcLengthDiff = _this8.config.get('arcLabelLetterWidth') * n.label.length - n.arcLength) < 0;
         if (!n.labelFits) {
-          n.labelLengthToTrim = (labelArcLengthDiff + 3 * _this8.config.get('arcLabelLetterWidth')) / _this8.config.get('arcLabelLetterWidth');
+          n.labelLengthToTrim = (labelArcLengthDiff + 4 * _this8.config.get('arcLabelLetterWidth')) / _this8.config.get('arcLabelLetterWidth');
         }
         if (_this8.config.get('labelFlow') === 'perpendicular') {
           n.labelFits = n.arcLength > 9 && _this8.config.get('innerRadius') / _this8.config.get('drillDownLevel') - _this8.params.arcLabelYOffset[n.height - 1] > _this8.config.get('arcLabelLetterWidth') * n.label.length;
@@ -13197,7 +13198,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         svgArcLabelsEnter.append('textPath').attr('xlink:href', function (d) {
           return '#' + d.data.namePath.join('-');
         }).attr('class', function (d) {
-          return d.data.arcType ? d.data.arcType.split(' ')[0] : '';
+          return d.data.arcType ? d.data.arcType : '';
         });
         var svgArcLabelsEdit = svgArcLabelsEnter.merge(svgArcLabels).transition().ease(this.config.get('ease')).duration(this.params.labelDuration != null ? this.params.labelDuration : this.params.duration).attr('x', this.params.arcLabelXOffset).attr('dy', function (d) {
           return _this9.params.arcLabelYOffset[d.height - 1];
@@ -13252,7 +13253,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         svgArcs.enter().append('path').attr('id', function (d) {
           return d.data.namePath.join('-');
         }).attr('d', arcEnter).merge(svgArcs).attr('class', function (d) {
-          return 'arc arc-' + d.depth + (d.data.arcType ? ' ' + d.data.arcType.split(' ')[0] : '') + (d.active ? ' active' : '');
+          return 'arc arc-' + d.depth + (d.data.arcType ? ' ' + d.data.arcType : '') + (d.active ? ' active' : '');
         }).transition().ease(this.config.get('ease')).duration(this.params.duration).style('fill', function (d) {
           return _this9.config.getColor([], _this9.config.get('levels')[d.depth - 1], d.data);
         }).attr('d', arc);
