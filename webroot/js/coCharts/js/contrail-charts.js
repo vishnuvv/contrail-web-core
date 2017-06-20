@@ -12758,9 +12758,12 @@ var RadialDendrogramView = function (_ContrailChartsView) {
     value: function _prepareHierarchyRootNode() {
       var zeroDataLinks = 0;
       this.hierarchyRootNode = d3Hierarchy.hierarchy(this.rootNode).each(function (d) {
-          if (d.data && d.data.linkId && d.data.value == 0) {
+          // Nodes with no children are called leaves which are links in the dendrogram,
+          // if the value of the links is zero we are setting it to 1 such that
+          // zero data links also plotted
+          if (d.data && d.children == null && d.data.value == 0) {
               d.data.value = 1;
-              zeroDataLinks +=1;
+              zeroDataLinks += 1;
           }
       });
       this.valueSum += zeroDataLinks;
