@@ -21,6 +21,9 @@ define([
 
         this.TRAFFIC_GROUP_COLOR_LEVEL1 = ['#74abd2', '#9fa8da', '#f8bbd0', '#c5e1a5'];
         this.TRAFFIC_GROUP_COLOR_LEVEL2 = ['#5282a7', '#91cd99', '#80d4f9', '#80deea'];
+        this.APPLICATION_ICON = '\uf022';
+        this.DEPLOYMENT_ICON = '\uf1c0';
+        this.TIER_ICON = '\uf24d';
 
         this.DEFAULT_FIREWALL_RULES = {
             '00000000-0000-0000-0000-000000000002': {

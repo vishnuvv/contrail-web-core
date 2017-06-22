@@ -23,6 +23,7 @@ $dashboard-info-label-color:#3183bd;
 $dashboard-alarms-color:#e4564f;
 $dashboard-default-color:#000;
 $traffic-link-info-width:400px;
+$traffic-group-implit-rule: #ff6f00;
 /*
  * Styles moved from vcon-web.css
  * TODO Cleanup required to remove unused styles
@@ -2350,6 +2351,16 @@ $label_color: #3182bd;
     }
     .arc-label.along-arc textPath, .cc-title, .iconFontStyle {
         font-family: "FontAwesome", Open Sans !important;
+    }
+    .traffic-stats-duration, .clear-traffic-stats {
+        font-size: 13px;
+    }
+    .traffic-stats-duration {
+        margin-right: 15px;
+        color: #888888;
+    }
+    .implicitRuleStyle {
+        color: $traffic-group-implit-rule;
     }
     @-webkit-keyframes slideInRight {
         0% {

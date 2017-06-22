@@ -12713,7 +12713,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
                 return;
               }
               namePath.push(name);
-              displayLabels.push(currLeaf.displayLabels[depth]);
+              if (currLeaf.displayLabels instanceof Array) displayLabels.push(currLeaf.displayLabels[depth]);
               node = _lodash2.default.find(children, function (child) {
                 return child.name === name;
               });
@@ -12758,16 +12758,15 @@ var RadialDendrogramView = function (_ContrailChartsView) {
     value: function _prepareHierarchyRootNode() {
       var zeroDataLinks = 0;
       this.hierarchyRootNode = d3Hierarchy.hierarchy(this.rootNode).each(function (d) {
-          // Nodes with no children are called leaves which are links in the dendrogram,
-          // if the value of the links is zero we are setting it to 1 such that
-          // zero data links also plotted
-          if (d.data && d.children == null && d.data.value == 0) {
-              d.data.value = 1;
-              zeroDataLinks += 1;
-          }
+        // Nodes with no children are called leaves which are links in the dendrogram,
+        // if the value of the links is zero we are setting it to 1 such that
+        // zero data links also plotted
+        if (d.data && d.children == null && d.data.value == 0) {
+          d.data.value = 1;
+          zeroDataLinks += 1;
+        }
       });
       this.valueSum += zeroDataLinks;
-
       var valueScale = this.config.get('valueScale').domain([0.01, this.valueSum]).range([0, 360]);
       this.hierarchyRootNode = this.hierarchyRootNode.sum(function (d) {
         return valueScale(d.value);
@@ -13046,7 +13045,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         }
         // Estimate arc length and wheather the label will fit (default letter width is assumed to be 5px).
         n.arcLength = 6 * (n.y - _this8.params.arcLabelYOffset[n.height - 1]) * (n.angleRange[1] - n.angleRange[0]) / 360;
-        var namePath = (n.data.displayLabels && n.data.displayLabels.length > 0) ? n.data.displayLabels : n.data.namePath;
+        var namePath = n.data.displayLabels && n.data.displayLabels.length > 0 ? n.data.displayLabels : n.data.namePath;
         n.label = '' + namePath[namePath.length - 1];
         if (n.depth == 1 && n.data.labelAppend) {
           n.label += '-' + n.data.labelAppend;
@@ -13163,20 +13162,19 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           }
 
           if (d.outerPoints.length == 4 && d.innerPoints.length == 4) {
-            var outerPoints = _.map(d.outerPoints, _.clone), innerPoints = _.map(d.innerPoints, _.clone);
+            var outerPoints = _lodash2.default.map(d.outerPoints, _lodash2.default.clone),
+                innerPoints = _lodash2.default.map(d.innerPoints, _lodash2.default.clone);
             var percentage = .25;
-            outerPoints[0][0] = outerPoints[0][0] + (Math.abs(outerPoints[0][0] - innerPoints[3][0]) * percentage);
-            outerPoints[1][0] = outerPoints[1][0] + (Math.abs(outerPoints[1][0] - innerPoints[2][0]) * percentage);
-            outerPoints[2][0] = outerPoints[2][0] - (Math.abs(outerPoints[2][0] - innerPoints[1][0]) * percentage);
-            outerPoints[3][0] = outerPoints[3][0] - (Math.abs(outerPoints[3][0] - innerPoints[0][0]) * percentage);
+            outerPoints[0][0] = outerPoints[0][0] + Math.abs(outerPoints[0][0] - innerPoints[3][0]) * percentage;
+            outerPoints[1][0] = outerPoints[1][0] + Math.abs(outerPoints[1][0] - innerPoints[2][0]) * percentage;
+            outerPoints[2][0] = outerPoints[2][0] - Math.abs(outerPoints[2][0] - innerPoints[1][0]) * percentage;
+            outerPoints[3][0] = outerPoints[3][0] - Math.abs(outerPoints[3][0] - innerPoints[0][0]) * percentage;
 
-
-            innerPoints[0][0] = innerPoints[0][0] + (Math.abs(outerPoints[0][0] - innerPoints[3][0]) * percentage);
-            innerPoints[1][0] = innerPoints[1][0] + (Math.abs(outerPoints[1][0] - innerPoints[2][0]) * percentage);
-            innerPoints[2][0] = innerPoints[2][0] - (Math.abs(outerPoints[2][0] - innerPoints[1][0]) * percentage);
-            innerPoints[3][0] = innerPoints[3][0] - (Math.abs(outerPoints[3][0] - innerPoints[0][0]) * percentage);
+            innerPoints[0][0] = innerPoints[0][0] + Math.abs(outerPoints[0][0] - innerPoints[3][0]) * percentage;
+            innerPoints[1][0] = innerPoints[1][0] + Math.abs(outerPoints[1][0] - innerPoints[2][0]) * percentage;
+            innerPoints[2][0] = innerPoints[2][0] - Math.abs(outerPoints[2][0] - innerPoints[1][0]) * percentage;
+            innerPoints[3][0] = innerPoints[3][0] - Math.abs(outerPoints[3][0] - innerPoints[0][0]) * percentage;
           }
-
           //Need to try with simple sample for debugging 
           //Looks causing issues as it's using elliptical arc
           /*
