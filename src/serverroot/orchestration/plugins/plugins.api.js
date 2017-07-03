@@ -6,60 +6,251 @@
  * This file contains the util functions for all plugins
  */
 
-var config = require('../../../../config/config.global');
+var configUtils = require('../../common/config.utils');
 var configMainServer = require('../../web/api/configServer.main.api');
+var opMainServer = require('../../web/api/opServer.main.api');
 var configJobServer = require('../../jobs/api/configServer.jobs.api');
+var opJobServer = require('../../jobs/api/opServer.jobs.api');
+//var vCenterJobServer = require('../../web/api/vCenterServer.jobs.api');
 var assert = require('assert');
 var authApi = require('../../common/auth.api');
+var logutils = require('../../utils/log.utils');
+var orch = require('../orchestration.api');
+var global = require('../../common/global');
+var commonUtils = require('../../utils/common.utils');
+var crypto = require('crypto');
 
-var orchModel = ((config.orchestration) && (config.orchestration.Manager)) ?
-    config.orchestration.Manager : 'openstack';
+var orchModels = orch.getOrchestrationModels();
 
-function getApiServerRequestedByData (appData)
+function getApiServerRequestedByData (appData,reqBy)
 {
-    var defproject = null;
+    assert(appData);
+    //Set loggedInOrchestrionMode
+    var loggedInOrchestrationMode = 'openstack';
+    if ((null != appData) && (null != appData['authObj']) &&
+        (null != appData['authObj']['req']) &&
+        (null != appData['authObj']['req'].session) &&
+        (null != appData['authObj']['req'].session.loggedInOrchestrationMode)) {
+        loggedInOrchestrationMode =
+            appData['authObj']['req'].session.loggedInOrchestrationMode;
+    } else {
+        if ((null != appData) && (null != appData.taskData) &&
+            (null != appData.taskData.loggedInOrchestrationMode)) {
+            loggedInOrchestrationMode =
+                appData.taskData.loggedInOrchestrationMode;
+        }
+    }
+    return getApiServerRequestedByApp(loggedInOrchestrationMode, appData,reqBy);
+}
+
+function getApiServerRequestedByApp (loggedInOrchestrationMode, appData, reqBy)
+{
+    switch (reqBy) {
+    case global.label.API_SERVER:
+    case global.label.OPSERVER:
+        return getApiServerRequestedByReqType(loggedInOrchestrationMode,
+                                              reqBy, appData);
+    case global.label.VCENTER_SERVER:
+        return getApiServerRequestedByvCenter(loggedInOrchestrationMode,
+                                              appData);
+    default:
+        assert(0);
+    }
+}
+
+function getServerType (genBy, reqBy)
+{
+    if (global.label.API_SERVER == reqBy) {
+        switch (genBy) {
+        case global.service.MIDDLEWARE:
+            return configJobServer;
+        case global.service.MAINSEREVR:
+        default:
+            return configMainServer;
+        }
+    } else if (global.label.OPSERVER = reqBy) {
+        switch (genBy) {
+        case global.service.MIDDLEWARE:
+            return opJobServer;
+        case global.service.MAINSEREVR:
+        default:
+            return opMainServer;
+        }
+    }
+    logutils.logger.error('We did not find correct genBy/reqBy: ' + genBy + ':'
+                          + reqBy);
+    return null;
+}
+
+function getApiServerRequestedByReqType (loggedInOrchestrationMode, reqBy,
+                                         appData)
+{
     switch (orchModel) {
     case 'openstack':
-        /* Openstack auth is keystone based, as config Server does not do
-         * authentication using cloudstack, so for now add check
-         */
-        try {
-            defProject = appData['authObj']['defTokenObj']['tenant']['name'];
-            return configMainServer;
-        } catch(e) {
-            try {
-                defProject =
-                    appData['taskData']['authObj']['token']['tenant']['name'];
+    case 'cloudstack':
+    case 'vcenter':
+    case 'none':
+        var genBy = appData['genBy'];
+        if (null == genBy) {
+            genBy = appData['taskData']['genBy'];
+        }
+        return getServerType(genBy, reqBy);
+    default:
+        if (null != appData['taskData']) {
+            if ((global.REQ_AT_SYS_INIT == appData['taskData']['reqBy']) ||
+                (null != appData['taskData']['authObj'])) {
                 return configJobServer;
-            } catch(e) {
-                /* Nothing specified, assert */
-                if (global.REQ_AT_SYS_INIT == appData['taskData']['reqBy']) {
-                    return configJobServer;
-                } else {
-                    assert(0);
-                }
             }
         }
-        break;
-    default:
-        /* If authentication is done via cloudstack, we can not have
-         * multi_tenancy, as config Server does not do authentication through
-         * cloudstack now */
-        try {
-            sessionKey = appData['authObj']['defTokenObj']['sessionkey'];
-            return configMainServer;
-        } catch(e) {
-            return configJobServer;
-        }
-        break;
+        return getServerType(global.service.MIDDLEWARE, reqBy);
     }
+}
+
+function getApiServerRequestedByvCenter (loggedInOrchestrationMode, appData)
+{
+    /* Openstack auth is keystone based, as config Server does not do
+     * authentication using cloudstack, so for now add check
+     */
+        var genBy = appData['genBy'];
+        if (null == genBy) {
+            genBy = appData['taskData']['genBy'];
+        }
+        if (global.service.MAINSEREVR == genBy) {
+            var vCenterMainServer = require('../../web/api/vCenterServer.main.api');
+            return vCenterMainServer;
+        } else {
+            return vCenterJobServer;
+        }
 }
 
 function getOrchestrationPluginModel ()
 {
-    return {'orchestrationModel' : orchModel}
+    return {'orchestrationModel' : orchModels}
+}
+
+function doDomainExist (domain, domainList)
+{
+    var data = domainList['domains'];
+    var cnt = data.length;
+    for (var i = 0; i < cnt; i++) {
+        if (domain == data[i]['fq_name'][0]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getDomainFqnByDomainUUID (domUUID, domainObjs)
+{
+    var domCnt = 0;
+    try {
+        var domains = domainObjs['domains'];
+        domCnt  = domains.length;
+    } catch(e) {
+        domCnt = 0;
+    }
+    for (var i = 0; i < domCnt; i++) {
+        if (domains[i]['uuid'] == domUUID) {
+            return domains[i]['fq_name'][0];
+        }
+    }
+    return null;
+}
+
+function formatDomainList (req, tenantList, domainListObjs)
+{
+    var domainObjs = {};
+    var data = tenantList['tenants'];
+    var len = data.length;
+    var domain = null;
+    var tmpDomainMap = {};
+    for (var i = 0; i < len; i++) {
+        if (null == tmpDomainMap[data[i]['domain_id']]) {
+            if (authApi.isDefaultDomain(req, data[i]['domain_id'])) {
+                domain = authApi.getDefaultDomain(req);
+            } else {
+                domain = commonUtils.convertUUIDToString(data[i]['domain_id']);
+                domain = getDomainFqnByDomainUUID(domain, domainListObjs);
+            }
+            if (null == domain) {
+                logutils.logger.error('Not found the domain ' +
+                                      data[i]['domain_id']);
+                continue;
+            }
+            tmpDomainMap[data[i]['domain_id']] = domain;
+            domainObjs[domain] = [];
+        }
+        domain = tmpDomainMap[data[i]['domain_id']];
+        domainObjs[domain].push(data[i]['name']);
+    }
+    return domainObjs;
+}
+
+function setAllCookies (req, res, appData, cookieObj, callback)
+{
+    var loginErrFile = 'webroot/html/login-error.html';
+    var adminProjectList = authApi.getAdminProjectList(req);
+    var config = configUtils.getConfig();
+    if (null == appData['authObj']['defTokenObj']) {
+        /* We have not got defTokenObj filled yet while sending to Auth
+         * Module, so fill it up here
+         */
+        /* adminProjectList must not empty array */
+        if (adminProjectList.length) {
+            appData['authObj']['defTokenObj'] =
+                req.session.tokenObjs[adminProjectList[0]]['token'];
+        } else {
+            var tokenObjs = req.session.tokenObjs;
+            for (key in tokenObjs) {
+                appData['authObj']['defTokenObj'] =
+                    req.session.tokenObjs[key]['token'];
+                break;
+            }
+        }
+    }
+    var defDomainId;
+    var cookieExp =
+        ((null != config.session) && (null != config.session.timeout)) ?
+        config.session.timeout : global.MAX_AGE_SESSION_ID;
+
+    var cookieExpStr = new Date(new Date().getTime() + cookieExp).toUTCString();
+    var secureCookieStr = (false == config.insecure_access) ? "; secure" : "";
+    res.setHeader('Set-Cookie', 'username=' + cookieObj.username +
+                  secureCookieStr);
+    var region = authApi.getCurrentRegion(req);
+    if (null != region) {
+        res.setHeader('Set-Cookie', 'region=' + region +
+                      '; path=/' + secureCookieStr);
+        req.cookies.region = region;
+    }
+    authApi.getCookieObjs(req, appData, function(cookieObjs) {
+        if (null != cookieObjs[global.COOKIE_DOMAIN_DISPLAY_NAME]) {
+            res.setHeader('Set-Cookie', global.COOKIE_DOMAIN_DISPLAY_NAME +
+                          '=' + cookieObjs[global.COOKIE_DOMAIN_DISPLAY_NAME] +
+                          secureCookieStr);
+        }
+        var cookieProject = cookieObjs[global.COOKIE_PROJECT_DISPLAY_NAME];
+        if ((null == cookieProject) ||
+            (-1 == adminProjectList.indexOf(cookieProject))) {
+            cookieProject = adminProjectList[0];
+        }
+        if (null != cookieProject) {
+            res.setHeader('Set-Cookie', global.COOKIE_PROJECT_DISPLAY_NAME +
+                          '=' + cookieProject + secureCookieStr);
+        }
+        if(req.session._csrf == null)
+            req.session._csrf = crypto.randomBytes(Math.ceil(24 * 3 / 4))
+                .toString('base64')
+                    .slice(0, 24);
+        res.setHeader('Set-Cookie', '_csrf=' + req.session._csrf +
+                      secureCookieStr);
+        callback();
+    });
 }
 
 exports.getApiServerRequestedByData = getApiServerRequestedByData;
 exports.getOrchestrationPluginModel = getOrchestrationPluginModel;
-
+exports.setAllCookies = setAllCookies;
+exports.doDomainExist = doDomainExist;
+exports.formatDomainList = formatDomainList;
+exports.getDomainFqnByDomainUUID = getDomainFqnByDomainUUID;

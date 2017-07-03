@@ -13,6 +13,7 @@ var assert = require("assert")
     , authApi = require('../../common/auth.api')
     , messages = require('../../common/messages')
     , rbac = require('./rbac.api')
+    , orch = require('../../orchestration/orchestration.api')
     ;
 
 if (!module.parent) {
@@ -113,14 +114,30 @@ function processPendingReq (ctx, next, callback)
   var defProjectObj = {};
 
   delete pendingReqQObj[ctx.id];// = null;
+  //If loggedInOrchestrationMode doesn't exist in session
+  if (checkLoginReq(ctx.req)) {
+    ctx.req.session.loggedInOrchestrationMode =
+        orch.getOrchestrationModelsByReqURL(ctx.req.url, ctx.req);
+    logutils.logger.info("Getting Logged In Orchestration Mode:",
+                          ctx.req.session.loggedInOrchestrationMode);
+  }
+
   /* Process the request */
   defTokenObj = authApi.getAPIServerAuthParams(ctx.req);
   var appData = {
     authObj: {
       req: ctx.req,
       defTokenObj: defTokenObj
-    }
+    },
+    genBy: global.service.MAINSEREVR
   };
+  /* Add region information in appData */
+  var reqRegion = ctx.req.query["reqRegion"];
+  if (null != reqRegion) {
+      appData.authObj.reqRegion = reqRegion;
+  }
+  /* Add appData in req object */
+  ctx.req.appData = appData;
   callback(ctx.req, ctx.res, appData);
 }
 
@@ -147,8 +164,18 @@ function registerRestrictedURL ()
  */
 function checkLoginReq (req)
 {
-  return ((req.url == '/login') || (req.url == '/authenticate') ||
-          (req.url == '/logout'));
+  //Now,as authenticate request is issued via Ajax call and we get the _ argument to avoid cache and need to match url only with the beginning
+  return req.url.match(/^((\/isauthenticated)|(\/vcenter\/menu)|(\/menu)|(\/authenticate)|(\/vcenter\/authenticate)|(\/vcenter\/isauthenticated)|(\/logout)|(\/vcenter\/login)|(\/vcenter\/logout)|(\/login)|(\/vcenter))/);
+}
+
+/*
+ * Check if URL is agnostic to orchestration 
+ * If URL is not agnostic to orchestration, then we logout if the requestedURL doesn't match with 
+ * loggedInOrchestrationMode on server
+ */
+function checkOrchestrationAgnosticReq(req) 
+{
+    return req.url.indexOf('/proxy') == 0 || req.url.indexOf('/api') == 0;
 }
 
 /* Function: routeAll
@@ -160,6 +187,23 @@ function routeAll (req, res, next)
 {
   /* nodejs sets the timeout 2 minute, override this timeout here */
   req.socket.setTimeout(global.NODEJS_HTTP_REQUEST_TIMEOUT_TIME);
+  if (checkLoginReq(req)) {
+    req.session.loggedInOrchestrationMode =
+        orch.getOrchestrationModelsByReqURL(req.url, req);
+  }
+  /* Do not set expiry for cookie */
+  /*
+  if (null == req.session.sessionExpSyncToIdentityToken) {
+      if (null != authApi.getSessionExpiryTime) {
+        var sessExp = authApi.getSessionExpiryTime(req);
+        if (null != sessExp) {
+            var sessExpAt = new Date().getTime() + sessExp;
+            req.session.cookie.expires = new Date(sessExpAt);
+            req.session.sessionExpSyncToIdentityToken = true;
+        }
+      }
+  }
+  */
   var u = url.parse(req.url, true);
   if ((null == req.route) || (null == handler.checkURLInAllowedList(req))) {
       /* Not a Valid URL */
@@ -224,7 +268,7 @@ function insertResToReadyQ (res, data, statusCode, isJson)
 
 function insertDataToSendAllClients (resObjList, data, statusCode, isJson)
 {
-    var resAdd = false;
+    var respAdd = false;
     var resCtx = {
         timeStamp : getCurrentTimestamp(),
         data: data,
@@ -264,15 +308,31 @@ function insertDataToSendAllClients (resObjList, data, statusCode, isJson)
 function redirectToLogoutByChannel (channel)
 {
     var reqCtxArr = cacheApi.checkCachePendingQueue(channel);
-    if ((null == reqCtxArr) || (null == reqCtxArr[0]) ||
-        (null == reqCtxArr[0]['req']) || (null == reqCtxArr[0]['res'])) {
+    if (null == reqCtxArr) {
+        return;
+    }
+    var reqCtxArrLen = reqCtxArr.length;
+    for (var i = 0; i < reqCtxArrLen; i++) {
+        if ((null != reqCtxArr[i]) && (null != reqCtxArr[i]['req']) &&
+            (null != reqCtxArr[i]['res'])) {
+            /* First request is the initiator, and rest are only pending */
+            break;
+        }
+    }
+    if (i == reqCtxArrLen) {
         return;
     }
     /* Always 1st entry in reqCtxArr is the requested client, others were
      * waiting for this active job, so only for that client, redirect
      * to login
      */
-    commonUtils.redirectToLogout(reqCtxArr[0]['req'], reqCtxArr[0]['res']);
+    commonUtils.redirectToLogout(reqCtxArr[i]['req'], reqCtxArr[i]['res'],
+                                 function() {
+        /* We have redirected to logout page, so remove this channel from the
+         * pending queue
+         */
+        cacheApi.deleteCachePendingQueueEntry(channel);
+    });
 }
 
 exports.redirectToLogoutByChannel = redirectToLogoutByChannel;
@@ -281,4 +341,5 @@ exports.insertResToReadyQ = insertResToReadyQ;
 exports.routeAll = routeAll;
 exports.processPendingReq = processPendingReq;
 exports.insertDataToSendAllClients = insertDataToSendAllClients;
-
+exports.checkLoginReq = checkLoginReq;
+exports.checkOrchestrationAgnosticReq = checkOrchestrationAgnosticReq;

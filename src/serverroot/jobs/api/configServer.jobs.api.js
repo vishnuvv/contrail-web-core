@@ -3,211 +3,158 @@
  */
 
 var rest = require('../../common/rest.api'),
-    config = require('../../../../config/config.global.js'),
+    configUtils = require('../../common/config.utils'),
     authApi = require('../../common/auth.api'),
     redisPub = require('../core/redisPub'),
-    configServer;
+    logutils = require('../../utils/log.utils'),
+    commonUtils = require('../../utils/common.utils'),
+    jobsUtils = require('../../common/jobs.utils'),
+    async = require('async');
 
-configServer = rest.getAPIServer({apiName: global.label.VNCONFIG_API_SERVER,
-                                 server: config.cnfg.server_ip, port:
-                                 config.cnfg.server_port });
-function getHeaders(defHeaders, appHeaders)
+function callApiByReqType (obj, reqType, stopRetry, callback)
 {
-    var headers = defHeaders;
-    for (key in appHeaders) {
-        /* App Header overrides default header */
-        headers[key] = appHeaders[key];
+    var jobData = obj.jobData;
+    var appHeaders = obj.appHeaders;
+    var reqUrl = obj.reqUrl;
+    var reqData = obj.reqData;
+
+    if (global.HTTP_REQUEST_GET == reqType) {
+        apiGet(reqUrl, jobData, callback, appHeaders, true);
+    } else if (global.HTTP_REQUEST_POST == reqType) {
+        apiPost(reqUrl, reqData, jobData, callback, appHeaders, true);
+    } else if (global.HTTP_REQUEST_PUT == reqType) {
+        apiPut(reqUrl, reqData, jobData, callback, appHeaders, true);
+    } else if (global.HTTP_REQUEST_DEL == reqType) {
+        apiDelete(reqUrl, jobData, callback, appHeaders, true);
+    } else {
+        var error = new appErrors.RESTServerError('reqType: ' + reqType +
+                                                  ' not allowed.');
+        callback(error, null);
     }
-    return headers;
+}
+
+function doSendApiServerRespToApp (err, data, obj, callback)
+{
+    var jobData = obj.jobData;
+    var appHeaders = obj.appHeaders;
+    var reqUrl = obj.reqUrl;
+    var reqType = obj.reqType;
+    var reqData = obj.reqData;
+    var stopRetry = obj.stopRetry;
+
+    var authObj = jobsUtils.buildAuthObjByJobData(jobData);
+    if (null != err) {
+        if (stopRetry) {
+            callback(err, data);
+        } else {
+            if (err.responseCode ==
+                 global.HTTP_STATUS_AUTHORIZATION_FAILURE) {
+                /* Retry once again */
+                authApi.getUserAuthDataByConfigAuthObj(jobData.taskData.loggedInOrchestrationMode,
+                                                       authObj,
+                                                       function(error, data) {
+                    if ((null != error) || (null == data) ||
+                        (null == data.access) ||
+                        (null == data.access.token)) {
+                        callback(error, data);
+                        return;
+                    }
+                    jobsUtils.updateJobDataAuthObjToken(jobData, data.access.token);
+                    obj.jobData = jobData;
+                    callApiByReqType(obj, reqType, true, callback);
+                });
+            } else {
+                callback(err, data);
+            }
+        }
+    } else {
+        callback(null, data);
+    }
+}
+
+function serveAPIRequestCB (obj, callback)
+{
+    var reqUrl = obj.reqUrl;
+    var reqData = obj.reqData;
+    var reqType = obj.reqType;
+    var jobData = obj.jobData;
+
+    if (global.HTTP_REQUEST_GET == reqType) {
+        obj.apiRestApi.api.get(reqUrl, function(error, data) {
+            doSendApiServerRespToApp(error, data, obj, callback);
+        }, obj.headers);
+    } else if (global.HTTP_REQUEST_PUT == reqType) {
+        obj.apiRestApi.api.put(reqUrl, reqData, function(error, data) {
+            doSendApiServerRespToApp(error, data, obj, callback);
+        }, obj.headers);
+    } else if (global.HTTP_REQUEST_POST == reqType) {
+        obj.apiRestApi.api.post(reqUrl, reqData, function(error, data) {
+            doSendApiServerRespToApp(error, data, obj, callback);
+        }, obj.headers);
+    } else if (global.HTTP_REQUEST_DEL == reqType) {
+        obj.apiRestApi.api.delete(reqUrl, function(error, data) {
+            doSendApiServerRespToApp(error, data, obj, callback);
+        }, obj.headers);
+    } else {
+        var error = new appErrors.RESTServerError('reqType: ' + reqType +
+                                                  ' not allowed.');
+        callback(error, null);
+    }
+}
+
+function serveAPIRequest (reqUrl, reqData, jobData, appHeaders, reqType,
+                          stopRetry, callback)
+{
+    var config = configUtils.getConfig(),
+        configServerIP = ((config.cnfg) && (config.cnfg.server_ip)) ?
+            config.cnfg.server_ip : global.DFLT_SERVER_IP,
+        configServerPort = ((config.cnfg) && (config.cnfg.server_port)) ?
+            config.cnfg.server_port : '8082',
+        configServer = rest.getAPIServer({
+                                    apiName: global.label.VNCONFIG_API_SERVER,
+                                    server: configServerIP,
+                                    port: configServerPort});
+    var dataObj = {
+        apiName: global.label.VNCONFIG_API_SERVER,
+        reqUrl: reqUrl,
+        appHeaders: appHeaders,
+        jobData: jobData,
+        reqType: reqType,
+        stopRetry: stopRetry,
+        reqData: reqData,
+        apiRestApi: configServer
+    };
+    async.waterfall([
+        async.apply(jobsUtils.getHeaders, dataObj),
+        serveAPIRequestCB
+    ],
+    function(error, data) {
+        callback(error, data);
+    });
 }
 
 function apiGet (reqUrl, jobData, callback, appHeaders, stopRetry)
 {
-    var headers = {};
-    var authObj;
-    var defProject = null;
-    var sessionId = null;
-    try {
-        headers['X-Auth-Token'] =
-            jobData['taskData']['authObj']['token']['id'];
-        headers = getHeaders(headers, appHeaders);
-        defProject = jobData['taskData']['authObj']['token']['tenant']['name'];
-        sessionId = jobData['taskData']['authObj']['sessionId']; 
-    } catch(e) {
-        /* We did not have authorized yet */
-        headers['X-Auth-Token'] = null;
-        defProject = null;
-        sessionId = null;
-    }
-    configServer.api.get(reqUrl, function(err, data) {
-        if (err) {
-            if (stopRetry) {
-                callback(err, data);
-            } else {
-                if ((null != defProject) && (null != sessionId) && 
-                    (err.responseCode ==
-                     global.HTTP_STATUS_AUTHORIZATION_FAILURE)) {
-                    /* Retry once again */
-                    authApi.getTokenObjBySession(sessionId, defProject, true,
-                                            function(error, token) {
-                                                      
-                        if ((error) || (null == token)) {
-                            redisPub.sendRedirectRequestToMainServer(jobData);
-                            return;
-                        }
-                        jobData['taskData']['authObj']['token'] = token;
-                        exports.apiGet(reqUrl, jobData, callback, appHeaders, true);
-                   });
-                } else {
-                    callback(err, data);
-                }
-            }
-        } else {
-            callback(null, data);
-        }
-    }, headers);
+    serveAPIRequest(reqUrl, null, jobData, appHeaders,
+                    global.HTTP_REQUEST_GET, stopRetry, callback);
 }
 
 function apiPut (reqUrl, reqData, jobData, callback, appHeaders, stopRetry)
 {
-    var headers = {};
-    var authObj;
-    var defProject = null;
-    var sessionId = null;
-    try {
-        headers['X-Auth-Token'] =
-            jobData['taskData']['authObj']['token']['id'];
-        headers = getHeaders(headers, appHeaders);
-        defProject = jobData['taskData']['authObj']['token']['tenant']['name'];
-        sessionId = jobData['taskData']['authObj']['sessionId'];
-    } catch(e) {
-        /* We did not have authorized yet */
-        headers['X-Auth-Token'] = null;
-        defProject = null;
-        sessionId = null;
-    }
-    configServer.api.put(reqUrl, function(err, data) {
-        if (err) {
-            if (stopRetry) {
-                callback(err, data);
-            } else {
-                if ((null != defProject) && (null != sessionId) && 
-                    (err.responseCode ==
-                     global.HTTP_STATUS_AUTHORIZATION_FAILURE)) {
-                    /* Retry once again */
-                    authApi.getTokenObjBySession(sessionId, defProject, true,
-                                            function(error, token) {
-
-                        if ((error) || (null == token)) {
-                            redisPub.sendRedirectRequestToMainServer(jobData);
-                            return;
-                        }
-                        jobData['taskData']['authObj']['token'] = token;
-                        exports.apiPut(reqUrl, jobData, callback, appHeaders, true);
-                   });
-                } else {
-                    callback(err, data);
-                }
-            }
-        } else {
-            callback(null, data);
-        }
-    }, headers);
-
+    serveAPIRequest(reqUrl, reqData, jobData, appHeaders,
+                    global.HTTP_REQUEST_PUT, stopRetry, callback);
 }
 
 function apiPost (reqUrl, reqData, jobData, callback, appHeaders, stopRetry)
 {
-    var headers = {};
-    var authObj;
-    var defProject = null;
-    var sessionId = null;
-    try {
-        headers['X-Auth-Token'] =
-            jobData['taskData']['authObj']['token']['id'];
-        headers = getHeaders(headers, appHeaders);
-        defProject = jobData['taskData']['authObj']['token']['tenant']['name'];
-        sessionId = jobData['taskData']['authObj']['sessionId'];
-    } catch(e) {
-        /* We did not have authorized yet */
-        headers['X-Auth-Token'] = null;
-        defProject = null;
-        sessionId = null;
-    }
-    configServer.api.post(reqUrl, function(err, data) {
-        if (err) {
-            if (stopRetry) {
-                callback(err, data);
-            } else {
-                if ((null != defProject) && (null != sessionId) && 
-                    (err.responseCode ==
-                     global.HTTP_STATUS_AUTHORIZATION_FAILURE)) {
-                    /* Retry once again */
-                    authApi.getTokenObjBySession(sessionId, defProject, true,
-                                            function(error, token) {
-
-                        if ((error) || (null == token)) {
-                            redisPub.sendRedirectRequestToMainServer(jobData);
-                            return;
-                        }
-                        jobData['taskData']['authObj']['token'] = token;
-                        exports.apiPost(reqUrl, jobData, callback, appHeaders, true);
-                   });
-                } else {
-                    callback(err, data);
-                }
-            }
-        } else {
-            callback(null, data);
-        }
-    }, headers);
+    serveAPIRequest(reqUrl, reqData, jobData, appHeaders,
+                    global.HTTP_REQUEST_POST, stopRetry, callback);
 }
 
 function apiDelete (reqUrl, jobData, callback, appHeaders, stopRetry)
 {
-    var headers = {};
-    var authObj;
-    var defProject = null;
-    var sessionId = null;
-    try {
-        headers['X-Auth-Token'] =
-            jobData['taskData']['authObj']['token']['id'];
-        headers = getHeaders(headers, appHeaders);
-        defProject = jobData['taskData']['authObj']['token']['tenant']['name'];
-        sessionId = jobData['taskData']['authObj']['sessionId'];
-    } catch(e) {
-        /* We did not have authorized yet */
-        headers['X-Auth-Token'] = null;
-        defProject = null;
-        sessionId = null;
-    }
-    configServer.api.delete(reqUrl, function(err, data) {
-        if (err) {
-            if (stopRetry) {
-                callback(err, data);
-            } else {
-                if ((null != defProject) && (null != sessionId) && 
-                    (err.responseCode ==
-                     global.HTTP_STATUS_AUTHORIZATION_FAILURE)) {
-                    /* Retry once again */
-                    authApi.getTokenObjBySession(sessionId, defProject, true,
-                                            function(error, token) {
-
-                        if ((error) || (null == token)) {
-                            redisPub.sendRedirectRequestToMainServer(jobData);
-                            return;
-                        }
-                        jobData['taskData']['authObj']['token'] = token;
-                        exports.apiDelete(reqUrl, jobData, callback, appHeaders, true);
-                   });
-                } else {
-                    callback(err, data);
-                }
-            }
-        } else {
-            callback(null, data);
-        }
-    }, headers);
+    serveAPIRequest(reqUrl, null, jobData, appHeaders,
+                    global.HTTP_REQUEST_DEL, stopRetry, callback);
 }
 
 exports.apiGet = apiGet;

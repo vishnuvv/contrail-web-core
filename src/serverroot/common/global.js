@@ -13,6 +13,7 @@ global.service = {};
 global.service.MAINSEREVR = 'mainServer';
 global.service.MIDDLEWARE = 'middleware';
 
+global.MSG_CMD_KILLALL = 'killAll';
 global.STR_MAIN_WEB_SERVER_READY = 'mainWebServerReady';
 
 /* JOB */
@@ -37,20 +38,19 @@ global.STR_VM_STATE_PARTIALLY_ACTIVE = 'Partially Active';
 /* ZMQ */
 global.ZWQ_MSG_SEPERATOR = '@';
 
-global.WEBUI_DFLT_REDIS_DB = 1;
-global.QE_DFLT_REDIS_DB = 2;
+global.WEBUI_SESSION_REDIS_DB = 2;
+global.WEBUI_DFLT_REDIS_DB = 3;
+global.QE_DFLT_REDIS_DB = 4;
+global.SM_DFLT_REDIS_DB = 5;
 
 /* Generic Caching related global variables */
 global.STR_JOB_TYPE_CACHE = 'cache';
 global.STR_SEND_TO_JOB_SERVER = 'sendToJobServer';
-global.STR_DISCOVERY_SERVICE_RESPONSE = 'discoveryServiceResponse';
-global.DISC_SERVICE_TYPE_OP_SERVER = 'OpServer';
-global.DISC_SERVICE_MAX_INST_COUNT_OP_SERVER = 20;
-global.DISC_SERVICE_TYPE_API_SERVER = 'ApiServer';
-global.DISC_SERVICE_MAX_INST_COUNT_API_SERVER = 20;
-global.DISC_SERVER_SUB_CLINET = 'discoveryServiceSubscribeClient';
-global.DISC_SERVER_SUB_CLIENT_RESPONSE = 'discoveryServiceSubscribeClientResp';
-global.DISC_SERVICE_MAX_INST_COUNT = 20;
+global.CONTRAIL_SERVICE_TYPE_OP_SERVER = 'OpServer';
+global.CONTRAIL_SERVICE_TYPE_API_SERVER = 'ApiServer';
+global.CONTRAIL_SERVICE_TYPE_DNS_SERVER = 'dns-server';
+global.CONTRAIL_SERVER_SUB_CLINET = 'contrailServiceSubscribeClient';
+global.CONTRAIL_SERVICE_RETRY_TIME = 300000; //5 minutes
 
 /* Topology tree caching */
 global.STR_GET_PROJECTS_TREE = 'getProjectsTree';
@@ -84,6 +84,10 @@ global.SERVICE_ENDPT_TYPE_IMAGE = 'image';
 global.SERVICE_ENDPT_TYPE_VOLUME = 'volume';
 global.SERVICE_ENDPT_TYPE_EC2 = 'ec2';
 global.SERVICE_ENDPT_TYPE_IDENTITY = 'identity';
+global.SERVICE_ENDPT_TYPE_APISERVER = 'ApiServer';
+global.SERVICE_ENDPT_TYPE_OPSERVER = 'OpServer';
+global.SERVICE_ENDPT_TYPE_CGC = 'cgc';
+global.REGION_ALL = 'All Regions';
 
 /* http status codes
  */
@@ -115,35 +119,11 @@ global.STR_GET_COMPUTE_NODE_ACL = 'getComputeNodeAcl';
 global.STR_GET_COMPUTE_NODE_ACL_FLOWS = 'getComputeNodeAclFlows';
 global.STR_GET_CTRL_NODES_COMBOLIST = 'getControlNodeAutoCompleteList';
 global.STR_PROJECT_DETAILS = 'getProjectDetails';
-global.STR_NW_DOMAIN_SUMMARY = 'getNetworkDomainSummary';
-global.STR_GET_TOP_NW_BY_PROJECT = 'getTopNetworkDetailsByProject';
-global.STR_GET_TOP_NW_BY_DOMAIN = 'getTopNetworkDetailsByDomain';
-global.STR_GET_TOP_PROJECT_BY_DOMAIN = 'getTopProjectDetailsByDomain';
-global.STR_GET_TOP_PORT_BY_DOMAIN = 'getTopPortByDomain';
-global.STR_GET_TOP_PORT_BY_PROJECT = 'getTopPortByProject';
 global.STR_GET_TOP_PORT_BY_NW = 'getTopPortByNetwork';
-global.STR_GET_TOP_FLOWS_BY_PROJECT = 'getTopFlowsByProject';
-global.STR_GET_TOP_FLOWS_BY_DOMAIN = 'getTopFlowsByDomain';
 global.STR_GET_TOP_FLOWS_BY_NW = 'getTopFlowsByNetwork';
-global.STR_GET_TOP_PEER_BY_PROJECT = 'getTopPeerByProject';
 global.GET_FLOW_SERIES_BY_VN = 'getVNFlowSeriesData';
 global.GET_FLOW_SERIES_BY_VM = 'getVMFlowSeriesData';
 global.GET_FLOW_SERIES_BY_VNS = 'getVNsFlowSeriesData';
-global.STR_FLOW_SERIES_BY_VM = 'getFlowSeriesByVM';
-global.STR_GET_TOP_PEER_BY_DOMAIN = 'getTopPeerByDomain';
-global.STR_GET_TOP_PEER_BY_NW = 'getTopPeerByNetwork';
-global.STR_GET_TOP_PORT_BY_VM = 'getTopPortByVM';
-global.STR_GET_TOP_PEER_BY_VM = 'getTopPeerByVM';
-global.STR_GET_TOP_FLOWS_BY_VM = 'getTopFlowsByVM';
-global.GET_STAT_SUMMARY_BY_VM = 'getVMStatSummary';
-global.GET_STAT_SUMMARY_BY_CONN_NWS = 'getConnNetStatsSummary';
-global.STR_GET_TOP_PORT_BY_CONN_NW = 'getTopPortByConnNet';
-global.STR_GET_TOP_PEER_BY_CONN_NW = 'getTopPeerByConnNet';
-global.STR_GET_TOP_FLOWS_BY_CONN_NW = 'getTopFlowsByConnNet';
-global.STR_GET_TOP_DETAILS = 'getTopDetails';
-global.STR_GET_TOP_PEER_DETAILS_BY_PORT = 'getTopPeerDetailsByPort';
-global.STR_GET_PORT_LEVEL_FLOW_SERIES = 'getPortLevelFlowSeries';
-global.STR_GET_FLOW_DETAILS_BY_FLOW_TUPLE = 'getFlowDetailsByFlowTuple';
 global.STR_GET_CPU_FLOW_SERIES = 'getCPULoadFlowSeries';
 global.INTERNAL_VENDOR_TYPE = 'contrail';
 global.MSG_REDIRECT_TO_LOGOUT = 'redirectToLogout';
@@ -157,34 +137,21 @@ global.FLOW_TIME_SLICE_FOR_1_HR = 10000;
 global.FLOW_TIME_SLICE_FOR_24_HRS = 86400000;
 global.FLOW_TIME_SLICE_FOR_1_HR = 3600000;
 global.FLOW_TIME_SLICE_FOR_60_MIN = 60000;
-global.MAX_AGE_SESSION_ID = 365 * 24 * 60 * 60 * 1000;
+global.MAX_AGE_SESSION_ID = 1 * 60 * 60 * 1000;
 /* 24 Hrs, In Milliseconds */
 global.STR_REDIS_STORE_SESSION_ID_PREFIX = 'mySession:';
 global.STR_SESSION_AUTHENTICATED = 'sessAuthenticated';
 global.STR_AUTH_KEY = 'authenticationKey';
 global.DEMO_USER_MAX_AGE_SESSION = 2 * 60 * 60 * 1000;
 /* 2 Hrs */
-;
-global.STR_ROLE_USER = 'user';
-global.STR_ROLE_ADMIN = 'admin';
 
-global.STR_EXT_ROLE_NETADMIN = 'netadmin';
-global.STR_EXT_ROLE_KEYSTONEADMIN = 'KeystoneAdmin';
-global.STR_EXT_ROLE_MEMBER_ = '_member_';
-global.STR_EXT_ROLE_SYSADMIN = 'sysadmin';
-global.STR_EXT_ROLE_KEYSTONE_SERVICE_ADMIN = 'KeystoneServiceAdmin';
-global.STR_EXT_ROLE_MEMBER = 'Member';
-global.STR_EXT_ROLE_ADMIN = 'admin';
+/* UI Roles */
+global.STR_ROLE_USER = 'member';
+global.STR_ROLE_ADMIN = 'cloudAdmin';
+global.STR_ROLE_WILDCARD = '*';
+global.STR_ROLE_GLOBAL_CONTROLLER = "globalController";
 
-/* Service Instance */
-global.INSTANCE_SPAWNING_TIMEOUT = 10 * 60 * 1000;
-/* 10 Mins */
-
-/* User Role */
-global.USER_ROLE_ADMIN = 1;
-global.USER_ROLE_USER = 2;
-global.USER_ROLE_DEMO = 3;
-global.DFLT_REDIS_SERVER_PORT = '6383';
+global.DFLT_REDIS_SERVER_PORT = '6379';
 global.DFLT_REDIS_SERVER_IP = '127.0.0.1';
 global.DFLT_UPLOAD_PATH = '/tmp';
 /** nodeJS timeout is 2 minutes, so set the timeout less than that, as when we
@@ -207,6 +174,13 @@ global.EMPTY_BGP_PEER_ATTR_JSON = {"session": [
 ]};
 global.TOKEN_URL = '/v2.0/tokens';
 
+global.PKI_ASN1_PREFIX = 'MII';
+global.PKIZ_PREFIX = 'PKIZ_';
+
+global.ALL_PROJECT_UUID = 'all';
+global.COOKIE_PROJECT_DISPLAY_NAME = "project-display-name";
+global.COOKIE_DOMAIN_DISPLAY_NAME = "domain-display-name";
+
 global.label = {};
 global.label.VNCONFIG_API_SERVER = 'vnconfig-api-server';
 global.label.OPS_API_SERVER = 'ops-api-server';
@@ -217,6 +191,12 @@ global.label.STORAGE_SERVER = 'storage-server';
 global.label.COMPUTE_SERVER = 'compute-server';
 global.label.DISCOVERY_SERVER = 'discovery-server';
 global.label.API_SERVER = 'api-server'
+global.label.OPSERVER = 'opserver';
+global.label.DNS_SERVER = 'dns-server'
+global.label.VCENTER_SERVER = 'vCenter-server'
+global.label.VROUTER = 'vrouter';
+global.label.CONTROL_NODE = 'control-node';
+global.label.CGC = 'contrail-global-controller';
 global.SANDESH_CONTROL_NODE_PORT = '8083';
 global.SANDESH_COMPUTE_NODE_PORT = '8085';
 global.SANDESH_DNS_AGENT_PORT = '8092';
@@ -225,6 +205,8 @@ global.PROTOCOL_HTTP = 'http';
 global.PROTOCOL_HTTPS = 'https';
 global.HTTP_URL = 'http://';
 global.HTTPS_URL = 'https://';
+global.DEFAULT_CONTRAIL_API_IDENTIFIER = 'ApiServer';
+global.DEFAULT_CONTRAIL_ANALYTICS_IDENTIFIER = 'OpServer';
 
 global.RESP_DATA_NOT_AVAILABLE = '-';
 global.GET_VROUTERS_LIST = 'getVRoutersList';
@@ -236,7 +218,6 @@ global.VROUTER_COUNT_IN_JOB = 100;
 global.VROUTER_SUMM_JOB_REFRESH_TIME = 5 * 60 * 1000;
 global.VROUTER_GENR_JOB_REFRESH_TIME = 4 * 60 * 1000;
 global.MAX_INT_VALUE = 429496729;
-
 global.RUN_QUERY_URL = '/analytics/query';
 global.GET_TABLES_URL = '/analytics/tables';
 global.GET_TABLE_INFO_URL = '/analytics/table';
@@ -257,9 +238,68 @@ global.QUERY_JSON = {
     ObjectCollectorInfo: {"table": 'ObjectCollectorInfo', "start_time": "", "end_time": "", "select_fields": ["MessageTS", "Source", "ModuleId"], "sort_fields": ['MessageTS'], "sort": 2, "filter": []},
     ObjectSITable: {"table": 'ObjectSITable', "start_time": "", "end_time": "", "select_fields": ["MessageTS", "Source", "ModuleId"], "sort_fields": ['MessageTS'], "sort": 2, "filter": []},
     FlowSeriesTable: {"table": 'FlowSeriesTable', "start_time": "", "end_time": "", "select_fields": ['flow_class_id', 'direction_ing']},
-    FlowRecordTable: {"table": 'FlowRecordTable', "start_time": "", "end_time": "", "select_fields": ['vrouter', 'sourcevn', 'sourceip', 'sport', 'destvn', 'destip', 'dport', 'protocol', 'direction_ing']}
+    FlowRecordTable: {"table": 'FlowRecordTable', "start_time": "", "end_time": "", "select_fields": ['vrouter', 'sourcevn', 'sourceip', 'sport', 'destvn', 'destip', 'dport', 'protocol', 'direction_ing']},
+    StatTable_UveVirtualNetworkAgent_vn_stats: {
+                                                    "table": 'StatTable.UveVirtualNetworkAgent.vn_stats',
+                                                    "start_time": "",
+                                                    "end_time": "", 
+                                                    "select_fields": []
+                                                },
+    StatTable_VirtualMachineStats_if_stats: {
+                                                    "table": 'StatTable.VirtualMachineStats.if_stats',
+                                                    "start_time": "",
+                                                    "end_time": "", 
+                                                    "select_fields": []
+                                             },
+    StatTable_VirtualMachineStats_fip_stats: {
+                                                    "table": 'StatTable.VirtualMachineStats.fip_stats',
+                                                    "start_time": "",
+                                                    "end_time": "", 
+                                                    "select_fields": []
+                                             },
+    OverlayToUnderlayFlowMap: {"table": 'OverlayToUnderlayFlowMap', "start_time": "",
+                            "end_time": "", "select_fields": ["u_prouter", "u_pifindex"]
+    },
+    StatTable_UveVMInterfaceAgent_if_stats: {
+        "table": 'StatTable.UveVMInterfaceAgent.if_stats',
+        "start_time": "",
+        "end_time": "",
+        "select_fields": []
+    },
+    StatTable_UveVMInterfaceAgent_fip_diff_stats: {
+        "table": 'StatTable.UveVMInterfaceAgent.fip_diff_stats',
+        "start_time": "",
+        "end_time": "",
+        "select_fields": []
+    }
 };
 
+global.STATS_PROP = {
+                    'vn': {
+                            'inBytes':'SUM(vn_stats.in_bytes)',
+                            'outBytes':'SUM(vn_stats.out_bytes)',
+                            'inPkts':'SUM(vn_stats.in_tpkts)',
+                            'outPkts':'SUM(vn_stats.out_tpkts)'
+                          },
+                    'conn-vn': {
+                            'inBytes':'SUM(vn_stats.in_bytes)',
+                            'outBytes':'SUM(vn_stats.out_bytes)',
+                            'inPkts':'SUM(vn_stats.in_pkts)',
+                            'outPkts':'SUM(vn_stats.out_pkts)'
+                          },
+                    'vm': {
+                            'inBytes':'SUM(if_stats.in_bytes)',
+                            'outBytes':'SUM(if_stats.out_bytes)',
+                            'inPkts':'SUM(if_stats.in_pkts)',
+                            'outPkts':'SUM(if_stats.out_pkts)'
+                           },
+                    'fip' : {
+                            'inBytes':'SUM(fip_stats.in_bytes)',
+                            'outBytes':'SUM(fip_stats.out_bytes)',
+                            'inPkts':'SUM(fip_stats.in_pkts)',
+                            'outPkts':'SUM(fip_stats.out_pkts)'
+                           },
+                 };
 global.FORMAT_TABLE_COLUMNS = {
     'FlowSeriesTable': {"sum(bytes)": "sum_bytes", "sum(packets)": "sum_packets", "avg(bytes)": "avg_bytes", "avg(packets)": "avg_packets"}
 };
@@ -267,8 +307,11 @@ global.FORMAT_TABLE_COLUMNS = {
 global.VALID_LIKE_OPR_FIELDS = ['sourcevn', 'destvn'];
 global.VALID_RANGE_OPR_FIELDS = ['protocol', 'sourceip', 'destip', 'sport', 'dport'];
 
+global.QE_STAT_TABLE_TYPE = "STAT";
+global.QE_FLOW_TABLE_TYPE = "FLOW";
+
 /* Async URL Timeout */
-global.DEFAULT_ASYNC_REQUEST_TIMEOUT = 30 * 1000;
+global.DEFAULT_ASYNC_REQUEST_TIMEOUT = 300 * 1000; /* 5 Minutes */
 /* 8 seconds */
 global.BGP_NODE_SUMMARY_GET_TIMEOUT = 5 * 1000;
 /* 5 Seconds */
@@ -296,5 +339,17 @@ global.DEFAULT_FLOW_PCAP_ANALYZER = 'flow-packet-capture';
 
 global.CONTRAIL_LOGIN_ERROR = 'ContrailLoginError';
 
-module.exports = global;
+/* Keystone */
+global.KEYSTONE_V3_DEFAULT_DOMAIN = 'default';
+global.KEYSTONE_V2_DEFAULT_DOMAIN = 'default-domain';
+global.KEYSTONE_V3_TOKEN_URL = '/v3/auth/tokens';
+global.keystoneServiceListByProject = ['compute'];
 
+/* vCenter Config */
+global.VCENTER_SDK_PATH = '/sdk';
+global.VCENTER_WSDL = 'webroot/js/vim.wsdl';
+
+/* Async map limit Count */
+global.ASYNC_MAP_LIMIT_COUNT = 100;
+
+module.exports = global;

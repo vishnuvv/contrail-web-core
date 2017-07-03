@@ -7,7 +7,7 @@
  * cloudstack
  */
 
-var config = require('../../../../../config/config.global'),
+var configUtils = require('../../../common/config.utils'),
     global = require('../../../common/global'),
     messages = require('../../../common/messages'),
     logutils = require('../../../utils/log.utils'),
@@ -16,16 +16,8 @@ var config = require('../../../../../config/config.global'),
     rest = require('../../../common/rest.api'),
     assert = require('assert'),
     commonUtils = require('./../../../utils/common.utils'),
+    configServerUtils = require('../../../common/configServer.utils'),
     cloudStackApi = require('./cloudstack.api');
-
-var authServerIP = ((config.identityManager) && (config.identityManager.ip)) ?
-    config.identityManager.ip : global.DFLT_SERVER_IP;
-var authServerPort =
-    ((config.identityManager) && (config.identityManager.port)) ?
-    config.identityManager.port : '8080';
-
-authAPIServer = rest.getAPIServer({apiName:global.label.IDENTITY_SERVER,
-                                   server:authServerIP, port:authServerPort});
 
 var CLOUDSTACK_USER_TYPE_ADMIN = 1;
 var CLOUDSTACK_USER_TYPE_USER  = 0;
@@ -40,6 +32,16 @@ function doAuth (userName, password, callback)
     };
 
     var reqUrl = '/client/api';
+    var config = configUtils.getConfig(),
+    authServerIP = ((config.identityManager) &&
+                        (config.identityManager.ip)) ?
+                        config.identityManager.ip : global.DFLT_SERVER_IP,
+    authServerPort = ((config.identityManager) &&
+                        (config.identityManager.port)) ?
+                        config.identityManager.port : '8080',
+    authAPIServer =
+                rest.getAPIServer({apiName:global.label.IDENTITY_SERVER,
+                      server: authServerIP, port: authServerPort});
 
     authAPIServer.api.post(reqUrl, postData, function(err, data, response) {
         callback(err, data, response); 
@@ -50,10 +52,51 @@ function getUserRoleByAuthResponse (cloudStackUserLoginResp)
 {
     var userType = cloudStackUserLoginResp['loginresponse']['type'];
     if (CLOUDSTACK_USER_TYPE_ADMIN == userType) {
-        return global.STR_ROLE_ADMIN;
+        return [global.STR_ROLE_ADMIN];
     } else {
-        global.STR_ROLE_USER;
+        return [global.STR_ROLE_USER];
     }
+}
+
+function getUIUserRoleByTenant (userObj, callback)
+{
+    var userRoles = [global.STR_ROLE_USER];
+    if ((null == userObj) || (null == userObj.req)) {
+        callback(null, userRoles);
+        return;
+    }
+    userRoles =
+         commonUtils.getValueByJsonPath(userObj.req,
+                                        'session;userRole',
+                                        [global.STR_ROLE_USER]);
+    callback(null, userRoles);
+}
+
+function getUIRolesByExtRoles (extRoles)
+{
+    var roles = [];
+    if ((null == extRoles) || (!extRoles.length)) {
+        return [global.STR_ROLE_USER];
+    }
+    var roleCnt = extRoles.length;
+    for (var i = 0; i < roleCnt; i++) {
+        roles.push(extRoles[i]['name']);
+    }
+    if (-1 != roles.indexOf('admin')) {
+        return [global.STR_ROLE_ADMIN];
+    }
+    return [global.STR_ROLE_USER];
+}
+
+function getExtUserRoleByTenant (userObj, callback)
+{
+    getUIUserRoleByTenant(userObj, function(uiRoles) {
+        if (-1 != uiRoles.indexOf(global.STR_ROLE_ADMIN)) {
+            callback(null, {'roles': [{'name': 'admin'}]});
+            return;
+        }
+        callback(null, {'roles': [{'name': 'Member'}]});
+    });
 }
 
 function getUsers (req, callback)
@@ -81,7 +124,7 @@ function updateUserKeys (req, userName, userLists)
     req.session['userKey']['secretKey'] = users[i]['secretkey'];
 }
 
-function authenticate (req, res, callback)
+function authenticate (req, res, appData, callback)
 {
     var self = this,
         post = req.body,
@@ -93,18 +136,13 @@ function authenticate (req, res, callback)
     var passwdCipher = null
     var userEncrypted = null;
     var passwdEncrypted = null;
-    var loginErrFile = 'webroot/html/login-error.html';
     if(post.urlHash != null)
         urlHash = post.urlHash;
 
     doAuth(username, password, function (err, data, response) {
         if ((err) || (null == data)) {
             req.session.isAuthenticated = false;
-            commonUtils.changeFileContentAndSend(res, loginErrFile,
-                                                 global.CONTRAIL_LOGIN_ERROR,
-                                                 messages.error.invalid_user_pass,
-                                                 function() { 
-            });
+            callback(messages.error.invalid_user_pass);
             return;
         }
         req.session.isAuthenticated = true;
@@ -115,14 +153,12 @@ function authenticate (req, res, callback)
         req.session.sessionKey = data['loginresponse']['sessionkey'];
         getUsers(req, function(userLists) {
             updateUserKeys(req, username, userLists);
-            authApi.saveUserAuthInRedis(username, password, req, function(err) {
-                logutils.logger.info("Login Successful with tenants.");
-                res.setHeader('Set-Cookie', "username=" + username +
-                              '; expires=' +
-                              new Date(new Date().getTime() +
-                                       global.MAX_AGE_SESSION_ID).toUTCString());
-                res.redirect('/' + urlHash);
-            });
+            logutils.logger.info("Login Successful with tenants.");
+            res.setHeader('Set-Cookie', "username=" + username +
+                          '; expires=' +
+                          new Date(new Date().getTime() +
+                                   global.MAX_AGE_SESSION_ID).toUTCString());
+            callback(null, '/' + urlHash);
         });
     });
 }
@@ -152,13 +188,13 @@ function formatClodStackTenantList (data)
     return resultJSON;
 }
 
-function formatTenantList (cloudstackProjects, apiProjects, callback)
+function formatTenantList (req, cloudstackProjects, apiProjects, callback)
 {
     var resultJSON = formatClodStackTenantList(cloudstackProjects);
     callback(resultJSON);
 }
 
-function getTenantList (req, callback)
+function getTenantList (req, appData, callback)
 {
     var postData = {};
     var cmd = 'listProjects';
@@ -168,8 +204,62 @@ function getTenantList (req, callback)
     });
 }
 
+function getProjectList (req, appData, callback)
+{
+    getTenantList(req, appData, function(err, tenantList) {
+        configServerUtils.listProjectsAPIServer(err, tenantList, appData,
+                                             function(err, data) {
+            formatTenantList(req, tenantList, data, function(projects) {
+                callback(null, projects);
+            });
+        });
+    });
+}
+
+function getSessionExpiryTime (req, appData, callback)
+{
+    var config = configUtils.getConfig();
+    var cfgSessTimeout =
+        ((null != config.session) && (null != config.session.timeout)) ?
+        config.session.timeout : null;
+    var defSessTimeout = global.MAX_AGE_SESSION_ID;
+    if (null == cfgSessTimeout) {
+        return defSessTimeout;
+    }
+    return cfgSessTimeout;
+}
+
+function getUserAuthDataByConfigAuthObj (authObj, callback)
+{
+    callback(null, null);
+}
+
+function deleteAllTokens (req, callback)
+{
+    callback(null, null);
+}
+
+function getServiceAPIVersionByReqObj (req, appData, svcType, callback)
+{
+    callback(null);
+}
+
+function shiftServiceEndpointList (req, serviceType, regionName)
+{
+    return;
+}
+
 exports.getAPIServerAuthParamsByReq = getAPIServerAuthParamsByReq;
 exports.authenticate = authenticate;
 exports.getTenantList = getTenantList;
 exports.formatTenantList = formatTenantList;
+exports.getProjectList = getProjectList;
+exports.getSessionExpiryTime = getSessionExpiryTime;
+exports.getUserAuthDataByConfigAuthObj = getUserAuthDataByConfigAuthObj;
+exports.deleteAllTokens = deleteAllTokens;
+exports.getUIUserRoleByTenant = getUIUserRoleByTenant;
+exports.getExtUserRoleByTenant = getExtUserRoleByTenant;
+exports.getUIRolesByExtRoles = getUIRolesByExtRoles;
+exports.getServiceAPIVersionByReqObj = getServiceAPIVersionByReqObj;
+exports.shiftServiceEndpointList = shiftServiceEndpointList;
 

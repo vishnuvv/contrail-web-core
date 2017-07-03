@@ -4,19 +4,19 @@
 
 var http = require('http'),
     https = require('https'),
-    config = require('../../../../config/config.global.js'),
     logutils = require('../../utils/log.utils'),
     messages = require('../../common/messages'),
     util = require('util'),
     redis = require("redis"),
     global = require('../../common/global'),
-    config = require('../../../../config/config.global.js'),
+    configUtils = require('../../common/config.utils'),
     longPoll = require('../core/longPolling.api'),
     logutils = require('../../utils/log.utils'),
     commonUtils = require('../../utils/common.utils'),
     crypto = require('crypto'),
     redisSub = require('../core/redisSub'),
     authApi = require('../../common/auth.api'),
+    vCenterApi = require('../../orchestration/plugins/vcenter/vcenter.api');
     fs = require('fs'),
     messages = require('../../common/messages');
 
@@ -37,8 +37,128 @@ exports.admin = function (req, res) {
     checkAndRedirect(req, res, 'html/admin.html');
 };
 
-exports.login = function (req, res) {
-    res.sendfile('webroot/html/login.html');
+exports.getMenuXML = function(req,res) {
+//construct the name of menu xml file to be returned based on enabled packages
+    var featurePkgToMenuNameMap = {
+        'webController': 'wc',
+        'webStorage': 'ws',
+        'serverManager': 'sm'
+    },featureMaps = [];
+    var webServerInfo = {featurePkg:{}};
+
+    var pkgList = process.mainModule.exports['pkgList'];
+    var pkgLen = pkgList.length;
+    var activePkgs = [];
+    for (var i = 1; i < pkgLen; i++) {
+        activePkgs.push(pkgList[i]['pkgName']);
+    }
+    /* It may happen that user has written same config multiple times in config
+     * file
+     */
+    activePkgs = _.uniq(activePkgs);
+    var pkgCnt = activePkgs.length;
+    for (var i = 0; i < pkgCnt; i++) {
+        webServerInfo['featurePkg'][activePkgs[i]] = true;
+    }
+
+    if (null != webServerInfo['featurePkg']) {
+        var pkgList = webServerInfo['featurePkg'];
+        for (var key in pkgList) {
+            if (null != featurePkgToMenuNameMap[key]) {
+                featureMaps.push(featurePkgToMenuNameMap[key]);
+            } else {
+                console.log('featurePkgToMenuNameMap key is null: ' + key);
+            }
+        }
+        if (featureMaps.length > 0) {
+            featureMaps.sort();
+            var mFileName = 'menu_' + featureMaps.join('_') + '.xml';
+            res.sendfile('webroot/' + mFileName);
+        } else {
+            //Add error case
+        }
+    }
+}
+
+exports.isAuthenticated = function(req,res) {
+    var retData = {}, config = configUtils.getConfig();
+    if(req.session.isAuthenticated == true) {
+        commonUtils.getWebServerInfo(req,res)
+        return;
+    } else {
+        // commonUtils.getWebServerInfo(req,res)
+        // var featurePkgs = commonUtils.getValueByJsonPath(config,'featurePkg',[]);
+        var featurePkg = commonUtils.getFeaturePkgs();
+        retData = {
+            isAuthenticated: false,
+            featurePkg: featurePkg,
+            isRegionListFromConfig: config.regionsFromConfig,
+            configRegionList: config.regions
+        };
+        commonUtils.handleJSONResponse(null,res,retData);
+    }
+}
+
+function login (req, res, appData, redirectURL)
+{
+    if (null == redirectURL) {
+        redirectURL = "/";
+    }
+    res.redirect(302, redirectURL);
+}
+
+function vcenter_login (req, res, appData)
+{
+    //Move setting loggedInOrchestrationMode to longPolling??
+    var config = configUtils.getConfig();
+    var orch = config.orchestration.Manager;
+    var models = orch.split(',');
+    //If vcenter orchestration is not set and user tries to launch "/vcenter/login",redirect to "/login"
+    if (-1 == models.indexOf('vcenter')) {
+        commonUtils.redirectToURL(req, res, '/login');
+    } else {
+        if (-1 != req.url.indexOf('/vcenter/login')) {
+            return login(req, res, appData, '/vcenter');
+        }
+        exports.dashboard(req, res);
+    }
+}
+
+function logoutCB (req, res, appData, redURL)
+{
+    var ajaxCall = req.headers['x-requested-with'];
+    var config = configUtils.getConfig();
+    if ('XMLHttpRequest' == ajaxCall) {
+        var retData = {
+            isRegionListFromConfig: config.regionsFromConfig,
+            configRegionList: config.regions
+        };
+        commonUtils.handleJSONResponse(null, res, retData);
+    } else {
+        login(req, res, appData, redURL);
+    }
+}
+
+function vcenter_logout (req, res, appData)
+{
+    /* First invalidate the session object */
+    var config = configUtils.getConfig();
+    commonUtils.invalidateReqSession(req, res);
+    var orch = config.orchestration.Manager;
+    var models = orch.split(',');
+    if (req.session.loggedInOrchestrationMode != 'vcenter') {
+        commonUtils.redirectToURL(req, res, '/logout');
+    } else {
+        //Issue logout on vCenter only if vmware session exists
+        if (req.session.vmware_soap_session != null) {
+            var logoutSess = vCenterApi.logout(appData);
+            logoutSess.done(function(response) {
+                logoutCB(req, res, appData, '/vcenter');
+            });
+        } else {
+            logoutCB(req, res, appData, '/vcenter');
+        }
+    }
 }
 
 var urlAllowedList = {};
@@ -111,6 +231,35 @@ exports.checkURLInAllowedList = function(req) {
     This function returns the isAuthenticated flag for a user session
  */
 exports.isSessionAuthenticated = function(req) {
+    //If url contains "/vcenter" and not loginReq and session doesn't contain vmware_soap_session
+    //If loggedInOrchestrationMode doesn't match on client and server
+    if(!longPoll.checkLoginReq(req) && req.session.loggedInOrchestrationMode != null && req.headers['x-orchestrationmode'] != null) {
+        if(req.headers['x-orchestrationmode'] != req.session.loggedInOrchestrationMode) {
+            // console.log(commonUtils.FgGreen,'not authenticated',req.headers['x-orchestrationmode'],req.session.loggedInOrchestrationMode);
+            req.session.isAuthenticated = false;
+            return false;
+        }
+    }
+    //If not login request and not /api request
+    //Requests that are same across vCenter and openStack
+    var refererURL = req.headers.referer;
+    //As we differentiate between orchestration models based on browserURL like for vcenter mode, we suffix with "/vcenter"
+    //If user deletes the "/vcenter" suffix and reloads the page,we need to take to login page and vice-versa
+    if(refererURL != null) {
+        if(refererURL.indexOf('/vcenter') > -1 && req.session.vmware_soap_session == null) {
+            //Moving none to vcenter orchestration mode 
+            req.session.isAuthenticated = false;
+            // console.log(commonUtils.FgGreen,'vcenter not authenticated',req.url,req.session.vmware_soap_session);
+            return false;
+        }
+        if(refererURL.indexOf('/vcenter') == -1 && req.session.vmware_soap_session != null) {
+            //Moving from vCenter orchestration mode to none
+            // console.log(commonUtils.FgGreen,'none not authenticated',req.url,req.session.vmware_soap_session);
+            delete req.session.vmware_soap_session;
+            req.session.isAuthenticated = false;
+            return false;
+        }
+    }
     return ((req.session) ? req.session.isAuthenticated : false);
 }
 
@@ -119,6 +268,9 @@ exports.isSessionAuthenticated = function(req) {
    if so, then redirect to the last page, user visited
  */
 checkAndRedirect = function(req, res, sendFile) {
+    //As we have a single html file,return it always
+    res.sendfile(sendFile);
+    return;
     var data = exports.checkURLInAllowedList(req);
     var loginErrFile = 'webroot/html/login-error.html';
     if (null == data) {
@@ -127,7 +279,7 @@ checkAndRedirect = function(req, res, sendFile) {
         return;
     }
     if (false == exports.isSessionAuthenticated(req)) {
-        res.redirect('/login');
+        commonUtils.redirectToLogin(req, res);
     } else {
         var pkgList = process.mainModule.exports['pkgList'];
         if (pkgList.length > 1) {
@@ -151,40 +303,73 @@ setSessionTimeoutByReq = function(req) {
     }
 }
 
-getUserRoleByAuthResponse = function(resRoleList) {
-    if ((null == resRoleList) || (!resRoleList.length)) {
-        /* Ideally if Role is not associated, then we should not allow user to
-         * login, but we are assigning role as 'Member' to the user to not to
-         * block UI
-//        return null;
-         */
-        return global.STR_ROLE_USER;
-    }
-    var rolesCount = resRoleList.length;
-    for (var i = 0; i < rolesCount; i++) {
-        if (resRoleList[i]['name'] != 'Member') {
-            return global.STR_ROLE_ADMIN;
-        }
-    }
-    return global.STR_ROLE_USER;
-}
-
-exports.authenticate = function (req, res) {
+exports.authenticate = function (req, res, appData) {
     /* Call module independent API */
-    authApi.doAuthenticate(req, res, function(err, data) {
+    var pkgList = process.mainModule.exports['pkgList'];
+    var errorObj = {status: 'failure'};
+    if (pkgList.length <= 1) {
+        errorObj['msg'] = "Install feature package";
+        commonUtils.handleJSONResponse(null, res, errorObj);
+        return;
+    }
+    authApi.doAuthenticate(req, res, appData, function(errorMsg, redirectURL) {
         /* Already logged */
-        logutils.logger.debug('Getting err ' + err);
+        if (null != errorMsg) {
+            errorObj['msg'] = errorMsg;
+            commonUtils.handleJSONResponse(null, res, errorObj);
+            return;
+        }
+        if (null != redirectURL) {
+            res.redirect(redirectURL);
+            return;
+        }
+        commonUtils.getWebServerInfo(req, res);
+    });
+}
+exports.vcenter_authenticate = function (req, res, appData) {
+    var errorObj = {status: 'failure'};
+    /* Call module independent API */
+    authApi.doAuthenticate(req, res, appData, function(errorMsg) {
+        /* Already logged */
+        if (null != errorMsg) {
+            errorObj['msg'] = errorMsg;
+            commonUtils.handleJSONResponse(null, res, errorObj);
+            return;
+        }
+        commonUtils.getWebServerInfo(req, res);
     });
 }
 
-exports.logout = function (req, res) {
-    if (req.session.userid) {
-        req.session.isAuthenticated = false;
-        req.session.destroy();
+function logout (req, res, appData)
+{
+    req.session.isAuthenticated = false;
+    res.clearCookie('_csrf');
+    res.clearCookie('connect.sid');
+    var referer = req.headers['referer'];
+    var config = configUtils.getConfig();
+    if (((null != referer) && (-1 != referer.indexOf('/vcenter'))) ||
+        (-1 != req.url.indexOf('/vcenter'))) {
+        vcenter_logout(req, res, appData);
+        return;
     }
-    res.header('Cache-Control', 
+    authApi.deleteAllTokens(req, function(err) {
+        res.header('Cache-Control', 
                'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
-    res.redirect('/login');
+        /* Need to destroy the session after redirectToLogin as login page depends
+           on orchestrationModel
+         */
+        req.session.destroy();
+        var retData = {
+            isRegionListFromConfig: config.regionsFromConfig,
+            configRegionList: config.regions
+        };
+        var ajaxCall = req.headers['x-requested-with'];
+        if ('XMLHttpRequest' == ajaxCall) {
+            commonUtils.handleJSONResponse(null, res, retData);
+        } else {
+            login(req, res);
+        }
+    });
 };
 
 function putData(id, callback) {
@@ -285,4 +470,21 @@ exports.testCreate = function (req, res) {
 	}
 };
 
+function doAuthenticate (req, res, appData)
+{
+    /* This is a GET request, so redirect to login page */
+    return commonUtils.redirectToLogin(req, res);
+}
 
+function doVcenterAuthenticate (req, res, appData)
+{
+    /* This is a GET request, so redirect to login page */
+    return commonUtils.redirectToLogin(req, res);
+}
+
+exports.login = login;
+exports.logout = logout;
+exports.vcenter_login = vcenter_login;
+exports.vcenter_logout = vcenter_logout;
+exports.doAuthenticate = doAuthenticate;
+exports.doVcenterAuthenticate = doVcenterAuthenticate;

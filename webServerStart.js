@@ -1,6 +1,25 @@
 /*
  * Copyright (c) 2014 Juniper Networks, Inc. All rights reserved.
  */
+var configUtils = require('./src/serverroot/common/config.utils'),
+    args = process.argv.slice(2),
+    configFile = configUtils.getConfigFile(args);
+configUtils.updateConfig(configFile);
+configUtils.subscribeAutoDetectConfig(configFile);
+
+/* Set corePath before loading any other module */
+var corePath = process.cwd();
+var config = configUtils.getConfig();
+
+exports.corePath = corePath;
+
+var redisUtils = require('./src/serverroot/utils/redis.utils');
+var global = require('./src/serverroot/common/global');
+
+var server_port = (config.redis_server_port) ?
+    config.redis_server_port : global.DFLT_REDIS_SERVER_PORT;
+var server_ip = (config.redis_server_ip) ?
+    config.redis_server_ip : global.DFLT_REDIS_SERVER_IP;
 
 var express = require('express')
     , path = require('path')
@@ -8,45 +27,79 @@ var express = require('express')
     , http = require('http')
     , https = require("https")
     , underscore = require('underscore')
-    , config = require('./config/config.global.js')
-    , logutils = require('./src/serverroot/utils/log.utils')
     , cluster = require('cluster')
-    , nodeWorkerCount = config.node_worker_count
     , axon = require('axon')
     , producerSock = axon.socket('push')
-    , redisSub = require('./src/serverroot/web/core/redisSub')
     , global = require('./src/serverroot/common/global')
     , redis = require("redis")
     , eventEmitter = require('events').EventEmitter
     , async = require('async')
-    , authApi = require('./src/serverroot/common/auth.api')
-    , async = require('async')
     , os = require('os')
     , commonUtils = require('./src/serverroot/utils/common.utils')
-    , discClient = require('./src/serverroot/common/discoveryclient.api')
+    , contrailServ = require('./src/serverroot/common/contrailservice.api')
+    , assert = require('assert')
     , jsonPath = require('JSONPath').eval
+    , helmet = require('helmet')
+    , logutils = require('./src/serverroot/utils/log.utils')
+    , clusterUtils = require('./src/serverroot/utils/cluster.utils')
     ;
+
+    var cgcApi = require('./src/serverroot/common/globalcontroller.api');
+var pkgList = commonUtils.mergeAllPackageList(global.service.MAINSEREVR);
+assert(pkgList);
+var nodeWorkerCount = config.node_worker_count;
 
 var server_port = (config.redis_server_port) ?
     config.redis_server_port : global.DFLT_REDIS_SERVER_PORT;
 var server_ip = (config.redis_server_ip) ?
     config.redis_server_ip : global.DFLT_REDIS_SERVER_IP;
 
-var redisClient = redis.createClient(server_port,
-    server_ip);
 var RedisStore = require('connect-redis')(express);
 
 var store;
 var myIdentity = global.service.MAINSEREVR;
-var discServEnable = ((null != config.discoveryService) &&
-                      (null != config.discoveryService.enable)) ?
-                      config.discoveryService.enable : true;
 
 var sessEvent = new eventEmitter();
+var csrfInvalidEvent = new eventEmitter();
+
+/* Recommended Cipheres */
+var defCiphers =
+    'ECDHE-RSA-AES256-SHA384:AES256-SHA256:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM';
+var serCiphers = ((null != config.server_options) &&
+               (null != config.server_options.ciphers)) ?
+    config.server_options.ciphers : defCiphers;
+
+var keyFile = './keys/cs-key.pem';
+var certFile = './keys/cs-cert.pem';
+if (config.server_options) {
+    keyFile = config.server_options.key_file;
+    if (null != keyFile) {
+        keyFile = path.normalize(keyFile);
+        if (false == fs.existsSync(keyFile)) {
+            keyFile = './keys/cs-key.pem';
+        }
+    } else {
+        keyFile = './keys/cs-key.pem';
+    }
+    certFile = config.server_options.cert_file;
+    if (null != certFile) {
+        certFile = path.normalize(certFile);
+        if (false == fs.existsSync(certFile)) {
+            certFile = './keys/cs-cert.pem';
+        }
+    } else {
+        certFile = './keys/cs-cert.pem';
+    }
+}
 
 var options = {
-    key:fs.readFileSync('./keys/cs-key.pem'),
-    cert:fs.readFileSync('./keys/cs-cert.pem')
+    key:fs.readFileSync(keyFile),
+    cert:fs.readFileSync(certFile),
+    /* From https://github.com/nodejs/node-v0.x-archive/issues/2727
+       https://github.com/nodejs/node-v0.x-archive/pull/2732/files
+     */
+    ciphers: serCiphers,
+    honorCipherOrder: true
 };
 
 var insecureAccessFlag = false;
@@ -67,62 +120,78 @@ function initializeAppConfig (appObj)
 {
     var app = appObj.app;
     var port = appObj.port;
+    var secretKey =
+        'enterasupbK3xg8qescJK.dUbdgfVq0D70UaLTMGTzO4yx5vVJral2zIhVersecretkey';
+    if ((null != config.session) && (null != config.session.secret_key)) {
+        secretKey = config.session.secret_key;
+    }
     app.set('port', process.env.PORT || port);
     app.use(express.cookieParser());
+    var maxAgeTime =
+        ((null != config.session) && (null != config.session.timeout)) ?
+        config.session.timeout : global.MAX_AGE_SESSION_ID;
     store = new RedisStore({host:redisIP, port:redisPort,
-        prefix:global.STR_REDIS_STORE_SESSION_ID_PREFIX,
-        eventEmitter:sessEvent});
+                           db:global.WEBUI_SESSION_REDIS_DB,
+                           prefix:global.STR_REDIS_STORE_SESSION_ID_PREFIX,
+                           ttl: (maxAgeTime / 1000), /* ttl is in seconds */
+                           eventEmitter:sessEvent});
 
+    // Implement X-XSS-Protection
+    app.use(helmet.xssFilter());
+    // Implement X-Frame: SameOrigin
+    app.use(helmet.xframe('sameorigin'));
+    // Implement Strict-Transport-Security
+
+    var compressOptions = {
+        filter: function(req, res) {
+            //To enable gzip compression for xml,tmpl,...files
+            return /json|text|xml|javascript|tmpl/.test(res.getHeader('Content-Type'))
+        }
+    };
+    app.use(express.compress(compressOptions));
+    express.static.mime.define({'text/tmpl': ['tmpl']});
+    registerStaticFiles(app);
+    app.use(helmet.hsts({
+        maxAge: maxAgeTime,
+        includeSubdomains: true
+    }));
+    var cookieObj = {maxAge: null, httpOnly: true};
+    if (false == insecureAccessFlag) {
+        cookieObj['secure'] = true;
+    }
     app.use(express.session({ store:store,
-        secret:'enterasupbK3xg8qescJK.dUbdgfVq0D70UaLTMGTzO4yx5vVJral2zIhVersecretkey',
-        cookie:{
-            maxAge:global.MAX_AGE_SESSION_ID
-        }}));
-        app.use(express.compress());
+        secret: secretKey,
+        cookie: cookieObj
+        }));
         app.use(express.methodOverride());
         app.use(express.bodyParser());
         app.use(app.router);
-        registerStaticFiles(app);
-    // Catch-all error handler
-    app.use(function (err, req, res, next) {
-        logutils.logger.error(err.stack);
-        res.send(500, 'An unexpected error occurred!');
-    });
+        // Catch-all error handler
+        app.use(function (err, req, res, next) {
+            logutils.logger.error(err.stack);
+            res.send(500, 'An unexpected error occurred!');
+        });
 }
 
-var pkgList = null;
-
-function loadStaticFiles (pkgNameObj, callback)
+function loadStaticFiles (app, pkgDir)
 {
-    var app     = pkgNameObj['app'];
-    var pkgName = pkgNameObj['pkgName'];
-
-    app.use(express.static(path.join(process.cwd(), 'webroot'),
-                           {maxAge: 3600*24*3*1000}));
-    if ((null == config.featurePkg[pkgName]) || (null == config.featurePkg[pkgName]['path'])) {
-        callback(null);
-        return;
+    var dirPath = path.join(pkgDir, 'webroot');
+    var fsStat = fs.statSync(dirPath);
+    if ((null != fsStat) && (true == fsStat.isDirectory())) {
+        logutils.logger.debug("Registering Static Directory: " + dirPath);
+        app.use(express.static(dirPath, {maxAge: 3600*24*3*1000}));
     }
-    /* First register core webroot directory */
-    var dirPath = path.join(config.featurePkg[pkgName]['path'], 'webroot');
-    fs.exists(dirPath, function(exists) {
-        if (exists) {
-            app.use(express.static(dirPath, {maxAge: 3600*24*3*1000}));
-            callback(null);
-        }
-    });
 }
 
 function registerStaticFiles (app)
 {
-    var pkgNameLists = jsonPath(pkgList, "$..name[0]");
-    var pkgNameListsLen = pkgNameLists.length;
+    var pkgDir;
     var staticFileDirLists = [];
+    var pkgNameListsLen = pkgList.length;
     for (var i = 0; i < pkgNameListsLen; i++) {
-        staticFileDirLists.push({'app': app, 'pkgName': pkgNameLists[i]});
+        pkgDir = commonUtils.getPkgPathByPkgName(pkgList[i]['pkgName']);
+        loadStaticFiles(app, pkgDir);
     }
-    async.map(staticFileDirLists, loadStaticFiles, function(err) {
-    });
 }
 
 function initAppConfig ()
@@ -153,33 +222,25 @@ function registerSessionDeleteEvent ()
 {
     store.eventEmitter.on('sessionDeleted', function (sid) {
         /* Handle session delete cases here */
-        console.log("Session got expired:", sid);
-        /* Delete authKey from Redis for this Session ID */
-        /* NOTE: sid is of format as: 
-           global.STR_REDIS_STORE_SESSION_ID_PREFIXsessionId, so extract sessionId
-           from here
-         */
-        var sessionId = getSessionIdByRedisSessionStore(sid);
-        authApi.deleteAuthDataBySessionId(sessionId);
+        logutils.logger.debug("Session got expired: " + sid);
     });
-}
-
-function getDestPathByPkgPathURL (destPath)
-{
-    var destArrPath = destPath.split(':');
-    if (destArrPath.length > 1) {
-        destPath = config.featurePkg[destArrPath[0]]['path'] + '/' + destArrPath[1];
-    }
-    return destPath;
 }
 
 function loadAllFeatureURLs (myApp)
 {
-    var parseURLData = jsonPath(pkgList, "$..parseURL[0]");
-    var parseURLDataLen = parseURLData.length;
-    for (var i = 0; i < parseURLDataLen; i++) {
-        destPath = getDestPathByPkgPathURL(parseURLData[i]['output'][0]);
-        require(destPath).registerURLsToApp(myApp);
+    var pkgDir;
+    var pkgListLen = pkgList.length;
+    for (var i = 0; i < pkgListLen; i++) {
+        if (pkgList[i]['parseURL.xml']) {
+            pkgDir = commonUtils.getPkgPathByPkgName(pkgList[i]['pkgName']);
+            var urlListLen = pkgList[i]['parseURL.xml'].length;
+            for (var j = 0; j < urlListLen; j++) {
+                logutils.logger.debug("Registered URLs to APP :" +
+                                      pkgDir + pkgList[i]['parseURL.xml'][j]);
+                require(pkgDir +
+                        pkgList[i]['parseURL.xml'][j]).registerURLsToApp(myApp);
+            }
+        }
     }
     return;
 }
@@ -190,9 +251,24 @@ function registerReqToApp ()
     if (true == insecureAccessFlag) {
         myApp = httpApp;
     }
+
+    var csrfOptions = {eventEmitter: csrfInvalidEvent};
+    var csrf = express.csrf(csrfOptions);
+    //Populate the CSRF token in req.session on login request
+    myApp.get('/', csrf);
+    myApp.get('/vcenter', csrf);
+    //Enable CSRF token check for all URLs starting with "/api"
+    myApp.all('/api/*', csrf);
+    myApp.all('/gohan_contrail/*', cgcApi.getCGCAllReq);
+    myApp.all('/gohan_contrail_auth/*', cgcApi.getCGCAuthReq);
+
     loadAllFeatureURLs(myApp);
     var handler = require('./src/serverroot/web/routes/handler')
     handler.addAppReqToAllowedList(myApp.routes);
+    csrfInvalidEvent.on('csrfInvalidated', function(req, res) {
+        logutils.logger.debug('_csrf token got invalidated');
+        commonUtils.redirectToLogout(req, res);
+    });
 }
 
 function bindProducerSocket ()
@@ -206,13 +282,16 @@ function bindProducerSocket ()
        Server of other nodeJS server
      */
     producerSock.bind(connectURL);
-    console.log('nodeJS Server bound to port %s to Job Server ', port);
+    logutils.logger.debug('Web Server bound to port ' + port +
+                          ' to Job Server');
+    return;
 }
 
 function sendRequestToJobServer (msg)
 {
     var timer = setInterval(function () {
-        console.log("SENDING to jobServer:", msg);
+        //logutils.logger.debug("SENDING to jobServer:" + msg.reqData);
+        //console.log("Getting producerSock as:", producerSock);
         producerSock.send(msg.reqData);
         clearTimeout(timer);
     }, 1000);
@@ -227,54 +306,36 @@ function addProducerSockListener ()
 
 function messageHandler (msg)
 {
-    if (msg.cmd && msg.cmd == global.STR_SEND_TO_JOB_SERVER) {
-        sendRequestToJobServer(msg);
+    console.log("Got from worker process:", msg);
+    if ((null != msg) && (null != msg.cmd)) {
+        switch (msg.cmd) {
+        case global.STR_SEND_TO_JOB_SERVER:
+            sendRequestToJobServer(msg);
+            break;
+        default:
+            logutils.logger.error('Unknown cmd: ' + msg.cmd);
+            break;
+        }
     }
 }
 
 var workers = [];
-var timeouts = [];
-
-function addClusterEventListener ()
-{
-    cluster.on('fork', function (worker) {
-        logutils.logger.info('Forking worker #', worker.id);
-        cluster.workers[worker.id].on('message', messageHandler);
-        timeouts[worker.id] = setTimeout(function () {
-            logutils.logger.error(['Worker taking too long to start.']);
-        }, 2000);
-    });
-    cluster.on('listening', function (worker, address) {
-        logutils.logger.info('Worker #' + worker.id + ' listening on port: '
-                             + address.port);
-        clearTimeout(timeouts[worker.id]);
-    });
-    cluster.on('online', function (worker) {
-        logutils.logger.info('Worker #' + worker.id + ' is online.');
-    });
-    cluster.on('exit', function (worker, code, signal) {
-        logutils.logger.error(['The worker #' + worker.id +
-                              ' has exited with exit code ' +
-                              worker.process.exitCode]);
-        clearTimeout(timeouts[worker.id]);
-        // Don't try to restart the workers when disconnect or destroy has been called
-        if (worker.suicide !== true) {
-            logutils.logger.debug('Worker #' + worker.id + ' did not commit suicide.');
-            workers[worker.id] = cluster.fork();
-        }
-    });
-    cluster.on('disconnect', function (worker) {
-        logutils.logger.debug('The worker #' + worker.id + ' has disconnected.');
-    });
-}
-
 function registerFeatureLists ()
 {
-    var featureList = jsonPath(pkgList, "$..featureList[0]");
-    var featureListLen = featureList.length;
-    for (var i = 0; i < featureListLen; i++) {
-        destPath = getDestPathByPkgPathURL(featureList[i]['output'][0]);
-        require(destPath).registerFeature();
+    var pkgDir;
+    var pkgListLen = pkgList.length;
+    for (var i = 0; i < pkgListLen; i++) {
+        if (pkgList[i]['featureList.xml']) {
+            pkgDir = commonUtils.getPkgPathByPkgName(pkgList[i]['pkgName']);
+            var featureLen = pkgList[i]['featureList.xml'].length;
+            for (var j = 0; j < featureLen; j++) {
+                logutils.logger.debug("Registering feature Lists: " +
+                                      pkgDir +
+                                      pkgList[i]['featureList.xml'][j]);
+                require(pkgDir +
+                        pkgList[i]['featureList.xml'][j]).registerFeature();
+            }
+        }
     }
     return;
 }
@@ -312,14 +373,12 @@ function startWebCluster ()
             logutils.logger.info("Starting Contrail UI in clustered mode.");
             bindProducerSocket();
             addProducerSockListener();
-
-            var i;
-            for (i = 0; i < nodeWorkerCount; i += 1) {
+            for (var i = 0; i < nodeWorkerCount; i += 1) {
                 var worker = cluster.fork();
                 workers[i] = worker;
             }
 
-            addClusterEventListener();
+            clusterUtils.addClusterEventListener(messageHandler);
 
             // Trick by Ian Young to make cluster and supervisor play nicely together.
             // https://github.com/isaacs/node-supervisor/issues/40#issuecomment-4330946
@@ -338,14 +397,18 @@ function startWebCluster ()
     } else {
         clusterWorkerInit(function(error) {
             initAppConfig();
+            var jsonDiff = require('./src/serverroot/common/jsondiff');
+            var redisSub = require('./src/serverroot/web/core/redisSub');
+            jsonDiff.doFeatureJsonDiffParamsInit();
             registerSessionDeleteEvent();
             registerReqToApp();
             /* Set maxListener to unlimited */
             process.setMaxListeners(0);
             registerFeatureLists();
             redisSub.createRedisClientAndSubscribeMsg(function() {
-                discClient.sendWebServerReadyMessage();
             });
+            contrailServ.getContrailServices();
+            contrailServ.startWatchContrailServiceRetryList();
             /* All the config should be set before this line */
             startServer();
         });
@@ -354,6 +417,11 @@ function startWebCluster ()
 
 function doPreStartServer (isRetry)
 {
+    generateLogoFile(isRetry);
+    generateFaviconFile(isRetry);
+}
+
+function generateLogoFile(isRetry) {
     var rootPath = path.join(__dirname, 'webroot');
     var defLogoFile = '/img/opencontrail-logo.png';
     var srcLogoFile = rootPath + defLogoFile;
@@ -363,17 +431,43 @@ function doPreStartServer (isRetry)
     }
     var destLogoFile = rootPath + '/img/sdn-logo.png';
     var cmd = 'cp -f ' + srcLogoFile + " " + destLogoFile;
-    
+
     commonUtils.executeShellCommand(cmd, function(error, stdout, stderr) {
         if (error) {
             logutils.logger.error("Error occurred while copying logo file:" +
-                                  srcLogoFile + ' to ' + destLogoFile +
-                                  ' ['+ error + ']');
+            srcLogoFile + ' to ' + destLogoFile +
+            ' ['+ error + ']');
             if (false == isRetry) {
                 logutils.logger.error("Retrying Copying default logo");
-                doPreStartServer(true);
+                generateLogoFile(true);
             } else {
                 /* Default logo is also missing !!! */
+            }
+        }
+    });
+}
+
+function generateFaviconFile(isRetry) {
+    var rootPath = path.join(__dirname, 'webroot');
+    var defFaviconFile = '/img/opencontrail-favicon.ico';
+    var srcFaviconFile = rootPath + defFaviconFile;
+
+    if ((null != config.favicon_file) && (false == isRetry)) {
+        srcFaviconFile = config.favicon_file;
+    }
+    var destFaviconFile = rootPath + '/img/sdn-favicon.ico';
+    var cmdFavicon = 'cp -f ' + srcFaviconFile + " " + destFaviconFile;
+
+    commonUtils.executeShellCommand(cmdFavicon, function(error, stdout, stderr) {
+        if (error) {
+            logutils.logger.error("Error occurred while copying favicon file:" +
+            srcFaviconFile + ' to ' + destFaviconFile +
+            ' ['+ error + ']');
+            if (false == isRetry) {
+                logutils.logger.error("Retrying Copying default favicon");
+                generateFaviconFile(true);
+            } else {
+                /* Default favicon is also missing !!! */
             }
         }
     });
@@ -394,12 +488,12 @@ function startWebUIService (webUIIP, callback)
     });
 
     httpServer.on('clientError', function(exception, socket) {
-        logutils.logger.error("httpServer Exception: on clientError:", 
-                               exception, socket);
+        logutils.logger.error("httpServer Exception: on clientError:" +
+                               exception);
     });
     httpsServer.on('clientError', function(exception, socket) {
-        logutils.logger.error("httpsServer Exception: on clientError:", 
-                              exception, socket);
+        logutils.logger.error("httpsServer Exception: on clientError:" +
+                              exception);
     });
     
     if (false == insecureAccessFlag) {
@@ -488,7 +582,27 @@ function startServer ()
  */
 function clusterMasterInit (callback)
 {
-    checkAndDeleteRedisRDB(function() {
+    var parseXMLList = require('./src/tools/parseXMLList');
+    var mergePath = path.join(__dirname, 'webroot');
+    async.parallel([
+        function(CB) {
+            commonUtils.mergeAllMenuXMLFiles(pkgList, mergePath, function() {
+                CB(null, null);
+            });
+        },
+        function(CB) {
+            checkAndDeleteRedisRDB(function() {
+                CB(null, null);
+            });
+        },
+        function(CB) {
+            var regionJs = require('./src/tools/parseRegion');
+            regionJs.createRegionFile(function() {
+                CB(null, null);
+            });
+        }
+    ],
+    function(error, results) {
         callback();
     });
 }
@@ -498,8 +612,10 @@ function clusterMasterInit (callback)
  */
 function clusterWorkerInit (callback)
 {
-    commonUtils.compareAndMergeDefaultConfig(function(err) {
-        pkgList = commonUtils.mergeAllPackageList(global.service.MAINSEREVR);
+    redisUtils.createRedisClientAndWait(server_port, server_ip,
+                                    global.WEBUI_DFLT_REDIS_DB,
+                                    function(redisClient) {
+        exports.redisClient = redisClient;
         callback();
     });
 }
@@ -508,5 +624,5 @@ function clusterWorkerInit (callback)
 startWebCluster();
 
 exports.myIdentity = myIdentity;
-exports.discServEnable = discServEnable;
 exports.pkgList = pkgList;
+

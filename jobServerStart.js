@@ -2,18 +2,53 @@
  * Copyright (c) 2014 Juniper Networks, Inc. All rights reserved.
  */
 
+var configUtils = require('./src/serverroot/common/config.utils');
+    args = process.argv.slice(2),
+    configFile = configUtils.getConfigFile(args);
+configUtils.updateConfig(configFile);
+configUtils.subscribeAutoDetectConfig(configFile);
+
+/* Set corePath before loading any other contrail module */
+var corePath = process.cwd();
+var config = configUtils.getConfig();
+
+exports.corePath = corePath;
+
+var redisUtils = require('./src/serverroot/utils/redis.utils');
+var global = require('./src/serverroot/common/global');
+var jobsUtils = require('./src/serverroot/common/jobs.utils');
+var commonUtils = require('./src/serverroot/utils/common.utils');
+var async = require('async');
+var cluster = require('cluster');
+var clusterUtils = require('./src/serverroot/utils/cluster.utils');
+
+var server_port = (config.redis_server_port) ?
+    config.redis_server_port : global.DFLT_REDIS_SERVER_PORT;
+var server_ip = (config.redis_server_ip) ?
+    config.redis_server_ip : global.DFLT_REDIS_SERVER_IP;
+
+function loadJobServer () {
+jobsUtils.jobKueEventEmitter.on('kueReady', function() {
+    /* Now start real server processing */
+    if (false == process.kueReinitReqd) {
+        return;
+    }
+    var purgeRedisClient = redisUtils.createRedisClient();//createDefRedisClientAndWait(function(purgeRedisClient) {
+    jobServerPurgeAndStart(purgeRedisClient, function() {
+        startServers();
+        process.kueReinitReqd = false;
+    });
+});
+
 var axon = require('axon')
-    , jobsApi = require('./src/serverroot/jobs/core/jobs.api')
     , assert = require('assert')
-    , jobsApi = require('./src/serverroot/jobs/core/jobs.api')
-    , global = require('./src/serverroot/common/global')
     , redisPub = require('./src/serverroot/jobs/core/redisPub')
     , kue = require('kue')
-    , commonUtils = require('./src/serverroot/utils/common.utils')
     , logutils = require('./src/serverroot/utils/log.utils')
-    , discServ = require('./src/serverroot/jobs/core/discoveryservice.api')
-    , jsonPath = require('JSONPath').eval
-    , config = require('./config/config.global.js');
+    , contrailServ = require('./src/serverroot/common/contrailservice.api')
+    , fs = require('fs')
+    , jobsApi = require('./src/serverroot/jobs/core/jobs.api')
+    , jsonPath = require('JSONPath').eval;
 
 var hostName = config.jobServer.server_ip
     , port = config.jobServer.server_port;
@@ -25,6 +60,10 @@ var discServEnable = ((null != config.discoveryService) &&
                       config.discoveryService.enable : true;
 
 var pkgList = commonUtils.mergeAllPackageList(global.service.MIDDLEWARE);
+assert(pkgList);
+exports.myIdentity = myIdentity;
+exports.discServEnable = discServEnable;
+exports.pkgList = pkgList;
 
 /* Function: processMsg
  Handler for message processing for messages coming from main Server
@@ -37,118 +76,137 @@ processMsg = function (msg) {
  This function is used to connect to main Server on host and port
  defined in config.global.js
  */
+var resetDone = false;
 connectToMainServer = function () {
+    if (true == resetDone) {
+        return;
+    }
     var connectURL = 'tcp://' + hostName + ":" + port;
     workerSock.connect(connectURL);
-    console.log('Job Server connected to port ', port);
+    logutils.logger.info('Job Server connected to port ' + port);
+    resetDone = true;
+    workerSock.on('message', function (msg) {
+        /* Now based on the message type, act */
+        processMsg(msg);
+    });
 }
 
 kueJobListen = function() {
     /* kue UI listening port */
     var kuePort = config.kue.ui_port || 3002;
-    kue.app.listen(kuePort);
-}
-
-function createVRouterSummaryJob ()
-{
-    var appData = {};
-    appData['addGen'] = true;
-    var url = '/virtual-routers';
-    jobsApi.createJobAtInit(global.STR_GET_VROUTERS_SUMMARY, url, 
-                            global.VROUTER_SUMM_JOB_REFRESH_TIME,
-                            /* Wait for 5 minutes to start job at web-ui start
-                             * */
-                            0, global.VROUTER_SUMM_JOB_REFRESH_TIME, appData);
-}
-
-function createVRouterGeneratorsJob ()
-{
-    var url = '/virtual-routers';
-    jobsApi.createJobAtInit(global.STR_GET_VROUTERS_GENERATORS, url, 
-                            global.VROUTER_SUMM_JOB_REFRESH_TIME,
-                            /* Wait for 5 minutes to start job at web-ui start
-                             * */
-                            0, global.VROUTER_GENR_JOB_REFRESH_TIME, null);
-}
-
-function createJobsAtInit ()
-{
-    createVRouterSummaryJob();
-    createVRouterGeneratorsJob();
-}
-
-function getDestPathByPkgPathURL (destPath)
-{
-    var destArrPath = destPath.split(':');
-    if (destArrPath.length > 1) {
-        destPath = config.featurePkg[destArrPath[0]]['path'] + '/' + destArrPath[1];
-    }
-    return destPath;
+    kue.app.listen(kuePort, '127.0.0.1');
 }
 
 function registerTojobListenerEvent()
 {
-    var destPath = null;
-    var jobProcData = jsonPath(pkgList, "$..jobProcess[0]");
-    var jobProcDataLen = jobProcData.length;
-    for (var i = 0; i < jobProcDataLen; i++) {
-        destPath = getDestPathByPkgPathURL(jobProcData[i]['output'][0]);
-        require(destPath).addjobListenerEvent();
-        require(destPath).jobsProcess();
+    var pkgDir;
+    var pkgListLen = pkgList.length;
+    for (var i = 0; i < pkgListLen; i++) {
+        if (pkgList[i]['jobProcess.xml']) {
+            pkgDir = commonUtils.getPkgPathByPkgName(pkgList[i]['pkgName']);
+            var jobListLen = pkgList[i]['jobProcess.xml'].length;
+            for (var j = 0; j < jobListLen; j++) {
+                logutils.logger.debug("Registering jobListeners: " +
+                                      pkgDir + pkgList[i]['jobProcess.xml'][j]);
+                require(pkgDir +
+                        pkgList[i]['jobProcess.xml'][j]).addjobListenerEvent();
+                require(pkgDir + pkgList[i]['jobProcess.xml'][j]).jobsProcess();
+            }
+        }
+    }
+}
+
+/* Function: doFeatureTaskInit
+   This function is used to do all initializations of all the feature packages
+   installed and if is set as enabled in config file
+ */
+function doFeatureTaskInit ()
+{
+    var featurePkgList = config.featurePkg;
+    for (key in featurePkgList) {
+        if ((config.featurePkg[key]) && (config.featurePkg[key]['path']) &&
+            ((null == config.featurePkg[key]['enable']) ||
+             (true == config.featurePkg[key]['enable'])) &&
+            (true == fs.existsSync(config.featurePkg[key]['path'] +
+                                   '/webroot/common/api/init.api.js'))) {
+            var initApi = require(config.featurePkg[key]['path'] +
+                                   '/webroot/common/api/init.api.js');
+            if (initApi.featureInit) {
+                initApi.featureInit();
+            }
+        }
     }
 }
 
 function startServers ()
 {
     kueJobListen();
-    connectToMainServer();
     registerTojobListenerEvent();
     jobsApi.doCheckJobsProcess();
-    if (true == discServEnable) {
-        discServ.createRedisClientAndStartSubscribeToDiscoveryService(global.service.MIDDLEWARE);
-        discServ.startWatchDiscServiceRetryList();
-    }
+    contrailServ.getContrailServices();
+    contrailServ.startWatchContrailServiceRetryList();
     redisPub.createRedisPubClient(function() {
-        createJobsAtInit();
+        connectToMainServer();
+        doFeatureTaskInit();
+        process.send("INIT IS DONE");
     });
 }
+}
 
-function jobServerPurgeAndStart (redisClient)
+function jobServerPurgeAndStart (redisClient, callback)
 {
-    redisClient.flushall(function (err) {
-        if (err) {
-            logutils.logger.error("web-ui Redis FLUSALL error:" + err);
-        } else {
-            logutils.logger.debug("web-ui Redis FLUSHALL done.");
-        }
-    /*
-        var uiDB = config.redisDBIndex;
-        if (null == uiDB) {
-            uiDB = global.WEBUI_DFLT_REDIS_DB;
-        }
-        if (err) {
-            logutils.logger.error("web-ui Redis FLUSHDB " + uiDB + " error:" + err);
-        } else {
-            logutils.logger.debug("Redis FLUSHDB " + uiDB + " Done.");
-        }
-    */
+    var redisDBs = [global.WEBUI_SESSION_REDIS_DB, global.WEBUI_DFLT_REDIS_DB,
+        global.QE_DFLT_REDIS_DB, global.SM_DFLT_REDIS_DB];
+    async.map(redisDBs, commonUtils.flushRedisDB, function() {
+        /* Already logged */
+        callback();
     });
 }
 
-commonUtils.createRedisClient(function(client) {
-    jobServerPurgeAndStart(client);
-});
+function messageHandler (msg)
+{
+    if ((null != msg) && (null != msg.cmd)) {
+        switch(msg.cmd) {
+        case global.MSG_CMD_KILLALL:
+            /* Kill the worker process and let master again fork it */
+            clusterUtils.killAllWorkers();
+            break;
+        }
+    }
+}
 
-workerSock.on('message', function (msg) {
-    /* Now based on the message type, act */
-    processMsg(msg);
-});
+function startJobCluster ()
+{
+    if (cluster.isMaster) {
+        clusterMasterInit(function(err) {
+            clusterUtils.forkWorkers();
+            clusterUtils.addClusterEventListener(messageHandler);
+        });
+    } else {
+        clusterWorkerInit(function(err) {
+            loadJobServer();
+        });
+    }
+}
 
-jobsApi.jobListenerReadyQEvent.on('kueReady', function() {
-    /* Now start real server processing */
-    startServers();
-});
+function clusterWorkerInit (callback)
+{
+    var purgeRedisClient = redisUtils.createRedisClient();
+    async.parallel([
+        function(CB) {
+            jobServerPurgeAndStart(purgeRedisClient, function() {
+                CB(null, null);
+            });
+        }
+    ],
+    function(error, results) {
+        callback();
+    });
+}
 
-exports.myIdentity = myIdentity;
-exports.discServEnable = discServEnable;
-exports.pkgList = pkgList;
+function clusterMasterInit(callback)
+{
+    callback();
+}
+
+startJobCluster();

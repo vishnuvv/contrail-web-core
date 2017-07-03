@@ -3,11 +3,11 @@
  */
 
 var redis = require('redis')
-	, config = require('../../../../config/config.global.js')
 	, logutils = require('../../utils/log.utils')
 	, messages = require('../../common/messages')
     , jobsApi = require('./jobs.api')
     , commonUtils = require('../../utils/common.utils')
+    , redisUtils = require('../../utils/redis.utils')
 	, util = require('util');
 
 if (!module.parent) {
@@ -19,15 +19,14 @@ if (!module.parent) {
 redisPub = module.exports;
 function createRedisPubClient (callback)
 {
-    commonUtils.createRedisClient(function(client) {
-        redisPub.redisPubClient = client;
-        callback();
-    });
+    redisPub.redisPubClient = redisUtils.createRedisClient(-1);
+    redisPub.redisSetClient = redisUtils.createRedisClient();
+    callback();
 }
 
 function doSetToRedis (key, data)
 {
-	redisPub.redisPubClient.set(channel, data, function (err) {
+	redisPub.redisSetClient.set(channel, data, function (err) {
 		if (err) {
 			logutils.logger.error("Redis SET error [key#]" + key + ", [value#]" + data);
 		}
@@ -64,8 +63,20 @@ function publishDataToRedis (pubChannel, saveChannelKey, errCode, pubData,
 
     saveData = JSON.stringify(saveDataObj);
     */
+    var deleteChannelAtMainServer = true;
+    if ((null != jobData) && (null != jobData.taskData) &&
+        (jobData.taskData.nextRunDelay != -1)) {
+        /* For recurrent jobs, we MUST not delete the listening channel at the
+         * receiving end
+         */
+        deleteChannelAtMainServer = false;
+    }
+    var msg = {
+        msgData: pubDataObj,
+        deleteChannelAtMainServer: deleteChannelAtMainServer
+    };
 	logutils.logger.info("Data Publish done on Channel:" + pubChannel);
-	redisPub.redisPubClient.publish(pubChannel, JSON.stringify(pubDataObj));
+	redisPub.redisPubClient.publish(pubChannel, JSON.stringify(msg));
 
    /* This may be a result of request in Job Server itself, so create an event 
       to trigger it
@@ -76,8 +87,8 @@ function publishDataToRedis (pubChannel, saveChannelKey, errCode, pubData,
 	 save the data by calling this API, set doSave = 1
 	 */
 	if (doSave) {
-		//redisPub.redisPubClient.setex(saveChannelKey, expiryTime, saveData,
-		redisPub.redisPubClient.set(saveChannelKey, saveData,
+		//redisPub.redisSetClient.setex(saveChannelKey, expiryTime, saveData,
+		redisPub.redisSetClient.set(saveChannelKey, saveData,
 			function (err) {
 				if (err) {
 					logutils.logger.error("redis SET error for pubData [err#] " +

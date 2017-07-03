@@ -6,45 +6,80 @@
  * This file contains the wrapper function for network manager 
  */
 
-var config = require('../../../config/config.global');
+var orch = require('../orchestration/orchestration.api');
 
-var orchModel = ((config.orchestration) && (config.orchestration.Manager)) ?
-    config.orchestration.Manager : 'openstack';
+var orchModels = orch.getOrchestrationModels();
 
-if (orchModel == 'openstack') {
-    var nwMgrApi = require('../orchestration/plugins/openstack/quantum.api');
+var openstackNetworkApi = require('../orchestration/plugins/openstack/neutron.api');
+var cloudstackNetworkApi  =
+    require('../orchestration/plugins/cloudstack/cloudstack.api');
+var noOrchestrationNetworkApi  =
+    require('../orchestration/plugins/no-orch/noOrchestration.api');
+var vCenterNetworkApi =
+    require('../orchestration/plugins/vcenter/vcenter.common');
+
+var getNetworkMethod = {
+    'vcenter': vCenterNetworkApi,
+    'openstack': openstackNetworkApi,
+    'cloudstack' : cloudstackNetworkApi,
+    'none'       : noOrchestrationNetworkApi
 }
 
 function apiGet (reqUrl, req, callback)
 {
-    nwMgrApi.get(reqUrl, req, function(err, data) {
+    var loggedInOrchMode = orch.getLoggedInOrchestrationMode(req);
+    getNetworkMethod[loggedInOrchMode].get(reqUrl, req, function(err, data) {
         callback(err, data);
     });
 }
 
 function apiPost (reqUrl, postData, req, callback)
 {
-    nwMgrApi.post(reqUrl, postData, req, function(err, data) {
+    var loggedInOrchMode = orch.getLoggedInOrchestrationMode(req);
+    getNetworkMethod[loggedInOrchMode].post(reqUrl, postData, req, function(err, data) {
         callback(err, data);
     });
 }
 
 function apiPut (reqUrl, putData, req, callback)
 {
-    nwMgrApi.put(reqUrl, putData, req, function(err, data) {
+    var loggedInOrchMode = orch.getLoggedInOrchestrationMode(req);
+    getNetworkMethod[loggedInOrchMode].put(reqUrl, putData, req, function(err, data) {
         callback(err, data);
     });
 }
 
 function apiDelete (reqUrl, req, callback)
 {
-    nwMgrApi.delete(reqUrl, req, function(err, data) {
+    var loggedInOrchMode = orch.getLoggedInOrchestrationMode(req);
+    getNetworkMethod[loggedInOrchMode].delete(reqUrl, req, function(err, data) {
         callback(err, data);
     });
+}
+
+function createNetworkPort (req, postData, project, callback)
+{
+    var loggedInOrchMode = orch.getLoggedInOrchestrationMode(req);
+    req.cookies[global.COOKIE_PROJECT_DISPLAY_NAME] = project;
+    getNetworkMethod[loggedInOrchMode].createNetworkPort(req, postData, callback);
+}
+
+function deleteNetworkPort (req, portId, callback)
+{
+    var loggedInOrchMode = orch.getLoggedInOrchestrationMode(req);
+    getNetworkMethod[loggedInOrchMode].deleteNetworkPort(req, portId, callback);
+}
+
+function updateRouter (req, postData, portId,  callback)
+{
+    var loggedInOrchMode = orch.getLoggedInOrchestrationMode(req);
+    getNetworkMethod[loggedInOrchMode].updateRouter(req, postData, portId, callback);
 }
 
 exports.apiGet = apiGet;
 exports.apiPost = apiPost;
 exports.apiPut = apiPut;
 exports.apiDelete = apiDelete;
-
+exports.createNetworkPort = createNetworkPort;
+exports.deleteNetworkPort = deleteNetworkPort;
+exports.updateRouter =  updateRouter;

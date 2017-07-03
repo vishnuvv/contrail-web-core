@@ -3,9 +3,10 @@
  */
 
 var fs      = require('fs');
-var config  = require('../../../config/config.global');
+var configUtils = require('./config.utils');
 var request = require('request');
 var restler = require('restler');
+var commonUtils = require("../utils/common.utils");
 
 /* Function: getHttpsOptionsDefValue
     Get the default value for https options
@@ -33,6 +34,11 @@ function getHttpsOptionsDefValue (reqType)
  */
 function getHttpsOptionsByAPIType (apiType, reqType)
 {
+    var config = configUtils.getConfig();
+    if (global.SANDESH_API == apiType) {
+        return commonUtils.getValueByJsonPath(config,
+                                              "introspect;ssl;" + reqType);
+    }
     var defVal = getHttpsOptionsDefValue(reqType);
     if (null == apiType) {
         return defVal;
@@ -76,6 +82,7 @@ function getOrchModuleByAPIType (apiType)
         orchModule = 'cnfg';
         break;
     case global.label.OPS_API_SERVER:
+    case global.label.OPSERVER:
         orchModule = 'analytics';
         break;
     case global.label.DISCOVERY_SERVER:
@@ -92,6 +99,14 @@ function getOrchModuleByAPIType (apiType)
  */
 function getProtocolByAPIType (apiType)
 {
+    var config = configUtils.getConfig();
+    if (global.SANDESH_API == apiType) {
+        var isSSLEnabled = commonUtils.getValueByJsonPath(config,
+                                                          "introspect;ssl;enabled",
+                                                          false);
+        return (true == isSSLEnabled) ? global.PROTOCOL_HTTPS :
+            global.PROTOCOL_HTTP;
+    }
     if (null != apiProtocolList[apiType]) {
         return apiProtocolList[apiType];
     }
@@ -143,12 +158,27 @@ function updateHttpsSecureOptions (apiType, options)
                 logutils.logger.error('readFileSync error for ca file' + e);
             }
         }
-        /* If strictSSL is set to false, then if response.client.authorized
-         * is set as false, a secure connection is established.
-         */
+        var keyFile = getHttpsOptionsByAPIType(apiType, 'key');
+        if ((null != keyFile) && ('' != keyFile) && ("" != keyFile)) {
+            try {
+                options['key'] = fs.readFileSync(keyFile);
+            } catch(e) {
+                logutils.logger.error('readFileSync error for key file' + e);
+            }
+        }
+        var certFile = getHttpsOptionsByAPIType(apiType, 'cert');
+        if ((null != certFile) && ('' != certFile) && ("" != certFile)) {
+            try {
+                options['cert'] = fs.readFileSync(certFile);
+            } catch(e) {
+                logutils.logger.error('readFileSync error for cert file' + e);
+            }
+        }
+        /* https://github.com/mscdex/node-imap/issues/181 */
+        options['rejectUnauthorized'] = false;
         var strictSSL = getHttpsOptionsByAPIType(apiType, 'strictSSL');
         if (null != strictSSL) {
-            options['strictSSL'] = strictSSL;
+            options['rejectUnauthorized'] = strictSSL;
         }
     }
     return options;

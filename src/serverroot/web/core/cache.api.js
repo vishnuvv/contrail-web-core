@@ -6,10 +6,10 @@ var redisSub = require('./redisSub')
 	, global = require('../../common/global')
 	, redis = require("redis")
 	, longPoll = require('./longPolling.api')
-	, config = require('../../../../config/config.global.js')
 	, commonUtils = require('../../utils/common.utils')
 	, logutils = require('../../utils/log.utils')
 	, util = require('util')
+    , redisUtils = require('../../utils/redis.utils')
 	, messages = require('../../common/messages');
 
 if (!module.parent) 
@@ -21,9 +21,7 @@ if (!module.parent)
 
 cacheApi = module.exports;
 
-commonUtils.createRedisClient(function(client) {
-    cacheApi.redisClient = client;
-});
+cacheApi.redisClient = redisUtils.createRedisClient();
 
 var cachePendingQueue = {};
 
@@ -132,6 +130,12 @@ function queueDataFromCacheOrSendRequest (req, res, jobType, jobName,
 	var reqUrl = reqJSON.data.url;
 	var hash = reqJSON.jobName;
 	var channel = redisSub.createChannelByHashURL(hash, reqUrl);
+    if ((null == sendToJobServerAlways) || (false == sendToJobServerAlways)) {
+        sendReqToJobServer(req, res, reqData, channel, hash,
+                           sendToJobServerAlways, postCallback);
+        return;
+    }
+
     cacheApi.redisClient.zrange('q:jobs:' + jobName + ':' + 'active' , 0,
                                global.MAX_INT_VALUE,
                                function(err, data) {
@@ -163,6 +167,21 @@ function queueDataFromCacheOrSendRequest (req, res, jobType, jobName,
                                sendToJobServerAlways, postCallback);
         }
     });
+}
+
+function sendRespOrDoCallback (err, req, res, value, postCallback)
+{
+    var data;
+    if (null == postCallback) {
+        handleJSONResponse(err, req, res, value);
+    } else {
+        try {
+            data = JSON.parse(value);
+        } catch(e) {
+            data = value;
+        }
+        postCallback(req, res, data);
+    }
 }
 
 function sendReqToJobServer (req, res, reqData, channel, hash,
@@ -206,15 +225,14 @@ function sendReqToJobServer (req, res, reqData, channel, hash,
                  * from API Server at init time, so send the cached info to UI
                  * and parallelly send request to update the cache
                  */
-                handleJSONResponse(err, req, res, value);
+                sendRespOrDoCallback(err, req, res, value, postCallback);
                 saveCtx = false;
             }
-                
 			createDataAndSendToJobServer(global.STR_JOB_TYPE_CACHE, hash,
 			                             reqData, req, res, saveCtx,
                                          postCallback);
 		} else {
-			handleJSONResponse(err, req, res, value);
+            sendRespOrDoCallback(err, req, res, value, postCallback);
 		}
 	});
 }
@@ -301,6 +319,9 @@ function createReqData (req, type, jobName, reqUrl, runCount, defCallback,
         token: req.session.def_token_used,
         sessionId: req.session.id
     };
+    var tokenid =
+        commonUtils.getValueByJsonPath(req, 'session;def_token_used;id',
+                                       null, false);
 	var curTime = commonUtils.getCurrentTimestamp();
 	var reqId = longPoll.lastRequestId;
 	var pubChannel = redisSub.createPubChannelKey();
@@ -323,9 +344,22 @@ function createReqData (req, type, jobName, reqUrl, runCount, defCallback,
 			pubChannel: pubChannel,
 			saveChannelKey: saveChannelKey,
 			reqBy: reqBy,
+			userRoles: req.session.userRoles,
+            tokenObjs: req.session.tokenObjs,
+            serviceCatalog: req.session.serviceCatalog,
+            region: req.session.region,
+            session: req.session,
+            tokenid: tokenid,
+            cookies: req.cookies,
+			loggedInOrchestrationMode: req.session.loggedInOrchestrationMode,
 			appData: appData
 		}
 	};
+    var reqRegion = commonUtils.getValueByJsonPath(req, "appData;authObj;reqRegion", null);
+    if (null != reqRegion) {
+        reqMsgObj.data.reqRegion = reqRegion;
+    }
+
 	return JSON.stringify(reqMsgObj);
 }
 
@@ -333,21 +367,22 @@ function createReqData (req, type, jobName, reqUrl, runCount, defCallback,
  This function is used to insert the response published on redis channel on
  ready Q
  */
-function sendResponseByChannel (channel, msg)
+function sendResponseByChannel (channel, msg, deleteChannelAtMainServer)
 {
     var pendClientLists = checkCachePendingQueue(channel);
     if (null == pendClientLists) {
         return;
     }
     var isJson = 0;
-    var msgParse = JSON.parse(msg);
-    if (global.HTTP_STATUS_RESP_OK == msgParse.errCode) {
+    if (global.HTTP_STATUS_RESP_OK == msg.errCode) {
         isJson = 1;
         /* In error case, application will send only the error string */
     }
-    deleteCachePendingQueueEntry(channel);
-    longPoll.insertDataToSendAllClients(pendClientLists, msgParse.data, 
-                                        msgParse.errCode, isJson);
+    if (true == deleteChannelAtMainServer) {
+        deleteCachePendingQueueEntry(channel);
+    }
+    longPoll.insertDataToSendAllClients(pendClientLists, msg.data,
+                                        msg.errCode, isJson);
 }
 
 function handleJSONResponse(error, req, res, jsonStr)
@@ -355,7 +390,7 @@ function handleJSONResponse(error, req, res, jsonStr)
 	if (!error) {
 		longPoll.insertResToReadyQ(res, jsonStr, global.HTTP_STATUS_RESP_OK, 1);
 	} else {
-		console.log(error.stack);
+		logutils.logger.debug(error.stack);
 		res.send(error.responseCode, error.message);
 	}
 }

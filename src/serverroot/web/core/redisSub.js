@@ -6,7 +6,6 @@ redisSub = module.exports;
 
 var redis = require('redis')
   , cacheApi = require('./cache.api')
-  , config = require('../../../../config/config.global.js')
   , logutils = require('../../utils/log.utils')
   , util = require('util')
   , global = require('../../common/global')
@@ -14,7 +13,7 @@ var redis = require('redis')
   , messages = require('../../common/messages')
   , longPolling = require('./longPolling.api')
   , commonUtils = require('../../utils/common.utils')
-  , discClient = require('../../common/discoveryclient.api')
+  , redisUtils = require('../../utils/redis.utils')
   ;
 
 if (!module.parent) {
@@ -24,18 +23,14 @@ if (!module.parent) {
 }
 function createRedisClientAndSubscribeMsg (callback)
 {
-    commonUtils.createRedisClient(function(client) {
-        redisSub.redisSubClient = client;
-        addRedisSubMsgListener(redisSub.redisSubClient);
-        subsToRedis(global.MSG_REDIRECT_TO_LOGOUT);
-        subsToRedis(global.DISC_SERVER_SUB_CLINET);
-        callback();
-    });
+    redisSub.redisSubClient = redisUtils.createRedisClient();
+    redisSub.redisMsgClient = redisUtils.createRedisClient();
+    addRedisSubMsgListener(redisSub.redisSubClient);
+    subsToRedis(global.MSG_REDIRECT_TO_LOGOUT);
+    callback();
 }
 
-commonUtils.createRedisClient(0, function(client) {
-    redisSub.redisPerClient = client;
-});
+redisSub.redisPerClient = redisUtils.createRedisClient();
 
 /* Function: subsToRedis
     This function is used to subscribe to a apecific channel to redis
@@ -99,12 +94,15 @@ function processRedisSubMessage (channel, msg)
         longPolling.redirectToLogoutByChannel(msg);
         break;
 
-    case global.DISC_SERVER_SUB_CLINET:
-        discClient.processDiscoveryServiceResponseMsg(msg);
-        break;
-
     default:
-        cacheApi.sendResponseByChannel(channel, msg);
+        if (null == msg) {
+            logutils.logger.error("In processRedisSubMessage(): We got " +
+                                  "null message for channel:" + channel);
+            return;
+        }
+        var msgParse = JSON.parse(msg);
+        cacheApi.sendResponseByChannel(channel, msgParse['msgData'],
+                                       msgParse['deleteChannelAtMainServer']);
         redisSub.unsubsToRedis(channel);
         break;
     }
@@ -117,9 +115,9 @@ function processRedisSubMessage (channel, msg)
 function addRedisSubMsgListener (redisClient)
 {
   redisClient.on('message', function(channel, msg) {
-    if (global.DISC_SERVER_SUB_CLINET != channel) {
-        /* As in system there will be a lot of disc-server-sub message, we are
-         * not logging it
+    if (global.CONTRAIL_SERVER_SUB_CLINET != channel) {
+        /* As in system there will be a lot of contrail-service-sub message,
+         * we are not logging it
          */
         logutils.logger.debug("We got the channel:" + channel + " by process:" +
                               process.pid);

@@ -5,7 +5,12 @@
 REPORTER = dot
 WEBUISERVER = contrail-web-core
 WEBUICLIENT = contrail-web-controller
-THIRDPARTY = third_party
+WEBUITHIRDPARTY = contrail-webui-third-party
+THIRD_PARTY='../contrail-webui-third-party'
+WEBCONTROLLERREPO = ../contrail-web-controller,webController
+GENERATEDS = tools/generateds
+CONTROLLER = controller
+BRANCH = master
 
 $(WEBUISERVER):
 	if [ ! -d ../$(WEBUISERVER) ]; then git clone git@github.com:Juniper/contrail-web-core.git ../$(WEBUISERVER); else cd ../$(WEBUISERVER) && touch testFile && git stash; git pull --rebase; git stash pop; rm testFile; fi
@@ -13,18 +18,49 @@ $(WEBUISERVER):
 $(WEBUICLIENT):
 	if [ ! -d ../$(WEBUICLIENT) ]; then git clone git@github.com:Juniper/contrail-web-controller.git ../$(WEBUICLIENT); else cd ../$(WEBUICLIENT) && touch testFile && git stash; git pull --rebase; git stash pop; rm testFile; fi
 
-$(THIRDPARTY):
-	if [ ! -d ../$(THIRDPARTY) ]; then git clone git@github.com:Juniper/contrail-third-party.git ../$(THIRDPARTY); else cd ../$(THIRDPARTY) && touch testFile && git stash; git pull --rebase; git stash pop; rm testFile; fi
+$(WEBUITHIRDPARTY):
+	if [ ! -d ../$(WEBUITHIRDPARTY) ]; then git clone git@github.com:Juniper/contrail-webui-third-party.git ../$(WEBUITHIRDPARTY); else cd ../$(WEBUITHIRDPARTY) && touch testFile && git stash; git pull --rebase; git stash pop; rm testFile; fi
 
-repos: $(WEBUISERVER) $(WEBUICLIENT) $(THIRDPARTY)
+$(GENERATEDS):
+	if [ ! -d ../$(GENERATEDS) ]; then git clone https://github.com/Juniper/contrail-generateDS.git ../$(GENERATEDS); else cd ../$(GENERATEDS) && touch testFile && git stash; git pull --rebase; git stash pop; rm testFile; fi
+
+$(CONTROLLER):
+	mkdir -p ../$(CONTROLLER)/src/schema;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/alarm.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/all_cfg.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/bfd_schema.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/bgp_schema.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/ietf-bfd-schema.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/ietf-l3vpn-schema.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/loadbalancer.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/routing_policy.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/services.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/smi-base.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/usr_def_cntr.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/vnc_cfg.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/xmpp_enet.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/xmpp_multicast.xsd;
+	cd ../$(CONTROLLER)/src/schema && wget https://raw.githubusercontent.com/Juniper/contrail-controller/$(BRANCH)/src/schema/xmpp_unicast.xsd;
+
+
+repos: $(WEBUISERVER) $(WEBUICLIENT) $(WEBUITHIRDPARTY) $(GENERATEDS) $(CONTROLLER)
+
+fetch-schema: $(GENERATEDS) $(CONTROLLER)
 
 fetch-pkgs-prod:
+	python ../contrail-webui-third-party/fetch_packages.py -f ../contrail-webui-third-party/packages.xml
 	make clean
-	./fetch_packages.sh prod
+	rm -rf node_modules
+	mkdir -p node_modules
+	cp -rf $(THIRD_PARTY)/node_modules/* node_modules/.
 
 fetch-pkgs-dev:
 	make clean
-	./fetch_packages.sh dev
+	rm -rf node_modules
+	mkdir -p node_modules
+	python ../contrail-webui-third-party/fetch_packages.py -f ../contrail-webui-third-party/packages.xml
+	python ../contrail-webui-third-party/fetch_packages.py -f ../contrail-webui-third-party/packages_dev.xml
+	cp -rf $(THIRD_PARTY)/node_modules/* node_modules/.
 
 package:
 	make clean
@@ -37,6 +73,9 @@ package:
 	cp -a webroot/html/login-error.tmpl webroot/html/login-error.html
 	./generate-files.sh 'prod-env' $(REPO)
 	./dev-install.sh
+	rm -f built_version
+	# build the minified, unified files.
+	./build-files.sh "prod-env" $(REPO)
 	./prod-dev.sh webroot/html/dashboard.html prod_env dev_env true
 	./prod-dev.sh webroot/html/login.html prod_env dev_env true
 	./prod-dev.sh webroot/html/login-error.html prod_env dev_env true
@@ -59,50 +98,71 @@ dev-env:
 	ln -sf ../../webroot/html/dashboard.tmpl webroot/html/dashboard.html
 	ln -sf ../../webroot/html/login.tmpl webroot/html/login.html
 	ln -sf ../../webroot/html/login-error.tmpl webroot/html/login-error.html
+	if [ ! -d ../$(CONTROLLER) ]; then make fetch-schema; fi
 	./generate-files.sh "dev-env" $(REPO)
 	./dev-install.sh
+	rm -f built_version
 	./prod-dev.sh webroot/html/dashboard.html dev_env prod_env true
 	./prod-dev.sh webroot/html/login.html dev_env prod_env true
 	./prod-dev.sh webroot/html/login-error.html dev_env prod_env true
 	make make-ln
+	# For test files, we will setting the env file with current environment.
+	./unit-test.sh set-env "dev"
 
-test-env:
-	make dev-env
-	./unit-test.sh init
+ui-schemas:
+	node webroot/js/common/transformer.js
 
 prod-env:
 	mkdir -p webroot/html
 	ln -sf ../../webroot/html/dashboard.tmpl webroot/html/dashboard.html
 	ln -sf ../../webroot/html/login.tmpl webroot/html/login.html
 	ln -sf ../../webroot/html/login-error.tmpl webroot/html/login-error.html
-	./generate-files.sh "prod-env" $(REPO)
+	./generate-files.sh "dev-env" $(REPO)
 	./dev-install.sh
+	rm -f built_version
+	# build the minified, unified files.
+	./build-files.sh "prod-env" $(REPO)
 	./prod-dev.sh webroot/html/dashboard.html prod_env dev_env true
 	./prod-dev.sh webroot/html/login.html prod_env dev_env true
 	./prod-dev.sh webroot/html/login-error.html prod_env dev_env true
 	make make-ln
+	# For test files, we will setting the env file with current environment.
+	./unit-test.sh set-env "prod"
+
+chrome-extension:
+ifndef REPO
+	./generate-files.sh 'prod-env' $(WEBCONTROLLERREPO)
+else
+	./generate-files.sh 'prod-env' $(REPO)
+endif
+	./dev-install.sh
+	./chrome-extension.sh
 
 clear-cache-dev:
+	rm -f built_version
 	./prod-dev.sh webroot/html/dashboard.html dev_env prod_env false
 	./prod-dev.sh webroot/html/login.html dev_env prod_env false
 	./prod-dev.sh webroot/html/login-error.html dev_env prod_env false
 	make make-ln
 
 clear-cache-prod:
+	rm -f built_version
 	./prod-dev.sh webroot/html/dashboard.html prod_env dev_env false
 	./prod-dev.sh webroot/html/login.html prod_env dev_env false
 	./prod-dev.sh webroot/html/login-error.html prod_env dev_env false
 	make make-ln
 
-test-node:
-	./unit-test.sh node
-	
+css-lint:
+	./linting.sh $(REPO)
+
+test-env:
+	./unit-test.sh init $(REPO)
+
 test-ui:
-	./unit-test.sh ui
-test: 
-	make test-node
-	make test-ui
-             
+	./unit-test.sh ui $(REPO) $(ENV)
+
+test: test-env test-ui
+
 clean:
 	rm -f src/serverroot/jobs/core/jobsCb.api.js
 	rm -f src/serverroot/web/core/feature.list.js

@@ -7,16 +7,17 @@ var jobsApi = module.exports;
 var redis = require("redis")
 	, kue = require('kue')
 	, assert = require('assert')
-	, config = require('../../../../config/config.global.js')
 	, logutils = require('../../utils/log.utils')
 	, util = require('util')
     , redisPub = require('./redisPub')
     , commonUtils = require('../../utils/common.utils')
     , eventEmitter = require('events').EventEmitter
     , async = require('async')
-    , discServ = require('./discoveryservice.api')
+    , contrailServ = require('../../common/contrailservice.api')
     , UUID = require('uuid-js')
-	, messages = require('../../common/messages');
+    , jobUtils = require('../../common/jobs.utils')
+	, messages = require('../../common/messages')
+    , parseJobsReq = require("../../common/parseJobsRequire");
 
 try {
     computeNode = require('../api/vrouternode.jobs.api');
@@ -35,29 +36,17 @@ var jobListenerReadyQEvent = new eventEmitter();
 jobsApi.kue = kue;
 
 jobsApi.storeQ = {};
+var jobServerRedisClient = jobUtils.createJobServerRedisClient();
 
 kue.redis.createClient = function ()
 {
-    var server_port = (config.redis_server_port) ?
-        config.redis_server_port : global.DFLT_REDIS_SERVER_PORT;
-    var server_ip = (config.redis_server_ip) ?
-        config.redis_server_ip : global.DFLT_REDIS_SERVER_IP;
-    var client = redis.createClient(server_port, server_ip);
-    var uiDB = commonUtils.getWebUIRedisDBIndex();
-    client.select(uiDB);
-    return client;
+    return jobUtils.createJobServerRedisClient();
 }
 
 kue.redis.createClient();
-commonUtils.createRedisClient(function(client) {
-    jobsApi.redisClient = client;
-    jobsApi.jobs = kue.createQueue();
-    jobsApi.jobs.promote();
-    jobListenerReadyQEvent.emit('kueReady');
-});
-
-/* kue UI listening port */
-var kuePort = config.kue.ui_port || 3002;
+jobsApi.jobs = kue.createQueue();
+jobsApi.jobs.promote();
+jobUtils.jobKueEventEmitter.emit('kueReady');
 //kue.app.listen(kuePort);
 //logutils.logger.info("KUE Jobs Infra UI listening on", kuePort);
 
@@ -105,7 +94,7 @@ function getKueJobExist (jobStr, callback)
     var oldJobStr = jobStr, oldCallback = callback;
     if (typeof oldJobStr === 'undefined' || typeof oldCallback === 'undefined') {
         return function (newJobStr, newCallback) {
-            redisPub.redisPubClient.zcard(kueJobStr, function(err, data) {
+            jobServerRedisClient.zcard(newJobStr, function(err, data) {
                 /* zcard returns the sorted set cardinality (number of elements) 
                    of the sorted set stored at key
                  */
@@ -117,7 +106,7 @@ function getKueJobExist (jobStr, callback)
             });
         }
     } else {
-        redisPub.redisPubClient.zcard(jobStr, function (err, data) {
+        jobServerRedisClient.zcard(jobStr, function (err, data) {
             if (err) {
                 callback(err);
             } else {
@@ -165,6 +154,7 @@ function doJobExist (jobName, callback)
  */
 function createJob (jobName, jobTitle, jobPriority, delayInMS, runCount, taskData)
 {
+    taskData['genBy'] = global.service.MIDDLEWARE;
     doJobExist(jobName, function(err, jobExists) {
         if (true == jobExists) {
             runCount = 1;
@@ -172,34 +162,57 @@ function createJob (jobName, jobTitle, jobPriority, delayInMS, runCount, taskDat
             jobsApi.kue.Job.rangeByType(jobName, 'delayed', 0,
                                         global.MAX_INT_VALUE, 'desc',
                                         function (err, selectedJobs) {
-                selectedJobs.forEach(function (job) {
-                    var reqBy = job.data.taskData.reqBy;
-                    if ((global.REQ_AT_SYS_INIT == reqBy) &&
-                        (global.REQ_AT_SYS_INIT != taskData.reqBy)) {
-                        /* Stored JOB is Requested at System INIT */
+                if ((null == err) && (null != selectedJobs)) {
+                    selectedJobs.forEach(function (job) {
+                        taskData =
+                            jobUtils.updateJobDataRequiresField(job.data, taskData);
                         job.data.taskData = taskData;
-                        checkAndRequeueJobs(job);
+                        var nextRunDelay = 0;
+                        checkAndRequeueJobs(job, nextRunDelay);
                         return;
-                    }
-                });
+                    });
+                } else {
+                    logutils.logger.error('Though job exists, but we did not' +
+                                          ' find in DB, creating a new one');
+                    createJobCB(jobName, jobTitle, jobPriority, delayInMS, runCount,
+                                taskData);
+                }
             });
+            return;
+        } else {
+            createJobCB(jobName, jobTitle, jobPriority, delayInMS, runCount,
+                        taskData);
         }
-	    var jobTitleStr = (jobTitle == null) ? jobName : jobTitle;
-	    var obj = { 'title':jobTitleStr, 'runCount':runCount, 'taskData':taskData };
-	    var newJob = jobsApi.jobs.create(jobName, obj);
-	    if (delayInMS) {
-	        newJob.delay(delayInMS);
-	    }
-	    /* Check valid job priority */
-	    var check = checkKueJobPriority(jobPriority);
-	    if (false == check) {
-	        logutils.logger.error("Invalid priority provided" + jobPriority);
-	        assert(0);
-	    }
-	    newJob.priority(jobPriority);
-	    newJob.save();
-	    logutils.logger.debug("Created a new Job with jobName:" + jobName);
     });
+}
+
+function createJobCB (jobName, jobTitle, jobPriority, delayInMS, runCount,
+                      taskData)
+{
+    if (-1 === parseJobsReq.registeredJobs.indexOf(jobName)) {
+        /* If we are not registered to create this job, then return */
+        return;
+    }
+    var jobTitleStr = (jobTitle == null) ? jobName : jobTitle;
+    /* Update any jobData parameters if any changed in last iteration of job
+     * processing
+     */
+    taskData =
+        jobUtils.getAndUpdateChangedJobTaskData(jobTitleStr, taskData);
+    var obj = { 'title':jobTitleStr, 'runCount':runCount, 'taskData':taskData };
+    var newJob = jobsApi.jobs.create(jobName, obj);
+    if (delayInMS) {
+        newJob.delay(delayInMS);
+    }
+    /* Check valid job priority */
+    var check = checkKueJobPriority(jobPriority);
+    if (false == check) {
+        logutils.logger.error("Invalid priority provided" + jobPriority);
+        assert(0);
+    }
+    newJob.priority(jobPriority);
+    newJob.save();
+    logutils.logger.debug("Created a new Job with jobName:" + jobName);
 }
 
 function getJobInfo (job)
@@ -258,7 +271,7 @@ function getJobNextRefreshTime (job, callback)
             callback(null);
             return;
         }
-        redisPub.redisPubClient.get(job.data.taskData.saveChannelKey, 
+        jobServerRedisClient.get(job.data.taskData.saveChannelKey,
                                     function(err, data) {
             if ((null == err) || (null != data)) {
                 var nextRefTime = refCb(data);
@@ -271,9 +284,12 @@ function getJobNextRefreshTime (job, callback)
     }
 }
 
-function checkAndRequeueJobs (job)
+function checkAndRequeueJobs (job, appNextRunDelay)
 {
     getJobNextRefreshTime(job, function(nextRunDelay) {
+        if (null == nextRunDelay) {
+            nextRunDelay = appNextRunDelay;
+        }
         checkAndRequeueJob(job, nextRunDelay);
     });
 }
@@ -284,11 +300,8 @@ function checkAndRequeueJobs (job)
  */
 function checkAndRequeueJob (job, nextRunDelay)
 {
-    /* First check the job type */
     if (null == nextRunDelay) {
-        /* DO not do anything */
-    } else {
-        job.data.taskData.nextRunDelay = nextRunDelay;
+        nextRunDelay = job.data.taskData.nextRunDelay;
     }
     var jobType = job.type;
     var jobData = job.data;//commonUtils.cloneObj(job.data);
@@ -304,9 +317,9 @@ function checkAndRequeueJob (job, nextRunDelay)
         removeJobFromKue(job, function(err) {
             if (null == err) {
                 /* Job got removed, so create a new one now */
-                createJob(jobType, jobData.title,
+                createJobCB(jobType, jobData.title,
                           getKueJobPriorityByValue(jobPriority),
-                          jobData.taskData.nextRunDelay,
+                          nextRunDelay,
                           (!jobData.runCount) ? 0 :
                           jobData.runCount - 1, jobData.taskData);
                 logutils.logger.debug("Job Got requeued with Job Type:" +
@@ -328,12 +341,16 @@ function checkAndRequeueJob (job, nextRunDelay)
  */
 function doCheckJobsProcess ()
 {
+    if (!parseJobsReq.registeredJobs.length) {
+        /* If there is no registered jobs, do not subscribe for jobs events */
+        return;
+    }
 	jobsApi.jobs.on('job complete', function (id) {
 		logutils.logger.info("We are on jobs.on for event 'job complete', id:" + id);
 		jobsApi.kue.Job.get(id, function (err, job) {
 			if ((err) || (null == job)) {
-				logutils.logger.error("Some error happened or job is null:",
-					err, process.pid);
+				logutils.logger.error("Some error happened or job is null: " +
+					err + " processID: " + process.pid);
 				return;
 			}
 			logutils.logger.debug("Job " + job.id + " completed by process: " + process.pid);
@@ -342,15 +359,40 @@ function doCheckJobsProcess ()
 	});
 }
 
-function createJobAtInit (jobName, url, firstRunDelay, runCount, nextRunDelay, appData)
+function createJobAtInit (jobObj)
 {
+    if (null == jobObj) {
+        logutils.logger.error("In createJobAtInit(): jobObj is null");
+        return;
+    }
+    var jobName = jobObj['jobName'];
+    if (null == jobName) {
+        logutils.logger.error("In createJobAtInit(): jobName is null");
+        assert(0);
+    }
+    var url = jobObj['url'];
+    var firstRunDelay = jobObj['firstRunDelay'];
+    var runCount = jobObj['runCount'];
+    var nextRunDelay = jobObj['nextRunDelay'];
+    var appData = jobObj['appData'];
+    var orchModel = jobObj['orchModel'];
     var msgObj = {};
     msgObj['jobName'] = jobName;
     msgObj['priority'] = 'normal';
     msgObj['jobType'] = global.STR_JOB_TYPE_CACHE;
-    msgObj['runCount'] = runCount;
-    msgObj['runDelay'] = firstRunDelay;
+    if (null == runCount) {
+        msgObj['runCount'] = 0;
+    } else {
+        msgObj['runCount'] = runCount;
+    }
+    if (null == firstRunDelay) {
+        /* Let the whole system come up, so default start job after 2 minutes */
+        msgObj['runDelay'] = 2 * 60 * 1000;
+    } else {
+        msgObj['runDelay'] = firstRunDelay;
+    }
     msgObj['data'] = {};
+    msgObj['data']['loggedInOrchestrationMode'] = orchModel;
     msgObj['data']['appData'] = appData;
     msgObj['data']['authObj'] = {};
     msgObj['data']['authObj']['sessionId'] = "";
@@ -373,27 +415,8 @@ function createJobAtInit (jobName, url, firstRunDelay, runCount, nextRunDelay, a
 function createJobByMsgObj (msg)
 {
     var msgJSON = JSON.parse(msg.toString());
-    switch (msgJSON['jobType']) {
-    case global.STR_MAIN_WEB_SERVER_READY:
-        if (true == process.mainModule.exports['discServEnable']) {
-            /* The main webServer is ready now, now start discovery service 
-             * subscription
-             */
-            discServ.createRedisClientAndStartSubscribeToDiscoveryService(global.service.MAINSEREVR);
-        }
-        break;
-
-    case global.STR_DISC_SUBSCRIBE_MSG:
-        logutils.logger.debug("We got on-demand discovery SUB message for " +
-                              "serverType " + msgJSON['serverType']);
-        discServ.subscribeDiscoveryServiceOnDemand(msgJSON['serverType']);
-        break;
-
-    default:
-        createJob(msgJSON.jobName, msgJSON.jobName, msgJSON.jobPriority,
-                  msgJSON.firstRunDelay, msgJSON.runCount, msgJSON.data);
-        break;
-    }
+    createJob(msgJSON.jobName, msgJSON.jobName, msgJSON.jobPriority,
+        msgJSON.firstRunDelay, msgJSON.runCount, msgJSON.data);
 }
 
 function getChannelkeyByHashUrl (lookupHash, myHash, url)
@@ -411,7 +434,7 @@ function getChannelkeyByHashUrl (lookupHash, myHash, url)
 
 function defDoneCallback ()
 {
-    console.log("We are done");
+    logutils.logger.debug("We are done");
 }
 
 function createJobListener (lookupHash, myHash, url, oldPubChannel, oldSaveChannelKey, 
@@ -502,4 +525,3 @@ exports.createJobByMsgObj = createJobByMsgObj;
 exports.doCheckJobsProcess = doCheckJobsProcess;
 exports.getDataFromStoreQ = getDataFromStoreQ;
 exports.createJobAtInit = createJobAtInit;
-

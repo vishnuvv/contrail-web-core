@@ -21,7 +21,8 @@ function getCookie(name) {
 }
 
 function setCookie(name, value) {
-    document.cookie = name + "=" + escape(value) + "; expires=Sun, 17 Jan 2038 00:00:00 UTC; path=/"
+    document.cookie = name + "=" + escape(value) +
+        "; path=/";
 }
 
 var class_A = 1;
@@ -90,7 +91,27 @@ function clone(obj) {
     throw new Error("Unable to copy obj! Its type isnt supported.");
 }
 
-function doAjaxCall(targetUrl, methodType, postData, successHandler, failureHandler, cacheEnabled, callbackParams, timeOut, hideErrMsg,abortCall) {
+function getID(divid){
+    if(divid === undefined){
+         return -1;
+    }
+    var split = divid.split("_");
+    if(split.length > 1){
+        return(split[1])
+    } else {
+        return -1;
+    }
+}
+function getInnerID(divid){
+    var split = divid.split("_");
+    if(split.length > 3){
+        return(split[3])
+    } else {
+        return -1;
+    }
+}
+
+function doAjaxCall(targetUrl, methodType, postData, successHandler, failureHandler, cacheEnabled, callbackParams, timeOut, hideErrMsg,abortCall,projectUUID) {
     var url = targetUrl, type = methodType, cache = cacheEnabled,
         success = successHandler, failure = failureHandler, data = postData,
         cbParams = callbackParams, headers = {}, timeout = timeOut, hideErrorMsg = hideErrMsg;
@@ -146,25 +167,83 @@ function doAjaxCall(targetUrl, methodType, postData, successHandler, failureHand
         if(isSet(timeout) && isNumber(timeout) && timeout > 0) {
         	config.timeout = timeout;
         }
-        $.ajax(config)
-            .success(function (res) {
-                configObj = $.extend({}, configObj, res);
-                if (typeof window[success] === "function")
-                    window[success](res, cbParams);
-            })
-            .fail(function (res) {
-                if(hideErrorMsg !== "true" && hideErrorMsg !== true) {
-                    if(res.responseText && res.responseText != "") {
-                        showInfoWindow(res.responseText, res.statusText);
-                    }
+
+        if(methodType === "POST") {
+            var jsonPostData = JSON.parse(data);
+            var projectUUId = "";
+            var parent_type = jsonPath(jsonPostData, "$..parent_type");
+            if(null !== parent_type && false !== parent_type && 
+                parent_type.length == 1) {
+                parent_type = parent_type[0];
+                if(parent_type === "project") {
+                    var fqn = jsonPath(jsonPostData, "$.*..fq_name")[0];
+                    projectUUId = 
+                        jsonPath(configObj, "$.projects[?(@.fq_name[0]=='" + fqn[0] + "' && @.fq_name[1]=='" + fqn[1] + "')]")[0].uuid;
+                    var dataType = jsonPath(jsonPostData, "$.*")[0];
+                    dataType["parent_uuid"] = projectUUId;
+                } else if(parent_type === "domain") {
+                    var fqn = jsonPath(jsonPostData, "$.*.fq_name")[0];
+                    var domainUUId = 
+                        jsonPath(configObj, "$.domains[?(@.fq_name[0]=='" + fqn[0] + "')]")[0].uuid;
+                    var dataType = jsonPath(jsonPostData, "$.*")[0];
+                    dataType["parent_uuid"] = domainUUId;
+                } else if(parent_type === "floating-ip-pool") {
+                    var fqn = jsonPath(jsonPostData, "$.*.fq_name")[0];
+                    var fipoolUUId = 
+                        jsonPath(configObj, "$.floating-ip-pools[?(@.to[0]=='" + fqn[0] + "' && @.to[1]=='" + fqn[1] + 
+                            "' && @.to[2]=='" + fqn[2] + "')]")[0].uuid;
+                    var dataType = jsonPath(jsonPostData, "$.*")[0];
+                    dataType["parent_uuid"] = fipoolUUId;
                 }
-                console.log("Error in getting/submitting data");
-                if (typeof window[failure] === "function")
-                    window[failure](res, cbParams);
-            });
+                data = JSON.stringify(jsonPostData);
+                config.data = data;
+
+                var getProject = {
+                    type:"GET",
+                    abortOnNavigate:true
+                };
+                if(parent_type === "project" || parent_type === "floating-ip-pool") {
+                    getProject["url"] = "/api/tenants/config/project/" + projectUUId + 
+                        "?exclude_children=True&exclude_back_refs=True";
+                }
+                $.ajax(getProject)
+                    .success(function (res) {
+                        callAjax(config, success, failure, hideErrorMsg, cbParams);
+                    })
+                    .fail(function (res) {
+                        callAjax(config, success, failure, hideErrorMsg, cbParams);
+                    });
+            } else {
+                callAjax(config, success, failure, hideErrorMsg, cbParams);
+            }
+        } else {
+            callAjax(config, success, failure, hideErrorMsg, cbParams);
+        }
     }
-    else 
+    else {
     	return false;
+    }
+}
+
+function callAjax(config, success, failure, hideErrorMsg, cbParams) {
+    $.ajax(config)
+        .success(function (res) {
+            configObj = $.extend({}, configObj, res);
+            if (typeof window[success] === "function")
+                window[success](res, cbParams);
+        })
+        .fail(function (res) {
+            if(res.statusText === 'abort') {
+                return;
+            }         
+            if(hideErrorMsg !== "true" && hideErrorMsg !== true) {
+                if(res.responseText && res.responseText != "") {
+                    showInfoWindow(res.responseText, res.statusText);
+                }
+            }
+            if (typeof window[failure] === "function")
+                window[failure](res, cbParams);
+        });
 }
 
 function toggleButtonStateByID(id, enable) {
@@ -191,46 +270,44 @@ function formatPolicyRule(rule, domain, project) {
     var rule_display = "";
     if (isSet(rule) && !rule.hasOwnProperty("length")) {
         if (isSet(rule["action_list"]) && isSet(rule["action_list"]["simple_action"]))
-            rule_display += rule["action_list"]["simple_action"];
+            rule_display += policyRuleFormat(rule["action_list"]["simple_action"]);
 
         if (isSet(rule["application"]) && rule["application"].length > 0) {
-            rule_display += " application " + rule["application"].toString();
-            var src_addr = policy_net_display(rule["src_addresses"], domain, project); 
-            if(isSet(src_addr))
-                rule_display += " network " + src_addr;
+            rule_display += " application " + policyRuleFormat(rule["application"].toString());
+            var src_addr = formatSrcDestAddresses(rule["src_addresses"], domain, project);
+            rule_display += src_addr;
             if(isSet(rule["direction"]))
-            	rule_display += " " + rule["direction"];
+            	rule_display += policyRuleFormat(rule["direction"]);
             var dest_addr = policy_net_display(rule["dst_addresses"], domain, project);
-            if(isSet(dest_addr))
-            	rule_display += " network " + dest_addr;
+            var dest_addr = formatSrcDestAddresses(rule["dst_addresses"], domain, project); 
+            rule_display += dest_addr;
             if (isSet(rule["action_list"]))
-                rule_display += " action " + rule["action_list"].toString();
+                rule_display += " action" + policyRuleFormat(rule["action_list"].toString());
         } else {
         	if(null !== rule["simple_action"] && typeof rule["simple_action"] !== "undefined")
-        	    rule_display += rule["simple_action"];
+        	    rule_display += policyRuleFormat(rule["simple_action"]);
             if (isSet(rule["protocol"]))
-                rule_display += " protocol " + rule["protocol"].toString();
+                //rule_display += " protocol " + rule["protocol"].toString();
+                  rule_display += ' protocol ' + policyRuleFormat(rule["protocol"].toString());
             
-            var src_addr = policy_net_display(rule["src_addresses"], domain, project); 
-            if(isSet(src_addr))
-                rule_display += " network " + src_addr;
+            var src_addr = formatSrcDestAddresses(rule["src_addresses"], domain, project);
+            rule_display += src_addr;
 
             var src_ports = policy_ports_display(rule["src_ports"]); 
             if(isSet(src_ports))
-                rule_display += src_ports;
+                rule_display += " ports " + policyRuleFormat(src_ports);
 
             if(isSet(rule["direction"]))
-            	rule_display += " " + rule["direction"];
+            	rule_display += ' ' + policyRuleFormat(rule["direction"]);
 
-            var dest_addr = policy_net_display(rule["dst_addresses"], domain, project); 
-            if(isSet(dest_addr))
-                rule_display += " network " + dest_addr;
+            var dest_addr = formatSrcDestAddresses(rule["dst_addresses"], domain, project); 
+            rule_display += dest_addr;
 
             var dst_ports = policy_ports_display(rule["dst_ports"]); 
             if(isSet(dst_ports))
-                rule_display += dst_ports;
+                rule_display += ' ports ' + policyRuleFormat(dst_ports);
 
-            var action_list = policy_services_display(rule["action_list"]); 
+            var action_list = policy_services_display(rule["action_list"], domain, project); 
             if(isSet(action_list))
                 rule_display += action_list;
         }
@@ -238,53 +315,92 @@ function formatPolicyRule(rule, domain, project) {
     return rule_display;
 }
 
+function formatSrcDestAddresses (rule, domain, project) {
+    var rule_display = '';
+    var addrSrcDest = policy_net_display(rule, domain, project); 
+    if(isSet(addrSrcDest.value)) {
+        rule_display = addrSrcDest.label + addrSrcDest.value;
+    }
+    return rule_display;     
+}
+
 function policy_net_display(nets, domain, project) {
     var net_disp_all = "";
+    var labelName = ' network ';
     if (isSet(nets) && nets.length > 0) {
         for (var i = 0; i < nets.length; i++) {
             var net_disp = "";
             var net = nets[i];
             if (isSet(net)) {
-                if (isSet(net["security_group"]))
+                if (isSet(net["security_group"])) {
                     net_disp += net["security_group"].toString();
+                }    
                 if (isSet(net["subnet"]) && isSet(net["subnet"]["ip_prefix"]) &&
-                    isSet(net["subnet"]["ip_prefix_len"]))
+                    isSet(net["subnet"]["ip_prefix_len"])) {
+                    labelName = ' ';
                     net_disp +=
-                        net["subnet"]["ip_prefix"] + "/" +
-                            net["subnet"]["ip_prefix_len"];
+                        policyRuleFormat(net["subnet"]["ip_prefix"] + "/" +
+                            net["subnet"]["ip_prefix_len"]);
+                }            
                 if (isSet(net["virtual_network"])) {
-                	if(isSet(domain) && isSet(project) && isString(domain) &&
-                		isString(project)) {
-                		var splits = net["virtual_network"].split(":");
-                		if(domain === splits[0] && project === splits[1]) {
-                            if(splits[2].toLowerCase() === "any" 
-                                || splits[2].toLowerCase() === "local"){
-                                net_disp = net["virtual_network"].toString();
-                            } else {
-								net_disp += splits[2];
-                            }
-                		} else {
-                			net_disp += net["virtual_network"].toString();
-                		}
-                	} else {
-                		net_disp += net["virtual_network"].toString();	
-                	}
+                    labelName = ' network ';
+                    net_disp += prepareFQN(domain, project, net["virtual_network"]);
+                }
+                if(isSet(net["network_policy"])) {
+                    labelName = ' policy ';
+                    net_disp += prepareFQN(domain, project, net["network_policy"]);
                 }
             }
             net_disp_all += net_disp;
         }
     }
-    return net_disp_all;
+    return {value : net_disp_all, label : labelName} ;
+}
+
+function prepareFQN(domain, project, net) {
+    var net_disp = '';
+    if(isSet(domain) && isSet(project) && isString(domain) &&
+    	isString(project)) {
+    	var splits = net.split(":");
+    	if(domain === splits[0] && project === splits[1]) {
+            if(splits.length === 3) {    
+                if(splits[2].toLowerCase() === "any" 
+                    || splits[2].toLowerCase() === "local"){
+                    net_disp = policyRuleFormat(net.toString());
+                } else {
+                    net_disp = policyRuleFormat(splits[2]);
+                }
+            } else {
+                net_disp = policyRuleFormat(splits[0]);    
+            }    
+    	} else {
+            //prepare network display format
+            var netArry = net.toString().split(':');
+            if(netArry.length === 3) {
+                if(netArry[0].toLowerCase() != 'any' && netArry[0].toLowerCase() != 'local') {
+                    netArry = policyRuleFormat(netArry[2]) + ' (' + netArry[0] + ':' + netArry[1] + ')';
+                    net_disp = netArry;
+                } else {
+                    net_disp = policyRuleFormat(netArry[0]);                                
+                }
+            } else {
+                net_disp = policyRuleFormat(netArry[0]); 
+            }
+    	}
+    } else {
+    	net_disp = policyRuleFormat(net.toString());	
+    }
+    return net_disp;
 }
 
 function policy_ports_display(ports) {
     var ports_str = "";
     if (isSet(ports) && ports.length > 0) {
         if (ports.length == 1 && ports[0]["start_port"] == -1) {
-            ports_str += " port any";
+            ports_str += " any";
         }
         else {
-            ports_str += " port [";
+            ports_str += " [";
             for (var i = 0; i < ports.length; i++) {
                 var p = ports[i];
                 if (isSet(p["start_port"])) {
@@ -306,22 +422,45 @@ function policy_ports_display(ports) {
     return ports_str;
 }
 
-function policy_services_display(action_list) {
+function policy_services_display(action_list, domain, project) {
     var service_str = "";
     if (isSet(action_list)) {
         var as = action_list.apply_service;
         var mt = action_list.mirror_to;
         if (isSet(as) && as.length > 0) {
-            service_str += " apply_service ";
+            var services_value = "";
             for (var i = 0; i < as.length; i++) {
-                service_str += as[i];
+                var item = as[i].split(':');
+                if(item.length === 3) {
+                    if(item[0] === domain &&
+                        item[1] === project) {
+                        item = item[2];  
+                    } else {               
+                        item = item[2] + ' (' + item[0] + ':' + item[1] + ')'; 
+                    }    
+                } else {
+                    item = item[0];
+                }
+                services_value += item;
                 if (i != (as.length - 1)) {
-                    service_str += ",";
+                    services_value += ",";
                 }
             }
+            service_str += ' services ' + policyRuleFormat(services_value);
         }
         if (isSet(mt) && isSet(mt.analyzer_name)) {
-            service_str += " mirror_to " + mt.analyzer_name;
+            mt.analyzer_name = mt.analyzer_name.split(':');
+            if(mt.analyzer_name.length === 3) {
+                if(mt.analyzer_name[0] === domain && 
+                    mt.analyzer_name[1] === project) {
+                    mt.analyzer_name = mt.analyzer_name[2];        
+                } else {
+                    mt.analyzer_name = mt.analyzer_name[2] + ' (' + mt.analyzer_name[0] + ':' + mt.analyzer_name[1] + ')'; 
+                }    
+            } else {
+                mt.analyzer_name = mt.analyzer_name[0];
+            }
+            service_str += ' mirror ' + policyRuleFormat(mt.analyzer_name);
         }
     }
     return service_str;
@@ -417,6 +556,28 @@ function getFQNofVN(domain, project, vn) {
     return null;
 }
 
+function getFQNofPolicy(domain, project, policy) {
+	if(!isSet(domain) || !isSet(project)) {
+		if(isSet(policy)) {
+			return policy;
+		} else {
+			return null;
+		}
+	}
+    var fqn = jsonPath(configObj, 
+            "$..policys-input[?(@.fq_name[0]=='" + domain + 
+            "' && @.fq_name[1]=='" + project + 
+            "' && @.fq_name[2]=='" + policy + "')]");
+    if (fqn && fqn.length == 1) {
+        fqn = fqn[0].fq_name;
+        fqn = (fqn.toString()).replace(/,/g, ":");
+        return fqn;
+    } else if (isSet(policy)) {
+        return policy
+    }
+    return null;
+}
+
 function getEndPort(port) {
     if (isSet(port)) {
     	port = port.toString();
@@ -485,6 +646,182 @@ function getStartPort(port) {
     return -1;
 }
 
+function genarateGateway(cidr,from){
+    var ciderValue = new v4.Address(cidr); 
+    var gateway;
+    if(ciderValue.isValid() === true){
+        var ipcreated;
+        var bigInt;
+        if(from == "end"){
+            ipcreated = ciderValue.endAddress();
+            var bg1 = ipcreated.bigInteger();
+            bigInt = bg1.subtract(new BigInteger("1",10));
+        } else if(from == "start" || from == "" ){
+            ipcreated = ciderValue.startAddress();
+            var bg1 = ipcreated.bigInteger();
+            bigInt = bg1.add(new BigInteger("1",10));
+        }
+        gateway = v4.Address.fromBigInteger(bigInt).address;
+    } else {    
+        ciderValue = new v6.Address(cidr); 
+        if(ciderValue.isValid() === true){
+            var ipcreated;
+            var bigInt;
+            if(from == "end"){
+                ipcreated = ciderValue.endAddress();
+                var bg1 = ipcreated.bigInteger();
+                bigInt = bg1.subtract(new BigInteger("1",10));
+            } else if(from == "start" || from == "" ){
+                ipcreated = ciderValue.startAddress();
+                var bg1 = ipcreated.bigInteger();
+                bigInt = bg1.add(new BigInteger("1",10));
+            }
+            gateway = new v6.Address.fromBigInteger(bigInt).correctForm()
+
+        } else {
+            return false;
+        }
+    }
+    return gateway;
+}
+
+function isIPBoundToRange(range,ipAddress){
+    var IP = new v4.Address(ipAddress); 
+    var IPRange = new v4.Address(range); 
+    if(IP.isValid() === true && IPRange.isValid() === true){
+        return IP.isInSubnet(IPRange);
+    } else {
+        IP = new v6.Address(ipAddress); 
+        IPRange = new v6.Address(range);        
+        if(IP.isValid() === true && IPRange.isValid() === true){
+            return IP.isInSubnet(IPRange);
+        }
+    }
+}
+
+function isIPBoundToIPRange(rangeStart, rangeEnd, ipAddress){
+    var code = 2;//Out of Range
+    var IP = new v4.Address(ipAddress);
+    var IPRangeStart = new v4.Address(rangeStart);
+    var IPRangeEnd = new v4.Address(rangeEnd);
+    if(IP.isValid() === true && IPRangeStart.isValid() === true && IPRangeEnd.isValid()){
+        var IPInt = IP.bigInteger();
+        var startIPInt = IPRangeStart.bigInteger();
+        var endIPInt = IPRangeEnd.bigInteger();
+        if(startIPInt.compareTo(IPInt) <= 0 && endIPInt.compareTo(IPInt) >= 0){
+            code = 0;// In Range
+        }
+    } else {
+        IP = new v6.Address(ipAddress); 
+        IPRangeStart = new v6.Address(rangeStart);
+        IPRangeEnd = new v6.Address(rangeEnd);
+        if(IP.isValid() === true && IPRangeStart.isValid() === true && IPRangeEnd.isValid()){
+            var IPInt = IP.bigInteger();
+            var startIPInt = IPRangeStart.bigInteger();
+            var endIPInt = IPRangeEnd.bigInteger();
+            if(startIPInt.compareTo(IPInt) <= 0 && endIPInt.compareTo(IPInt) >= 0){
+                code = 0;// In Range
+            }
+        } else {
+            code = 1;// Invalid IP
+        }
+    }
+    //code 0-> In Range.
+    //code 1-> Invalid IP.
+    //code 2-> Not in Range.
+    return code;
+}
+
+function isStartAddress(cidr, ipAddress){
+    var cidrAddress = new v4.Address(cidr);
+    if(cidrAddress.isValid() == true){
+        if(isIPv4(ipAddress)){
+            var cidrBigInt = new v4.Address(ipAddress).bigInteger();
+            var IPBigInt = new v4.Address(cidrAddress.startAddress().address).bigInteger();
+            if(cidrBigInt.compareTo(IPBigInt) == 0){
+                return true;
+            }
+        }
+    } else {
+        cidrAddress = new v6.Address(cidr); 
+        if(cidrAddress.isValid() == true){
+            if(isIPv6(ipAddress)){
+                var cidrBigInt = new v6.Address(cidrAddress.startAddress().address).bigInteger();
+                var IPBigInt = new v6.Address(ipAddress).bigInteger();
+                if(cidrBigInt.compareTo(IPBigInt) == 0){
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function isEndAddress(cidr, ipAddress){
+    var cidrAddress = new v4.Address(cidr);
+    if(cidrAddress.isValid() == true){
+        if(isIPv4(ipAddress)){
+            var cidrBigInt = new v4.Address(ipAddress).bigInteger();
+            var IPBigInt = new v4.Address(cidrAddress.endAddress().address).bigInteger();
+            if(cidrBigInt.compareTo(IPBigInt) == 0){
+                return true;
+            }
+        }
+    } else {
+        cidrAddress = new v6.Address(cidr); 
+        if(cidrAddress.isValid() == true){
+            if(isIPv6(ipAddress)){
+                var cidrBigInt = new v6.Address(cidrAddress.endAddress().address).bigInteger();
+                var IPBigInt = new v6.Address(ipAddress).bigInteger();
+                if(cidrBigInt.compareTo(IPBigInt) == 0){
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function isValidIP(ipAddress){
+    if(ipAddress == null)
+        return false;
+    var IP = new v4.Address(ipAddress); 
+    if(IP.isValid() === true){
+        return true;
+    }
+    IP = new v6.Address(ipAddress); 
+    if(IP.isValid() === true){
+        return true;
+    }
+    return false;
+}
+function isIPv4(ipAddress){
+    if(ipAddress == null)
+        return false;
+    var IP = new v4.Address(ipAddress); 
+    if(IP.isValid() === true){
+        return true;
+    }
+    return false;
+}
+function isIPv6(ipAddress){
+    var IP;
+
+    if(ipAddress == null ) {
+        return false;
+    } else {
+        try {
+            IP = new v6.Address(ipAddress);
+        } catch (error) {
+            return false;
+        }
+        if(IP.isValid() === true){
+            return true;
+        }
+    }
+
+    return false;
+}
 function validip(ip) {
     if (null != ip && "" != ip) {
         ipsplit = ip.split("/");
@@ -704,6 +1041,43 @@ function getSelectedProjectObjNew (projectSwitcherId, elementType) {
     return firstProjectValue;
 }
 
+function getSelectedDomainProjectObjNew (filterSwitcherId, elementType, filterType) {
+    var firstFilterName = "", firstFilterValue = "";
+    var cookiedFilter = getCookie(filterType);
+    var dataSrc = $("#" + filterSwitcherId).data(elementType).getAllData()[0];
+    if (cookiedFilter === false || cookiedFilter === "null" || cookiedFilter === "undefined") {
+        if(elementType === "contrailDropdown") {
+            firstFilterName = dataSrc ? dataSrc.text : "";
+            firstFilterValue = dataSrc ? dataSrc.value : "";
+        }
+    } else {
+        if(elementType === "contrailDropdown") {
+            for (var i = 0; i < $("#" + filterSwitcherId).data(elementType).getAllData().length; i++) {
+                var pname = $("#" + filterSwitcherId).data(elementType).getAllData()[i].text;
+                if (pname === cookiedFilter) {
+                    return $("#" + filterSwitcherId).data(elementType).getAllData()[i].value;
+                }
+            }
+            firstFilterName = dataSrc ? dataSrc.text : "";
+            firstFilterValue = dataSrc ? dataSrc.value : "";
+        }
+    }
+    setCookie(filterType, firstFilterName);
+    return firstFilterValue;
+}
+
+function setDomainProjectEmptyMsg(filterSwitcherId, filterType) {
+        var filter = filterType === 'project'? 'Projects' : 'Domains';
+        var emptyObj = [{text:'No '+ filter +' found',value:"Message"}];
+        $("#" + filterSwitcherId).data("contrailDropdown").setData(emptyObj);
+        $("#" + filterSwitcherId).data("contrailDropdown").text(emptyObj[0].text);
+        $("#" + filterSwitcherId).data("contrailDropdown").enable(false);
+}
+
+function emptyCookie(filterType) {
+    setCookie(filterType, "");
+}
+
 function fetchDomains(successCB, failureCB) {
     doAjaxCall("/api/tenants/config/domains", "GET", null, successCB, (failureCB) ? failureCB : "errorInFetchingDomains", null, null);
 };
@@ -773,7 +1147,7 @@ function createSuccessDialog() {
 	$(btnClose).attr("aria-hidden", "true");
 
 	var iconRemove = document.createElement("i");
-	$(iconRemove).addClass("icon-remove");
+	$(iconRemove).addClass("fa fa-remove");
 	btnClose.appendChild(iconRemove);
 	
 	var hdrTitle = document.createElement("h6");
@@ -842,7 +1216,7 @@ function deleteObject(cbParams) {
 	if(cbParams && (cbParams.index < cbParams.selected_rows.length)) {
 		var selected_row_data = cbParams.selected_rows[cbParams.index];
 	    doAjaxCall(cbParams.url + selected_row_data[cbParams.urlField], 
-	        "DELETE", null, "deleteSuccess", "deleteFailure", null, cbParams, null, true);
+	        "DELETE", JSON.stringify(selected_row_data), "deleteSuccess", "deleteFailure", null, cbParams, cbParams.timeout, true);
 	} else {
 		deleteComplete(cbParams);
 	}
@@ -925,7 +1299,8 @@ function checkSystemProject(project) {
 	return false;
 }
 
-function scrollUp(contWindow,div,boolCollapse){
+function scrollUp(contWindow,div,boolCollapse,collapseDivID){
+    //div.scrollIntoView();
     if(46 >= Math.abs(
         $(contWindow).find("div.modal-body")[0].getBoundingClientRect().bottom - 
         $(div)[0].getBoundingClientRect().bottom)) {
@@ -934,11 +1309,75 @@ function scrollUp(contWindow,div,boolCollapse){
         }, 1000);
     }
     if(boolCollapse === true){
-        collapseElement(div);
+        collapseElement(div,collapseDivID);
     }
 }
 
-cutils.getCookie = getCookie;
+function policyRuleFormat(text) {
+    return '<span class="rule-format">' + text  + '</span>';
+}
+function formatVirtualRouterType(type) {
+    var formattedType = '';
+    if(type === '-') {
+         formattedType = type;
+    } else if(type instanceof  Array) {
+        if(type.length > 0) {
+            for(var i = 0; i < type.length; i++) {
+                var actText = '';
+                switch(type[i]) {
+                    case 'hypervisor' :
+                        actText = 'Hypervisor';
+                        break;
+                    case 'embedded' :
+                        actText = 'Embedded';
+                        break;
+                    case 'tor-agent' :
+                        actText = 'TOR Agent';
+                        break;
+                    case 'tor-service-node' :
+                        actText = 'TOR Service Node';
+                        break;
+                    default :
+                        actText = 'Hypervisor';
+                        break;
+                }
+                if(formattedType === '') {
+                    formattedType = actText
+                } else {
+                    formattedType += ' , ' + actText;
+                }
+            }
+        } else {
+            formattedType = 'Hypervisor';
+        }
+    }else {
+            switch(type) {
+                case 'hypervisor' :
+                    formattedType = 'Hypervisor';
+                    break;
+                case 'embedded' :
+                    formattedType = 'Embedded';
+                    break;
+                case 'tor-agent' :
+                    formattedType = 'TOR Agent';
+                    break;
+                case 'tor-service-node' :
+                    formattedType = 'TOR Service Node';
+                    break;
+                default :
+                    formattedType = 'Hypervisor';
+                    break;
+            }
+    }
+    return formattedType;
+}
+function isValidMACAddress(mac) {
+    mac = mac.toUpperCase();
+    var mac_address_regex = /^(([0-9A-F]{1,2}[:-]){5}[0-9A-F]{1,2}?)+$/;
+    return mac_address_regex.test(mac);
+}
+
+cutils.getCookie = getCookie;       
 cutils.setCookie = setCookie;
 cutils.isSet = isSet;
 cutils.isObject = isObject;
@@ -946,6 +1385,9 @@ cutils.isNumber = isNumber;
 cutils.isString = isString;
 cutils.pad = pad;
 cutils.doAjaxCall = doAjaxCall;
+cutils.getID = getID;
+cutils.getInnerID = getInnerID;
+cutils.callAjax = callAjax;
 cutils.formatPolicyRule = formatPolicyRule;
 cutils.policy_net_display = policy_net_display;
 cutils.policy_ports_display = policy_ports_display;
@@ -986,3 +1428,20 @@ cutils.deleteFailure = deleteFailure;
 cutils.checkSystemProject = checkSystemProject;
 cutils.scrollUp = scrollUp;
 cutils.getSelectedProjectObjNew = getSelectedProjectObjNew;
+cutils.getSelectedDomainProjectObjNew = getSelectedDomainProjectObjNew;
+cutils.setDomainProjectEmptyMsg = setDomainProjectEmptyMsg;
+cutils.emptyCookie = emptyCookie;
+cutils.policyRuleFormat = policyRuleFormat;
+cutils.formatSrcDestAddresses = formatSrcDestAddresses;
+cutils.prepareFQN = prepareFQN;
+cutils.getFQNofPolicy = getFQNofPolicy;
+cutils.genarateGateway = genarateGateway;
+cutils.isValidIP = isValidIP;
+cutils.isIPv4 = isIPv4;
+cutils.isIPv6 = isIPv6;
+cutils.isIPBoundToRange = isIPBoundToRange;
+cutils.formatVirtualRouterType = formatVirtualRouterType;
+cutils.isValidMACAddress = isValidMACAddress;
+cutils.isIPBoundToIPRange = isIPBoundToIPRange;
+cutils.isStartAddress = isStartAddress;
+cutils.isEndAddress = isEndAddress;

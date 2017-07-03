@@ -2,7 +2,9 @@
  * Copyright (c) 2014 Juniper Networks, Inc. All rights reserved.
  */
 
-var config = require('../../../../config/config.global');
+var configUtils = require('../../common/config.utils'),
+    logutils = require('../../utils/log.utils');
+var config = configUtils.getConfig();
 var  topoCache = require(config.featurePkg.webController.path +
                          '/webroot/monitor/tenant-network/jobs/topoCache.api')
 	, bgpNode = require(config.featurePkg.webController.path +
@@ -136,7 +138,7 @@ jobsProcess.processTopPeerByConnNetRequestByJob = function(pubChannel,
 jobsProcess.processTopPeerDetailsRequestByJob = function(pubChannel,
                                                      saveChannelKey,
                                                      jobData, done) {
-    console.log("getting Top Peer:");
+    logutils.logger.debug("getting Top Peer:");
     nwMonJobsApi.processTopPeerDetails(pubChannel, saveChannelKey, jobData,
                                        done);
 }

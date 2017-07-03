@@ -5,7 +5,15 @@
 var config = {};
 
 config.orchestration = {};
-config.orchestration.Manager = 'openstack'
+/****************************************************************************
+ * Specify Orchestration Model
+ * Available models are:
+ *  - openstack
+ *  - cloudstack
+ * If you do not want to specify any model, set it to 'none'
+ *
+ *****************************************************************************/
+config.orchestration.Manager = 'openstack';
 
 /****************************************************************************
  * This boolean flag indicates to communicate with Orchestration
@@ -18,14 +26,53 @@ config.orchestration.Manager = 'openstack'
  *
  * true  - These values should be taken from this config
  *         file.
- * false - These values should be taken from auth catalog list 
+ * false - These values should be taken from auth catalog list
  *
-*****************************************************************************/
+ *****************************************************************************/
 config.serviceEndPointFromConfig = true;
 
 /****************************************************************************
+ * This boolean flag specifies wheather region list should be taken from config
+ * file or from keystone endpoint
+ * true  - If set as true, then keystone endpoint is taken from
+ *         config.regions
+ * false - If set as false, then keystone endpoint is taken from
+ *         config.identityManager
+ *
+ ****************************************************************************/
+config.regionsFromConfig = false;
+
+/****************************************************************************
+ * Below are the configs for Api Server and analytics Service type & name as
+ * provisioned in keystone
+ *
+ * apiServiceType - Service Type for apiServer, default value is apiServer
+ * opServiceType  - Service Type for analytics, default value is opServer
+ *
+ * Note: If there are multiple api server or analytices nodes in a specific
+ *       region, then provision service type/name as ApiServer0, ApiServer1,
+ *       ApiServer2 etc, similarly for analytics node: OpServer0, OpServer1,
+ *       OpServer2 etc.
+ *
+ ****************************************************************************/
+config.endpoints = {};
+config.endpoints.apiServiceType = 'ApiServer';
+config.endpoints.opServiceType = 'OpServer';
+
+/****************************************************************************
+ * Mapping to region name with keystone endpoint
+ *
+ * For example:
+ * config.regions.RegionOne = 'http://nodeIp:5000/v2.0';
+ * config.regions.RegionTwo = 'http://nodeIp:5000/v3';
+ *
+ ****************************************************************************/
+config.regions = {};
+config.regions.RegionOne = 'http://127.0.0.1:5000/v2.0';
+
+/****************************************************************************
  * This boolean flag indicates if serviceEndPointFromConfig is set as false,
- * then to take IP/Port/Protocol/Version information from auth catalog, 
+ * then to take IP/Port/Protocol/Version information from auth catalog,
  * should publicURL OR internalURL will be used.
  *
  * true  - publicURL in endpoint will be used to retrieve IP/Port/Protocol/
@@ -36,7 +83,7 @@ config.serviceEndPointFromConfig = true;
  * NOTE: if config.serviceEndPointFromConfig is set as true, then this flag
  *       does not have any effect.
  *
-*****************************************************************************/
+ *****************************************************************************/
 config.serviceEndPointTakePublicURL = true;
 
 /****************************************************************************
@@ -54,7 +101,7 @@ config.serviceEndPointTakePublicURL = true;
  *      IP to connect to for this Server.
  * port:
  *      Port to connect to for this server
- * authProtocol:        
+ * authProtocol:
  *      Specify authProtocol either 'http' or 'https'
  * apiVersion:
  *      REST API Version for this server to connect to.
@@ -68,10 +115,10 @@ config.serviceEndPointTakePublicURL = true;
  *      Not applicable for cnfg/analytics as of now
  * strictSSL:
  *      If true, requires certificates to be valid
- * ca: 
+ * ca:
  *      An authority certificate to check the remote host against,
  *      if you do not want to specify then use ''
-*****************************************************************************/
+ *****************************************************************************/
 config.networkManager = {};
 config.networkManager.ip = '127.0.0.1';
 config.networkManager.port = '9696'
@@ -101,12 +148,12 @@ config.identityManager.ip = '127.0.0.1';
 config.identityManager.port = '5000';
 config.identityManager.authProtocol = 'http';
 /******************************************************************************
- * Note: config.identityManager.apiVersion is not controlled by boolean flag 
+ * Note: config.identityManager.apiVersion is not controlled by boolean flag
  * config.serviceEndPointFromConfig. If specified apiVersion here, then these
  * API versions will be used while using REST API to identityManager.
- * If want to use with default apiVersion(v2.0), then can specify it as 
+ * If want to use with default apiVersion(v2.0), then can specify it as
  * empty array.
-******************************************************************************/
+ ******************************************************************************/
 config.identityManager.apiVersion = ['v2.0'];
 config.identityManager.strictSSL = false;
 config.identityManager.ca = '';
@@ -121,28 +168,67 @@ config.storageManager.ca = '';
 
 // VNConfig API server and port.
 config.cnfg = {};
-config.cnfg.server_ip = '127.0.0.1';
+config.cnfg.server_ip = ['127.0.0.1'];
 config.cnfg.server_port = '8082';
 config.cnfg.authProtocol = 'http';
 config.cnfg.strictSSL = false;
 config.cnfg.ca = '';
+config.cnfg.statusURL = "/global-system-configs";
 
 // Analytics API server and port.
 config.analytics = {};
-config.analytics.server_ip = '127.0.0.1';
+config.analytics.server_ip = ['127.0.0.1'];
 config.analytics.server_port = '8081';
 config.analytics.authProtocol = 'http';
 config.analytics.strictSSL = false;
 config.analytics.ca = '';
+config.analytics.statusURL = "/analytics/uves/bgp-peers";
 
-/* Discovery Service */
-config.discoveryService = {};
-config.discoveryService.server_ip = '127.0.0.1';
-config.discoveryService.server_port = '5998';
-/* Specifiy true if subscription to discovery server should be enabled, else
- * specify false. Other than true/false value here is treated as true
+//DNS API Server and port.
+/* Please note: being introspect port, SSL options for dns should come from
+   config.introspect.ssl configuration
  */
-config.discoveryService.enable = true;
+config.dns = {};
+config.dns.server_ip = ['127.0.0.1'];
+config.dns.server_port = '8092';
+config.dns.statusURL = "/Snh_PageReq?x=AllEntries%20VdnsServersReq";
+
+// vcenter related parameters
+config.vcenter = {};
+config.vcenter.server_ip = '127.0.0.1';         //vCenter IP
+config.vcenter.server_port = '443';             //Port
+config.vcenter.authProtocol = 'https';          //http or https
+config.vcenter.datacenter = 'vcenter';          //datacenter name
+config.vcenter.dvsswitch = 'vswitch';           //dvsswitch name
+config.vcenter.strictSSL = false;               //Validate the certificate or ignore
+config.vcenter.ca = '';                         //specify the certificate key file
+config.vcenter.wsdl = '/usr/src/contrail/contrail-web-core/webroot/js/vim.wsdl';
+
+/*****************************************************************************
+ * The below configurations descibe the SSL options for connecting to different
+ * introspect port.
+ *
+ * enabled:
+ *      Boolean flag to enable or disable ssl while connecting to different
+ *      introspect port
+ * key:
+ *      Private key to use for SSL
+ * cert:
+ *      Public x509 certificate to use
+ * ca:
+ *      A string, Buffer or array of strings or Buffers of trusted certificates
+ *      in PEM format. These are used to authorize connections.
+ * strictSSL:
+ *      If true, the server certificate is verified against the list of
+ *      supplied CAs
+ *****************************************************************************/
+config.introspect = {};
+config.introspect.ssl = {};
+config.introspect.ssl.enabled = false;
+config.introspect.ssl.key = '';
+config.introspect.ssl.cert = '';
+config.introspect.ssl.ca = '';
+config.introspect.ssl.strictSSL = false;
 
 /* Job Server */
 config.jobServer = {};
@@ -153,15 +239,10 @@ config.jobServer.server_port = '3000';
 config.files = {};
 config.files.download_path = '/tmp';
 
-/* Redis Server */
-config.redis = {};
-config.redis.server_port = '6379';
-config.redis.server_ip = '127.0.0.1';
-
 /* Cassandra Server */
 config.cassandra = {};
 config.cassandra.server_ips = ['127.0.0.1'];
-config.cassandra.server_port = '9160';
+config.cassandra.server_port = '9042';
 config.cassandra.enable_edit = false;
 
 /* KUE Job Scheduler */
@@ -194,20 +275,22 @@ config.node_worker_count = 1;
 config.maxActiveJobs = 10;
 
 /* Redis DB index for Web-UI */
-config.redisDBIndex = 1;
+config.redisDBIndex = 3;
+
+/* Retry time for reading servers list recursively */
+config.CONTRAIL_SERVICE_RETRY_TIME = 300000; //5 minutes
 
 /* WebUI Redis Server */
-config.redis_server_port = '6383';
+config.redis_server_port = '6379';
 config.redis_server_ip = '127.0.0.1';
 config.redis_dump_file = '/var/lib/redis/dump-webui.rdb';
-
-/* Cache Expiry Time */
-config.cacheExpire = {};
-config.cacheExpire.flow_stat_time = 600; /* Seconds */
-config.cacheExpire.topo_tree_time = 600; /* Seconds */
+config.redis_password = '';
 
 /* Logo File: Use complete path of logo file location */
 config.logo_file = '/usr/src/contrail/contrail-web-core/webroot/img/opencontrail-logo.png';
+
+/* Favicon File: Use complete path of favicon file location */
+config.favicon_file = '/usr/src/contrail/contrail-web-core/webroot/img/opencontrail-favicon.ico';
 
 config.featurePkg = {};
 /* Add new feature Package Config details below */
@@ -220,10 +303,46 @@ config.qe = {};
 config.qe.enable_stat_queries = false;
 
 /* Configure level of logs, supported log levels are:
-   debug, info, notice, warning, error, crit, alert, emerg
+ debug, info, notice, warning, error, crit, alert, emerg
  */
 config.logs = {};
 config.logs.level = 'debug';
 
+/******************************************************************************
+ * Boolean flag getDomainProjectsFromApiServer indicates wheather the project
+ * list should come from API Server or Identity Manager.
+ * If Set
+ *      - true, then project list will come from API Server
+ *      - false, then project list will come from Identity Manager
+ * Default: false
+ *
+ ******************************************************************************/
+config.getDomainProjectsFromApiServer = false;
+/*****************************************************************************
+ * Boolean flag L2_enable indicates the default forwarding-mode of a network.
+ * Allowed values : true / false
+ * Set this flag to true if all the networks are to be L2 networks,
+ * set to false otherwise.
+ *****************************************************************************/
+config.network = {};
+config.network.L2_enable = false;
+
+/******************************************************************************
+ * Boolean flag getDomainsFromApiServer indicates wheather the domain
+ * list should come from API Server or Identity Manager.
+ * If Set
+ *      - true, then domain list will come from API Server
+ *      - false, then domain list will come from Identity Manager
+ * Default: true
+ * NOTE: if config.identityManager.apiVersion is set as v2.0, then this flag
+ *       does not have any effect, in that case the domain list is retrieved
+ *       from API Server.
+ *
+ *****************************************************************************/
+config.getDomainsFromApiServer = false;
+
+config.jsonSchemaPath = "/usr/src/contrail/contrail-web-core/src/serverroot/configJsonSchemas";
+
 // Export this as a module.
 module.exports = config;
+
