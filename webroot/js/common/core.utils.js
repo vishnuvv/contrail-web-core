@@ -1372,9 +1372,10 @@ define([
             $.each(tooltipConfig, function (keyConfig, valueConfig) {
                 valueConfig = $.extend(true, {}, cowc.DEFAULT_CONFIG_ELEMENT_TOOLTIP, valueConfig);
                 $('g.' + keyConfig).popover('destroy');
-                $('g.' + keyConfig).popover({
+                $(graphView.$el).popover({
                     trigger: 'manual',
                     html: true,
+                    selector: $('g.' + keyConfig),
                     animation: false,
                     placement: function (context, src) {
                         var srcOffset = $(src).offset(),

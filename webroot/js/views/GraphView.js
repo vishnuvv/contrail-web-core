@@ -181,7 +181,7 @@ define([
     var initMouseEvents = function(graphSelectorElement, tooltipConfig, graphView) {
         cowu.bindPopoverInTopology(tooltipConfig, graphView);
         var dragEvents = "mousedown touchstart pointerdown";
-        $(graphSelectorElement).find("text").on(dragEvents, function (e) {
+        $(graphSelectorElement).on(dragEvents, 'text', function (e) {
             e.stopImmediatePropagation();
             if($(this).closest('.no-drag-element').length == 0) {
                 graphView.pointerdown(e);
