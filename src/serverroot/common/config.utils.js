@@ -5,6 +5,7 @@
 var assert = require('assert'),
     path = require('path'),
     fs = require('fs'),
+    logutils = require('../utils/log.utils'),
     contrailConfig;
 /* Function: compareAndMergeDefaultConfig
    This function is used to compare and merge missing configuration from
@@ -47,6 +48,15 @@ function mergeObjects (defaults, configs)
     return configs;
 }
 
+function updateMOTD (msg)
+{
+    if (null == msg) {
+        delete contrailConfig.motd_message;
+    } else {
+        contrailConfig.motd_message = msg;
+    }
+}
+
 /* Function: compareAndMergeFiles
    This function is used to mege two files line by line comparing the left
    porton of splitter of fileToCmp with fileWithCmp.
@@ -62,6 +72,45 @@ function compareAndMergeFiles (fileToCmp, fileWithCmp)
     var defConfig = require(fileWithCmp);
     var config = mergeObjects(defConfig, oldConfig);
     return config;
+}
+
+function subscribeMOTDFileChange ()
+{
+    var commonUtils = require("../utils/common.utils");
+        config = getConfig(),
+        notFoundMsg = 'Message of the day file is missing at ',
+        notTextMsg = 'No Text in message of the day file at ',
+        motdFilePath =
+        commonUtils.getValueByJsonPath(config, "motd_file_path", null);
+    if ((null == motdFilePath) || (!motdFilePath.length)) {
+        logutils.logger.warn('Either custom or default message of the day file path not mentioned');
+        return;
+    }
+    console.log("Getting filePath as:", motdFilePath);
+    fs.readFile(motdFilePath, function (err, fileContent) {
+        readFileCallBack(motdFilePath, err, fileContent, notFoundMsg, notTextMsg, updateMOTD);
+    });
+    console.log("Getting config0:", contents);
+    fs.watchFile(motdFilePath, function(curr, prev) {
+        fs.readFile(motdFilePath, function (err, fileContent) {
+            readFileCallBack(motdFilePath, err, fileContent, notFoundMsg, notTextMsg, updateMOTD);
+        });
+        //updateMOTD(contents);
+        console.log("Getting config:", contrailConfig.motd_message);
+    });
+}
+function readFileCallBack (path, err, fileContent, notFoundMsg, noTextMsg, callBack) {
+    if(err != null && err.code == 'ENOENT') {
+        logutils.logger.warn(notFoundMsg, path);
+        return;
+    }
+    if (fileContent == null) {
+        logutils.logger.warn(noTextMsg, path);
+        return;
+    }
+    if (fileContent != null && callBack != null) {
+        callBack(fileContent);
+    }
 }
 
 /* Function: subscribeAutoDetectConfig, implements fs.watchFile
@@ -81,6 +130,7 @@ function subscribeAutoDetectConfig(confFile)
             var contrailServ = require('./contrailservice.api');
             contrailServ.getContrailServices();
             contrailServ.startWatchContrailServiceRetryList();
+            subscribeMOTDFileChange();
         });
     });
 }
@@ -171,3 +221,5 @@ exports.subscribeAutoDetectConfig = subscribeAutoDetectConfig;
 exports.updateConfig = updateConfig;
 exports.getConfig = getConfig;
 exports.getConfigFile = getConfigFile;
+exports.subscribeMOTDFileChange = subscribeMOTDFileChange;
+

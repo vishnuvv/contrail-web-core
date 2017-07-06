@@ -1397,6 +1397,7 @@ function getWebServerInfo (req, res, appData)
     serverObj['featurePkg'] = {};
     serverObj['uiConfig'] = ui;
     serverObj['isAuthenticated'] = req.session.isAuthenticated;
+    serverObj['motdText'] = config.motdText;
     serverObj['discoveryEnabled'] = getValueByJsonPath(config,
                                                        'discoveryService;enable',
                                                        true);

@@ -1186,6 +1186,12 @@ if (typeof document !== 'undefined' && document) {
             setCookie: function(name,value){
                 document.cookie = name + "=" + escape(value) + "; path=/";
             },
+            appendMotdText: function (text) {
+                if (text != null) {
+                    $('.proprietary-info').html(text);
+                    $('.proprietary-info').removeClass('hide');
+                }
+            },
             postAuthenticate: function(response) {
                 require(['jquery', 'thirdparty-libs', 'nonamd-libs'],function() {
                     //To fetch alarmtypes
@@ -1260,6 +1266,7 @@ if (typeof document !== 'undefined' && document) {
                         isRegionsFromConfig = loadCfg.isRegionListFromConfig;
                         configRegionList = loadCfg.configRegionList;
                     }
+                    loadUtils.appendMotdText(loadCfg['motd_message']);
                     var regionList = [];
                     if (true == isRegionsFromConfig) {
                         for (var key in configRegionList) {

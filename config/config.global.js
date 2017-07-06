@@ -4,6 +4,20 @@
 
 var config = {};
 
+//var ipAddress = '10.163.43.4'
+//var ipAddress ='10.84.29.69'
+//var ipAddress = '10.84.30.201'
+//var ipAddress = 'nodea16';
+//var ipAddress = '10.84.17.3';
+var ipAddress = 'nodeg3';
+//var ipAddress ='nodea16.englab.juniper.net'
+//var ipAddress = '10.84.30.250' // Biswajit
+//var ipAddress = '10.204.216.40'//Biswajit
+//var ipAddress = '10.84.30.249'
+//var ipAddress = '10.224.19.241'
+
+//var ipAddress = '10.87.140.197'
+//var ipAddress = '10.87.141.138'
 config.orchestration = {};
 /****************************************************************************
  * Specify Orchestration Model
@@ -120,7 +134,7 @@ config.serviceEndPointTakePublicURL = true;
  *      if you do not want to specify then use ''
  *****************************************************************************/
 config.networkManager = {};
-config.networkManager.ip = '127.0.0.1';
+config.networkManager.ip = ipAddress;
 config.networkManager.port = '9696'
 config.networkManager.authProtocol = 'http';
 config.networkManager.apiVersion = [];
@@ -128,7 +142,7 @@ config.networkManager.strictSSL = false;
 config.networkManager.ca = '';
 
 config.imageManager = {};
-config.imageManager.ip = '127.0.0.1';
+config.imageManager.ip = ipAddress;
 config.imageManager.port = '9292';
 config.imageManager.authProtocol = 'http';
 config.imageManager.apiVersion = ['v1', 'v2'];
@@ -136,7 +150,7 @@ config.imageManager.strictSSL = false;
 config.imageManager.ca = '';
 
 config.computeManager = {};
-config.computeManager.ip = '127.0.0.1';
+config.computeManager.ip = ipAddress;
 config.computeManager.port = '8774';
 config.computeManager.authProtocol = 'http';
 config.computeManager.apiVersion = ['v1.1', 'v2'];
@@ -144,7 +158,7 @@ config.computeManager.strictSSL = false;
 config.computeManager.ca = '';
 
 config.identityManager = {};
-config.identityManager.ip = '127.0.0.1';
+config.identityManager.ip = ipAddress;
 config.identityManager.port = '5000';
 config.identityManager.authProtocol = 'http';
 /******************************************************************************
@@ -159,7 +173,7 @@ config.identityManager.strictSSL = false;
 config.identityManager.ca = '';
 
 config.storageManager = {};
-config.storageManager.ip = '127.0.0.1';
+config.storageManager.ip = ipAddress;
 config.storageManager.port = '8776';
 config.storageManager.authProtocol = 'http';
 config.storageManager.apiVersion = ['v1'];
@@ -168,7 +182,7 @@ config.storageManager.ca = '';
 
 // VNConfig API server and port.
 config.cnfg = {};
-config.cnfg.server_ip = ['127.0.0.1'];
+config.cnfg.server_ip = [ipAddress];
 config.cnfg.server_port = '8082';
 config.cnfg.authProtocol = 'http';
 config.cnfg.strictSSL = false;
@@ -177,7 +191,7 @@ config.cnfg.statusURL = "/global-system-configs";
 
 // Analytics API server and port.
 config.analytics = {};
-config.analytics.server_ip = ['127.0.0.1'];
+config.analytics.server_ip = [ipAddress];
 config.analytics.server_port = '8081';
 config.analytics.authProtocol = 'http';
 config.analytics.strictSSL = false;
@@ -189,13 +203,13 @@ config.analytics.statusURL = "/analytics/uves/bgp-peers";
    config.introspect.ssl configuration
  */
 config.dns = {};
-config.dns.server_ip = ['127.0.0.1'];
+config.dns.server_ip = [ipAddress];
 config.dns.server_port = '8092';
 config.dns.statusURL = "/Snh_PageReq?x=AllEntries%20VdnsServersReq";
 
 // vcenter related parameters
 config.vcenter = {};
-config.vcenter.server_ip = '127.0.0.1';         //vCenter IP
+config.vcenter.server_ip = ipAddress;         //vCenter IP
 config.vcenter.server_port = '443';             //Port
 config.vcenter.authProtocol = 'https';          //http or https
 config.vcenter.datacenter = 'vcenter';          //datacenter name
@@ -224,10 +238,10 @@ config.vcenter.wsdl = '/usr/src/contrail/contrail-web-core/webroot/js/vim.wsdl';
  *****************************************************************************/
 config.introspect = {};
 config.introspect.ssl = {};
-config.introspect.ssl.enabled = false;
-config.introspect.ssl.key = '';
-config.introspect.ssl.cert = '';
-config.introspect.ssl.ca = '';
+config.introspect.ssl.enabled = true;
+config.introspect.ssl.key = '/Users/vishnuvv/Desktop/server-privkey.pem';
+config.introspect.ssl.cert = '/Users/vishnuvv/Desktop/server.pem';
+config.introspect.ssl.ca = '/Users/vishnuvv/Desktop/ca-cert.pem';
 config.introspect.ssl.strictSSL = false;
 
 /* Job Server */
@@ -242,7 +256,7 @@ config.files.download_path = '/tmp';
 /* Cassandra Server */
 config.cassandra = {};
 config.cassandra.server_ips = ['127.0.0.1'];
-config.cassandra.server_port = '9042';
+config.cassandra.server_port = '9041';
 config.cassandra.enable_edit = false;
 
 /* KUE Job Scheduler */
@@ -252,7 +266,7 @@ config.kue.ui_port = '3002'
 /* IP List to listen on */
 config.webui_addresses = ['0.0.0.0'];
 
-/* Is insecure access to WebUI? 
+/* Is insecure access to WebUI?
  * If set as false, then all http request will be redirected
  * to https, if set true, then no https request will be processed, but only http
  * request
@@ -295,9 +309,11 @@ config.favicon_file = '/usr/src/contrail/contrail-web-core/webroot/img/opencontr
 config.featurePkg = {};
 /* Add new feature Package Config details below */
 config.featurePkg.webController = {};
-config.featurePkg.webController.path = '/usr/src/contrail/contrail-web-controller';
+config.featurePkg.webController.path = '/Users/vishnuvv/workspace/24May/contrail-web-controller';
 config.featurePkg.webController.enable = true;
 
+config.optFeatureList = {};
+config.optFeatureList.mon_infra_underlay = false;
 /* Enable/disable Stat Query Links in Sidebar*/
 config.qe = {};
 config.qe.enable_stat_queries = false;
@@ -345,4 +361,3 @@ config.jsonSchemaPath = "/usr/src/contrail/contrail-web-core/src/serverroot/conf
 
 // Export this as a module.
 module.exports = config;
-

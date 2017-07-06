@@ -93,7 +93,8 @@ exports.isAuthenticated = function(req,res) {
             isAuthenticated: false,
             featurePkg: featurePkg,
             isRegionListFromConfig: config.regionsFromConfig,
-            configRegionList: config.regions
+            configRegionList: config.regions,
+            motd_message: config.motd_message
         };
         commonUtils.handleJSONResponse(null,res,retData);
     }

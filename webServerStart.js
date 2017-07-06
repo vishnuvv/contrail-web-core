@@ -1,18 +1,19 @@
 /*
  * Copyright (c) 2014 Juniper Networks, Inc. All rights reserved.
  */
+
+
+/* Set corePath before loading any other module */
+var corePath = process.cwd();
+
+
+exports.corePath = corePath;
 var configUtils = require('./src/serverroot/common/config.utils'),
     args = process.argv.slice(2),
     configFile = configUtils.getConfigFile(args);
 configUtils.updateConfig(configFile);
 configUtils.subscribeAutoDetectConfig(configFile);
-
-/* Set corePath before loading any other module */
-var corePath = process.cwd();
 var config = configUtils.getConfig();
-
-exports.corePath = corePath;
-
 var redisUtils = require('./src/serverroot/utils/redis.utils');
 var global = require('./src/serverroot/common/global');
 
@@ -409,6 +410,7 @@ function startWebCluster ()
             });
             contrailServ.getContrailServices();
             contrailServ.startWatchContrailServiceRetryList();
+            configUtils.subscribeMOTDFileChange();
             /* All the config should be set before this line */
             startServer();
         });
