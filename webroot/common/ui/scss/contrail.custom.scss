@@ -2327,6 +2327,14 @@ div#alarms-event-drops .grid-stack-item-content {
     margin-top: -15px;
 }
 $label_color: #3182bd;
+#traffic-groups-sessions-grid {
+    #traffic-groups-sessions-grid-header .grid-header-text {
+        font-family: "FontAwesome", Open Sans !important;
+    }
+    .slick-row-detail .slick-cell {
+        width: 100%;
+    }
+}
 .traffic-groups-view {
    /* .widget-toolbar {
         display: none;
@@ -2617,4 +2625,8 @@ font-style:normal;}
 }
 .padding-bottom-5 {
     padding-bottom: 5px;
+}
+button.ui-multiselect {
+    vertical-align: baseline;
+    height: 25px !important;
 }
