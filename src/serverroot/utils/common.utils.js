@@ -1455,6 +1455,7 @@ function getWebServerInfo (req, res, appData)
 
     serverObj['loggedInOrchestrationMode'] = req.session.loggedInOrchestrationMode;
     serverObj['insecureAccess'] = config.insecure_access;
+    serverObj['motdText'] = req.session.motdText;
 
     var pkgCnt = activePkgs.length;
     if (!pkgCnt) {
@@ -2330,7 +2331,37 @@ function handleAuthToAuthorizeError(err, req, callback)
         redirectToLogout(req, req.res);
     }
 }
-
+/**
+This function reads the file mentioned at path in config options
+(motd_file_path) which is used to display the message in footer across all pages
+**/
+function readFile(path, options, callback) {
+    
+    console.log('readMotdFile', path);
+    fs.readFile(path, function(err, content){
+        if (err) {
+            console.log('Error in readMotdFile', err.code);
+            if (err.code == 'ENOENT') {
+                logutils.logger.error(_.result(options, 'fileNotFoundMsg', 'File Not Found at'), path);
+                if (callback) {
+                    callback(err, null);
+                }
+                return;
+            }
+            //throw err;
+        }
+        if (null == content || content == '') {
+            console.log('null case in readMotdFile');
+            logutils.logger.error(_.result(options, 'noTextFoundMsg', 'No Text at '), path);
+            if (callback) {
+                callback(err, null);
+            }
+            return;
+        }
+        callback(err, content.toString());
+        console.log('readMotdFile content', content.toString());
+    });
+}
 exports.filterJsonKeysWithNullValues = filterJsonKeysWithNullValues;
 exports.createJSONBySandeshResponseArr = createJSONBySandeshResponseArr;
 exports.createJSONBySandeshResponse = createJSONBySandeshResponse;
@@ -2393,4 +2424,5 @@ exports.getFeaturePkgs = getFeaturePkgs;
 exports.doDeepSort = doDeepSort;
 exports.invalidateReqSession = invalidateReqSession;
 exports.handleAuthToAuthorizeError = handleAuthToAuthorizeError;
+exports.readFile = readFile;
 

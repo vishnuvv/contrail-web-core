@@ -538,6 +538,9 @@ config.server_options.ciphers =
     'AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS';
 config.server_options.key_file = '/usr/src/contrail/contrail-web-core/keys/cs-key.pem';
 config.server_options.cert_file = '/usr/src/contrail/contrail-web-core/keys/cs-cert.pem';
+config.motd = {
+	file_path: '/Users/vishnuvv/contrail-webui-motd.txt'
+}
 
 // Export this as a module.
 module.exports = config;

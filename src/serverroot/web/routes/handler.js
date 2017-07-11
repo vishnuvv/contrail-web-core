@@ -19,7 +19,10 @@ var http = require('http'),
     vCenterApi = require('../../orchestration/plugins/vcenter/vcenter.api');
     fs = require('fs'),
     messages = require('../../common/messages');
-
+var readMotdFileOptions = {
+        fileNotFoundMsg: 'Message of the day file not found either at custom path or at default path',
+        noTextFoundMsg: 'No Message in message of the day file'
+    };
 if (!module.parent) {
 	logutils.logger.warn(util.format(messages.warn.invalid_mod_call, module.filename));
 	process.exit(1);
@@ -82,8 +85,17 @@ exports.getMenuXML = function(req,res) {
 
 exports.isAuthenticated = function(req,res) {
     var retData = {}, config = configUtils.getConfig();
+    var motdFilePath = commonUtils.getValueByJsonPath(config, 'motd;file_path', null);
+    console.log('Filepath', motdFilePath);
     if(req.session.isAuthenticated == true) {
-        commonUtils.getWebServerInfo(req,res)
+        if (motdFilePath != null) {
+            commonUtils.readFile(motdFilePath, readMotdFileOptions, function (err, motdText) {
+                req.session.motdText = motdText;
+                commonUtils.getWebServerInfo(req,res);
+            });
+        } else {
+            commonUtils.getWebServerInfo(req,res);
+        }
         return;
     } else {
         // commonUtils.getWebServerInfo(req,res)
@@ -95,10 +107,17 @@ exports.isAuthenticated = function(req,res) {
             isRegionListFromConfig: config.regionsFromConfig,
             configRegionList: config.regions
         };
-        commonUtils.handleJSONResponse(null,res,retData);
+        if (motdFilePath != null) {
+            commonUtils.readFile(motdFilePath, readMotdFileOptions, function (err, motdText) {
+                retData['motdText'] = motdText;
+                commonUtils.handleJSONResponse(null, res, retData);
+            });
+        } else {
+            commonUtils.handleJSONResponse(null, res, retData);
+        }
+        
     }
 }
-
 function login (req, res, appData, redirectURL)
 {
     if (null == redirectURL) {
@@ -313,6 +332,8 @@ exports.authenticate = function (req, res, appData) {
         return;
     }
     authApi.doAuthenticate(req, res, appData, function(errorMsg, redirectURL) {
+        var config = configUtils.getConfig();
+        var motdFilePath = commonUtils.getValueByJsonPath(config, 'motd;file_path', null);
         /* Already logged */
         if (null != errorMsg) {
             errorObj['msg'] = errorMsg;
@@ -323,7 +344,14 @@ exports.authenticate = function (req, res, appData) {
             res.redirect(redirectURL);
             return;
         }
-        commonUtils.getWebServerInfo(req, res);
+        if (motdFilePath != null) {
+            commonUtils.readFile(motdFilePath, readMotdFileOptions, function (err, motdText) {
+                req.session.motdText = motdText;
+                commonUtils.getWebServerInfo(req,res);
+            });
+        } else {
+            commonUtils.getWebServerInfo(req,res);
+        }
     });
 }
 exports.vcenter_authenticate = function (req, res, appData) {
@@ -347,6 +375,7 @@ function logout (req, res, appData)
     res.clearCookie('connect.sid');
     var referer = req.headers['referer'];
     var config = configUtils.getConfig();
+    var motdFilePath = commonUtils.getValueByJsonPath(config, 'motd;file_path', null);
     if (((null != referer) && (-1 != referer.indexOf('/vcenter'))) ||
         (-1 != req.url.indexOf('/vcenter'))) {
         vcenter_logout(req, res, appData);
@@ -365,7 +394,14 @@ function logout (req, res, appData)
         };
         var ajaxCall = req.headers['x-requested-with'];
         if ('XMLHttpRequest' == ajaxCall) {
-            commonUtils.handleJSONResponse(null, res, retData);
+            if (motdFilePath != null) {
+                commonUtils.readFile(motdFilePath, readMotdFileOptions, function (err, motdText) {
+                    retData['motdText'] = motdText;
+                    commonUtils.handleJSONResponse(null, res, retData);
+                });
+            } else {
+                commonUtils.handleJSONResponse(null, res, retData);
+            }
         } else {
             login(req, res);
         }
