@@ -2327,8 +2327,8 @@ div#alarms-event-drops .grid-stack-item-content {
     margin-top: -15px;
 }
 $label_color: #3182bd;
-#traffic-groups-sessions-grid {
-    #traffic-groups-sessions-grid-header .grid-header-text {
+#traffic-groups-endpoint-statistics-tabs {
+    .grid-header .grid-header-text, .contrail-tab-link {
         font-family: "FontAwesome", Open Sans !important;
     }
     .slick-row-detail .slick-cell {
