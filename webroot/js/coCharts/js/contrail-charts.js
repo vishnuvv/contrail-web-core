@@ -12554,8 +12554,6 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -12586,6 +12584,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
      * Let's bind super _onResize to this. Also .bind returns new function ref.
      * we need to store this for successful removal from window event
      */
+    _this.d3Selection = d3Selection;
     _this._onResize = _this._onResize.bind(_this);
     window.addEventListener('resize', _this._onResize);
     return _this;
@@ -13044,7 +13043,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           return;
         }
         // Estimate arc length and wheather the label will fit (default letter width is assumed to be 5px).
-        n.arcLength = 6 * (n.y - _this8.params.arcLabelYOffset[n.height - 1]) * (n.angleRange[1] - n.angleRange[0]) / 360;
+        n.arcLength = 6 * (n.y - _this8._checkValueIsArray(_this8.params.arcLabelYOffset, n.height)) * (n.angleRange[1] - n.angleRange[0]) / 360;
         var namePath = n.data.displayLabels && n.data.displayLabels.length > 0 ? n.data.displayLabels : n.data.namePath;
         n.label = '' + namePath[namePath.length - 1];
         if (n.depth == 1 && n.data.labelAppend) {
@@ -13056,7 +13055,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           n.labelLengthToTrim = (labelArcLengthDiff + 4 * _this8.config.get('arcLabelLetterWidth')) / _this8.config.get('arcLabelLetterWidth');
         }
         if (_this8.config.get('labelFlow') === 'perpendicular') {
-          n.labelFits = n.arcLength > 9 && _this8.config.get('innerRadius') / _this8.config.get('drillDownLevel') - _this8.params.arcLabelYOffset[n.height - 1] > _this8.config.get('arcLabelLetterWidth') * n.label.length;
+          n.labelFits = n.arcLength > 9 && _this8.config.get('innerRadius') / _this8.config.get('drillDownLevel') - _this8._checkValueIsArray(_this8.params.arcLabelYOffset, n.height) > _this8.config.get('arcLabelLetterWidth') * n.label.length;
         }
         _this8.arcs.push(n);
       });
@@ -13139,13 +13138,17 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           }*/
           // d.outerPoints.splice(1,0,getMidPoint(d.outerPoints));
           // d.innerPoints.splice(1,0,getMidPoint(d.innerPoints));
-          if (d.outerPoints.length == 2 && d.innerPoints.length == 2) {
-            var out1 = { radians: d.outerPoints[0][0] / 180 * Math.PI, radius: d.outerPoints[0][1] },
-                out2 = { radians: d.outerPoints[1][0] / 180 * Math.PI, radius: d.outerPoints[1][1] };
-            var in1 = { radians: d.innerPoints[0][0] / 180 * Math.PI, radius: d.innerPoints[0][1] },
-                in2 = { radians: d.innerPoints[1][0] / 180 * Math.PI, radius: d.innerPoints[1][1] };
 
-            var ribbon = d3v4.ribbon().radius(out1.radius);
+          var outerPoints = d.outerPoints;
+          var innerPoints = d.innerPoints;
+
+          if (outerPoints.length == 2 && innerPoints.length == 2) {
+            var out1 = { radians: outerPoints[0][0] / 180 * Math.PI, radius: outerPoints[0][1] },
+                out2 = { radians: outerPoints[1][0] / 180 * Math.PI, radius: outerPoints[1][1] };
+            var in1 = { radians: innerPoints[0][0] / 180 * Math.PI, radius: innerPoints[0][1] },
+                in2 = { radians: innerPoints[1][0] / 180 * Math.PI, radius: innerPoints[1][1] };
+
+            var ribbon = (typeof d3v4 != 'undefined' ? d3v4 : d3Chord).ribbon().radius(out1.radius);
             var radians = [out1.radians, in1.radians, out2.radians, in2.radians];
             radians.sort();
             //Adding 10% buffer
@@ -13161,9 +13164,9 @@ var RadialDendrogramView = function (_ContrailChartsView) {
             });
           }
 
-          if (d.outerPoints.length == 4 && d.innerPoints.length == 4) {
-            var outerPoints = _lodash2.default.map(d.outerPoints, _lodash2.default.clone),
-                innerPoints = _lodash2.default.map(d.innerPoints, _lodash2.default.clone);
+          if (outerPoints.length == 4 && innerPoints.length == 4) {
+            outerPoints = _lodash2.default.map(outerPoints, _lodash2.default.clone);
+            innerPoints = _lodash2.default.map(innerPoints, _lodash2.default.clone);
             var percentage = .25;
             outerPoints[0][0] = outerPoints[0][0] + Math.abs(outerPoints[0][0] - innerPoints[3][0]) * percentage;
             outerPoints[1][0] = outerPoints[1][0] + Math.abs(outerPoints[1][0] - innerPoints[2][0]) * percentage;
@@ -13209,7 +13212,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         var svgArcLabelsEnter = svgArcLabels.enter().append('text').attr('class', function (d) {
           return 'arc-label along-arc arc-label-' + d.height;
         }).attr('x', this.params.arcLabelXOffset).attr('dy', function (d) {
-          return _this9.params.arcLabelYOffset[d.height - 1];
+          return _this9._checkValueIsArray(_this9.params.arcLabelYOffset, d.height);
         });
         svgArcLabelsEnter.append('textPath').attr('xlink:href', function (d) {
           return '#' + d.data.namePath.join('-');
@@ -13217,7 +13220,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           return d.data.arcType ? d.data.arcType : '';
         });
         var svgArcLabelsEdit = svgArcLabelsEnter.merge(svgArcLabels).transition().ease(this.config.get('ease')).duration(this.params.labelDuration != null ? this.params.labelDuration : this.params.duration).attr('x', this.params.arcLabelXOffset).attr('dy', function (d) {
-          return _this9.params.arcLabelYOffset[d.height - 1];
+          return _this9._checkValueIsArray(_this9.params.arcLabelYOffset, d.height);
         });
         svgArcLabelsEdit.select('textPath').attr('startOffset', function (d) {
           return d.arcLength / 2;
@@ -13234,8 +13237,8 @@ var RadialDendrogramView = function (_ContrailChartsView) {
           if ((d.angleRange[1] + d.angleRange[0]) / 2 < 180) {
             alpha -= 180;
           }
-          var x = (d.y + _this9.params.arcLabelYOffset[d.height - 1]) * Math.cos((d.angleRange[1] + d.angleRange[0] - 180) * Math.PI / 360) + _this9.params.arcLabelXOffset;
-          var y = (d.y + _this9.params.arcLabelYOffset[d.height - 1]) * Math.sin((d.angleRange[1] + d.angleRange[0] - 180) * Math.PI / 360);
+          var x = (d.y + _this9._checkValueIsArray(_this9.params.arcLabelYOffset, d.height)) * Math.cos((d.angleRange[1] + d.angleRange[0] - 180) * Math.PI / 360) + _this9.params.arcLabelXOffset;
+          var y = (d.y + _this9._checkValueIsArray(_this9.params.arcLabelYOffset, d.height)) * Math.sin((d.angleRange[1] + d.angleRange[0] - 180) * Math.PI / 360);
           return 'translate(' + x + ', ' + y + ') rotate(' + alpha + ')';
         }).style('text-anchor', function (d) {
           return (d.angleRange[1] + d.angleRange[0]) / 2 < 180 ? 'start' : 'end';
@@ -13257,7 +13260,7 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         var arc = d3Shape.arc().innerRadius(function (n) {
           return n.y;
         }).outerRadius(function (n) {
-          return n.y + _this9.params.arcWidth[n.height - 1];
+          return n.y + _this9._checkValueIsArray(_this9.params.arcWidth, n.height);
         }).startAngle(function (n) {
           return Math.PI * n.angleRange[0] / 180;
         }).endAngle(function (n) {
@@ -13275,6 +13278,17 @@ var RadialDendrogramView = function (_ContrailChartsView) {
         }).attr('d', arc);
         svgArcs.exit().transition().ease(this.config.get('ease')).duration(this.params.duration).attr('d', arcEnter).remove();
       }
+    }
+
+    // Checke value is array and get value based on level height
+
+  }, {
+    key: '_checkValueIsArray',
+    value: function _checkValueIsArray(value, height) {
+      if (_lodash2.default.isArray(value)) {
+        return value[height - 1];
+      }
+      return value;
     }
 
     // Event handlers
@@ -13341,69 +13355,15 @@ var RadialDendrogramView = function (_ContrailChartsView) {
   }, {
     key: '_onClickNode',
     value: function _onClickNode(d, el, e) {
-      if (this.config.attributes && this.config.attributes.expandLevels == 'disable') {
-        return;
-      }
-      /*if (d.depth < this.maxDepth && d.depth === this.params.drillDownLevel) {
+      if (d.depth < this.maxDepth && d.depth === this.params.drillDownLevel) {
         // Expand
-        this.config.set('drillDownLevel', this.params.drillDownLevel + 1)
+        this.config.set('drillDownLevel', this.params.drillDownLevel + 1);
       } else if (d.depth < this.params.drillDownLevel) {
         // Collapse
-        this.config.set('drillDownLevel', this.params.drillDownLevel - 1)
+        this.config.set('drillDownLevel', this.params.drillDownLevel - 1);
       }
-      this.config.set('drillDownLevel', this.params.drillDownLevel - 1)*/
-      if (this.clearArcTootltip) {
-        clearTimeout(this.clearArcTootltip);
-      }
-      var levels = 2;
-      //If clicked on 2nd level arc,collapse to 1st level
-      if (d.depth == 2 || d.height == 2) levels = 1;
-      this.config.attributes.updateChart({
-        levels: levels
-      });
       el.classList.remove(this.selectorClass('active'));
       _get(RadialDendrogramView.prototype.__proto__ || Object.getPrototypeOf(RadialDendrogramView.prototype), '_onEvent', this).call(this, d, el, e);
-    }
-  }, {
-    key: '_onClickLink',
-    value: function _onClickLink(d, el, e) {
-      if (this.config.attributes && this.config.attributes.showLinkInfo && typeof this.config.attributes.showLinkInfo == 'function') {
-        this.config.attributes.showLinkInfo(d, el, e, this);
-      }
-    }
-  }, {
-    key: '_onMousemoveLink',
-    value: function _onMousemoveLink(d, el, e) {
-      var _this11 = this;
-
-      if (this.config.attributes && this.config.attributes.showLinkTooltip) {
-        var _d3Selection$mouse3 = d3Selection.mouse(this._container),
-            _d3Selection$mouse4 = _slicedToArray(_d3Selection$mouse3, 2),
-            left = _d3Selection$mouse4[0],
-            top = _d3Selection$mouse4[1];
-
-        if (this.clearLinkTooltip) {
-          clearTimeout(this.clearLinkTooltip);
-        }
-        this.clearLinkTooltip = setTimeout(function () {
-          _Actionman2.default.fire('ShowComponent', _this11.config.get('tooltip'), { left: left, top: top }, d);
-          var tooltipId = document.getElementById(_this11.config.get('tooltip'));
-          if (left > _this11._container.offsetWidth / 2) {
-            tooltipId.style.right = 0;
-            tooltipId.style.left = 'auto';
-          } else {
-            tooltipId.style.right = 'auto';
-          }
-        }, 300);
-      }
-    }
-  }, {
-    key: '_onMouseoutLink',
-    value: function _onMouseoutLink(d, el, e) {
-      if (this.clearLinkTooltip) {
-        clearTimeout(this.clearLinkTooltip);
-      }
-      _Actionman2.default.fire('HideComponent', this.config.get('tooltip'));
     }
   }, {
     key: 'tagName',
@@ -13422,16 +13382,14 @@ var RadialDendrogramView = function (_ContrailChartsView) {
   }, {
     key: 'events',
     get: function get() {
-      var _$extend;
-
-      return _lodash2.default.extend(_get(RadialDendrogramView.prototype.__proto__ || Object.getPrototypeOf(RadialDendrogramView.prototype), 'events', this), (_$extend = {
+      return _lodash2.default.extend(_get(RadialDendrogramView.prototype.__proto__ || Object.getPrototypeOf(RadialDendrogramView.prototype), 'events', this), {
         'click node': '_onClickNode',
         'click link': '_onEvent',
         'dblclick node': '_onEvent',
         'dblclick link': '_onEvent',
         'mousemove node': '_onMousemove',
         'mouseout node': '_onMouseout'
-      }, _defineProperty(_$extend, 'click link', '_onClickLink'), _defineProperty(_$extend, 'mousemove link', '_onMousemoveLink'), _defineProperty(_$extend, 'mouseout link', '_onMouseoutLink'), _$extend));
+      });
     }
   }]);
 

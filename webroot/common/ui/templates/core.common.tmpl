@@ -2518,14 +2518,15 @@
 <script type="text/x-handlebars-template" id="traffic-rule-template">
     <div class="trafficGroups_content">
         <section class="trafficGroups_sidePanel">
-            <div class="allSessionInfo pull-right" title="Endpoint Stats"><i class="fa fa-table"></i></div>
             <div class="traffic-rules">
                 <header class="iconFontStyle">
                     <span> {{this.srcId}} </span>
                     <img src="/img/double_arrow.svg"/>
                 <span> {{this.dstId}} </span>
                 </header>
-                <h1> Matched Rules:</h1>
+                <h1> Matched Rules:
+                <span class="allSessionInfo pull-right" title="Endpoint Stats"><i class="fa fa-table"></i></span>
+                </h1>
                 <ul class="policyRules">
                    {{#each this.policyRules}}
                     <li>
