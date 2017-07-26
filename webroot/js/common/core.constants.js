@@ -24,6 +24,7 @@ define([
         this.APPLICATION_ICON = '\uf022';
         this.DEPLOYMENT_ICON = '\uf1c0';
         this.TIER_ICON = '\uf24d';
+        this.SITE_ICON = '\uf1cd';
         this.ARROW_RIGHT_ICON = '\uf178';
 
         this.DEFAULT_FIREWALL_RULES = {

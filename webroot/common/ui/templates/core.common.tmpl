@@ -2478,6 +2478,11 @@
                 </a>
             </div>
             <div class="widget-toolbar pull-right">
+                <a class="widget-toolbar-icon filter-traffic-stats" title="Filter" data-action="filter">
+                    <i class="fa fa-filter"></i>
+                </a>
+            </div>
+            <div class="widget-toolbar pull-right">
                 <span class="traffic-stats-duration">
                    <i>Stats for last <span class="statsTimeDuration"></span></i>
                 </span>
@@ -2493,10 +2498,41 @@
         <ul class="trafficGroupsTagIcons">
             <li><i class="fa fa-list-alt"></i>Application</li>
             <li><i class="fa fa-database"></i>Deployment</li>
+            <li><i class="fa fa-life-bouy"></i>Site</li>
             <li><i class="fa fa-clone"></i>Tier</li>
         </ul>
     </div>
     <div id="traffic-groups-link-info"></div>
+</script>
+
+<script type="text/x-handlebars-template" id="filter-tarffic-data-template">
+   <div>Group By:</div>
+   <div id="FilterbyTagType"></div>
+
+   <div>Filter By:</div>
+   App : <select id="app">
+        <option value=''>select</option>
+        {{#each tagList.app}}
+            <option>{{this}}</option>
+        {{/each}}
+        </select>
+   Deployment : <select id="deployment">
+                    <option value=''>select</option>
+                    {{#each tagList.deployment}}
+                        <option>{{this}}</option>
+                    {{/each}}
+                </select>
+   Site : <select id="site">
+            <option value=''>select</option>
+            {{#each tagList.site}}
+                <option>{{this}}</option>
+            {{/each}}</select>
+   Tier : <select id="tier">
+            <option value=''>select</option>
+            {{#each tagList.tier}}
+                <option>{{this}}</option>
+            {{/each}}
+          </select>
 </script>
 
 <script type="text/x-handlebars-template" id="traffic-link-tooltip-template">
