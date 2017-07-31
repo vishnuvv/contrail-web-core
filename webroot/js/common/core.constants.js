@@ -26,6 +26,44 @@ define([
         this.TIER_ICON = '\uf24d';
         this.SITE_ICON = '\uf1cd';
         this.ARROW_RIGHT_ICON = '\uf178';
+        this.TRAFFIC_GROUP_TAG_TYPES = [{
+            'text': 'Appilcation',
+            'value': 'app'
+        },{
+            'text': 'Tier',
+            'value': 'tier'
+        },{
+            'text': 'Deployment',
+            'value': 'deployment'
+        },{
+            'text': 'Site',
+            'value': 'site'
+        }];
+        this.TRAFFIC_GROUP_TAG_OPTIONS = [{
+            'text': 'Appilcation',
+            'value': 'app'
+        },{
+            'text': 'Tier',
+            'value': 'tier'
+        },{
+            'text': 'Deployment',
+            'value': 'deployment'
+        },{
+            'text': 'Site',
+            'value': 'site'
+        },{
+            'text': 'Appilcation-Deployment',
+            'value': 'app-deployment'
+        },{
+            'text': 'Appilcation-Tier',
+            'value': 'app-tier'
+        },{
+            'text': 'Appilcation-Deployment-Tier',
+            'value': 'app-deployment-tier'
+        },{
+            'text': 'Appilcation-Deployment-Tier-Site',
+            'value': 'app-deployment-tier-site'
+        }];
 
         this.DEFAULT_FIREWALL_RULES = {
             '00000000-0000-0000-0000-000000000002': {
