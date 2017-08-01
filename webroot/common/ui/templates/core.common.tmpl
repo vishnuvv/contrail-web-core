@@ -2478,29 +2478,25 @@
                 </a>
             </div>
             <div class="widget-toolbar pull-right">
-                <a class="widget-toolbar-icon filter-traffic-stats" title="Filter" data-action="filter">
-                    <i class="fa fa-filter"></i>
+                <a class="widget-toolbar-icon filter-traffic-stats" title="Settings" data-action="settings">
+                    <i class="fa fa-cog"></i>
                 </a>
             </div>
             <div class="widget-toolbar pull-right">
                 <span class="traffic-stats-duration">
-                   <i>Stats for last <span class="statsTimeDuration"></span></i>
+                   <span id="statsFromOnly">
+                        <i>Stats for <span class="statsFromTime"></span></i>
+                   </span>
+                   <span id="statsFromTo" class="hidden">
+                        <i>Stats from <span class="statsFromTime"></span>
+                        to <span class="statsToTime"></span></i>
+                    </span>
                 </span>
-                <a class="clear-traffic-stats" class="widget-toolbar-icon" title="Reset">
-                    <i class="fa fa-refresh"></i>
-                    Reset Stats
-                </a>
             </div>
             <div class="widget-toolbar pull-right hidden" id="filterByTagNameSec">
                 <div class="trafficFilterSec">
                     <span><b>Filter: </b></span>
                     <span class="selectedVal"></span>
-                </div>
-            </div>
-            <div class="widget-toolbar pull-right" id="groupByTagTypeSec">
-                <div class="trafficFilterSec">
-                    <span><b>Categorization: </b></span>
-                    <span class="selectedVal">Appilcation-Deployment, Tier</span>
                 </div>
             </div>
         </div>
@@ -2515,36 +2511,6 @@
         </ul>
     </div>
     <div id="traffic-groups-link-info"></div>
-</script>
-
-<script type="text/x-handlebars-template" id="filter-tarffic-data-template">
-   <div>Group By:</div>
-   <div id="FilterbyTagType"></div>
-
-   <div>Filter By:</div>
-   App : <select id="app">
-        <option value=''>select</option>
-        {{#each tagList.app}}
-            <option>{{this}}</option>
-        {{/each}}
-        </select>
-   Deployment : <select id="deployment">
-                    <option value=''>select</option>
-                    {{#each tagList.deployment}}
-                        <option>{{this}}</option>
-                    {{/each}}
-                </select>
-   Site : <select id="site">
-            <option value=''>select</option>
-            {{#each tagList.site}}
-                <option>{{this}}</option>
-            {{/each}}</select>
-   Tier : <select id="tier">
-            <option value=''>select</option>
-            {{#each tagList.tier}}
-                <option>{{this}}</option>
-            {{/each}}
-          </select>
 </script>
 
 <script type="text/x-handlebars-template" id="traffic-link-tooltip-template">
