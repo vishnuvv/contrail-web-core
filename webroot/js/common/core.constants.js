@@ -27,17 +27,25 @@ define([
         this.SITE_ICON = '\uf1cd';
         this.ARROW_RIGHT_ICON = '\uf178';
         this.TRAFFIC_GROUP_TAG_TYPES = [{
-            'text': 'Appilcation',
-            'value': 'app'
+            'text': 'Application',
+            'value': 'app',
+            'showVNonEmpty' : true,
+            'showIcononEmpty': true
         },{
             'text': 'Tier',
-            'value': 'tier'
+            'value': 'tier',
+            'showVNonEmpty' : true,
+            'showIcononEmpty': true
         },{
             'text': 'Deployment',
-            'value': 'deployment'
+            'value': 'deployment',
+            'showVNonEmpty' : true,
+            'showIcononEmpty': true
         },{
             'text': 'Site',
-            'value': 'site'
+            'value': 'site',
+            'showVNonEmpty' : true,
+            'showIcononEmpty': true
         }];
 
         this.DEFAULT_FIREWALL_RULES = {

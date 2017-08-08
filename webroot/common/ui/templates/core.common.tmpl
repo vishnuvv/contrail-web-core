@@ -2494,10 +2494,6 @@
                 </span>
             </div>
             <div class="widget-toolbar pull-right hidden" id="filterByTagNameSec">
-                <div class="trafficFilterSec">
-                    <span><b>Filter: </b></span>
-                    <span class="selectedVal"></span>
-                </div>
             </div>
         </div>
     </div>
@@ -2511,6 +2507,21 @@
         </ul>
     </div>
     <div id="traffic-groups-link-info"></div>
+</script>
+
+<script type="text/x-handlebars-template" id="traffic-filter-view-template">
+    <div class="pull-left"><b>Filter: </b></div>
+    <div class="select2-container-multi pull-left">
+        <ul class="select2-choices">
+            {{#each tags}}
+            <li class="select2-search-choice">
+                <div data-tag="{{this.tag}}">{{this.value}}</div>
+                <a class="select2-search-choice-close tgRemoveFilter">
+                </a>
+            </li>
+            {{/each}}
+        </ul>
+    </div>
 </script>
 
 <script type="text/x-handlebars-template" id="traffic-link-tooltip-template">

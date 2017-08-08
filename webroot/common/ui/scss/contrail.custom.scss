@@ -2347,9 +2347,6 @@ $label_color: #3182bd;
             color: $label_color;
         }
     }
-    .select2-container {
-        margin-top: 8px;
-    }
     label {
         //display: block;
         margin-right: 20px;
@@ -2360,8 +2357,13 @@ $label_color: #3182bd;
     .arc-label.along-arc textPath, .cc-title, .iconFontStyle {
         font-family: "FontAwesome", Open Sans !important;
     }
-    .traffic-stats-duration, .clear-traffic-stats, .trafficFilterSec {
+    .traffic-stats-duration, .clear-traffic-stats, #filterByTagNameSec {
         font-size: 13px;
+    }
+    #filterByTagNameSec {
+        .select2-container-multi {
+            margin-top: 3px;
+        }
     }
     .traffic-stats-duration {
         margin-right: 15px;
