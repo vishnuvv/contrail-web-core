@@ -2351,6 +2351,10 @@ $label_color: #3182bd;
         //display: block;
         margin-right: 20px;
     }
+    h4.noStatsMsg {
+        text-align: center;
+        padding-top: 25%;
+    }
     .showLinkInfo{
         margin-right: $traffic-link-info-width;
     }
@@ -2361,8 +2365,13 @@ $label_color: #3182bd;
         font-size: 13px;
     }
     #filterByTagNameSec {
+        width: 600px;
+        text-align: right;
         .select2-container-multi {
-            margin-top: 3px;
+            margin: 3px 5px 0 0;
+        }
+        .dropdown-menu {
+            left: auto;
         }
     }
     .traffic-stats-duration {
