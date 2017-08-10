@@ -2478,7 +2478,7 @@
                 </a>
             </div>
             <div class="widget-toolbar pull-right">
-                <a class="widget-toolbar-icon filter-traffic-stats" title="Settings" data-action="settings">
+                <a class="widget-toolbar-icon settings-traffic-stats" title="Settings" data-action="settings">
                     <i class="fa fa-cog"></i>
                 </a>
             </div>
@@ -2493,12 +2493,17 @@
                     </span>
                 </span>
             </div>
-            <div class="widget-toolbar pull-right hidden" id="filterByTagNameSec">
+            <div class="widget-toolbar pull-right" id="filterByTagNameSec">
+                <a data-toggle="dropdown" class="dropdown-toggle" title="Clear Filter" data-action="clear">
+                    <i class="fa fa-filter"></i>
+                </a>
+                <div class="pull-right dropdown-menu dropdown-caret dropdown-closer">
+                </div>
             </div>
         </div>
     </div>
     <div id="traffic-groups-radial-chart"></div>
-    <div id="traffic-groups-legend-info">
+    <div id="traffic-groups-legend-info" class="hidden">
         <ul class="trafficGroupsTagIcons">
             <li><i class="fa fa-list-alt"></i>Application</li>
             <li><i class="fa fa-database"></i>Deployment</li>
@@ -2510,18 +2515,22 @@
 </script>
 
 <script type="text/x-handlebars-template" id="traffic-filter-view-template">
-    <div class="pull-left"><b>Filter: </b></div>
+    {{#IfCompare endpoints '' operator = '!='}}
     <div class="select2-container-multi pull-left">
-        <ul class="select2-choices">
-            {{#each tags}}
+        {{#each endpoints}}
+        <ul class="select2-choices margin-0-0-5">
+            {{#each this.tags}}
             <li class="select2-search-choice">
-                <div data-tag="{{this.tag}}">{{this.value}}</div>
-                <a class="select2-search-choice-close tgRemoveFilter">
-                </a>
+                <div data-tag="{{this.tag}}" data-index={{this.index}}>{{this.value}}</div>
+                <a class="select2-search-choice-close tgRemoveFilter"></a>
             </li>
             {{/each}}
         </ul>
+        {{/each}}
     </div>
+    {{else}}
+        <div class="text-center">No filters applied</div>
+    {{/IfCompare}}
 </script>
 
 <script type="text/x-handlebars-template" id="traffic-link-tooltip-template">
