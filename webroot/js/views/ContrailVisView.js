@@ -43,6 +43,8 @@ define([ 'underscore', 'contrail-view', 'vis'],
             var self = this;
             $.each(events, function(key, value) {
                 if(typeof value === "function") {
+                    console.log('event binding called');
+                    self.network.off(key);
                     self.network.on(key, function(params){
                         events[key](params, self);
                     });
