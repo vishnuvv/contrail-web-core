@@ -2657,3 +2657,14 @@ button.ui-multiselect {
     vertical-align: baseline;
     height: 25px !important;
 }
+.multiSelectViewWithIcon {
+    .select2-container.select2-container-multi {
+        width: 90%;
+    }
+    .infoIcon {
+        position: relative;
+        display: inline-block;
+        font-size: 18px;
+        vertical-align: middle;
+    }
+}

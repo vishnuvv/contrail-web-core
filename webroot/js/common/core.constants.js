@@ -141,6 +141,7 @@ define([
         this.TMPL_MULTISELECT_VIEW = "core-multiselect-view-template";
         this.TMPL_EDITABLE_GRID_MULTISELECT_LEFT_LABEL_VIEW = "core-editable-grid-label-left-multiselect-view-template";
         this.TMPL_EDITABLE_GRID_MULTISELECT_VIEW = "core-editable-grid-multiselect-view-template";
+        this.TMPL_EDITABLE_GRID_MULTISELECT_WITH_ICON_VIEW = "core-editable-grid-multiselect-with-icon-view-template";
         this.TMPL_COMBOBOX_VIEW = "core-combobox-view-template";
         this.TMPL_EDITABLE_GRID_COMBOBOX_VIEW = "core-editable-grid-combobox-view-template";
         this.TMPL_CHECKBOX_VIEW = "core-checkbox-view-template";

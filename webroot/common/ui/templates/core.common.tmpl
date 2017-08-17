@@ -1189,6 +1189,22 @@
     </div>
 </script>
 
+<script type="text/x-handlebars-template" id="core-editable-grid-multiselect-with-icon-view-template">
+   <div class="form-group multiSelectViewWithIcon" data-bind="{{#if viewConfig.visible}} visible: {{viewConfig.visible}} {{/if}}">
+       {{> coreFormLabel}}
+        <input id="{{id}}" name="{{name}}" class="{{class}}"
+            data-bind="
+                {{#if viewConfig.disabled}}disable: {{viewConfig.disabled}}, {{/if}}{{#if lockAttr}}disable: locks().{{name}}_locked, {{/if}}
+                value: {{viewConfig.dataBindValue}},
+                optionList: {{viewConfig.dataBindOptionList}},
+                event: { change: function() { validateAttr('{{viewConfig.path}}', '{{validation}}') } },
+                contrailMultiselect: {}"
+        />
+        <i class="{{viewConfig.icon}} margin-0-0-0-15 infoIcon" title="{{viewConfig.iconInfo}}"></i>
+        <span class="help-block red" data-bind="visible: errors().{{name}}_error, text: errors().{{name}}_error"></span>
+    </div>
+</script>
+
 <script type="text/x-handlebars-template" id="core-editable-grid-multiselect-view-template">
     <div data-bind="
         {{#if viewConfig.visible}} visible: {{viewConfig.visible}}, {{/if}}
