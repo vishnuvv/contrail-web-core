@@ -2668,3 +2668,12 @@ button.ui-multiselect {
         vertical-align: middle;
     }
 }
+$disable-color: #898989;
+$active-color: #3182bd;
+
+.disable-color {
+    color: $disable-color !important;
+}
+.active-color {
+    color: $active-color !important;
+}
