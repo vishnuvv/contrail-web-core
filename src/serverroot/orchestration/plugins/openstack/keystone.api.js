@@ -218,6 +218,9 @@ function authPostV2Req (authObj, callback)
         if (null != error) {
             logutils.logger.error('authPostV2Req() error:' + error);
         }
+        console.log('authPostV2Req response ', JSON.stringify(data));
+        console.log('authPostV2Req headers ', JSON.stringify(headers));
+        console.log('authPostV2Req postData ', JSON.stringify(postData));
         callback(error, data);
     }, headers);
 }
@@ -257,7 +260,7 @@ function getV2AuthResponse (dataObj, callback, isSvcPortReq)
     if (null != tmpAuthRestObj.mapped) {
         headers['protocol'] = tmpAuthRestObj.mapped.protocol;
     }
-
+    console.log('getV2AuthResponse headers ', headers, 'reqUrl ', reqUrl);
     tmpAuthRestObj.authRestAPI.api.get(reqUrl, function(error, data) {
         if (null != error) {
             logutils.logger.error('getAuthResponse() error:' + error);
@@ -491,7 +494,8 @@ function getAuthData (error, reqArr, index, authCB, callback, isSvcPortReq)
         return;
     }
     authCB(reqArr[index], function(err, data, version) {
-        if ((null == err) && (null != data) && (null == data['error'])) {
+        console.log('authCB callback in getAuthData ', JSON.stringify(data));
+    	if ((null == err) && (null != data) && (null == data['error'])) {
             callback(null, data, version);
             return;
         } else {
@@ -808,12 +812,14 @@ function isPKIToken (token)
 
 function updateTokenIdWithMD5 (accessData)
 {
-    if ((null != accessData) && (null != accessData['token']) &&
+    console.log('updateTokenIdWithMD5 called');
+	if ((null != accessData) && (null != accessData['token']) &&
         (null != accessData['token']['id'])) {
         var pkiTokenHash =
             commonUtils.getValueByJsonPath(config,
                                            'identityManager;pkiTokenHashAlgorithm',
                                            'md5');
+        console.log('pkiTokenHash ', pkiTokenHash);
         if (('md5' != pkiTokenHash) ||
             (false == isPKIToken(accessData['token']['id']))) {
             return;
@@ -821,11 +827,11 @@ function updateTokenIdWithMD5 (accessData)
         var oldToken = accessData['token']['id'];
         accessData['token']['id'] =
             crypto.createHash('md5').update(oldToken).digest('hex');
+        console.log('md5 hashing');
         logutils.logger.debug('We are changing the old token: <' + oldToken +
                               '> to MD5 hash: ' + accessData['token']['id']);
     }
 }
-
 function fillAndGetReqArrToGetAuthData (authObj)
 {
     var reqArr = [];
@@ -915,11 +921,13 @@ function doAuth (authObj, callback)
     var domainName = authObj['domain'];
     var regionname = authObj['regionname'];
     var req = authObj['req'];
-
+    //console.log('doAuth: AuthObj before calling fillAndGetReqArrToGetAuthData ', JSON.stringify(authObj['req']));
     var reqArr = fillAndGetReqArrToGetAuthData(authObj);
+    //console.log('doAuth: AuthObj after calling fillAndGetReqArrToGetAuthData & reqArr ', JSON.stringify(reqArr));
     var startIndex = 0;
     getAuthData(null, reqArr, startIndex, makeAuthPostReq, function(err, data,
                                                                     version) {
+        console.log('getAuthData callback called in doAuth', JSON.stringify(data));
         if (('v3' == version) && (null == err) && (null != data) &&
             (null == data['error'])) {
             formatV3AuthDataToV2AuthData(data, authObj,
@@ -1666,8 +1674,9 @@ function authenticate (req, res, appData, callback)
     if (post.urlPath != null) {
         urlPath = post.urlPath;
     }
-    var identityApiVerList = config.identityManager.apiVersion;
-    var verCnt = identityApiVerList.length;
+    //Unused variables
+    //var identityApiVerList = config.identityManager.apiVersion;
+    //var verCnt = identityApiVerList.length;
 
     var startIndex = 0;
     if ((null != regionname) && (regionname.length)) {
@@ -2053,7 +2062,8 @@ function userRoleListByTokenObjs (tokenObjs)
 
 function doV2Auth (req, callback)
 {
-    var self = this,
+    console.log('doV2Auth called');
+	var self = this,
         post = req.body,
         username = post.username,
         password = post.password,
@@ -2071,6 +2081,7 @@ function doV2Auth (req, callback)
 
     req.session.authApiVersion = 'v2.0';
     doAuth(userObj, function (data) {
+        console.log('doAuth callback in doV2Auth', JSON.stringify(data));
         if ((null == data) || (null == data.access)) {
             req.session.isAuthenticated = false;
             callback(messages.error.invalid_user_pass);
@@ -2080,115 +2091,120 @@ function doV2Auth (req, callback)
         /* Now check the tenants attached to this user */
         req.session.last_token_used = data.access.token;
         getTenantListByToken(req, data.access.token, function(err, data) {
-            if ((null == data) || (null == data.tenants) ||
-                (!data.tenants.length)) {
-                req.session.isAuthenticated = false;
-                callback(messages.error.unauthorized_to_project);
-                return;
-            }
-            data.tenants = getEnabledProjects(data.tenants);
-            var projectCookie =
-                commonUtils.getValueByJsonPath(req,
-                                               'cookies;' +
-                                               global.COOKIE_PROJECT_DISPLAY_NAME,
-                                               null);
-            var lastTenantObj = data.tenants[data.tenants.length - 1];
-            var cookieProjObj = null;
-            if (null != projectCookie) {
-                var tenantsCnt = data.tenants.length;
-                for (var i = 0; i < tenantsCnt; i++) {
-                    if ((projectCookie == data.tenants[i]['name']) &&
-                        (projectCookie != lastTenantObj['name'])) {
-                        cookieProjObj = data.tenants[i];
-                    }
-                }
-            }
-            data.tenants = [lastTenantObj];
-            if (null != cookieProjObj) {
-                data.tenants.push(cookieProjObj);
-            }
-            var projCount = data.tenants.length;
-            if (!projCount) {
-                req.session.isAuthenticated = false;
-                callback(messages.error.unauthorized_to_project);
-                return;
-            }
-
-            /* As of now, keystone does not provide the default project name,
-               so we are using the last entry in the tenant list as default 
-               project
-             */
-            var tenantList = data.tenants;
-            var defProject = tenantList[projCount - 1]['name'];
-            var userObj = {'username': username, 'password': password,
-                           'tenant': defProject, 'req': req};
-            doAuth(userObj, function(data) {
-                if (data == null) {
-                    req.session.isAuthenticated = false;
-                    callback(messages.error.unauthorized_to_project);
-                    return;
-                } else {
-                    logutils.logger.debug("After V2 Successful auth def_token:" +
-                                          JSON.stringify(data.access));
-                    req.session.def_token_used = data.access.token;
-                    var uiRoles = null;
-                    /* We got already the last one from tenantList, so remove
-                       * this from tenantList now
-                       */
-                    var userRolesToDefProject =
-                        commonUtils.getValueByJsonPath(data,
-                                                       'access;user;roles', []);
-                    var uiRolesToDefProject =
-                        getUIRolesByExtRoles(userRolesToDefProject);
-                    tenantList.splice(projCount - 1, 1);
-                    getUserRoleByAllTenants(username, password,
-                                            tenantList, req,
-                                            function(uiRoles, tokenObjs) {
-                        if ((tenantList.length > 0) && ((null == uiRoles) ||
-                            (!uiRoles.length))) {
-                            req.session.isAuthenticated = false;
-                            callback(messages.error.unauthenticate_to_project);
-                            return;
-                        }
-                        var uiRolesCnt = 0;
-                        if ((null == uiRoles) || (!uiRoles.length)) {
-                            uiRoles = [];
-                            /* Take from default project one */
-                            tokenObjs[defProject] =
-                                commonUtils.getValueByJsonPath(data, 'access',
-                                                               {});
-                            delete tokenObjs[defProject]['serviceCatalog'];
-                            var userRoles = uiRolesToDefProject;
-                            var userRolesCnt = userRoles.length;
-                            var tmpUIRoleObjs = {};
-                            for (var i = 0; i < userRolesCnt; i++) {
-                                if (null == tmpUIRoleObjs[userRoles[i]]) {
-                                    uiRoles.push(userRoles[i]);
-                                    tmpUIRoleObjs[userRoles[i]] = userRoles[i];
-                                }
-                            }
-                        }
-
-                        /* Save the user-id/password in Redis in encrypted format.
-                         */
-                        req.session.userRole = uiRoles;
-                        req.session.authApiVersion = 'v2.0';
-                        req.session.tokenObjs = tokenObjs;
-                        req.session.userRoles =
-                            userRoleListByTokenObjs(tokenObjs);
-                        //setSessionTimeoutByReq(req);
-                        updateTokenIdForProject(userObj.req, defProject,
-                                                data.access);
-                        updateLastTokenUsed(req, data.access);
-                        logutils.logger.info("Login Successful with tenants.");
-                        callback(null);
-                    });
-                }
-            });
+            fetchTenantListByTokenCB(err, data, req, username, password, callback);
         });
     });
 }
 
+function fetchTenantListByTokenCB (err, data, req, username, password, callback) {
+    var tokenid = req.param('tokenid');
+	if ((null == data) || (null == data.tenants) ||
+        (!data.tenants.length)) {
+        req.session.isAuthenticated = false;
+        callback(messages.error.unauthorized_to_project);
+        return;
+    }
+    data.tenants = getEnabledProjects(data.tenants);
+    var projectCookie =
+        commonUtils.getValueByJsonPath(req,
+                                       'cookies;' +
+                                       global.COOKIE_PROJECT_DISPLAY_NAME,
+                                       null);
+    var lastTenantObj = data.tenants[data.tenants.length - 1];
+    var cookieProjObj = null;
+    if (null != projectCookie) {
+        var tenantsCnt = data.tenants.length;
+        for (var i = 0; i < tenantsCnt; i++) {
+            if ((projectCookie == data.tenants[i]['name']) &&
+                (projectCookie != lastTenantObj['name'])) {
+                cookieProjObj = data.tenants[i];
+            }
+        }
+    }
+    data.tenants = [lastTenantObj];
+    if (null != cookieProjObj) {
+        data.tenants.push(cookieProjObj);
+    }
+    var projCount = data.tenants.length;
+    if (!projCount) {
+        req.session.isAuthenticated = false;
+        callback(messages.error.unauthorized_to_project);
+        return;
+    }
+
+    /* As of now, keystone does not provide the default project name,
+       so we are using the last entry in the tenant list as default 
+       project
+     */
+    var tenantList = data.tenants;
+    var defProject = tenantList[projCount - 1]['name'];
+    var userObj = {'username': username, 'password': password,
+                   'tenant': defProject, 'req': req, 'tokenid': tokenid};
+    doAuth(userObj, function(data) {
+        if (data == null) {
+            req.session.isAuthenticated = false;
+            callback(messages.error.unauthorized_to_project);
+            return;
+        } else {
+            logutils.logger.debug("After V2 Successful auth def_token:" +
+                                  JSON.stringify(data.access));
+            req.session.def_token_used = data.access.token;
+            req.session.isAuthenticated = true;
+            var uiRoles = null;
+            /* We got already the last one from tenantList, so remove
+               * this from tenantList now
+               */
+            var userRolesToDefProject =
+                commonUtils.getValueByJsonPath(data,
+                                               'access;user;roles', []);
+            var uiRolesToDefProject =
+                getUIRolesByExtRoles(userRolesToDefProject);
+            tenantList.splice(projCount - 1, 1);
+            getUserRoleByAllTenants(username, password,
+                                    tenantList, req,
+                                    function(uiRoles, tokenObjs) {
+                if ((tenantList.length > 0) && ((null == uiRoles) ||
+                    (!uiRoles.length))) {
+                    req.session.isAuthenticated = false;
+                    callback(messages.error.unauthenticate_to_project);
+                    return;
+                }
+                var uiRolesCnt = 0;
+                if ((null == uiRoles) || (!uiRoles.length)) {
+                    uiRoles = [];
+                    /* Take from default project one */
+                    tokenObjs[defProject] =
+                        commonUtils.getValueByJsonPath(data, 'access',
+                                                       {});
+                    delete tokenObjs[defProject]['serviceCatalog'];
+                    var userRoles = uiRolesToDefProject;
+                    var userRolesCnt = userRoles.length;
+                    var tmpUIRoleObjs = {};
+                    for (var i = 0; i < userRolesCnt; i++) {
+                        if (null == tmpUIRoleObjs[userRoles[i]]) {
+                            uiRoles.push(userRoles[i]);
+                            tmpUIRoleObjs[userRoles[i]] = userRoles[i];
+                        }
+                    }
+                }
+
+                /* Save the user-id/password in Redis in encrypted format.
+                 */
+                req.session.userRole = uiRoles;
+                req.session.authApiVersion = 'v2.0';
+                req.session.tokenObjs = tokenObjs;
+                req.session.userRoles =
+                    userRoleListByTokenObjs(tokenObjs);
+                //setSessionTimeoutByReq(req);
+                updateTokenIdForProject(userObj.req, defProject,
+                                        data.access);
+                updateLastTokenUsed(req, data.access);
+                logutils.logger.info("Login Successful with tenants.");
+                callback(null);
+            });
+        }
+    });
+}
 function getV3DomainIfNotAvailable (domain)
 {
     if (null == domain) {
@@ -3084,3 +3100,5 @@ exports.getAuthRetryData = getAuthRetryData;
 exports.getPortToProcessMapByReqObj = getPortToProcessMapByReqObj;
 exports.getConfigEntityByServiceEndpoint = getConfigEntityByServiceEndpoint;
 exports.getTokenAndUpdateLastToken = getTokenAndUpdateLastToken;
+exports.fetchTenantListByTokenCB = fetchTenantListByTokenCB;
+exports.getTenantListByToken = getTenantListByToken;

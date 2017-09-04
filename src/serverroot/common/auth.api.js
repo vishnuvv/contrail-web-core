@@ -67,6 +67,30 @@ function doAuthenticate (req, res, appData, callback) {
     });
 }
 
+function singleSignOn (req, res) {
+	req.session.authApiVersion = 'v2.0';
+	var tokenid = req.param('tokenid');
+	if (!tokenid) {
+		logutils.logger.error("Unscoped token is missing redirecting to login page");
+		res.redirect('/');
+		res.end();
+		return;
+	}
+	var tokenObj = {
+		id: tokenid
+	};
+	keystoneAuthApi.getTenantListByToken(req, tokenObj, function (err, data) {
+		keystoneAuthApi.fetchTenantListByTokenCB(err, data, req, null, null, function (err, data) {
+			if (err != null) {
+				logutils.logger.error('Unauthorized project access');
+			} else {
+				res.redirect('/');
+				res.end();
+			}
+		});
+	});
+}
+
 function getTokenObj (authObj, callback)
 {
     var req = authObj.req;
@@ -389,4 +413,4 @@ exports.getRoleList = getRoleList;
 exports.getAuthRetryData = getAuthRetryData;
 exports.getPortToProcessMapByReqObj = getPortToProcessMapByReqObj;
 exports.getConfigEntityByServiceEndpoint = getConfigEntityByServiceEndpoint;
-
+exports.singleSignOn = singleSignOn;
