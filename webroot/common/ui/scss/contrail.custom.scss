@@ -2681,3 +2681,31 @@ $active-color: #3182bd;
 .active-color {
     color: $active-color !important;
 }
+footer {
+    background: #fafafa;
+    border-top: #ccc solid 1px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 2px;
+    font-size: 12px;
+    .linkAppFormix {
+            float: left;
+            padding: 5px 15px;
+            color: #1275bd;
+    }
+    .copyrights {
+            float: right;
+            padding: 5px 15px;
+            color: #787878 ;
+    }
+}
+#page-content {
+    margin-bottom: 30px;
+}
+.footer-links {
+    bottom: 35px;
+}
+#back-to-top {
+    bottom: 35px;
+}
