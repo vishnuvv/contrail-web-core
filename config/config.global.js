@@ -343,6 +343,19 @@ config.getDomainsFromApiServer = false;
 
 config.jsonSchemaPath = "/usr/src/contrail/contrail-web-core/src/serverroot/configJsonSchemas";
 
+config.motd = {};
+config.motd.file_path = "/Users/vishnuvv/workspace/21Aug/contrail-web-core/motd1.txt";
+
+config.connectedAppsInfo = {
+	// This is global flag which enables links (display links in footer)
+	// to all the connectedApps mentioned, however we can
+	// override this by mentioning in app object as well.
+	enable: true,
+	AppFormix: {
+		url: 'http://10.102.44.34:9000/appformix/#/dashboard?view=infrastructure&token=',
+		//enable: true
+	}
+}
+
 // Export this as a module.
 module.exports = config;
-

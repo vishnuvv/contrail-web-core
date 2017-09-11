@@ -93,6 +93,12 @@
         <callback>authApi.singleSignOn</callback>
     </item>
     <item>
+        <url>/connectedApps</url>
+        <method>get</method>
+        <feature>orchestration</feature>
+        <callback>authApi.redirectToConnectedApps</callback>
+    </item>
+    <item>
         <url>/api/getRoles</url>
         <method>get</method>
         <feature>orchestration</feature>

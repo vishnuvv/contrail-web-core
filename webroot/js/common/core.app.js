@@ -1224,6 +1224,16 @@ if (typeof document !== 'undefined' && document) {
                         }
                     });
                     globalObj['webServerInfo'] = loadUtils.parseWebServerInfo(response);
+                    //Append links to connectedApps(like appformix, storage ui etc;) to footer
+                    var connectedAppInfo = globalObj['webServerInfo']['connectedAppInfo'];
+                    if (connectedAppInfo != null && connectedAppInfo['enable']) {
+                        Object.keys(connectedAppInfo).forEach(function (key, index) {
+                            if (connectedAppInfo[key] != null && connectedAppInfo[key]['enable'] != false
+                                && connectedAppInfo[key]['url'] != null) {
+                                $('#footer-container').prepend('<span class="connectedAppLink"><a href="/connectedApps?app='+key+'" target="_blank">'+key+'</a></span>');
+                            }
+                        });
+                    }
                     //For Region drop-down
                         var regionList =
                             globalObj.webServerInfo.regionList;

@@ -3102,3 +3102,4 @@ exports.getConfigEntityByServiceEndpoint = getConfigEntityByServiceEndpoint;
 exports.getTokenAndUpdateLastToken = getTokenAndUpdateLastToken;
 exports.fetchTenantListByTokenCB = fetchTenantListByTokenCB;
 exports.getTenantListByToken = getTenantListByToken;
+exports.getUserAuthData = getUserAuthData;

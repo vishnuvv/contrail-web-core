@@ -66,7 +66,23 @@ function doAuthenticate (req, res, appData, callback) {
         callback(err, data);
     });
 }
-
+function redirectToConnectedApps (req, res) {
+	var appName = req.param('app'),
+		config = configUtils.getConfig(),
+		connectedAppsInfo = config.connectedAppsInfo,
+		appInfo = connectedAppsInfo[appName],
+		userObj = {
+			req: req
+		};
+	var	tokenObj = keystoneAuthApi.getUserAuthData(req, null, function (err, data) {
+			if (appInfo != null && appInfo.url != null && data != null) {
+				console.log('dataAccess ', JSON.stringify(data));
+				res.redirect(appInfo.url + data.access.token.id);
+			} else {
+				logutils.logger.error('AppInfo or token not found');
+			}
+		});
+}
 function singleSignOn (req, res) {
 	req.session.authApiVersion = 'v2.0';
 	var tokenid = req.param('tokenid');
@@ -414,3 +430,4 @@ exports.getAuthRetryData = getAuthRetryData;
 exports.getPortToProcessMapByReqObj = getPortToProcessMapByReqObj;
 exports.getConfigEntityByServiceEndpoint = getConfigEntityByServiceEndpoint;
 exports.singleSignOn = singleSignOn;
+exports.redirectToConnectedApps = redirectToConnectedApps;

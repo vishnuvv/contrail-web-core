@@ -1464,6 +1464,7 @@ function getWebServerInfo (req, res, appData)
 
     serverObj['loggedInOrchestrationMode'] = req.session.loggedInOrchestrationMode;
     serverObj['insecureAccess'] = config.insecure_access;
+    serverObj['connectedAppInfo'] = config.connectedAppsInfo;
 
     var pkgCnt = activePkgs.length;
     if (!pkgCnt) {
