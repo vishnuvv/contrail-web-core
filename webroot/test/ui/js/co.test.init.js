@@ -7,7 +7,7 @@ var cowc, cowu, cowhu, cowf, cowl, cowch, cowm, cotu, cotc, covdc;
 var allTestFiles = [], windowKarma = window.__karma__;
 
 for (var file in windowKarma.files) {
-    if (/\.test\.js$/.test(file)) {
+	if (/\.test\.js$/.test(file)) {
         allTestFiles.push(file);
     }
 }
@@ -23,6 +23,7 @@ var depArray = [
     'co-test-utils', 'co-test-constants',
 
     'layout-handler', 'joint.contrail', 'text',
+    'contrail-common'
 
 ];
 
@@ -327,6 +328,15 @@ function testAppInit(testAppConfig) {
                         require(['layout-handler', 'content-handler', 'help-handler', 'contrail-load', 'lodash'], function (LayoutHandler, ContentHandler, helpHandler, ChartUtils, _) {
                             window._ = _;
                             contentHandler = new ContentHandler();
+                            globalObj.resourcePathStub = sinon.stub(contentHandler, 'getPath', function (resourceDir, type, fileName) {
+            	            	console.log('resourcePathStub parameters resourceDir',JSON.stringify(resourceDir), 'type', type, 'fileName', fileName);
+            	            	console.log('resourcePathStub', pkgBaseDir + resourceDir['testDir'] != null ? resourceDir['testDir'] : resourceDir['rootDir']+ '/'+type+'/'+ fileName);
+            	            	if (resourceDir['testDir'] != null) {
+            	            		return resourceDir['testDir']+ '/'+type+'/'+ fileName;
+            	            	} else {
+            	            		return '/base/contrail-web-controller/webroot' + resourceDir['rootDir']+ '/'+type+'/'+ fileName;
+            	            	}
+            	            });
                             initBackboneValidation();
                             initCustomKOBindings(window.ko);
                             initDomEvents();
@@ -425,19 +435,20 @@ function testAppInit(testAppConfig) {
 
 function testLibApiAppInit(testAppConfig) {
 
-    require(['jquery', 'knockout', 'bezier'], function ($, Knockout, Bezier) {
+    require(['jquery', 'knockout'], function ($, Knockout) {
         window.ko = Knockout;
-        window.Bezier = Bezier;
+        //window.Bezier = Bezier;
 
+        //require(['jquery-dep-libs','core-bundle','nonamd-libs', 'chart-libs'],function() {});
+        require(['slick.core'], function () {});
         if (document.location.pathname.indexOf('/vcenter') == 0) {
             $('head').append('<base href="/vcenter/" />');
         }
 
         require(depArray, function ($, _, validation, CoreConstants, CoreUtils, CoreFormatters, CoreMessages,
-                                    CoreViewsDefaultConfig, CoreLabels, Knockout, Cache, CoreCommonTmpl,
-                                    QEUtils, QEModelConfig, QEGridConfig, QEParsers, ChartUtils,
-                                    CoreTestUtils, CoreTestConstants, LayoutHandler) {
-            cowc = new CoreConstants();
+                                    CoreViewsDefaultConfig, CoreLabels, Knockout, Cache, CoreCommonTmpl, ChartUtils,
+                                    CoreTestUtils, CoreTestConstants, LayoutHandler, jointjs, text, Contrail) {
+            //cowc = new CoreConstants();
             cowu = new CoreUtils();
             cowf = new CoreFormatters();
             cowm = new CoreMessages();
@@ -446,24 +457,28 @@ function testLibApiAppInit(testAppConfig) {
             kbValidation = validation;
             cowch = new Cache();
 
-            chUtils = new ChartUtils();
+            chUtils = ChartUtils
 
             cotu = CoreTestUtils;
             cotc = CoreTestConstants;
+            contrail = new Contrail();
 
             $("body").addClass('navbar-fixed');
+            //TODO cotu file is not loading, need to fix it
             $("body").append(cotu.getPageHeaderHTML());
             $("body").append(cotu.getSidebarHTML());
             $("body").append(CoreCommonTmpl);
 
-            var cssList = cotu.getCSSList();
+            var cssList = _.result(cotu, 'getCSSList()', []);
 
             for (var i = 0; i < cssList.length; i++) {
                 $("body").append(cssList[i]);
             }
-            require([allTestFiles[0]], function () {
+            //require([allTestFiles[0]], function () {
+            require(['/base/contrail-web-core/webroot/test/ui/js/component.test.runner.js'], function () {
                 requirejs.config({
-                    deps: [allTestFiles[0]],
+                    deps: ['/base/contrail-web-core/webroot/test/ui/js/component.test.runner.js'],
+                	//deps: [allTestFiles[0]],
                     callback: window.__karma__.start($.Deferred(), true)
                 });
             });

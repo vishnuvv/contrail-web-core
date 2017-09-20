@@ -91,8 +91,10 @@ define(['underscore', 'menu-handler', 'content-handler'], function (_, MenuHandl
         };
 
         this.onHashChange = function(lastHash, currHash, loadingStartedDefObj) {
-            globalObj['featureAppDefObj'].done(function () {
-                contentHandler.loadContent(lastHash, currHash, loadingStartedDefObj);
+            console.log('Onhash change');
+        	globalObj['featureAppDefObj'].done(function () {
+        		console.log('featureAppDefObj resolved');
+        		contentHandler.loadContent(lastHash, currHash, loadingStartedDefObj);
             });
         }
     };

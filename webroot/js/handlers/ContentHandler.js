@@ -21,6 +21,7 @@ define(['underscore'], function (_) {
                     }
                 });
                 resourcesDefObj.done(function () {
+                	console.log('resourcesDefObj resolved');
                     //set the global variable
                     IS_NODE_MANAGER_INSTALLED = getValueByJsonPath(globalObj, 'webServerInfo;uiConfig;nodemanager;installed', true);
                     //Cleanup the container
@@ -47,7 +48,8 @@ define(['underscore'], function (_) {
                         }
                     } else {
                         $.each(getValueByJsonPath(currMenuObj, 'resources;resource', []), function (idx, currResourceObj) {
-                            if (currResourceObj['class'] != null && window[currResourceObj['class']] != null) {
+                            console.log('currResourceObj', currResourceObj['class']);
+                        	if (currResourceObj['class'] != null && window[currResourceObj['class']] != null) {
                                 window[currResourceObj['class']].load({
                                     containerId: contentContainer,
                                     hashParams: layoutHandler.getURLHashParams(),
@@ -69,6 +71,7 @@ define(['underscore'], function (_) {
                 resourcesDefObj = $.Deferred();
             // Clear the Error Popup
             contrail.hideErrorPopup();
+            console.log('content handler loadContent');
             if(globalObj['test-env'] == globalObj['env'] + "-test" && currPageHash == '') {
                 return;
             }
@@ -82,6 +85,7 @@ define(['underscore'], function (_) {
                 lastPageQueryStr = ifNull(lastHash['q'], {}),
                 webServerInfo = globalObj['webServerInfo'];
             try {
+            	console.log('webserverinfo in ', JSON.stringify(webServerInfo));
                 if (currPageHash == '' || menuHandler.isHashExists(currHash) == false) {
                     var currentRole =  getValueByJsonPath(webServerInfo,
                             'role;0', "", false);
@@ -114,6 +118,7 @@ define(['underscore'], function (_) {
                        currPageHash = "mon_infra_dashboard";
                    }
                 }
+                console.log('currPageHash ', currPageHash);
                 var currMenuObj = menuHandler.getMenuObjByHash(currPageHash);
                 //Toggle menu button only if there is a change in hash of main menu[Monitor/Configure/Settings/Queries]
                 menuHandler.toggleMenuButton(null, currPageHash, lastPageHash);
@@ -122,14 +127,17 @@ define(['underscore'], function (_) {
 
                 //If hashchange is within the same page
                 if ((lastPageHash == currPageHash) && (globalObj['menuClicked'] == null || globalObj['menuClicked'] == false)) {
-                    self.initFeatureModule(currMenuObj, function() {
+                	console.log('before  initFeatureModule');
+                	self.initFeatureModule(currMenuObj, function() {
                         //If user has moved away from the current feature page, before feature module is initialized, don't load the feature page
                         if(layoutHandler.getURLHashObj()['p'] == null || currMenuObj['hash'] == layoutHandler.getURLHashObj()['p']) {
                             contentHandler.loadResourcesFromMenuObj(currMenuObj, resourcesDefObj);
                         }
                     });
+                    console.log('contenthandler load content');
                     resourcesDefObj.done(function() {
-                        //If hashchange is within the same page
+                    	console.log('contenthandler load content resourcesDefObj resolved');
+                    	//If hashchange is within the same page
                         var currMenuObj = menuHandler.getMenuObjByHash(currPageHash),
                             loaderObj = currMenuObj['loader'];
 
@@ -157,7 +165,7 @@ define(['underscore'], function (_) {
                         menuHandler.destroyView(menuObj);
                     }
                     var currMenuObj = menuHandler.getMenuObjByHash(currPageHash);
-
+                    console.log('before loadViewFromMenuObj');
                     contentHandler.loadViewFromMenuObj(currMenuObj, resourcesDefObj, loadingStartedDefObj);
                 }
             } catch (error) {
@@ -202,6 +210,10 @@ define(['underscore'], function (_) {
             }
         },
 
+        this.getPath = function (resourceDir, type, fileName) {
+        	console.log(pkgBaseDir + resourceDir['rootDir'] + '/'+type+'/'+ fileName);
+        	return pkgBaseDir + resourceDir['rootDir'] + '/'+type+'/'+ fileName;
+        },
         this.loadResourcesFromMenuObj = function (currMenuObj, resourcesDefObj) {
             var parents = currMenuObj['parents'];
 
@@ -225,7 +237,7 @@ define(['underscore'], function (_) {
                             $.each(currResourceObj['view'], function () {
                                 var viewDeferredObj = $.Deferred();
                                 viewDeferredObjs.push(viewDeferredObj);
-                                var viewPath = pkgBaseDir + currResourceObj['rootDir'] + '/views/' + this;
+                                var viewPath = contentHandler.getPath(currResourceObj, 'views', this);
                                 loadExtTemplate(viewPath, viewDeferredObj, hash);
                             });
                         }
@@ -243,7 +255,7 @@ define(['underscore'], function (_) {
                             $.each(currResourceObj['template'], function () {
                                 var viewDeferredObj = $.Deferred();
                                 viewDeferredObjs.push(viewDeferredObj);
-                                var viewPath = pkgBaseDir + currResourceObj['rootDir'] + '/templates/' + this;
+                                var viewPath = contentHandler.getPath(currResourceObj, 'templates', this);
                                 loadExtTemplate(viewPath, viewDeferredObj, hash);
                             });
                         }
@@ -259,7 +271,7 @@ define(['underscore'], function (_) {
                         currResourceObj['css'] = [currResourceObj['css']];
                     }
                     $.each(currResourceObj['css'], function () {
-                        var cssPath = pkgBaseDir + currResourceObj['rootDir'] + '/css/' + this;
+                        var cssPath = contentHandler.getPath(currResourceObj, 'css', this);
                         if ($.inArray(cssPath, globalObj['loadedCSS']) == -1) {
                             globalObj['loadedCSS'].push(cssPath);
                             var cssLink = $("<link rel='stylesheet' type='text/css' href='" + cssPath + "'>");
@@ -284,7 +296,8 @@ define(['underscore'], function (_) {
                             //Load the JS file only if it's not loaded already
                             //if (window[currResourceObj['class']] == null)
                             if (($.inArray(pkgBaseDir + currResourceObj['rootDir'] + '/js/' + this, globalObj['loadedScripts']) == -1) || (isLoadFn == true) || (isReloadRequired == true))
-                                resourceDefObjList.push(getScript(pkgBaseDir + currResourceObj['rootDir'] + '/js/' + this));
+                            	//console.log('pkgBaseDir ',pkgBaseDir, 'currResourceObj', currResourceObj['rootDir'] + '/js/' + this);
+                            	resourceDefObjList.push(getScript(contentHandler.getPath(currResourceObj, 'js', this)));
                         });
                     }
                 });

@@ -288,6 +288,7 @@ function onWindowResize() {
 
 function getScript(url, callback) {
     var scriptPath = url + '?built_at=' + built_at;
+    console.log("script url is ", scriptPath);
     globalObj['loadedScripts'].push(url);
     return $.ajax({
         type: "GET",

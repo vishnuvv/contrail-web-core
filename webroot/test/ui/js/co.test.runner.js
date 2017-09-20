@@ -15,21 +15,21 @@ define([
     };
 
     var createTestSuiteConfig = function (testClass, groups, severity) {
-        severity = ifNull(severity, cotc.SEVERITY_LOW);
-        groups = ifNull(groups, ['all']);
+        severity = cowu.ifNull(severity, cotc.SEVERITY_LOW);
+        groups = cowu.ifNull(groups, ['all']);
         return $.extend({}, defaultTestSuiteConfig, {class: testClass, groups: groups, severity: severity});
     };
 
     var createViewTestConfig = function (viewId, testSuiteConfig, mokDataConfig) {
         var viewTestConfig = {};
-        viewTestConfig.viewId = ifNull(viewId, "");
+        viewTestConfig.viewId = cowu.ifNull(viewId, "");
         viewTestConfig.testSuites = [];
         if (testSuiteConfig != null) {
             _.each(testSuiteConfig, function (suiteConfig) {
                 viewTestConfig.testSuites.push(suiteConfig);
             });
         }
-        viewTestConfig.mockDataConfig = ifNull(mokDataConfig, {});
+        viewTestConfig.mockDataConfig = cowu.ifNull(mokDataConfig, {});
 
         return viewTestConfig;
     };
@@ -109,7 +109,7 @@ define([
     };
 
     this.cTest = function (message, callback, severity) {
-        severity = ifNull(severity, cotc.SEVERITY_LOW);
+        severity = cowu.ifNull(severity, cotc.SEVERITY_LOW);
         return {
             severity: severity,
             test: function () {
@@ -120,7 +120,7 @@ define([
     };
 
     var testGroup = function (name) {
-        this.name = ifNull(name, '');
+        this.name = cowu.ifNull(name, '');
         this.type = cotc.TYPE_CONTRAIL_TEST_GROUP; //set constant type.
         this.tests = [];
 
@@ -160,7 +160,7 @@ define([
     };
 
     var testSuite = function (name) {
-        this.name = ifNull(name, '');
+        this.name = cowu.ifNull(name, '');
         this.groups = [];
         this.type = cotc.TYPE_CONTRAIL_TEST_SUITE; //set constant type.
 
@@ -249,15 +249,16 @@ define([
      * testConfig.getTestConfig()
      * @param PageTestConfig
      */
-    this.startTestRunner = function (pageTestConfig) {
+    this.startTestRunner = function (pageTestConfig, testCompleteCB) {
         var self = this,
             fakeServer = null,
-            fakeServerConfig = ifNull(pageTestConfig.fakeServer, self.getDefaultFakeServerConfig());
+            fakeServerConfig = cowu.ifNull(pageTestConfig.fakeServer, self.getDefaultFakeServerConfig());
 
         module(pageTestConfig.moduleId, {
             setup: function () {
                 fakeServer = cotu.getFakeServer(fakeServerConfig.options);
                 _.each(fakeServerConfig.responses, function (response) {
+                	console.log('startTestRunner response url ', response.url);
                     fakeServer.respondWith(response.method, response.url, [response.statusCode, response.headers, response.data]);
                 });
                 $.ajaxSetup({
@@ -265,7 +266,10 @@ define([
                 });
             },
             teardown: function () {
-                fakeServer.restore();
+                if (testCompleteCB != null && typeof testCompleteCB == 'function') {
+                	testCompleteCB();
+                }
+            	fakeServer.restore();
                 delete fakeServer;
             }
         });
@@ -299,12 +303,24 @@ define([
 
     this.startViewTestRunner = function(viewTestConfig, fakeServer, assert, done) {
         if (contrail.checkIfExist(viewTestConfig.page.hashParams)) {
-            var loadingStartedDefObj = loadFeature(viewTestConfig.page.hashParams);
-            loadingStartedDefObj.done(function () {
+        	console.log('startViewTestRunner');
+        	var loadingStartedDefObj = loadFeature(viewTestConfig.page.hashParams);
+            //Feature page need to make sure that loadingStartedDef is resolved once feature is rendered
+        	loadingStartedDefObj.done(function () {
+            	console.log('startViewTestRunner loadingStartedDefObj resolved');
                 //additional fake server response setup
                 var responses = viewTestConfig.fakeServer.getResponsesConfig();
                 _.each(responses, function (response) {
-                    fakeServer.respondWith(response.method, response.url, [response.statusCode, response.headers, response.body]);
+                	console.log('viewtest runner');
+                    //fakeServer.respondWith(response.method, response.url, [response.statusCode, response.headers, response.body]);
+                	fakeServer.respondWith(response.method, response.url, function (xhr, id) {
+                		console.log('response.url ', response.url);
+                		console.log('xhr.requestBody ', xhr.requestBody);
+                		console.log('response.postBody ', response.postBody);
+                		if(response.postBody == xhr.requestBody) {
+                			xhr.respond(response.statusCode, response.headers, response.body);
+                		}
+                	});
                 });
 
                 var pageLoadTimeOut = viewTestConfig.page.loadTimeout,
@@ -325,9 +341,9 @@ define([
                     clearTimeout(pageLoadSetTimeoutId);
 
                     pageLoadSetTimeoutId = window.setTimeout(function () {
-                        if (!testStarted && !qunitStarted) {
+                        if (!testStarted && !qunitStarted && testConfig != null && testConfig.rootView != null) {
                             testConfig.rootView.onAllViewsRenderComplete.unsubscribe(startTest);
-                            testConfig.rootView.onAllViewsRenderComplete.unsubscribe(initQUnit);
+                            testConfig.rootView.onAllViewsRenderCreomplete.unsubscribe(initQUnit);
                             assert.ok(false, "Page should load completely within configured page load timeout");
                             if (done) done();
                         }
@@ -421,7 +437,14 @@ define([
         //additional fake server response setup
         var responses = pageTestConfig.fakeServer.getResponsesConfig();
         _.each(responses, function (response) {
-            fakeServer.respondWith(response.method, response.url, [response.statusCode, response.headers, response.body]);
+        	console.log(JSON.stringify(response));
+        	//fakeServer.respondWith(response.method, response.url, [response.statusCode, response.headers, response.body]);
+            fakeServer.respondWith(response.method, response.url, function (xhr, id) {
+            	console.log('modeltest runner', xhr.requestBody);
+            	console.log(JSON.stringify(xhr));
+            	xhr.respond(response.statusCode, response.headers, response.body)
+            	//[response.statusCode, response.headers, response.body]);
+            });
         });
 
         //TODO Remove the page timeout usage
@@ -448,7 +471,7 @@ define([
             testInitDefObj = $.Deferred(),
             unitTestConfig = pageTestConfig.getTestConfig();
 
-        module(ifNull(pageTestConfig.moduleId, "Unit Test Module"));
+        module(cowu.ifNull(pageTestConfig.moduleId, "Unit Test Module"));
 
         if (contrail.checkIfExist(pageTestConfig.testInitFn)) {
             pageTestConfig.testInitFn(testInitDefObj);
@@ -471,9 +494,9 @@ define([
         var self = this;
         var testInitDefObj = $.Deferred();
 
-        module(ifNull(libTestConfig.moduleId, "Library API Test Module"));
+        module(cowu.ifNull(libTestConfig.moduleId, "Library API Test Module"));
 
-        asyncTest("Start Library Tests - " + ifNull(libTestConfig.libName, ""), function (assert) {
+        asyncTest("Start Library Tests - " + cowu.ifNull(libTestConfig.libName, ""), function (assert) {
             expect(0);
             libTestConfig.testInitFn(testInitDefObj);
             var libTests = libTestConfig.getTestConfig();
