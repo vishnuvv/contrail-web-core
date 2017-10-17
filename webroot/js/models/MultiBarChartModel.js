@@ -46,6 +46,9 @@ define([
         chartModel.xAxis.tickPadding(chartOptions.xAxisTickPadding);
         chartModel.yAxis.axisLabel(chartOptions.yAxisLabel).tickFormat(chartOptions.yFormatter);
         chartModel.yAxis.tickPadding(chartOptions.yAxisTickPadding);
+        if (chartOptions['xLblFormatter'] != null) {
+            chartModel.xAxis.tickFormat(chartOptions['xLblFormatter'])
+        }
 
         return chartModel;
     }
