@@ -104,7 +104,7 @@ define([
     function getChartViewConfig(chartData, chartOptions) {
         var chartViewConfig = {};
         var chartDefaultOptions = {
-            margin: {top: 10, right: 30, bottom: 20, left: 60},
+            margin: {top: 10, right: 30, bottom: 50, left: 150},
             height: 250,
             barOrientation: 'vertical',
             xAxisLabel: 'Items',
