@@ -44,6 +44,13 @@ define([
                         callback();
                     });
                 }
+                var callback = function () {
+                	var chartData = self.model.getItems();
+                    if (contrail.checkIfFunction(viewConfig['parseFn'])) {
+                    	chartData = viewConfig['parseFn'](chartData);
+                    }
+                    self.renderChart(selector, viewConfig, chartData);
+                }
                 var prevDimensions = chUtils.getDimensionsObj(self.$el);
                 self.resizeFunction = _.debounce(function (e) {
                     if(!chUtils.isReRenderRequired({
@@ -104,7 +111,7 @@ define([
     function getChartViewConfig(chartData, chartOptions) {
         var chartViewConfig = {};
         var chartDefaultOptions = {
-            margin: {top: 10, right: 30, bottom: 50, left: 150},
+            margin: {top: 10, right: 30, bottom: 20, left: 60},
             height: 250,
             barOrientation: 'vertical',
             xAxisLabel: 'Items',
