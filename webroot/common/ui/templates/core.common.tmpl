@@ -2784,7 +2784,7 @@
                 <header class="iconFontStyle">
                     <span> {{this.title}} </span>
                 </header>
-                <h1>VMIs {{#IfCompare this.vmiCount '' operator='!='}}
+                <h1>{{this.vmiLabel}} {{#IfCompare this.vmiCount '' operator='!='}}
                     ({{this.vmiCount}}){{/IfCompare}}</h1>
                 <div class="row">
                     {{#IfCompare this.data 'nodata' operator='=='}}
@@ -2799,8 +2799,8 @@
                         <dd class="col-xs-6 margin-5-0-0">{{this.vn}}</dd>
                         <dd class="col-xs-6 margin-5-0-0">vRouter : </dd>
                         <dd class="col-xs-6 margin-5-0-0">{{this.vrouter}}</dd>
-                        <dd class="col-xs-6 margin-5-0-0">Logged Bytes (In/Out) : </dd>
-                        <dd class="col-xs-6 margin-5-0-0">{{this.loggedIn}} / {{this.loggedOut}}</dd>
+                        <!--<dd class="col-xs-6 margin-5-0-0">Logged Bytes (In/Out) : </dd>
+                        <dd class="col-xs-6 margin-5-0-0">{{this.loggedIn}} / {{this.loggedOut}}</dd>-->
                         <dd class="col-xs-6 margin-5-0-0">Sampled Bytes (In/Out) : </dd>
                         <dd class="col-xs-6 margin-5-0-0">{{this.sampledIn}} / {{this.sampledOut}}</dd>
                     </dl>
