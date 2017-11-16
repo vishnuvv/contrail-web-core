@@ -69,13 +69,8 @@ define([
                 }
                 data = viewConfig['parseFn'](data, viewConfig['chartOptions']);
             }
-<<<<<<< HEAD
             if (cowu.isGridStackWidget(selector)) {
                 viewConfig['chartOptions']['height'] = $(selector).closest('.custom-grid-stack-item').height();
-=======
-            if ($(selector).parents('.custom-grid-stack-item').length != 0) {
-                viewConfig['chartOptions']['height'] = $(selector).parents('.custom-grid-stack-item').height();
->>>>>>> bitbucket changes
             }
             chartViewConfig = self.getChartViewConfig(data, viewConfig, chartDataModel.isRequestInProgress());
             chartOptions = chartViewConfig['chartOptions'];

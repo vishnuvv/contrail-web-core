@@ -109,14 +109,6 @@ define([
                 self.$el.find('.widget-dropdown').hide();
             });
         },
-        isLayoutValid: function(data) {
-            var itemWidths = _.sum(data,'itemAttr.width');
-            var avgItemWidth = itemWidths/data.length;
-            if(avgItemWidth < 2.5) {
-                return false;
-            }
-            return true;
-        },
         //Mark the layout as invalid if there are more than 5 widgets in a row i.e
         //avg width of a widget shouldn't be more than 12/5 (12 being the total width)
         isLayoutValid: function(data) {
