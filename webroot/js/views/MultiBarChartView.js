@@ -98,8 +98,8 @@ define([
         //Incase of horizontal we need more left margin to 
         //accomodate the labels.
         if (chartOptions['barOrientation'] == 'horizontal') {
-        	chartDefaultOptions.margin['left'] = 180;
-        	chartDefaultOptions.margin['bottom'] = 80;
+            chartDefaultOptions.margin['left'] = 120;
+            chartDefaultOptions.margin['bottom'] = 90;
         }
         var chartOptions = $.extend(true, {}, chartDefaultOptions, chartOptions);
 
