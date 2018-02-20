@@ -715,7 +715,8 @@ define([
                 //If there exists requireJS alias for the current view path,use that
                 var pathMapping = _.invert(require.s.contexts._.config.paths);
                 pathMapping = {
-                    'core-basedir/js/views/GridStackView' : 'gs-view'
+                    'core-basedir/js/views/GridStackView' : 'gs-view',
+                    'core-basedir/js/views/ToolbarView'   : 'toolbar-view'
                 }
                 viewPath = ifNull(pathMapping[viewPath],viewPath);
                 onAllViewsRenderCompleteCB = renderConfig['onAllViewsRenderCompleteCB'];
@@ -2757,10 +2758,11 @@ define([
             return defObj;
         };
 
-        self.populateModel = function (ajaxConfig, options) {
-            if (!$.isArray(ajaxConfig)) {
-                ajaxConfig = [ajaxConfig];
+        self.populateModel = function (ajaxConfigArr, options) {
+            if (!$.isArray(ajaxConfigArr)) {
+                ajaxConfigArr = [ajaxConfigArr];
             }
+            var ajaxConfig = $.extend([], ajaxConfigArr);
             BbModel = Backbone.Model.extend({
                 defaults: {
                     type: options['type'],

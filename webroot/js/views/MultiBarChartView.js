@@ -39,13 +39,23 @@ define([
             if (contrail.checkIfFunction(viewConfig['parseFn'])) {
                 chartData = viewConfig['parseFn'](chartData, chartOptions, chartDataModel);
             }
-            if ( ! chartDataModel.isRequestInProgress()) {
-                chartData = chUtils.formatDataForMultibarChart(chartData);
-            }
+            /**
+             * Multibar chart in stacked mode needs data such that
+             * all the keys should be there across all the series
+             * if a key doesn't exist in one series full it zero
+             * and order of the keys across the series should be same
+             * function does data format according to the
+             * mulitbar chart compatibility format.
+             */
+            chartData = chUtils.formatDataForMultibarChart(chartData);
             if (cowu.isGridStackWidget(selector)) {
                 chartOptions['height'] = $(selector).closest('.custom-grid-stack-item').height() - 10;
             }
             chartOptions['chartData'] = chartData;
+            console.log('chartData ', chartData);
+            if (!chartDataModel.isRequestInProgress()) {
+                
+            }
             chartModel = new MultiBarChartModel(chartOptions);
             this.chartModel = chartModel;
 
@@ -99,7 +109,7 @@ define([
         //accomodate the labels.
         if (chartOptions['barOrientation'] == 'horizontal') {
             chartDefaultOptions.margin['left'] = 120;
-            chartDefaultOptions.margin['bottom'] = 90;
+            chartDefaultOptions.margin['bottom'] = 105;
         }
         var chartOptions = $.extend(true, {}, chartDefaultOptions, chartOptions);
 

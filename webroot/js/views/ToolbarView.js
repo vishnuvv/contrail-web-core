@@ -25,19 +25,17 @@ define([
             self.$el.html(template({icon : menuIconClass}));
             $(".tool-container").remove();
             $(self.$el).append(toolBarContent());
-
             self.settings = cowu.getValueByJsonPath(options,
-                    "viewCfg;settings", []);
+                    "attributes;viewConfig;settings", []);
             _.each(self.settings, function(setting) {
                 var iconHtml = '<a id="' + setting.id + '" href="#"><i class="fa ' +
                     self.getStyleClassForIcon(setting.id) + '"></i></a>';
                 $(eleSettingItems).append(iconHtml);
             });
-
             self.toolbar = $(eleSettings).toolbar({
                 content: eleSettingItems,
                 position: "left",
-                adjustment: 65,
+                adjustment: 35,
                 event: 'click',
                 hideOnClick: true
             }).data('toolbar');
@@ -55,23 +53,8 @@ define([
                 }
                 self.removeSelectedClass()
             });
-
-            function closeToolbar() {
-                $('.tool-container').hide();
-                $('#toolbar_settings').removeClass('pressed');
-            }
             $(eleSettings).on('toolbarItemClick', function(event, item){
-                if($(item).attr('id') == cowc.FULL_SCREEN) {
-                    cowu.toggleFullScreen();	
-                    closeToolbar();
-                } else if($(item).attr('id') == cowc.ADD_WIDGET) {
-                    var gridStackView = $('.carousel-content').data('ContrailView');
-                    gridStackView.add();
-                    $('.fa-info-circle:last').click();
-                    closeToolbar();
-                } else {
-                    self.renderOnClick($(item).attr('id'));
-                }
+                self.renderOnClick($(item).attr('id'));
             });
             $($("#toolbar_section").parent()).addClass(eleSettingsParentStyle);
         },
@@ -106,16 +89,6 @@ define([
                        'title': curSetting.title,
                        'targetId': targetId ? targetId :
                                           ".tool-container #" + curSetting.id,
-                       'onSave': function() {
-                           if(cfgObj.model) {
-                               isSaveClicked = true;
-                               //Hide the toolbar
-                               $('.tool-container').hide();
-                               $('#toolbar_settings').removeClass('pressed');
-                               cfgObj.model.onSave();
-                           }
-                           $("#" + modalId).modal('hide');
-                       },
                        'onCancel': function() {
                            if(cfgObj.model) {
                                isSaveClicked = false;
@@ -176,12 +149,6 @@ define([
             switch(id){
                 case cowc.COLOR_PALETTE :
                     classStyle = cowc.COLOR_PALETTE_CLASS;
-                    break;
-                case cowc.FULL_SCREEN :
-                    classStyle = cowc.FULLSCREEN_CLASS;
-                    break;
-                case cowc.ADD_WIDGET :
-                    classStyle = cowc.ADD_WIDGET_CLASS;
                     break;
                 case cowc.CHART_SETTINGS :
                     classStyle = cowc.CHART_SETTINGS_CLASS;
